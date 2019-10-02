@@ -1,0 +1,22 @@
+classes: 2 + -
+features: 4
+outlook 3 sunny overcast rain
+temperature 3 hot mild cool
+humidity 2 high normal
+windy 2 true false 
+
+examples: 14
+overcast hot high false +
+rain mild high false + 
+rain cool normal false + 
+overcast cool normal true + 
+sunny cool normal false + 
+rain mild normal false + 
+sunny mild normal true + 
+overcast mild high true + 
+overcast hot normal false + 
+rain mild high true - 
+sunny hot high false - 
+sunny hot high true - 
+rain cool normal true - 
+sunny mild high false - 
