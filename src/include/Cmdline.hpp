@@ -31,6 +31,8 @@ public:
   bool print_sta;
   bool print_cmd;
 
+  double sample;
+
   Options(){};
   Options(const Options &opt)
       : cmdline(opt.cmdline), instance_file(opt.instance_file),

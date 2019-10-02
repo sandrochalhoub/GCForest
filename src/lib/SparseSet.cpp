@@ -32,7 +32,9 @@ bool SparseSet::safe_contain(const int elt) const {
 
 bool SparseSet::contain(const int elt) const { return index_[elt] < size_ and index_[elt] >= start_; }
 
-size_t SparseSet::size() const { return size_ - start_; }
+size_t SparseSet::count() const { return size_ - start_; }
+size_t SparseSet::size() const { return size_; }
+size_t SparseSet::start() const { return start_; }
 size_t SparseSet::capacity() const { return index_.size(); }
 
 bool SparseSet::empty() const { return size_ == start_; }

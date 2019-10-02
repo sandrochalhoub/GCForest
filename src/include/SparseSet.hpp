@@ -39,6 +39,8 @@ public:
   bool contain(const int elt) const;
 
   size_t capacity() const;
+	size_t count() const;
+	size_t start() const;
   size_t size() const;
   bool empty() const;
 
