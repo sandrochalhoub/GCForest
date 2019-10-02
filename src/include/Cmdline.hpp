@@ -31,6 +31,8 @@ public:
   bool print_sta;
   bool print_cmd;
 
+  bool verified;
+
   double sample;
 
   Options(){};

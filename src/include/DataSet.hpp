@@ -60,6 +60,7 @@ public:
   }
   size_t numFeature() const { return feature_label.size(); }
   size_t size() const { return X.size(); }
+  size_t count() const { return example[0].count() + example[1].count(); }
   int NOT(const int f) const { return (f + numFeature() / 2) % numFeature(); }
   dynamic_bitset<> NOT(dynamic_bitset<> &e) const {
     dynamic_bitset<> not_e = e;
@@ -126,7 +127,7 @@ public:
   }
 
   void addExplanation(dynamic_bitset<> &impl, const bool y, const int limit,
-                      vector<int> entailed) {
+                      vector<int> &entailed) {
     entailed.clear();
     // remove all explained examples
     for (auto e : example[y]) {
@@ -170,7 +171,7 @@ public:
       }
 
       // now X[i] is the first remaining example of class c
-      if (opt.verbosity >= Options::YACKING)
+      if (opt.verbosity >= Options::SOLVERINFO)
         cout << "compute a rule from the " << (c ? "positive" : "negative")
              << " example " << i << ":" << X[i] << endl;
 
@@ -188,7 +189,7 @@ public:
         // there is already a feature of the explanation that contradicts X[j],
         // so no need to take X[j] into account
         if (!implicant.is_subset_of(X[j])) {
-          if (opt.verbosity >= Options::YACKING)
+          if (opt.verbosity >= Options::SOLVERINFO)
             cout << "skip " << j << " = " << X[j]
                  << " b/c it is already covered\n";
           continue;
@@ -198,13 +199,13 @@ public:
         // one contradicting feature among:
         getContradictingFeatures(X[i], X[j], contradicting_features);
 
-        if (opt.verbosity >= Options::YACKING)
+        if (opt.verbosity >= Options::SOLVERINFO)
           cout << X[i] << " \\ " << j << ":" << X[j] << " = "
                << contradicting_features;
 
         // this should not happen
         if (contradicting_features.none()) {
-          if (opt.verbosity >= Options::YACKING)
+          if (opt.verbosity >= Options::SOLVERINFO)
             cout << " inconsistent example\?\?!\n";
           continue;
         }
@@ -222,7 +223,7 @@ public:
         // make sure that the explanation will contradict X[j]
         candidates &= contradicting_features;
 
-        if (opt.verbosity >= Options::YACKING)
+        if (opt.verbosity >= Options::SOLVERINFO)
           cout << " -> " << candidates << " " << implicant << endl;
       }
 
@@ -230,7 +231,7 @@ public:
       // from 1-c
       implicant.set(candidates.find_first());
 
-      if (opt.verbosity >= Options::NORMAL)
+      if (opt.verbosity >= Options::YACKING)
         cout << " -> " << implicant << " (" << implicant.count() << ")" << endl
              << endl;
 
@@ -238,7 +239,7 @@ public:
       // entailed (they're into removed)
       addExplanation(implicant, c, last_example, removed);
 
-      if (opt.verbosity >= Options::NORMAL)
+      if (opt.verbosity >= Options::SOLVERINFO)
         for (auto e : removed)
           cout << " - remove " << X[e] << endl;
     }
@@ -249,23 +250,26 @@ public:
     // that no explanation entails an example of the other class
 
     dynamic_bitset<> not_covered[2];
-    for (auto c{0}; c < 2; ++c)
-      not_covered[c].resize(example[c].start(), true);
+    for (auto c{0}; c < 2; ++c) {
+      not_covered[c].resize(X.size(), false);
+      for (auto i{-example[c].start()}; i < 0; ++i)
+        not_covered[c].set(example[c][i]);
+    }
 
     for (auto c{0}; c < 2; ++c)
       for (auto explanation : example[c]) {
 
-        for (auto i{0}; i < example[c].start(); ++i)
-          if (X[explanation].is_subset_of(X[i]))
-            not_covered[c].reset(i);
+        for (auto i{-example[c].start()}; i < 0; ++i)
+          if (X[explanation].is_subset_of(X[example[c][i]]))
+            not_covered[c].reset(example[c][i]);
 
-        for (auto i{0}; i < example[1 - c].start(); ++i)
-          if (X[explanation].is_subset_of(X[i])) {
+        for (auto i{-example[1 - c].start()}; i < 0; ++i)
+          if (X[explanation].is_subset_of(X[example[c][i]])) {
             cerr << "rule " << explanation << ": " << X[explanation] << " = ";
             display_example(cerr, explanation);
-            cerr << " for class " << c << " entails example " << i << ": "
-                 << X[i] << " = ";
-            display_example(cerr, i);
+            cerr << " for class " << c << " entails example " << example[c][i]
+                 << ": " << X[example[c][i]] << " = ";
+            display_example(cerr, example[c][i]);
             cerr << " of class " << (1 - c) << "!!\n";
             exit(1);
           }

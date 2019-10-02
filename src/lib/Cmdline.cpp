@@ -140,6 +140,9 @@ Options parse(int argc, char *argv[]) {
   cmd.add<SwitchArg>(opt.print_cmd, "", "print_cmd", "print the command-line",
                      false);
 
+  cmd.add<SwitchArg>(opt.verified, "", "verified", "verify the explanations",
+                     false);
+
   // ValueArg (const std::string &flag, const std::string &name, const
   // std::string &desc, bool req, T value, Constraint< T > *constraint, Visitor
   // *v=NULL)

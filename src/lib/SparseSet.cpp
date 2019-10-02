@@ -142,6 +142,7 @@ void SparseSet::remove_front(const int elt) {
 }
 
 void SparseSet::pull_front(const int elt) {
+
   auto first = list_[start_];
   index_[first] = index_[elt];
   list_[index_[elt]] = first;

@@ -39,7 +39,7 @@ int main(int argc, char* argv[]) {
   if (opt.print_par)
     opt.display(cout);
 
-  srand(opt.seed);
+  // srand(opt.seed);
 
   DataSet base;
 
@@ -67,19 +67,27 @@ int main(int argc, char* argv[]) {
 
   if (opt.sample != 1) {
     std::mt19937 random_generator;
+    random_generator.seed(opt.seed);
     base.uniform_sample(0, (double)(base.example[0].size()) * opt.sample,
                         random_generator);
     base.uniform_sample(1, (double)(base.example[1].size()) * opt.sample,
                         random_generator);
   }
 
-  cout << base << endl << endl;
+  if (opt.verbosity >= Options::NORMAL)
+    cout << base << endl << endl;
+  else if (opt.verbosity >= Options::QUIET)
+    cout << base.count() << endl << endl;
 
   base.computeDecisionSet(opt);
 
-  cout << base << endl;
-	
-	base.verify();
+  if (opt.verbosity >= Options::NORMAL)
+    cout << base << endl;
+  else if (opt.verbosity >= Options::QUIET)
+    cout << base.count() << endl;
+
+  if (opt.verified)
+    base.verify();
 }
 
 
