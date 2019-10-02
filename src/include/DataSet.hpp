@@ -90,24 +90,60 @@ public:
       os << " " << l;
     os << endl;
 
-    for (auto i : example[1])
-      os << X[i] << ": +" << std::endl;
-    for (auto i : example[0])
-      os << X[i] << ": -" << std::endl;
+    // for (auto i : example[1])
+    //   os << X[i] << ": +" << std::endl;
+    // for (auto i : example[0])
+    //   os << X[i] << ": -" << std::endl;
+		
+		os << "POSITIVE EXAMPLES:\n";
+    for (auto i : example[1]) {
+			display_example(os, i);
+			os << endl;
+		}
+		os << "NEGATIVE EXAMPLES:\n";
+    for (auto i : example[0]) {
+      display_example(os, i);
+			os << endl;
+		}
     return os;
   }
 
   std::ostream &display_example(std::ostream &os, const int e) const {
-    if (X[e][0])
-      os << feature_label[0];
-    else if (X[e][numFeature() / 2])
-      os << feature_label[NOT(0)];
+    // if (X[e][0])
+    //   os << feature_label[0];
+    // else if (X[e][numFeature() / 2])
+    //   os << feature_label[NOT(0)];
 
-    for (auto f{1}; f < numFeature() / 2; ++f) {
-      if (X[e][f])
-        os << ", " << feature_label[f];
-      else if (X[e][NOT(f)])
-        os << ", " << feature_label[NOT(f)];
+
+		auto flag{false};
+		auto nxt{false};
+		int last;
+		size_t n{X[e].count()};
+    for (auto f{0}; f < numFeature(); ++f) {
+      if (X[e][f]) {
+				if(f < numFeature()-1 and X[e][f])
+					nxt = true;
+				
+				if(!--n)
+				{
+					if(flag)
+						os << ",";
+					os << f;
+					break;
+				}
+
+				if(!nxt or f != last+1) {
+					if(flag)
+						os << ",";
+					os << f;
+					flag =true;
+				} else if (flag) {
+					os << "..";
+					flag = false;
+				}
+
+				last = f;
+      }
     }
 
     return os;
