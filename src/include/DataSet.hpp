@@ -11,6 +11,8 @@
 
 using namespace boost;
 
+typedef dynamic_bitset<> instance;
+
 namespace primer {
 /**********************************************
 * DataSet
@@ -24,8 +26,7 @@ class DataSet {
 
 private:
   string pretty(const int f) const {
-    return (f < (numFeature() / 2) ? "" : "¬") +
-           to_string(f % (numFeature() / 2));
+    return (f < numFeature() ? "" : "¬") + to_string(f % numFeature());
   }
 
 public:
@@ -33,44 +34,78 @@ public:
   //@{
   /// list of values
   std::vector<std::string> feature_label;
+  // size_t n_feature;
 
   // we store the example followed by its negation
   // irrelevant bits are 0 in both copies
   SparseSet example[2];
   SparseSet explanations[2];
-  std::vector<dynamic_bitset<>> X;
+  std::vector<instance> X;
   //@}
 
 public:
   /*!@name Constructors*/
   //@{
   explicit DataSet() {}
-  explicit DataSet(const int nfeatures) {
-    for (auto i{1}; i <= nfeatures; ++i)
-      feature_label.push_back("f_" + std::to_string(i));
+  explicit DataSet(const int n_feature) {
+    for (auto i{1}; i <= n_feature; ++i) {
+      string f("f_" + std::to_string(i));
+      addFeature(f);
+    }
   }
+
   void reserve(const size_t n) {
     X.reserve(n);
     example[1].reserve(n);
     example[0].reserve(n);
   }
+  //@}
 
   /*!@name Accessors*/
   //@{
-  dynamic_bitset<> &operator[](const size_t idx) { return X[idx]; }
+  instance &operator[](const size_t idx) { return X[idx]; }
+
+  template <typename RandomIt> void setFeatures(RandomIt beg, RandomIt end) {
+    auto n_feature = (end - beg);
+    feature_label.reserve(n_feature);
+    for (auto f{beg}; f != end; ++f)
+      addFeature(*f);
+  }
   void addFeature(string &f) { feature_label.push_back(f); }
-  void add(dynamic_bitset<> &x, const bool y) {
+
+  template <typename RandomIt>
+  void add(RandomIt beg, RandomIt end, const bool y) {
+    instance x;
+    x.resize(numFeature(), false);
+    x.resize(2 * numFeature(), true);
+    for (auto v{beg}; v != end; ++v) {
+      if (*v) {
+        x.set(v - beg);
+        x.reset(v - beg + numFeature());
+      }
+    }
+    add(x, y);
+  }
+  void add(instance &x, const bool y) {
     example[y].safe_add(X.size());
     X.push_back(x);
   }
+
   size_t numFeature() const { return feature_label.size(); }
   size_t size() const { return X.size(); }
   size_t count() const { return example[0].count() + example[1].count(); }
-  int NOT(const int f) const { return (f + numFeature() / 2) % numFeature(); }
-  dynamic_bitset<> NOT(dynamic_bitset<> &e) const {
-    dynamic_bitset<> not_e = e;
-    not_e >>= numFeature() / 2;
-    not_e |= (e << numFeature() / 2);
+  size_t volume() const {
+    auto v{0};
+    for (auto c{0}; c < 2; ++c)
+      for (auto e : example[c])
+        v += X[e].count();
+    return v;
+  }
+
+  instance NOT(instance &e) const {
+    instance not_e = e;
+    not_e >>= numFeature();
+    not_e |= (e << numFeature());
     return not_e;
   }
   //@}
@@ -86,77 +121,22 @@ public:
   }
   //@}
 
-  /*!@name Miscellaneous*/
+  /*!@name Business*/
   //@{
-  std::ostream &display(std::ostream &os) const {
-
-    os << "features:";
-    // for (auto l : feature_label)
-    for (auto i{0}; i < numFeature() / 2; ++i)
-      os << " " << feature_label[i];
-    os << endl;
-
-    // for (auto i : example[1])
-    //   os << X[i] << ": +" << std::endl;
-    // for (auto i : example[0])
-    //   os << X[i] << ": -" << std::endl;
-
-    os << "POSITIVE EXAMPLES:\n";
-    for (auto i : example[1]) {
-      cout << i << ": " ;//<< X[i] << " ";
-      display_example(os, X[i]);
-      os << endl;
-    }
-    os << "NEGATIVE EXAMPLES:\n";
-    for (auto i : example[0]) {
-      cout << i << ": " ;//<< X[i] << " ";
-      display_example(os, X[i]);
-      os << endl;
-    }
-    return os;
-  }
-
-  std::ostream &display_example(std::ostream &os,
-                                const dynamic_bitset<> e) const {
-
-    auto flag{false};
-    auto nxt{false};
-    int last;
-    size_t n{e.count()};
-    for (auto f{0}; f < numFeature(); ++f) {
-      if (e[f]) {
-        if (f < numFeature() - 1 and e[f])
-          nxt = true;
-
-        if (!--n) {
-          if (flag)
-            os << ",";
-          os << pretty(f); // feature_label[f];
-          break;
+  // look for examples that are both positive and negative and remove them
+  void filter() {
+    for (auto neg : example[0])
+      for (auto pos : example[1])
+        if (X[neg] == X[pos]) {
+          example[0].remove_back(neg);
+          example[1].remove_back(pos);
         }
-
-        if (!nxt or f != last + 1 or f == numFeature()/2) {
-          if (flag)
-            os << ",";
-          os << pretty(f); // feature_label[f];
-          flag = true;
-        } else if (flag) {
-          os << "..";
-          flag = false;
-        }
-
-        last = f;
-      }
-    }
-
-    return os;
   }
 
   // the set of true features of x1 that are false in x2
   // we cannot do set difference because features might neighter be true nor
   // false
-  void getContradictingFeatures(dynamic_bitset<> &x1, dynamic_bitset<> &x2,
-                                dynamic_bitset<> &buffer) {
+  void getContradictingFeatures(instance &x1, instance &x2, instance &buffer) {
     buffer = NOT(x2);
     // buffer = x2;
     // buffer >>= nFeature() / 2;
@@ -165,7 +145,7 @@ public:
     buffer &= x1;
   }
 
-  void addExplanation(dynamic_bitset<> &impl, const bool y, const int limit,
+  void addExplanation(instance &impl, const bool y, const int limit,
                       vector<int> &entailed) {
     entailed.clear();
     // remove all explained examples
@@ -187,28 +167,40 @@ public:
   void computeDecisionSet(Options opt, R& random_generator) {
     auto c{0};
 
-    dynamic_bitset<> contradicting_features;
-    dynamic_bitset<> candidates;
-    dynamic_bitset<> implicant;
+    // verify();
+
+    instance contradicting_features;
+    instance candidates;
+    instance implicant;
 
     vector<int> removed;
 
-    contradicting_features.resize(numFeature());
+    contradicting_features.resize(2 * numFeature());
 
     auto last_example{X.size() - 1};
 
+    size_t num_original[2];
+    for (auto i{0}; i < 2; ++i)
+      num_original[i] = example[i].count();
+
     while (true) {
 
-      // alternate between positive and negative examples, unless there are no
-      // remaining example of one class
-      c = 1 - c;
-      auto i{example[c].any(random_generator)};
-      if (i > last_example) {
+      if (num_original[1 - c] != 0)
         c = 1 - c;
-        i = example[c].any(random_generator);
-        if (i > last_example)
-          break;
-      }
+      if (num_original[c] == 0)
+        break;
+
+      auto i{example[c].any(num_original[c], random_generator)};
+      assert(i <= last_example);
+
+      // c = 1 - c;
+      // auto i = example[c].front();
+      // if (i > last_example) {
+      //   c = 1 - c;
+      //   i = example[c].front();
+      //   if (i > last_example)
+      //     break;
+      // }
 
       // now X[i] is the first remaining example of class c
       if (opt.verbosity >= Options::SOLVERINFO) {
@@ -220,11 +212,11 @@ public:
 
       // implicant is empty
       implicant.clear();
-      implicant.resize(numFeature(), false);
+      implicant.resize(2 * numFeature(), false);
 
       // cnadidates contains all features
       candidates.clear();
-      candidates.resize(numFeature(), true);
+      candidates.resize(2 * numFeature(), true);
 
       // example[1 - c] contains both examples and explanations
       for (auto j : example[1 - c]) {
@@ -268,7 +260,7 @@ public:
           // explanation and start with a fresh set of candidates
           implicant.set(candidates.find_first());
           candidates.clear();
-          candidates.resize(numFeature(), true);
+          candidates.resize(2 * numFeature(), true);
         }
         // make sure that the explanation will contradict X[j]
         candidates &= contradicting_features;
@@ -296,6 +288,9 @@ public:
       // entailed (they're into removed)
       addExplanation(implicant, c, last_example, removed);
 
+      assert(removed.size() <= num_original[c]);
+      num_original[c] -= removed.size();
+
       if (opt.verbosity >= Options::SOLVERINFO)
         for (auto e : removed) {
           cout << " - remove ";
@@ -304,20 +299,98 @@ public:
         }
     }
   }
+  //@}
 
+  /*!@name Miscellaneous*/
+  //@{
+  std::ostream &display(std::ostream &os) const {
+
+    os << "features:";
+    // for (auto l : feature_label)
+    for (auto i{0}; i < numFeature(); ++i)
+      os << " " << feature_label[i];
+    os << endl;
+
+    // for (auto i : example[1])
+    //   os << X[i] << ": +" << std::endl;
+    // for (auto i : example[0])
+    //   os << X[i] << ": -" << std::endl;
+
+    os << "POSITIVE EXAMPLES:\n";
+    for (auto i : example[1]) {
+      cout << i << ": "; //<< X[i] << " ";
+      display_example(os, X[i]);
+      os << endl;
+    }
+    os << "NEGATIVE EXAMPLES:\n";
+    for (auto i : example[0]) {
+      cout << i << ": "; //<< X[i] << " ";
+      display_example(os, X[i]);
+      os << endl;
+    }
+    return os;
+  }
+
+  std::ostream &display_example(std::ostream &os, const instance e) const {
+
+    auto flag{false};
+    auto nxt{false};
+    int last;
+    size_t n{e.count()};
+
+    os << "(";
+    for (auto f{0}; f < 2 * numFeature(); ++f) {
+      if (e[f]) {
+
+        // os << "[" << f << "]";
+
+        if (!--n) {
+          if (flag)
+            os << ",";
+          os << pretty(f) << ")"; // feature_label[f];
+          break;
+        }
+
+        if (f < 2 * numFeature() - 1 and e[f + 1])
+          nxt = true;
+        else
+          nxt = false;
+
+        if (!nxt or f != last + 1 or f == numFeature()) {
+          if (flag)
+            os << ",";
+          os << pretty(f); // feature_label[f];
+          flag = true;
+        } else if (flag) {
+          os << "..";
+          flag = false;
+        }
+
+        last = f;
+      }
+    }
+
+    return os;
+  }
+  //@}
+
+  /*!@name Verification*/
+  //@{
   void verify() {
     // check that every example is entailed by an explanation of its class and
     // that no explanation entails an example of the other class
 
-    dynamic_bitset<> not_covered[2];
+    instance not_covered[2];
     for (auto c{0}; c < 2; ++c) {
       not_covered[c].resize(X.size(), false);
       for (auto i{-example[c].start()}; i < 0; ++i)
         not_covered[c].set(example[c][i]);
     }
 
+    instance contradictions, not_expl;
     for (auto c{0}; c < 2; ++c)
       for (auto explanation : example[c]) {
+        not_expl = NOT(X[explanation]);
 
         for (auto i{-example[c].start()}; i < 0; ++i)
           if (X[explanation].is_subset_of(X[example[c][i]]))
@@ -333,6 +406,18 @@ public:
             cerr << " of class " << (1 - c) << "!!\n";
             exit(1);
           }
+
+        for (auto counter_example : example[1 - c]) {
+          contradictions = (not_expl & X[counter_example]);
+          if (contradictions.none()) {
+            cerr << explanation << ": ";
+            display_example(cerr, X[explanation]);
+            cerr << " does not contradict " << counter_example << ": ";
+            display_example(cerr, X[counter_example]);
+            cerr << endl;
+            exit(1);
+          }
+        }
       }
 
     for (auto c{0}; c < 2; ++c) {

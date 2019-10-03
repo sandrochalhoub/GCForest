@@ -206,11 +206,19 @@ int SparseSet::index(const int elt) const { return index_[elt]; }
 //@}
 
 std::ostream &SparseSet::display(std::ostream &os) const {
-  os << "(";
-  for (auto it = begin(); it < end(); ++it) {
-    os << " " << *it;
+  for (auto i = 0; i < capacity(); ++i) {
+    if (start_ == i or size_ == i)
+      os << " |";
+    os << " " << list_[i];
   }
-  os << " )";
+  os << std::endl;
+
+  // os << "(";
+  // for (auto it = begin(); it < end(); ++it) {
+  //   os << " " << *it;
+  // }
+  // os << " )";
+
   return os;
 }
 

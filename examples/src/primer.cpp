@@ -42,31 +42,17 @@ int main(int argc, char* argv[]) {
   std::mt19937 random_generator;
   random_generator.seed(opt.seed);
 
-  // srand(opt.seed);
 
   DataSet base;
 
-  csv::read<int>(opt.instance_file, [&](string &f) { base.addFeature(f); },
-                 [&](vector<int> &data, const int e, const int v) {
-                   if (v)
-                     data.push_back(e);
-                 },
-                 [&](vector<int> &data, const int y) {
-                   dynamic_bitset<> x;
-                   x.resize(base.numFeature(), false);
-                   for (auto v : data)
-                     x.set(v);
-                   x.resize(2 * base.numFeature(), true);
-                   for (auto v : data)
-                     x.reset(base.numFeature() + v);
-                   base.add(x, y);
-                 });
-
-  base.feature_label.reserve(2 * base.numFeature());
-  for (auto &f : base.feature_label) {
-    string notf{"¬" + f};
-    base.addFeature(notf);
-  }
+  csv::read<int>(
+      opt.instance_file,
+      [&](vector<string> &f) { base.setFeatures(f.begin(), f.end()); },
+      [&](vector<int> &data) {
+        auto y = data.back();
+        data.pop_back();
+        base.add(data.begin(), data.end(), y);
+      });
 
   if (opt.sample != 1) {
 
@@ -76,28 +62,44 @@ int main(int argc, char* argv[]) {
                         random_generator);
   }
 
+  auto count{base.count()};
+
+  if (opt.verbosity >= Options::QUIET)
+    cout << "filter base\n";
+
+  base.filter();
+
+  if (opt.verbosity >= Options::QUIET)
+    if (base.count() < count)
+      cout << "filtered " << (count - base.count()) / 2
+           << " noisy example(s)\n";
+
   if (opt.verbosity >= Options::NORMAL)
     cout << base << endl << endl;
   if (opt.verbosity >= Options::QUIET)
-    cout << "#examples = " << base.count() << endl << endl;
+    cout << "#examples = " << base.count()
+         << ", #features = " << base.numFeature()
+         << ", volume = " << base.volume() << endl
+         << endl;
 
-	auto count{0};
-	
-	do {
-		
-		count = base.count();
-		base.computeDecisionSet(opt, random_generator);
+  do {
 
-		if (opt.verbosity >= Options::NORMAL)
-   	 cout << base << endl;
-  	if (opt.verbosity >= Options::QUIET)
-   	 cout << "#explanations = "<< base.count() << endl;
+    count = base.count();
+    base.computeDecisionSet(opt, random_generator);
 
-		if (opt.verified)
-    	base.verify();
-		
-	} while( count != base.count() );
-	
+    if (opt.verbosity >= Options::NORMAL)
+      cout << base << endl;
+    if (opt.verbosity >= Options::QUIET) {
+      auto v{base.volume()};
+      cout << "#explanations = " << base.count()
+           << ", mean size = " << setprecision(5)
+           << static_cast<double>(v) / static_cast<double>(base.count())
+           << ", volume = " << v << endl;
+    }
+    if (opt.verified)
+      base.verify();
+
+  } while (count != base.count());
 }
 
 

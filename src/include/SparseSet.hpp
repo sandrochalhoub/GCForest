@@ -94,10 +94,11 @@ public:
   int front() const;
 
   int back() const;
-	
-	template< typename R >
-	int any(R& random_generator) const { return list_[start_ + (random_generator() % count())]; }
-	
+
+  template <typename R> int any(const size_t limit, R &random_generator) const {
+    auto m{std::min(limit, count())};
+    return list_[start_ + (random_generator() % m)];
+  }
 
   void push_front(const int elt);
 	void push_back(const int elt);
