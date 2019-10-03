@@ -22,9 +22,9 @@ along with minicsp.  If not, see <http://www.gnu.org/licenses/>.
 #include <stdlib.h>
 #include <random>
 
-#include "Cmdline.hpp"
-#include "DataSet.hpp"
 #include "CSVReader.hpp"
+#include "CmdLine.hpp"
+#include "DataSet.hpp"
 
 using namespace std;
 using namespace primer;

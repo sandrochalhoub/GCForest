@@ -22,6 +22,12 @@ public:
   enum verbosity { SILENT = 0, QUIET, NORMAL, YACKING, SOLVERINFO };
   int verbosity;
 
+  enum class_policy { NEGATIVE = 0, POSITIVE, ALTERNATE, UNIFORM, BIASED };
+  int class_policy;
+
+  enum example_policy { FIRST = 0, RANDOM };
+  int example_policy;
+
   int seed;
 
   bool print_sol;
@@ -42,9 +48,8 @@ public:
         print_par(opt.print_par), print_mod(opt.print_mod),
         print_ins(opt.print_ins), print_sta(opt.print_sta),
         print_cmd(opt.print_cmd) {}
-				
-	
-	ostream& display(ostream& os);
+
+  ostream &display(ostream &os);
 };
 
 Options parse(int argc, char *argv[]);

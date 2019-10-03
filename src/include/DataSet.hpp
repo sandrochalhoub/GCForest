@@ -164,7 +164,7 @@ public:
   }
 
 	template< typename R >
-  void computeDecisionSet(Options opt, R& random_generator) {
+  void computeDecisionSet(Options& opt, R& random_generator) {
     auto c{0};
 
     // verify();
@@ -185,22 +185,34 @@ public:
 
     while (true) {
 
-      if (num_original[1 - c] != 0)
-        c = 1 - c;
-      if (num_original[c] == 0)
+      if (num_original[0] + num_original[1] == 0)
         break;
+      if (num_original[1] == 0)
+        c = 0;
+      else if (num_original[0] == 0)
+        c = 1;
+      else {
+        if (opt.class_policy == Options::BIASED)
+          c = ((random_generator() % (num_original[0] + num_original[1])) >
+               num_original[0]);
+        else if (opt.class_policy == Options::UNIFORM)
+          c = random_generator() % 2;
+        else if (opt.class_policy == Options::POSITIVE)
+          c = 1;
+        else if (opt.class_policy == Options::NEGATIVE)
+          c = 0;
+        else
+          c = 1 - c;
+      }
 
-      auto i{example[c].any(num_original[c], random_generator)};
+      auto i{0};
+
+      if (opt.example_policy == Options::RANDOM)
+        i = example[c].any(num_original[c], random_generator);
+      else
+        i = example[c].front();
+
       assert(i <= last_example);
-
-      // c = 1 - c;
-      // auto i = example[c].front();
-      // if (i > last_example) {
-      //   c = 1 - c;
-      //   i = example[c].front();
-      //   if (i > last_example)
-      //     break;
-      // }
 
       // now X[i] is the first remaining example of class c
       if (opt.verbosity >= Options::SOLVERINFO) {
@@ -219,7 +231,13 @@ public:
       candidates.resize(2 * numFeature(), true);
 
       // example[1 - c] contains both examples and explanations
-      for (auto j : example[1 - c]) {
+      // for (auto j : example[1 - c]) {
+
+      // cout << example[1 - c] << endl;
+      for (auto jptr{example[1 - c].rbegin()}; jptr != example[1 - c].rend();
+           ++jptr) {
+        auto j{*jptr};
+        // cout << " " << j << endl;
 
         // there is already a feature of the explanation that contradicts X[j],
         // so no need to take X[j] into account

@@ -20,7 +20,7 @@ along with minicsp.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <iostream>
 
-#include <Cmdline.hpp>
+#include <CmdLine.hpp>
 #include <SparseSet.hpp>
 
 #include <boost/dynamic_bitset.hpp>

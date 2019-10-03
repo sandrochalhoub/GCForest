@@ -1,10 +1,9 @@
 
 #include <numeric>
 
-#include <Cmdline.hpp>
+#include <CmdLine.hpp>
 
 using namespace std;
-
 
 struct argbase {
   virtual ~argbase() {}
@@ -120,6 +119,16 @@ Options parse(int argc, char *argv[]) {
       "verbosity level (0:silent,1:quiet,2:improvements only,3:verbose", false,
       2, "int");
 
+  cmd.add<ValueArg<int>>(
+      opt.class_policy, "", "class_policy",
+      "policy for selecting the class "
+      "(0:negative,1:positive,2:alternate,3:random uniform,4:biased",
+      false, 2, "int");
+
+  cmd.add<ValueArg<int>>(opt.example_policy, "", "example_policy",
+                         "policy for selecting the example (0:first,1:random",
+                         false, 1, "int");
+
   cmd.add<ValueArg<int>>(opt.seed, "", "seed", "random seed", false, 12345,
                          "int");
 
@@ -155,10 +164,24 @@ Options parse(int argc, char *argv[]) {
   return opt;
 }
 
-ostream& Options::display(ostream& os) {
-	os << setw(20) << left << "data file:" << setw(30) << right << instance_file << endl
-		 << setw(20) << left << "verbosity:" << setw(30) << right << (verbosity == SILENT ? "silent" :
-				 (verbosity == QUIET ? "quiet" : (verbosity == NORMAL ? "normal" : "yacking"))) << endl;
+ostream &Options::display(ostream &os) {
+  os << setw(20) << left << "data file:" << setw(30) << right << instance_file
+     << endl
+     << setw(20) << left << "verbosity:" << setw(30) << right
+     << (verbosity == SILENT
+             ? "silent"
+             : (verbosity == QUIET
+                    ? "quiet"
+                    : (verbosity == NORMAL ? "normal" : "yacking")))
+     << endl
+     << setw(20) << left << "class policy:" << setw(30) << right
+     << (class_policy == NEGATIVE
+             ? "negative"
+             : (class_policy == POSITIVE
+                    ? "positive"
+                    : (class_policy == ALTERNATE
+                           ? "alternate"
+                           : (class_policy == UNIFORM ? "uniform" : "biased"))))
+     << endl;
   return os;
 }
-

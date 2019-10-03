@@ -57,24 +57,26 @@ int &SparseSet::operator[](const size_t idx) { return list_[idx+start_]; }
 //@{
 std::vector<int>::iterator SparseSet::begin() { return list_.begin() + start_; }
 std::vector<int>::reverse_iterator SparseSet::rbegin() {
-  return list_.rend() + size_;
+  return list_.rend() - size_;
 }
 
 std::vector<int>::iterator SparseSet::end() { return list_.begin() + size_; }
-std::vector<int>::reverse_iterator SparseSet::rend() { return list_.rend() + start_; }
+std::vector<int>::reverse_iterator SparseSet::rend() {
+  return list_.rend() - start_;
+}
 
 std::vector<int>::const_iterator SparseSet::begin() const {
   return list_.begin() + start_;
 }
 std::vector<int>::const_reverse_iterator SparseSet::rbegin() const {
-  return list_.rend() + size_;
+  return list_.rend() - size_;
 }
 
 std::vector<int>::const_iterator SparseSet::end() const {
   return list_.begin() + size_;
 }
 std::vector<int>::const_reverse_iterator SparseSet::rend() const {
-  return list_.rend() + start_;
+  return list_.rend() - start_;
 }
 
 // std::vector<int>::iterator SparseSet::begin_after() { return end(); }
