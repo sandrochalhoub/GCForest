@@ -94,6 +94,10 @@ public:
   int front() const;
 
   int back() const;
+	
+	template< typename R >
+	int any(R& random_generator) const { return list_[start_ + (random_generator() % count())]; }
+	
 
   void push_front(const int elt);
 	void push_back(const int elt);

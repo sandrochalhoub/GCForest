@@ -38,6 +38,9 @@ int main(int argc, char* argv[]) {
 
   if (opt.print_par)
     opt.display(cout);
+	
+  std::mt19937 random_generator;
+  random_generator.seed(opt.seed);
 
   // srand(opt.seed);
 
@@ -66,8 +69,7 @@ int main(int argc, char* argv[]) {
   }
 
   if (opt.sample != 1) {
-    std::mt19937 random_generator;
-    random_generator.seed(opt.seed);
+
     base.uniform_sample(0, (double)(base.example[0].size()) * opt.sample,
                         random_generator);
     base.uniform_sample(1, (double)(base.example[1].size()) * opt.sample,
@@ -76,18 +78,26 @@ int main(int argc, char* argv[]) {
 
   if (opt.verbosity >= Options::NORMAL)
     cout << base << endl << endl;
-  else if (opt.verbosity >= Options::QUIET)
-    cout << base.count() << endl << endl;
+  if (opt.verbosity >= Options::QUIET)
+    cout << "#examples = " << base.count() << endl << endl;
 
-  base.computeDecisionSet(opt);
+	auto count{0};
+	
+	do {
+		
+		count = base.count();
+		base.computeDecisionSet(opt, random_generator);
 
-  if (opt.verbosity >= Options::NORMAL)
-    cout << base << endl;
-  else if (opt.verbosity >= Options::QUIET)
-    cout << base.count() << endl;
+		if (opt.verbosity >= Options::NORMAL)
+   	 cout << base << endl;
+  	if (opt.verbosity >= Options::QUIET)
+   	 cout << "#explanations = "<< base.count() << endl;
 
-  if (opt.verified)
-    base.verify();
+		if (opt.verified)
+    	base.verify();
+		
+	} while( count != base.count() );
+	
 }
 
 

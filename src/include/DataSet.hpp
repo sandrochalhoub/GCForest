@@ -183,7 +183,8 @@ public:
     add(impl, y);
   }
 
-  void computeDecisionSet(Options opt) {
+	template< typename R >
+  void computeDecisionSet(Options opt, R& random_generator) {
     auto c{0};
 
     dynamic_bitset<> contradicting_features;
@@ -201,10 +202,10 @@ public:
       // alternate between positive and negative examples, unless there are no
       // remaining example of one class
       c = 1 - c;
-      auto i{example[c].front()};
+      auto i{example[c].any(random_generator)};
       if (i > last_example) {
         c = 1 - c;
-        i = example[c].front();
+        i = example[c].any(random_generator);
         if (i > last_example)
           break;
       }
