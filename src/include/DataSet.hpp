@@ -15,13 +15,18 @@ namespace primer {
 /**********************************************
 * DataSet
 **********************************************/
-/// Example base representation
-
+/// Representation of a list of examples
 class DataSet {
 
+  // private:
+  //   dynamic_bitset<> positive_mask;
+  //   dynamic_bitset<> negative_mask;
+
 private:
-  dynamic_bitset<> positive_mask;
-  dynamic_bitset<> negative_mask;
+  string pretty(const int f) const {
+    return (f < (numFeature() / 2) ? "" : "¬") +
+           to_string(f % (numFeature() / 2));
+  }
 
 public:
   /*!@name Parameters*/
@@ -86,63 +91,61 @@ public:
   std::ostream &display(std::ostream &os) const {
 
     os << "features:";
-    for (auto l : feature_label)
-      os << " " << l;
+    // for (auto l : feature_label)
+    for (auto i{0}; i < numFeature() / 2; ++i)
+      os << " " << feature_label[i];
     os << endl;
 
     // for (auto i : example[1])
     //   os << X[i] << ": +" << std::endl;
     // for (auto i : example[0])
     //   os << X[i] << ": -" << std::endl;
-		
-		os << "POSITIVE EXAMPLES:\n";
+
+    os << "POSITIVE EXAMPLES:\n";
     for (auto i : example[1]) {
-			display_example(os, i);
-			os << endl;
-		}
-		os << "NEGATIVE EXAMPLES:\n";
+      cout << i << ": " ;//<< X[i] << " ";
+      display_example(os, X[i]);
+      os << endl;
+    }
+    os << "NEGATIVE EXAMPLES:\n";
     for (auto i : example[0]) {
-      display_example(os, i);
-			os << endl;
-		}
+      cout << i << ": " ;//<< X[i] << " ";
+      display_example(os, X[i]);
+      os << endl;
+    }
     return os;
   }
 
-  std::ostream &display_example(std::ostream &os, const int e) const {
-    // if (X[e][0])
-    //   os << feature_label[0];
-    // else if (X[e][numFeature() / 2])
-    //   os << feature_label[NOT(0)];
+  std::ostream &display_example(std::ostream &os,
+                                const dynamic_bitset<> e) const {
 
-
-		auto flag{false};
-		auto nxt{false};
-		int last;
-		size_t n{X[e].count()};
+    auto flag{false};
+    auto nxt{false};
+    int last;
+    size_t n{e.count()};
     for (auto f{0}; f < numFeature(); ++f) {
-      if (X[e][f]) {
-				if(f < numFeature()-1 and X[e][f])
-					nxt = true;
-				
-				if(!--n)
-				{
-					if(flag)
-						os << ",";
-					os << f;
-					break;
-				}
+      if (e[f]) {
+        if (f < numFeature() - 1 and e[f])
+          nxt = true;
 
-				if(!nxt or f != last+1) {
-					if(flag)
-						os << ",";
-					os << f;
-					flag =true;
-				} else if (flag) {
-					os << "..";
-					flag = false;
-				}
+        if (!--n) {
+          if (flag)
+            os << ",";
+          os << pretty(f); // feature_label[f];
+          break;
+        }
 
-				last = f;
+        if (!nxt or f != last + 1 or f == numFeature()/2) {
+          if (flag)
+            os << ",";
+          os << pretty(f); // feature_label[f];
+          flag = true;
+        } else if (flag) {
+          os << "..";
+          flag = false;
+        }
+
+        last = f;
       }
     }
 
@@ -207,9 +210,12 @@ public:
       }
 
       // now X[i] is the first remaining example of class c
-      if (opt.verbosity >= Options::SOLVERINFO)
+      if (opt.verbosity >= Options::SOLVERINFO) {
         cout << "compute a rule from the " << (c ? "positive" : "negative")
-             << " example " << i << ":" << X[i] << endl;
+             << " example " << i << ":";
+        display_example(cout, X[i]);
+        cout << endl;
+      }
 
       // implicant is empty
       implicant.clear();
@@ -224,10 +230,13 @@ public:
 
         // there is already a feature of the explanation that contradicts X[j],
         // so no need to take X[j] into account
-        if (!implicant.is_subset_of(X[j])) {
-          if (opt.verbosity >= Options::SOLVERINFO)
-            cout << "skip " << j << " = " << X[j]
-                 << " b/c it is already covered\n";
+				getContradictingFeatures(X[j], implicant, contradicting_features);
+        if (!contradicting_features.none()) {
+          if (opt.verbosity >= Options::SOLVERINFO) {
+            cout << "skip " << j << " = ";
+            display_example(cout, X[j]);
+            cout << " b/c it is already covered\n";
+          }
           continue;
         }
 
@@ -235,9 +244,13 @@ public:
         // one contradicting feature among:
         getContradictingFeatures(X[i], X[j], contradicting_features);
 
-        if (opt.verbosity >= Options::SOLVERINFO)
-          cout << X[i] << " \\ " << j << ":" << X[j] << " = "
-               << contradicting_features;
+        if (opt.verbosity >= Options::SOLVERINFO) {
+          display_example(cout, X[i]);
+          cout << " \\ " << setw(4) << j << ":";
+          display_example(cout, X[j]);
+          cout << " = ";
+          display_example(cout, contradicting_features);
+        }
 
         // this should not happen
         if (contradicting_features.none()) {
@@ -259,25 +272,35 @@ public:
         // make sure that the explanation will contradict X[j]
         candidates &= contradicting_features;
 
-        if (opt.verbosity >= Options::SOLVERINFO)
-          cout << " -> " << candidates << " " << implicant << endl;
+        if (opt.verbosity >= Options::SOLVERINFO) {
+          cout << " -> ";
+          display_example(cout, candidates);
+          cout << " ";
+          display_example(cout, implicant);
+          cout << endl;
+        }
       }
 
       // make sure that the explanation contradicts the last batch of examples
       // from 1-c
       implicant.set(candidates.find_first());
 
-      if (opt.verbosity >= Options::YACKING)
-        cout << " -> " << implicant << " (" << implicant.count() << ")" << endl
-             << endl;
+      if (opt.verbosity >= Options::YACKING) {
+        cout << " -> ";
+        display_example(cout, implicant);
+        cout << " (" << implicant.count() << ")" << endl << endl;
+      }
 
       // add the explanation to example[c] and remove all the examples that are
       // entailed (they're into removed)
       addExplanation(implicant, c, last_example, removed);
 
       if (opt.verbosity >= Options::SOLVERINFO)
-        for (auto e : removed)
-          cout << " - remove " << X[e] << endl;
+        for (auto e : removed) {
+          cout << " - remove ";
+          display_example(cout, X[e]);
+          cout << endl;
+        }
     }
   }
 
@@ -302,10 +325,10 @@ public:
         for (auto i{-example[1 - c].start()}; i < 0; ++i)
           if (X[explanation].is_subset_of(X[example[c][i]])) {
             cerr << "rule " << explanation << ": " << X[explanation] << " = ";
-            display_example(cerr, explanation);
+            display_example(cerr, X[explanation]);
             cerr << " for class " << c << " entails example " << example[c][i]
                  << ": " << X[example[c][i]] << " = ";
-            display_example(cerr, example[c][i]);
+            display_example(cerr, X[example[c][i]]);
             cerr << " of class " << (1 - c) << "!!\n";
             exit(1);
           }
@@ -317,12 +340,9 @@ public:
         exit(1);
       }
     }
-		
-	}
-	
+  }
 };
 
-// template< typename T >
 std::ostream &operator<<(std::ostream &os, const DataSet &x) {
   return x.display(os);
 }
