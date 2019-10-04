@@ -67,12 +67,20 @@ int main(int argc, char* argv[]) {
   if (opt.verbosity >= Options::QUIET)
     cout << "c filter base\n";
 
+
+	// cout << base << endl;
+
   base.filter();
 
   if (opt.verbosity >= Options::QUIET)
     if (base.count() < count)
       cout << "c filtered " << (count - base.count()) / 2
            << " noisy example(s)\n";
+	
+	// cout << base << endl;
+	
+	
+	
 
   if (opt.verbosity >= Options::NORMAL)
     cout << base << endl << endl;

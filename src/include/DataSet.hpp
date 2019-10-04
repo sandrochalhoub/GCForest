@@ -125,12 +125,17 @@ public:
   //@{
   // look for examples that are both positive and negative and remove them
   void filter() {
+		vector<int> to_remove;
     for (auto neg : example[0])
       for (auto pos : example[1])
         if (X[neg] == X[pos]) {
-          example[0].remove_back(neg);
-          example[1].remove_back(pos);
+					to_remove.push_back(neg);
+					to_remove.push_back(pos);
         }
+		for(auto e{to_remove.begin()}; e!=to_remove.end(); e+=2) {
+			for(int i{0}; i<2; ++i)
+				example[i].remove_back(*(e+i));
+		}
   }
 
   // the set of true features of x1 that are false in x2
@@ -256,6 +261,7 @@ public:
         getContradictingFeatures(X[i], X[j], contradicting_features);
 
         if (opt.verbosity >= Options::SOLVERINFO) {
+					cout << j << ": ";
           display_example(cout, X[i]);
           cout << " \\ " << setw(4) << j << ":";
           display_example(cout, X[j]);
@@ -297,7 +303,7 @@ public:
       implicant.set(candidates.find_first());
 
       if (opt.verbosity >= Options::YACKING) {
-        cout << " -> ";
+        cout << " -> add " << X.size() << ": ";
         display_example(cout, implicant);
         cout << " (" << implicant.count() << ")" << endl << endl;
       }
@@ -311,7 +317,7 @@ public:
 
       if (opt.verbosity >= Options::SOLVERINFO)
         for (auto e : removed) {
-          cout << " - remove ";
+          cout << " - remove " << e << ": ";
           display_example(cout, X[e]);
           cout << endl;
         }
