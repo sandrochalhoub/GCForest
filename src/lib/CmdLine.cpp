@@ -165,16 +165,18 @@ Options parse(int argc, char *argv[]) {
 }
 
 ostream &Options::display(ostream &os) {
-  os << setw(20) << left << "data file:" << setw(30) << right << instance_file
+  os << setw(20) << left << "p data file:" << setw(30) << right << instance_file
      << endl
-     << setw(20) << left << "verbosity:" << setw(30) << right
+     << setw(20) << left << "p seed:" << setw(30) << right << seed << endl
+     << setw(20) << left << "p sample:" << setw(30) << right << sample << endl
+     << setw(20) << left << "p verbosity:" << setw(30) << right
      << (verbosity == SILENT
              ? "silent"
              : (verbosity == QUIET
                     ? "quiet"
                     : (verbosity == NORMAL ? "normal" : "yacking")))
      << endl
-     << setw(20) << left << "class policy:" << setw(30) << right
+     << setw(20) << left << "p class policy:" << setw(30) << right
      << (class_policy == NEGATIVE
              ? "negative"
              : (class_policy == POSITIVE
@@ -182,6 +184,10 @@ ostream &Options::display(ostream &os) {
                     : (class_policy == ALTERNATE
                            ? "alternate"
                            : (class_policy == UNIFORM ? "uniform" : "biased"))))
-     << endl;
+     << endl
+     << setw(20) << left << "p class policy:" << setw(30) << right
+     << (example_policy == FIRST ? "first" : "random") << endl
+     << setw(20) << left << "p verified:" << setw(30) << right
+     << (verified ? "yes" : "no") << endl;
   return os;
 }

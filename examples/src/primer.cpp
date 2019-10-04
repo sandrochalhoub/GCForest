@@ -65,22 +65,21 @@ int main(int argc, char* argv[]) {
   auto count{base.count()};
 
   if (opt.verbosity >= Options::QUIET)
-    cout << "filter base\n";
+    cout << "c filter base\n";
 
   base.filter();
 
   if (opt.verbosity >= Options::QUIET)
     if (base.count() < count)
-      cout << "filtered " << (count - base.count()) / 2
+      cout << "c filtered " << (count - base.count()) / 2
            << " noisy example(s)\n";
 
   if (opt.verbosity >= Options::NORMAL)
     cout << base << endl << endl;
   if (opt.verbosity >= Options::QUIET)
-    cout << "#examples = " << base.count()
-         << ", #features = " << base.numFeature()
-         << ", volume = " << base.volume() << endl
-         << endl;
+    cout << "d #examples = " << setw(10) << right << base.count()
+         << ", avgsize = " << setw(10) << right<< base.numFeature()
+         << ", volume = " << setw(12) << right<< base.volume() << endl;
 
   do {
 
@@ -91,10 +90,10 @@ int main(int argc, char* argv[]) {
       cout << base << endl;
     if (opt.verbosity >= Options::QUIET) {
       auto v{base.volume()};
-      cout << "#explanations = " << base.count()
-           << ", mean size = " << setprecision(5)
+      cout << "d #examples = " << setw(10) << right << base.count()
+           << ", avgsize = " << setw(10) << right << setprecision(5)
            << static_cast<double>(v) / static_cast<double>(base.count())
-           << ", volume = " << v << endl;
+           << ", volume = " << setw(12) << right << v << endl;
     }
     if (opt.verified)
       base.verify();
