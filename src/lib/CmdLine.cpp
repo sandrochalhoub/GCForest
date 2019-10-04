@@ -185,7 +185,7 @@ ostream &Options::display(ostream &os) {
                            ? "alternate"
                            : (class_policy == UNIFORM ? "uniform" : "biased"))))
      << endl
-     << setw(20) << left << "p class policy:" << setw(30) << right
+     << setw(20) << left << "p example policy:" << setw(30) << right
      << (example_policy == FIRST ? "first" : "random") << endl
      << setw(20) << left << "p verified:" << setw(30) << right
      << (verified ? "yes" : "no") << endl;
