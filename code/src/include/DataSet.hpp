@@ -34,13 +34,13 @@ public:
   //@{
   /// list of values
   std::vector<std::string> feature_label;
-  // size_t n_feature;
 
   // we store the example followed by its negation
   // irrelevant bits are 0 in both copies
   SparseSet example[2];
   SparseSet explanations[2];
   std::vector<instance> X;
+  std::vector<int> literal_count;
   //@}
 
 public:
@@ -107,6 +107,44 @@ public:
     not_e >>= numFeature();
     not_e |= (e << numFeature());
     return not_e;
+  }
+
+  double entropy(const int feature) {
+    auto not_feature = (feature + numFeature());
+
+    int npos[2] = {0, 0};
+    int nneg[2] = {0, 0};
+    int* count[2] = {nneg, npos};
+    for (auto c{0}; c < 2; ++c) {
+			int gr0{0};
+			int gr1{0};
+			
+      for (auto e : example[c]) {
+				
+				// cout << X[e] << endl;
+				// for(auto f=0; f<numFeature(); ++f)
+				// 	cout << X[e][f] ;
+				// cout << endl;
+				// exit(1);
+				
+				
+				
+        if (X[e][feature] != X[e][not_feature]) {
+          ++count[c][X[e][feature]];
+					if(X[e][not_feature])
+						gr1++;
+					else
+						gr0++;
+				}
+      }
+			cout << (c ? " positive: " : " negative: ") << gr0 << "/" << gr1 << endl;
+		}
+		
+		for (auto v{0}; v < 2; ++v)	
+			for (auto c{0}; c < 2; ++c)
+				cout << feature << "=" << v << ": " << count[c][v] << (c ? " positive" : " negative") << " examples\n";
+			
+			return 0;
   }
   //@}
 
@@ -322,6 +360,36 @@ public:
           cout << endl;
         }
     }
+  }
+
+  void close() {
+    literal_count.reserve(size());
+    for (auto c{0}; c < 2; ++c)
+      for (auto e : example[c])
+        literal_count[e] = X[e].count();
+  }
+
+  bool classify(instance &x) {
+    for (auto c{0}; c < 2; ++c)
+      for (auto e : example[c])
+        if (X[e].is_subset_of(x))
+          return c;
+
+    instance buffer;
+    double proba[2];
+
+    // #contradictions / #number literal = probability that x is not of class c
+
+    for (auto c{0}; c < 2; ++c)
+      for (auto e : example[c]) {
+        buffer = X[e];
+        buffer -= x;
+        auto nl{buffer.count()};
+        proba[c] *=
+            (static_cast<double>(nl) / static_cast<double>(literal_count[e]));
+      }
+
+    return proba[1] > proba[0];
   }
   //@}
 

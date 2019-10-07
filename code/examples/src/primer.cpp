@@ -77,8 +77,16 @@ int main(int argc, char* argv[]) {
       cout << "c filtered " << (count - base.count()) / 2
            << " noisy example(s)\n";
 	
-	// cout << base << endl;
+	cout << base.count() << endl;
 	
+	
+	for(int f{0}; f<base.numFeature(); ++f)
+	{
+		base.entropy(f);
+		cout << endl;	
+	}
+
+	exit(1);
 	
 	
 

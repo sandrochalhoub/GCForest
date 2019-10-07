@@ -1,0 +1,121 @@
+\documentclass{article}
+\usepackage[usenames,dvipsnames,svgnames,table]{xcolor}%% http://ctan.org/pkg/xcolor
+\usepackage[utf8]{inputenc}
+\usepackage{xspace}
+\usepackage{array}
+%\usepackage{amsthm}
+\usepackage{amsmath} 
+\usepackage{amssymb} 
+\usepackage[ruled,vlined]{algorithm2e}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{url}
+\usepackage{tikz}
+\usepackage{fp}
+\usepackage{subfig}
+\usetikzlibrary{arrows,shadows,fit,calc,positioning,decorations.pathreplacing,matrix,shapes,petri,topaths,fadings,mindmap,backgrounds,shapes.geometric}
+
+
+\newcommand{\setex}[1]{\ensuremath{{\mathcal X}^{#1}}\xspace}
+\newcommand{\posex}{{\setex{1}}}
+\newcommand{\negex}{{\setex{0}}}
+\newcommand{\setcube}[1]{\ensuremath{{\mathcal C}^{#1}}\xspace}
+\newcommand{\poscube}{\ensuremath{\setcube{1}}}
+\newcommand{\negcube}{\ensuremath{\setcube{0}}}
+\newcommand{\features}{\ensuremath{{\mathcal F}}\xspace}
+\newcommand{\classifier}{\ensuremath{f}}
+\newcommand{\lit}[1]{\ensuremath{l_{#1}}}
+\newcommand{\var}{\ensuremath{x}}
+\newcommand{\truelit}[1]{\ensuremath{\var_{#1}}}
+\newcommand{\falselit}[1]{\ensuremath{\bar{\var_{#1}}}}
+\newcommand{\ex}{\ensuremath{\var}}
+\newcommand{\cube}{\ensuremath{c}}
+\newcommand{\universe}{\ensuremath{{\mathcal U}}}
+
+
+
+\title{Reducing Data Sets by Computing Explanations}
+
+% \author{Emmanuel Hebrard\inst{1} \and George Katsirelos\inst{2}}
+% \institute{LAAS-CNRS, Universit\'e de Toulouse, CNRS, France, email: hebrard@laas.fr
+  % \and MIAT, UR-875, INRA, France, email: gkatsi@gmail.com \footnote{The second author was partially supported by the french ``Agence nationale de
+% la Recherche'', project DEMOGRAPH, reference ANR-16-C40-0028.}}
+
+\begin{document}
+
+\maketitle
+
+\section*{Problem statement}
+
+We consider a data set composed a set \posex of positive examples and a set \negex of negative examples over a set of binary features $\features$
+%$ = \{1,\ldots,m\}$.
+
+The classic task in machine learning is to compute a function $\classifier : 2^{\features} \mapsto \{0,1\}$ that \emph{generalizes} the data set.
+
+In this note we show how we can reduce the data sets by representing \posex and \negex as unions of \emph{cubes} (or DNFs) that we will denote respectively \poscube and \negcube, respectively. Let $\truelit{i}$ be a literal standing for ``feature $i$ is true'' and its negatiion $\falselit{i}$ standing for ``feature $i$ is false''. An instance $\ex$ is a conjunction $\bigwedge_{i \in \features}\lit{i}$ where $\lit{i}$ is either $\truelit{i}$ or $\falselit{i}$, an example is an instance $\ex \in \posex \cup \negex$.
+A cube $\cube \in \poscube \cup \negcube$ is a conjunction $\bigwedge_{i \in {\mathcal S}}\lit{i}$ where $\lit{i}$ is either $\truelit{i}$ or $\falselit{i}$, for a subset ${\mathcal S}$ of \features.
+The cubes \poscube and \negcube have the following properties:
+\begin{eqnarray}
+	\forall \ex \in \posex \exists \cube \in \poscube & \cube \vdash \ex \label{poscomplete} \\
+	\forall \ex \in \negex \exists \cube \in \negcube & \cube \vdash \ex \label{negcomplete} \\
+	\forall \cube \in \poscube  \forall \cube' \in \negcube  & \cube \wedge \cube' \vdash \perp \label{consistent}
+\end{eqnarray}
+
+Properties (\ref{poscomplete}) and (\ref{negcomplete}) state that \poscube and \negcube are complete, i.e., they entail every positive and negative example, respectively. Property (\ref{consistent}) states that \poscube and \negcube are consistent, i.e., there is no instance $\ex$ such that $\poscube \vdash \ex$ and $\negcube \vdash \ex$.
+
+ The reduced data set $(\poscube,\negcube)$ can be seen as a classifier $\classifier : 2^{\features} \mapsto \{0,1,*\}$ with a ``do not know'' value $*$ since it generalizes the original data set to some extent:
+ $$
+ \classifier(\ex) = \begin{cases} 1 \textrm{~if~} \poscube \vdash \ex\\ 0 \textrm{~if~} \negcube \vdash \ex\\ * \textrm{~otherwise} \end{cases}
+ $$
+ 
+ Moreover, standard machine learning techniques can be applied almost directly on such a reduced data set, thus improving their scalability (without degrading their accuracy?): usually the ``do not care'' value can be handled, and if not, it is always possible to generate examples by random sampling within a cube.
+ 
+ 
+ 
+ We represent instances and cubes as subsets $U$ with 
+ $\universe = \{\truelit{i} \mid i\in \features \} \cup \{\falselit{i} \mid i\in \features \}$.
+% $\bar{\features} = \{i+|\features| : i \in \features\}$.
+ %That is, the set $\ex \subseteq U$ is interpreted as the conjunction $\biwedge_{i \in \ex}$
+ Notice that $\truelit{i} \in \ex$ and $\falselit{i} \in \ex$ are mutually exclusive.
+ Given a set $\cube \in \universe$ we denote $\bar{\cube}$ the set $\{\truelit{i} \mid \falselit{i} \in \cube\} \cup \{\falselit{i} \mid \truelit{i} \in \cube\}$.
+ 
+ These sets are implemented as bitsets over $2|\features|$ bits. Notice that computing $\bar{\cube}$ can be done by swaping the two halves of the bitset standing for $\cube$. Taking the complement would work for examples (and instances), but not for cubes.
+ 
+ 
+ \begin{algorithm}
+	\SetKwFunction{explain}{Comprime}
+   \TitleOfAlgo{\explain} 
+   \KwData{A data set $(\posex,\negex)$}
+   \KwResult{An explanation set $(\poscube, \negcube)$}
+	 $(\poscube, \negcube) \gets (\emptyset, \emptyset)$\;
+	 \While{$\posex \cup \negex \neq \emptyset$}
+	 {
+			choose $c \in \{y \mid \setex{y} \neq \emptyset\}$\;
+			choose $\ex^y \in \setex{y}$\;
+			$implicant \gets \emptyset$\;
+			$candidates \gets \ex^y$\;
+			\ForEach{$\ex \in \setcube{1-y} \cup \setex{1-y}$}
+			{
+				\If{$implicant \cap \bar{\ex} = \emptyset$}
+				{
+					$\delta \gets \ex^y \cap \bar{\ex}$\;
+					\If{$candidates \cap \delta = \emptyset$} {
+						choose $\lit{i} \in candidates$\;
+						$implicant \gets implicant \cap \{\lit{i}\}$\;
+						$candidates \gets \ex^y$\;
+					}
+					$candidates \gets candidates \cap \delta$\;
+				}
+			}
+			$\setcube{y} \gets \setcube{y} \setminus \{\ex \mid \ex \in \setex{y}, implicant \subseteq \ex\} \cup \{implicant\}$\;
+	 }
+	 \Return{$(\poscube, \negcube)$}\;
+	 
+\end{algorithm}
+
+
+
+
+
+\end{document}
+
