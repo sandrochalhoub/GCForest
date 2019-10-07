@@ -14,6 +14,8 @@
 \usepackage{fp}
 \usepackage{subfig}
 \usetikzlibrary{arrows,shadows,fit,calc,positioning,decorations.pathreplacing,matrix,shapes,petri,topaths,fadings,mindmap,backgrounds,shapes.geometric}
+\usepackage{geometry}
+
 
 
 \newcommand{\setex}[1]{\ensuremath{{\mathcal X}^{#1}}\xspace}
@@ -42,6 +44,7 @@
 % la Recherche'', project DEMOGRAPH, reference ANR-16-C40-0028.}}
 
 \begin{document}
+	\newgeometry{bottom=3cm,top=3cm}
 
 \maketitle
 
@@ -71,12 +74,14 @@ Properties (\ref{poscomplete}) and (\ref{negcomplete}) state that \poscube and \
  Moreover, standard machine learning techniques can be applied almost directly on such a reduced data set, thus improving their scalability (without degrading their accuracy?): usually the ``do not care'' value can be handled, and if not, it is always possible to generate examples by random sampling within a cube.
  
  
+ \section*{Algorithm}
+ 
  
  We represent instances and cubes as subsets $U$ with 
  $\universe = \{\truelit{i} \mid i\in \features \} \cup \{\falselit{i} \mid i\in \features \}$.
 % $\bar{\features} = \{i+|\features| : i \in \features\}$.
  %That is, the set $\ex \subseteq U$ is interpreted as the conjunction $\biwedge_{i \in \ex}$
- Notice that $\truelit{i} \in \ex$ and $\falselit{i} \in \ex$ are mutually exclusive.
+ Notice that $\truelit{i} \in \ex$ and $\falselit{i} \in \ex$ are mutually exclusive, but $\truelit{i} \not\in \ex$ and $\falselit{i} \not\in \ex$ are not.
  Given a set $\cube \in \universe$ we denote $\bar{\cube}$ the set $\{\truelit{i} \mid \falselit{i} \in \cube\} \cup \{\falselit{i} \mid \truelit{i} \in \cube\}$.
  
  These sets are implemented as bitsets over $2|\features|$ bits. Notice that computing $\bar{\cube}$ can be done by swaping the two halves of the bitset standing for $\cube$. Taking the complement would work for examples (and instances), but not for cubes.
@@ -90,8 +95,8 @@ Properties (\ref{poscomplete}) and (\ref{negcomplete}) state that \poscube and \
 	 $(\poscube, \negcube) \gets (\emptyset, \emptyset)$\;
 	 \While{$\posex \cup \negex \neq \emptyset$}
 	 {
-			choose $c \in \{y \mid \setex{y} \neq \emptyset\}$\;
-			choose $\ex^y \in \setex{y}$\;
+			\lnl{l:classselect} choose $c \in \{y \mid \setex{y} \neq \emptyset\}$\;
+			\lnl{l:exselect} choose $\ex^y \in \setex{y}$\;
 			$implicant \gets \emptyset$\;
 			$candidates \gets \ex^y$\;
 			\ForEach{$\ex \in \setcube{1-y} \cup \setex{1-y}$}
@@ -113,6 +118,69 @@ Properties (\ref{poscomplete}) and (\ref{negcomplete}) state that \poscube and \
 	 
 \end{algorithm}
 
+
+\section*{Experimental results}
+
+We ran \explain on the some data sets, whose number of examples and (binary) features are given respectively in the second and third columns of the follwoing tables. We report the total \emph{size} of the set of cubes, i.e., the sum of the number of literals in all the cubes in Table~\ref{tab:vol}; the number of cubes in Table~\ref{tab:exa}; and the average number of literals per cube in Table~\ref{tab:fea};
+
+We tested several variants with five strategies for selecting the next class for which we compute a cube (at Line~\ref{l:classselect}):
+\begin{itemize}
+	\item \texttt{positive} always selects examples from $\posex$ first
+		\item \texttt{negative} always selects examples from $\negex$ first
+	\item \texttt{altern} always selects from the $\setex{1-c}$ where $\setex{c}$ is the previous choice
+\item \texttt{uniform} selects from $\posex$ with probability $1/2$ and from $\negex$ otherwise
+\item \texttt{biased} selects from $\posex$ with probability $|\posex|/(|\posex|+|\negex|)$ and from $\negex$ otherwise
+\end{itemize}
+and two strategies for selecting the example $\ex^y$ to minimize in $\setex{y}$ (at Line~\ref{l:exselect}):
+\begin{itemize}
+	\item \texttt{first} selects examples in input order
+	\item \texttt{random} selects any example randomly with uniform probability
+\end{itemize}
+
+\newgeometry{left=.1cm,bottom=.1cm,top=.1cm}
+
+\begin{center}
+
+\begin{table}[h!]
+\begin{center}
+\begin{scriptsize}
+\tabcolsep=2.1pt
+\input{src/tables/vol.tex}
+\end{scriptsize}
+\end{center}
+\vspace{-.1cm}
+\caption{\label{tab:vol} Total size (total number of literals)}
+\end{table}
+
+\vspace{-.1cm}
+
+\begin{table}[h!]
+\begin{center}
+\begin{scriptsize}
+\tabcolsep=2pt
+\input{src/tables/exa.tex}
+\end{scriptsize}
+\end{center}
+\vspace{-.25cm}
+\caption{\label{tab:exa} Number of explanations}
+\end{table}
+
+\vspace{-.1cm}
+
+\begin{table}[h!]
+\begin{center}
+\begin{scriptsize}
+\tabcolsep=2.3pt
+\input{src/tables/fea.tex}
+\end{scriptsize}
+\end{center}
+\vspace{-.25cm}
+\caption{\label{tab:fea} Mean number of features}
+\end{table}
+
+\end{center}
+
+\restoregeometry
 
 
 
