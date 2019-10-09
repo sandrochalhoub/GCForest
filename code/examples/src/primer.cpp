@@ -45,13 +45,15 @@ int main(int argc, char* argv[]) {
 
   DataSet base;
 
-  csv::read<int>(
+  csv::read(
       opt.instance_file,
-      [&](vector<string> &f) { base.setFeatures(f.begin(), f.end()); },
-      [&](vector<int> &data) {
-        auto y = data.back();
-        data.pop_back();
-        base.add(data.begin(), data.end(), y);
+      [&](vector<string> &f) { base.setFeatures(f.begin(), f.end() - 1); },
+      [&](vector<string> &data) {
+        //
+        //
+        // auto y = data.back();
+        // data.pop_back();
+        base.add(data.begin(), data.end());
       });
 
   if (opt.sample != 1) {
@@ -76,19 +78,6 @@ int main(int argc, char* argv[]) {
     if (base.count() < count)
       cout << "c filtered " << (count - base.count()) / 2
            << " noisy example(s)\n";
-	
-	cout << base.count() << endl;
-	
-	
-	for(int f{0}; f<base.numFeature(); ++f)
-	{
-		base.entropy(f);
-		cout << endl;	
-	}
-
-	exit(1);
-	
-	
 
   if (opt.verbosity >= Options::NORMAL)
     cout << base << endl << endl;

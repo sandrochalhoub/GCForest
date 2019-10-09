@@ -6,8 +6,8 @@
 
 #include "SparseSet.hpp"
 
-#ifndef _MINISCHEDULER_DATASET_HPP
-#define _MINISCHEDULER_DATASET_HPP
+#ifndef _PRIMER_DATASET_HPP
+#define _PRIMER_DATASET_HPP
 
 using namespace boost;
 
@@ -73,17 +73,27 @@ public:
   }
   void addFeature(string &f) { feature_label.push_back(f); }
 
-  template <typename RandomIt>
-  void add(RandomIt beg, RandomIt end, const bool y) {
+  template <typename RandomIt> void add(RandomIt beg, RandomIt end) {
     instance x;
     x.resize(numFeature(), false);
     x.resize(2 * numFeature(), true);
-    for (auto v{beg}; v != end; ++v) {
-      if (*v) {
-        x.set(v - beg);
-        x.reset(v - beg + numFeature());
+    for (auto s{beg}; s != end - 1; ++s) {
+      std::stringstream convert(*s);
+
+      bool v{false};
+      convert >> v;
+
+      if (v) {
+        x.set(s - beg);
+        x.reset(s - beg + numFeature());
       }
     }
+
+    std::stringstream convert(*(end - 1));
+
+    bool y{false};
+    convert >> y;
+
     add(x, y);
   }
   void add(instance &x, const bool y) {
@@ -109,42 +119,56 @@ public:
     return not_e;
   }
 
-  double entropy(const int feature) {
+  double conditional_entropy(const int feature) {
+
     auto not_feature = (feature + numFeature());
 
-    int npos[2] = {0, 0};
-    int nneg[2] = {0, 0};
-    int* count[2] = {nneg, npos};
-    for (auto c{0}; c < 2; ++c) {
-			int gr0{0};
-			int gr1{0};
-			
-      for (auto e : example[c]) {
-				
-				// cout << X[e] << endl;
-				// for(auto f=0; f<numFeature(); ++f)
-				// 	cout << X[e][f] ;
-				// cout << endl;
-				// exit(1);
-				
-				
-				
-        if (X[e][feature] != X[e][not_feature]) {
+    // cout << pretty(feature) << " / " << pretty(not_feature) << endl;
+
+    double npos[2] = {0, 0};
+    double nneg[2] = {0, 0};
+    double *count[2] = {nneg, npos};
+    for (auto c{0}; c < 2; ++c)
+      for (auto e : example[c])
+        if (X[e][feature] != X[e][not_feature])
           ++count[c][X[e][feature]];
-					if(X[e][not_feature])
-						gr1++;
-					else
-						gr0++;
-				}
+
+    // for (auto v{0}; v < 2; ++v)
+    // 	for (auto c{0}; c < 2; ++c)
+    // 		cout << feature << "=" << v << ": " << count[c][v] << (c ? " positive"
+    // : " negative") << " examples\n";
+
+    double entropy{0};
+    double total_size{
+        static_cast<double>(example[0].count() + example[1].size())};
+
+    for (auto val{0}; val < 2; ++val) {
+      //
+      // cout << "compute entropy of dataset w.r.t. " << pretty((val ? feature :
+      // not_feature)) << " (" << count[0][val] << "/" << count[1][val] <<
+      // "):\n";
+
+      auto val_size{count[0][val] + count[1][val]};
+      // auto ratio{val_size / total_size};
+      double entropy_val{0};
+      for (auto c{0}; c < 2; ++c) {
+        if (count[c][val] != 0 and count[c][val] != val_size) {
+          entropy_val -=
+              (count[c][val] / val_size) * std::log(count[c][val] / val_size);
+          // cout << " + " << -(count[c][val] / val_size) *
+          // std::log(count[c][val] / val_size);
+        }
+        // else cout << " + 0";
       }
-			cout << (c ? " positive: " : " negative: ") << gr0 << "/" << gr1 << endl;
-		}
-		
-		for (auto v{0}; v < 2; ++v)	
-			for (auto c{0}; c < 2; ++c)
-				cout << feature << "=" << v << ": " << count[c][v] << (c ? " positive" : " negative") << " examples\n";
-			
-			return 0;
+
+      // cout << " = " << (entropy_val * val_size / total_size) << endl;
+
+      entropy += (entropy_val * val_size / total_size);
+                }
+
+                // cout << " ==> " << -entropy << endl;
+
+                return entropy;
   }
   //@}
 
@@ -527,4 +551,4 @@ std::ostream &operator<<(std::ostream &os, const DataSet &x) {
 
 }
 
-#endif // _MINISCHEDULER_DATASET_HPP
+#endif // _PRIMER_DATASET_HPP

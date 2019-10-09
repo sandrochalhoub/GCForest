@@ -19,11 +19,11 @@
 
 
 \newcommand{\setex}[1]{\ensuremath{{\mathcal X}^{#1}}\xspace}
-\newcommand{\posex}{{\setex{1}}}
-\newcommand{\negex}{{\setex{0}}}
+\newcommand{\posex}{{\setex{1}}\xspace}
+\newcommand{\negex}{{\setex{0}}\xspace}
 \newcommand{\setcube}[1]{\ensuremath{{\mathcal C}^{#1}}\xspace}
-\newcommand{\poscube}{\ensuremath{\setcube{1}}}
-\newcommand{\negcube}{\ensuremath{\setcube{0}}}
+\newcommand{\poscube}{{\setcube{1}}\xspace}
+\newcommand{\negcube}{{\setcube{0}}\xspace}
 \newcommand{\features}{\ensuremath{{\mathcal F}}\xspace}
 \newcommand{\classifier}{\ensuremath{f}}
 \newcommand{\lit}[1]{\ensuremath{l_{#1}}}
@@ -50,17 +50,16 @@
 
 \section*{Problem statement}
 
-We consider a data set composed a set \posex of positive examples and a set \negex of negative examples over a set of binary features $\features$
+We consider a data set composed a set \posex of positive examples and a set \negex of negative examples over a set of binary features $\features$.
 %$ = \{1,\ldots,m\}$.
-
 The classic task in machine learning is to compute a function $\classifier : 2^{\features} \mapsto \{0,1\}$ that \emph{generalizes} the data set.
 
-In this note we show how we can reduce the data sets by representing \posex and \negex as unions of \emph{cubes} (or DNFs) that we will denote respectively \poscube and \negcube, respectively. Let $\truelit{i}$ be a literal standing for ``feature $i$ is true'' and its negatiion $\falselit{i}$ standing for ``feature $i$ is false''. An instance $\ex$ is a conjunction $\bigwedge_{i \in \features}\lit{i}$ where $\lit{i}$ is either $\truelit{i}$ or $\falselit{i}$, an example is an instance $\ex \in \posex \cup \negex$.
+In this note we show how we can reduce the data sets by representing \posex and \negex as unions of \emph{cubes} (or DNFs) that we will denote respectively \poscube and \negcube, respectively. Let $\truelit{i}$ be a literal standing for ``feature $i$ is true'' and its negation $\falselit{i}$ standing for ``feature $i$ is false''. An instance $\ex$ is a conjunction $\bigwedge_{i \in \features}\lit{i}$ where $\lit{i}$ is either $\truelit{i}$ or $\falselit{i}$, an example is an instance $\ex \in \posex \cup \negex$.
 A cube $\cube \in \poscube \cup \negcube$ is a conjunction $\bigwedge_{i \in {\mathcal S}}\lit{i}$ where $\lit{i}$ is either $\truelit{i}$ or $\falselit{i}$, for a subset ${\mathcal S}$ of \features.
 The cubes \poscube and \negcube have the following properties:
 \begin{eqnarray}
-	\forall \ex \in \posex \exists \cube \in \poscube & \cube \vdash \ex \label{poscomplete} \\
-	\forall \ex \in \negex \exists \cube \in \negcube & \cube \vdash \ex \label{negcomplete} \\
+	\forall \ex \in \posex \exists \cube \in \poscube & \ex \vdash \cube \label{poscomplete} \\
+	\forall \ex \in \negex \exists \cube \in \negcube & \ex \vdash \cube \label{negcomplete} \\
 	\forall \cube \in \poscube  \forall \cube' \in \negcube  & \cube \wedge \cube' \vdash \perp \label{consistent}
 \end{eqnarray}
 
@@ -71,20 +70,20 @@ Properties (\ref{poscomplete}) and (\ref{negcomplete}) state that \poscube and \
  \classifier(\ex) = \begin{cases} 1 \textrm{~if~} \poscube \vdash \ex\\ 0 \textrm{~if~} \negcube \vdash \ex\\ * \textrm{~otherwise} \end{cases}
  $$
  
- Moreover, standard machine learning techniques can be applied almost directly on such a reduced data set, thus improving their scalability (without degrading their accuracy?): usually the ``do not care'' value can be handled, and if not, it is always possible to generate examples by random sampling within a cube.
+ Moreover, standard machine learning techniques can be applied almost directly on such a reduced data set, thus improving their scalability (without degrading their accuracy?): usually the irrelevant features can be handled, and if not, it is always possible to generate full examples by random sampling within a cube.
  
  
  \section*{Algorithm}
  
  
- We represent instances and cubes as subsets $U$ with 
+ We represent instances and cubes as subsets of
  $\universe = \{\truelit{i} \mid i\in \features \} \cup \{\falselit{i} \mid i\in \features \}$.
 % $\bar{\features} = \{i+|\features| : i \in \features\}$.
  %That is, the set $\ex \subseteq U$ is interpreted as the conjunction $\biwedge_{i \in \ex}$
  Notice that $\truelit{i} \in \ex$ and $\falselit{i} \in \ex$ are mutually exclusive, but $\truelit{i} \not\in \ex$ and $\falselit{i} \not\in \ex$ are not.
  Given a set $\cube \in \universe$ we denote $\bar{\cube}$ the set $\{\truelit{i} \mid \falselit{i} \in \cube\} \cup \{\falselit{i} \mid \truelit{i} \in \cube\}$.
  
- These sets are implemented as bitsets over $2|\features|$ bits. Notice that computing $\bar{\cube}$ can be done by swaping the two halves of the bitset standing for $\cube$. Taking the complement would work for examples (and instances), but not for cubes.
+ These sets are implemented as bitsets over $2|\features|$ bits, with the first $|\features|$ bits standing for positive literals and the second $|\features|$ bits standing for negative literals. Notice that computing $\bar{\cube}$ can be done by swaping the two halves of the bitset standing for $\cube$. Taking the complement would work for examples (and instances), but not for cubes.
  
  
  \begin{algorithm}
@@ -112,7 +111,10 @@ Properties (\ref{poscomplete}) and (\ref{negcomplete}) state that \poscube and \
 					$candidates \gets candidates \cap \delta$\;
 				}
 			}
-			$\setcube{y} \gets \setcube{y} \setminus \{\ex \mid \ex \in \setex{y}, implicant \subseteq \ex\} \cup \{implicant\}$\;
+			choose $\lit{i} \in candidates$\;
+			$implicant \gets implicant \cup \{\lit{i}\}$\;
+			$\setcube{y} \gets \setcube{y} \cup \{implicant\}$\;
+			$\setex{y} \gets \setex{y} \setminus \{\ex \mid \ex \in \setex{y}, implicant \subseteq \ex\}$
 	 }
 	 \Return{$(\poscube, \negcube)$}\;
 	 
@@ -121,7 +123,7 @@ Properties (\ref{poscomplete}) and (\ref{negcomplete}) state that \poscube and \
 
 \section*{Experimental results}
 
-We ran \explain on the some data sets, whose number of examples and (binary) features are given respectively in the second and third columns of the follwoing tables. We report the total \emph{size} of the set of cubes, i.e., the sum of the number of literals in all the cubes in Table~\ref{tab:vol}; the number of cubes in Table~\ref{tab:exa}; and the average number of literals per cube in Table~\ref{tab:fea};
+We ran \explain on some data sets, whose number of examples and (binary) features are given respectively in the second and third columns of the following tables. We report the total \emph{size} of the set of cubes, i.e., the sum of the number of literals in all the cubes in Table~\ref{tab:vol}; the number of cubes in Table~\ref{tab:exa}; and the average number of literals per cube in Table~\ref{tab:fea};
 
 We tested several variants with five strategies for selecting the next class for which we compute a cube (at Line~\ref{l:classselect}):
 \begin{itemize}
