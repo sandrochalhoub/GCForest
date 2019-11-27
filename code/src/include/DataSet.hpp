@@ -73,6 +73,41 @@ public:
   }
   void addFeature(string &f) { feature_label.push_back(f); }
 
+  void add(instance x_, const bool y) {
+
+    while (x_.size() > numFeature()) {
+      string s("f" + to_string(numFeature() + 1));
+      addFeature(s);
+    }
+		
+    instance x = x_;
+    instance xp = x_;
+
+    cout << x << endl;
+
+    x.resize(2 * numFeature(), true);
+
+    cout << x << endl;
+
+    xp.resize(2 * numFeature(), false);
+    x <<= numFeature();
+
+    cout << x << endl;
+
+    x.flip();
+
+    cout << x << endl;
+
+    x |= xp;
+
+    cout << x_ << " -> " << x << endl;
+
+    exit(1);
+
+    example[y].safe_add(X.size());
+    X.push_back(x);
+  }
+
   template <typename RandomIt> void add(RandomIt beg, RandomIt end) {
     instance x;
     x.resize(numFeature(), false);
@@ -94,12 +129,14 @@ public:
     bool y{false};
     convert >> y;
 
-    add(x, y);
-  }
-  void add(instance &x, const bool y) {
     example[y].safe_add(X.size());
     X.push_back(x);
+    // add(x, y);
   }
+  // void add(instance &x, const bool y) {
+  //   example[y].safe_add(X.size());
+  //   X.push_back(x);
+  // }
 
   size_t numFeature() const { return feature_label.size(); }
   size_t size() const { return X.size(); }
@@ -419,6 +456,34 @@ public:
 
   /*!@name Miscellaneous*/
   //@{
+  std::ostream &to_csv(std::ostream &os) const {
+    for (auto i{0}; i < numFeature(); ++i)
+      os << feature_label[i] << ",";
+    os << "label" << endl;
+    for (auto c{0}; c < 2; ++c)
+      for (auto j : example[c]) {
+        for (auto i{0}; i < numFeature(); ++i)
+          os << X[j][i] << ",";
+        os << c << endl;
+      }
+
+    return os;
+  }
+
+  std::ostream &to_txt(std::ostream &os) const {
+    //     for (auto i{0}; i < numFeature(); ++i)
+    //       os << feature_label[i] << " " ;
+    // os << "label" << endl;
+    for (auto c{0}; c < 2; ++c)
+      for (auto j : example[c]) {
+        for (auto i{0}; i < numFeature(); ++i)
+          os << X[j][i] << " ";
+        os << c << endl;
+      }
+
+    return os;
+  }
+
   std::ostream &display(std::ostream &os) const {
 
     os << "features:";

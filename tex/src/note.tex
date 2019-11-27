@@ -105,7 +105,7 @@ Properties (\ref{poscomplete}) and (\ref{negcomplete}) state that \poscube and \
 					$\delta \gets \ex^y \cap \bar{\ex}$\;
 					\If{$candidates \cap \delta = \emptyset$} {
 						choose $\lit{i} \in candidates$\;
-						$implicant \gets implicant \cap \{\lit{i}\}$\;
+						$implicant \gets implicant \cup \{\lit{i}\}$\;
 						$candidates \gets \ex^y$\;
 					}
 					$candidates \gets candidates \cap \delta$\;

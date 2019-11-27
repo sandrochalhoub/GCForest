@@ -54,6 +54,11 @@ int main(int argc, char* argv[]) {
 			
 	cout << base << endl;
 
+        DataSet bin;
+
+        base.binarize(bin);
+
+        cout << bin << endl;
 }
 
 
