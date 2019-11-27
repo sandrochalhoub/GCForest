@@ -13,6 +13,7 @@ std::string DataSet::pretty(const int f) const {
 }
 
 DataSet::DataSet() {}
+
 DataSet::DataSet(const int n_feature) {
   for (auto i{1}; i <= n_feature; ++i) {
     string f("f_" + std::to_string(i));
@@ -30,30 +31,31 @@ instance &DataSet::operator[](const size_t idx) { return X[idx]; }
 
 void DataSet::addFeature(string &f) { feature_label.push_back(f); }
 
-void DataSet::add(instance x_, const bool y) {
+// I AM NOT SURE WHAT WAS THE PURPOSE OF THAT
+// void DataSet::add(instance x_, const bool y) {
+//
+//   while (x_.size() > numFeature()) {
+//     string s("f" + to_string(numFeature() + 1));
+//     addFeature(s);
+//   }
+//
+//   instance x = x_;
+//   instance xp = x_;
+//
+//   x.resize(2 * numFeature(), true);
+//
+//   xp.resize(2 * numFeature(), false);
+//   xp <<= numFeature();
+//
+//   x.flip();
+//
+//   x |= xp;
+//
+//   example[y].safe_add(X.size());
+//   X.push_back(x);
+// }
 
-  while (x_.size() > numFeature()) {
-    string s("f" + to_string(numFeature() + 1));
-    addFeature(s);
-  }
-
-  instance x = x_;
-  instance xp = x_;
-
-  x.resize(2 * numFeature(), true);
-
-  xp.resize(2 * numFeature(), false);
-  xp <<= numFeature();
-
-  x.flip();
-
-  x |= xp;
-
-  example[y].safe_add(X.size());
-  X.push_back(x);
-}
-
-void DataSet::push(instance x, const bool y) {
+void DataSet::add(instance x, const bool y) {
 
   example[y].safe_add(X.size());
   X.push_back(x);
@@ -61,9 +63,9 @@ void DataSet::push(instance x, const bool y) {
 
 size_t DataSet::numFeature() const { return feature_label.size(); }
 size_t DataSet::size() const { return X.size(); }
-size_t DataSet::count() const {
-  return example[0].count() + example[1].count();
-}
+size_t DataSet::positive_count() const { return example[1].count(); }
+size_t DataSet::negative_count() const { return example[0].count(); }
+size_t DataSet::count() const { return positive_count() + negative_count(); }
 size_t DataSet::volume() const {
   auto v{0};
   for (auto c{0}; c < 2; ++c)
@@ -171,7 +173,7 @@ void DataSet::addExplanation(instance &impl, const bool y, const int limit,
     example[y].remove_front(e);
 
   // add the explanation instead
-  push(impl, y);
+  add(impl, y);
 }
 
 void DataSet::close() {

@@ -49,18 +49,14 @@ int main(int argc, char* argv[]) {
       opt.instance_file,
       [&](vector<string> &f) { base.setFeatures(f.begin(), f.end() - 1); },
       [&](vector<string> &data) {
-        //
-        //
-        // auto y = data.back();
-        // data.pop_back();
         base.add(data.begin(), data.end());
       });
 
   if (opt.sample != 1) {
 
-    base.uniform_sample(0, (double)(base.example[0].size()) * opt.sample,
+    base.uniform_sample(0, (double)(base.positive_count()) * opt.sample,
                         random_generator);
-    base.uniform_sample(1, (double)(base.example[1].size()) * opt.sample,
+    base.uniform_sample(1, (double)(base.negative_count()) * opt.sample,
                         random_generator);
   }
 
@@ -68,9 +64,6 @@ int main(int argc, char* argv[]) {
 
   if (opt.verbosity >= Options::QUIET)
     cout << "c filter base\n";
-
-
-	// cout << base << endl;
 
   base.filter();
 
