@@ -29,14 +29,21 @@ private:
 public:
   /*!@name Parameters*/
   //@{
-  /// list of values
+  /// list of features
   std::vector<std::string> feature_label;
 
   // we store the example followed by its negation
   // irrelevant bits are 0 in both copies
-  SparseSet example[2];
-  SparseSet explanations[2];
+	// X is a vector containing all examples and explanations/cubes
   std::vector<instance> X;
+
+	// example[0] (resp. example[1]) is a set of indices of negative (resp. positive) examples in X
+  SparseSet example[2];
+	
+	// explanations[0] (resp. explanations[1]) is a set of indices of negative (resp. positive) explanations in X
+  SparseSet explanations[2];
+
+
   std::vector<int> literal_count;
   //@}
 
