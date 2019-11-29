@@ -72,32 +72,32 @@ public:
   RangeConstraint(T l, T u) : lb(l), ub(u) {}
 
   /**
-   * Returns a description of the Constraint.
-   */
+  * Returns a description of the Constraint.
+  */
   virtual std::string description() const {
     return "value must be in the range [" + to_string(lb) + "," +
            to_string(ub) + "]";
   }
 
   /**
-   * Returns the short ID for the Constraint.
-   */
+  * Returns the short ID for the Constraint.
+  */
   virtual std::string shortID() const { return "range"; }
 
   /**
-   * The method used to verify that the value parsed from the command
-   * line meets the constraint.
-   * \param value - The value that will be checked.
-   */
+  * The method used to verify that the value parsed from the command
+  * line meets the constraint.
+  * \param value - The value that will be checked.
+  */
   virtual bool check(const T &value) const {
     return value >= lb and value <= ub;
   }
 
   /**
-   * Destructor.
-   * Silences warnings about Constraint being a base class with virtual
-   * functions but without a virtual destructor.
-   */
+  * Destructor.
+  * Silences warnings about Constraint being a base class with virtual
+  * functions but without a virtual destructor.
+  */
   virtual ~RangeConstraint() { ; }
 };
 
@@ -113,6 +113,9 @@ Options parse(int argc, char *argv[]) {
 
   cmd.add<UnlabeledValueArg<std::string>>(opt.instance_file, "file",
                                           "instance file", true, "", "string");
+
+  cmd.add<ValueArg<string>>(opt.output, "o", "output", "output file", false, "",
+                            "string");
 
   cmd.add<ValueArg<int>>(
       opt.verbosity, "", "verbosity",

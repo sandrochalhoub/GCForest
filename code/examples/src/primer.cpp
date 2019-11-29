@@ -108,6 +108,16 @@ int main(int argc, char *argv[]) {
       base.verify();
 
   } while (count != base.count());
+
+  if (opt.output != "") {
+    ofstream outfile(opt.output, std::ios_base::out);
+
+		string del=",";
+		string wld="*";
+    base.write(outfile, del, wld, true, true);
+
+    outfile.close();
+  }
 }
 
 

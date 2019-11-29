@@ -18,6 +18,7 @@ public:
   // the actual options
   string cmdline; // for reference
   string instance_file;
+  string output;
 
   enum verbosity { SILENT = 0, QUIET, NORMAL, YACKING, SOLVERINFO };
   int verbosity;

@@ -343,212 +343,275 @@ void DataSet::getContradictingFeatures(instance &x1, instance &x2,
   // buffer |= (x2 << numFeature() / 2);
 
   buffer &= x1;
+}
+
+void DataSet::addExplanation(instance &impl, const bool y, const int limit,
+                             vector<int> &entailed) {
+  entailed.clear();
+  // remove all explained examples
+  for (auto e : example[y]) {
+    if (e > limit)
+      break;
+
+    if (impl.is_subset_of(X[e]))
+      entailed.push_back(e);
   }
+  for (auto e : entailed)
+    example[y].remove_front(e);
 
-  void DataSet::addExplanation(instance &impl, const bool y, const int limit,
-                               vector<int> &entailed) {
-    entailed.clear();
-    // remove all explained examples
-    for (auto e : example[y]) {
-      if (e > limit)
-        break;
+  // add the explanation instead
+  add(impl, y);
+}
 
-      if (impl.is_subset_of(X[e]))
-        entailed.push_back(e);
+void DataSet::close() {
+  literal_count.reserve(size());
+  for (auto c{0}; c < 2; ++c)
+    for (auto e : example[c])
+      literal_count[e] = X[e].count();
+}
+
+bool DataSet::classify(instance &x) {
+  for (auto c{0}; c < 2; ++c)
+    for (auto e : example[c])
+      if (X[e].is_subset_of(x))
+        return c;
+
+  instance buffer;
+  double proba[2];
+
+  // #contradictions / #number literal = probability that x is not of class c
+
+  for (auto c{0}; c < 2; ++c)
+    for (auto e : example[c]) {
+      buffer = X[e];
+      buffer -= x;
+      auto nl{buffer.count()};
+      proba[c] *=
+          (static_cast<double>(nl) / static_cast<double>(literal_count[e]));
     }
-    for (auto e : entailed)
-      example[y].remove_front(e);
 
-    // add the explanation instead
-    add(impl, y);
-  }
+  return proba[1] > proba[0];
+}
 
-  void DataSet::close() {
-    literal_count.reserve(size());
-    for (auto c{0}; c < 2; ++c)
-      for (auto e : example[c])
-        literal_count[e] = X[e].count();
-  }
+std::ostream &DataSet::write(std::ostream &os, string &delimiter,
+                             string &wildcard, const bool matrix,
+                             const bool header) const {
 
-  bool DataSet::classify(instance &x) {
-    for (auto c{0}; c < 2; ++c)
-      for (auto e : example[c])
-        if (X[e].is_subset_of(x))
-          return c;
+  SparseSet relevant_feature(numFeature());
+  relevant_feature.fill();
 
-    instance buffer;
-    double proba[2];
-
-    // #contradictions / #number literal = probability that x is not of class c
-
-    for (auto c{0}; c < 2; ++c)
-      for (auto e : example[c]) {
-        buffer = X[e];
-        buffer -= x;
-        auto nl{buffer.count()};
-        proba[c] *=
-            (static_cast<double>(nl) / static_cast<double>(literal_count[e]));
-      }
-
-    return proba[1] > proba[0];
-  }
-
-  std::ostream &DataSet::toCsv(std::ostream &os) const {
-    for (auto i{0}; i < numFeature(); ++i)
-      os << feature_label[i] << ",";
-    os << "label" << endl;
-    for (auto c{0}; c < 2; ++c)
-      for (auto j : example[c]) {
-        for (auto i{0}; i < numFeature(); ++i)
-          os << X[j][i] << ",";
-        os << c << endl;
-      }
-
-    return os;
-  }
-
-  std::ostream &DataSet::toTxt(std::ostream &os) const {
-    //     for (auto i{0}; i < numFeature(); ++i)
-    //       os << feature_label[i] << " " ;
-    // os << "label" << endl;
-    for (auto c{0}; c < 2; ++c)
-      for (auto j : example[c]) {
-        for (auto i{0}; i < numFeature(); ++i)
-          os << X[j][i] << " ";
-        os << c << endl;
-      }
-
-    return os;
-  }
-
-  std::ostream &DataSet::display(std::ostream &os) const {
-
-    os << "features:";
-    // for (auto l : feature_label)
-    for (auto i{0}; i < numFeature(); ++i)
-      os << " " << feature_label[i];
-    os << endl;
-
-    // for (auto i : example[1])
-    //   os << X[i] << ": +" << std::endl;
-    // for (auto i : example[0])
-    //   os << X[i] << ": -" << std::endl;
-
-    os << "POSITIVE EXAMPLES:\n";
-    for (auto i : example[1]) {
-      cout << i << ": "; //<< X[i] << " ";
-      displayExample(os, X[i]);
-      if (example_probability.size() > i)
-        os << " e^" << example_probability[i];
-      os << endl;
-    }
-    os << "NEGATIVE EXAMPLES:\n";
-    for (auto i : example[0]) {
-      cout << i << ": "; //<< X[i] << " ";
-      displayExample(os, X[i]);
-      if (example_probability.size() > i)
-        os << " e^" << example_probability[i];
-      os << endl;
-    }
-    return os;
-  }
-
-  std::ostream &DataSet::displayExample(std::ostream &os,
-                                        const instance e) const {
-
-    auto flag{false};
-    auto nxt{false};
-    int last;
-    size_t n{e.count()};
-
-    os << "(";
-    for (auto f{0}; f < 2 * numFeature(); ++f) {
-      if (e[f]) {
-
-        // os << "[" << f << "]";
-
-        if (!--n) {
-          if (flag)
-            os << ",";
-          os << pretty(f) << ")"; // feature_label[f];
+  for (auto i{0}; i < numFeature(); ++i) {
+    auto irrelevant{true};
+    for (auto c{0}; irrelevant and c < 2; ++c)
+      for (auto j : example[c])
+        if (X[j][i] != X[j][i + numFeature()]) {
+          irrelevant = false;
           break;
         }
-
-        if (f < 2 * numFeature() - 1 and e[f + 1])
-          nxt = true;
-        else
-          nxt = false;
-
-        if (!nxt or f != last + 1 or f == numFeature()) {
-          if (flag)
-            os << ",";
-          os << pretty(f); // feature_label[f];
-          flag = true;
-        } else if (flag) {
-          os << "..";
-          flag = false;
-        }
-
-        last = f;
-      }
-    }
-
-    return os;
+    if (irrelevant)
+      relevant_feature.remove_back(i);
   }
 
-  void DataSet::verify() {
-    // check that every example is entailed by an explanation of its class and
-    // that no explanation entails an example of the other class
+  if (header) {
+    for (auto i : relevant_feature)
+      os << i << delimiter << " ";
+    os << "label" << endl;
+  }
 
-    instance not_covered[2];
-    for (auto c{0}; c < 2; ++c) {
-      not_covered[c].resize(X.size(), false);
+  for (auto c{0}; c < 2; ++c)
+    for (auto j : example[c]) {
+      for (auto i : relevant_feature) {
+        if (X[j][i] == X[j][i + numFeature()]) {
+          if (matrix)
+            os << "*" << delimiter << " ";
+        } else {
+          if (matrix)
+            os << X[j][i] << delimiter << " ";
+          else
+            os << (X[j][i] ? (i + 1) : -(i + 1)) << delimiter << " ";
+        }
+      }
+      os << c << endl;
+    }
+
+  return os;
+}
+
+// std::ostream &DataSet::toCsv(std::ostream &os) const {
+//   for (auto i{0}; i < numFeature(); ++i)
+//     os << feature_label[i] << ",";
+//   os << "label" << endl;
+//   for (auto c{0}; c < 2; ++c)
+//     for (auto j : example[c]) {
+//       for (auto i{0}; i < numFeature(); ++i)
+//         os << X[j][i] << ",";
+//       os << c << endl;
+//     }
+//
+//   return os;
+// }
+
+// std::ostream &DataSet::toTxt(std::ostream &os) const {
+//   //     for (auto i{0}; i < numFeature(); ++i)
+//   //       os << feature_label[i] << " " ;
+//   // os << "label" << endl;
+//
+//   SparseSet relevant_feature(numFeature());
+//   relevant_feature.fill();
+//
+//   for (auto i{0}; i < numFeature(); ++i) {
+//     auto irrelevant{true};
+//     for (auto c{0}; irrelevant and c < 2; ++c)
+//       for (auto j : example[c])
+//         if (X[j][i] != X[j][i + numFeature()]) {
+//           irrelevant = false;
+//           break;
+//         }
+//     if (irrelevant)
+//       relevant_feature.remove_back(i);
+//   }
+//
+//   for (auto c{0}; c < 2; ++c)
+//     for (auto j : example[c]) {
+//       for (auto i : relevant_feature)
+//         if (X[j][i] == X[j][i + numFeature()])
+//           os << "* ";
+//         else
+//           os << X[j][i] << " ";
+//       os << c << endl;
+//     }
+//
+//   return os;
+// }
+
+std::ostream &DataSet::display(std::ostream &os) const {
+
+  os << "features:";
+  // for (auto l : feature_label)
+  for (auto i{0}; i < numFeature(); ++i)
+    os << " " << feature_label[i];
+  os << endl;
+
+  // for (auto i : example[1])
+  //   os << X[i] << ": +" << std::endl;
+  // for (auto i : example[0])
+  //   os << X[i] << ": -" << std::endl;
+
+  os << "POSITIVE EXAMPLES:\n";
+  for (auto i : example[1]) {
+    cout << i << ": "; //<< X[i] << " ";
+    displayExample(os, X[i]);
+    if (example_probability.size() > i)
+      os << " e^" << example_probability[i];
+    os << endl;
+  }
+  os << "NEGATIVE EXAMPLES:\n";
+  for (auto i : example[0]) {
+    cout << i << ": "; //<< X[i] << " ";
+    displayExample(os, X[i]);
+    if (example_probability.size() > i)
+      os << " e^" << example_probability[i];
+    os << endl;
+  }
+  return os;
+}
+
+std::ostream &DataSet::displayExample(std::ostream &os,
+                                      const instance e) const {
+
+  auto flag{false};
+  auto nxt{false};
+  int last;
+  size_t n{e.count()};
+
+  os << "(";
+  for (auto f{0}; f < 2 * numFeature(); ++f) {
+    if (e[f]) {
+
+      // os << "[" << f << "]";
+
+      if (!--n) {
+        if (flag)
+          os << ",";
+        os << pretty(f) << ")"; // feature_label[f];
+        break;
+      }
+
+      if (f < 2 * numFeature() - 1 and e[f + 1])
+        nxt = true;
+      else
+        nxt = false;
+
+      if (!nxt or f != last + 1 or f == numFeature()) {
+        if (flag)
+          os << ",";
+        os << pretty(f); // feature_label[f];
+        flag = true;
+      } else if (flag) {
+        os << "..";
+        flag = false;
+      }
+
+      last = f;
+    }
+  }
+
+  return os;
+}
+
+void DataSet::verify() {
+  // check that every example is entailed by an explanation of its class and
+  // that no explanation entails an example of the other class
+
+  instance not_covered[2];
+  for (auto c{0}; c < 2; ++c) {
+    not_covered[c].resize(X.size(), false);
+    for (auto i{-example[c].start()}; i < 0; ++i)
+      not_covered[c].set(example[c][i]);
+  }
+
+  instance contradictions, not_expl;
+  for (auto c{0}; c < 2; ++c)
+    for (auto explanation : example[c]) {
+      not_expl = NOT(X[explanation]);
+
       for (auto i{-example[c].start()}; i < 0; ++i)
-        not_covered[c].set(example[c][i]);
-    }
+        if (X[explanation].is_subset_of(X[example[c][i]]))
+          not_covered[c].reset(example[c][i]);
 
-    instance contradictions, not_expl;
-    for (auto c{0}; c < 2; ++c)
-      for (auto explanation : example[c]) {
-        not_expl = NOT(X[explanation]);
+      for (auto i{-example[1 - c].start()}; i < 0; ++i)
+        if (X[explanation].is_subset_of(X[example[c][i]])) {
+          cerr << "rule " << explanation << ": " << X[explanation] << " = ";
+          displayExample(cerr, X[explanation]);
+          cerr << " for class " << c << " entails example " << example[c][i]
+               << ": " << X[example[c][i]] << " = ";
+          displayExample(cerr, X[example[c][i]]);
+          cerr << " of class " << (1 - c) << "!!\n";
+          exit(1);
+        }
 
-        for (auto i{-example[c].start()}; i < 0; ++i)
-          if (X[explanation].is_subset_of(X[example[c][i]]))
-            not_covered[c].reset(example[c][i]);
-
-        for (auto i{-example[1 - c].start()}; i < 0; ++i)
-          if (X[explanation].is_subset_of(X[example[c][i]])) {
-            cerr << "rule " << explanation << ": " << X[explanation] << " = ";
-            displayExample(cerr, X[explanation]);
-            cerr << " for class " << c << " entails example " << example[c][i]
-                 << ": " << X[example[c][i]] << " = ";
-            displayExample(cerr, X[example[c][i]]);
-            cerr << " of class " << (1 - c) << "!!\n";
-            exit(1);
-          }
-
-        for (auto counter_example : example[1 - c]) {
-          contradictions = (not_expl & X[counter_example]);
-          if (contradictions.none()) {
-            cerr << explanation << ": ";
-            displayExample(cerr, X[explanation]);
-            cerr << " does not contradict " << counter_example << ": ";
-            displayExample(cerr, X[counter_example]);
-            cerr << endl;
-            exit(1);
-          }
+      for (auto counter_example : example[1 - c]) {
+        contradictions = (not_expl & X[counter_example]);
+        if (contradictions.none()) {
+          cerr << explanation << ": ";
+          displayExample(cerr, X[explanation]);
+          cerr << " does not contradict " << counter_example << ": ";
+          displayExample(cerr, X[counter_example]);
+          cerr << endl;
+          exit(1);
         }
       }
+    }
 
-    for (auto c{0}; c < 2; ++c) {
-      if (!not_covered[c].none()) {
-        cerr << "examples " << not_covered[c] << " are covered by no rule!!\n";
-        exit(1);
-      }
+  for (auto c{0}; c < 2; ++c) {
+    if (!not_covered[c].none()) {
+      cerr << "examples " << not_covered[c] << " are covered by no rule!!\n";
+      exit(1);
     }
   }
+}
 
-  std::ostream &operator<<(std::ostream &os, const DataSet &x) {
-    return x.display(os);
-  }
+std::ostream &operator<<(std::ostream &os, const DataSet &x) {
+  return x.display(os);
+}
 }

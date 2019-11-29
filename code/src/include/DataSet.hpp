@@ -165,9 +165,10 @@ public:
 
   /*!@name Printing*/
   //@{
-  std::ostream &toCsv(std::ostream &os) const;
+  // std::ostream &toCsv(std::ostream &os) const;
 
-  std::ostream &toTxt(std::ostream &os) const;
+  std::ostream &write(std::ostream &os, string &delimiter, string &wildcard,
+                      const bool matrix, const bool header) const;
 
   std::ostream &display(std::ostream &os) const;
 
