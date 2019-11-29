@@ -33,8 +33,11 @@ bool SparseSet::safe_contain(const int elt) const {
 bool SparseSet::contain(const int elt) const { return index_[elt] < size_ and index_[elt] >= start_; }
 
 size_t SparseSet::count() const { return size_ - start_; }
+
 size_t SparseSet::size() const { return size_; }
+
 size_t SparseSet::start() const { return start_; }
+
 size_t SparseSet::capacity() const { return index_.size(); }
 
 bool SparseSet::empty() const { return size_ == start_; }
@@ -77,6 +80,14 @@ std::vector<int>::const_iterator SparseSet::end() const {
 }
 std::vector<int>::const_reverse_iterator SparseSet::rend() const {
   return list_.rend() - start_;
+}
+
+std::vector<int>::const_iterator SparseSet::get_iterator(const size_t i) const {
+	return list_.begin() + i;
+}
+
+std::vector<int>::iterator SparseSet::get_iterator(const size_t i) {
+	return list_.begin() + i;
 }
 
 // std::vector<int>::iterator SparseSet::begin_after() { return end(); }

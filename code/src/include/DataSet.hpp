@@ -42,7 +42,17 @@ private:
   SparseSet example[2];
 
   // TODO
-  std::vector<int> literal_count;
+  vector<int> literal_count;
+
+  vector<int> feature_order;
+  vector<double> entropy_value;
+  vector<int> entropy_rank;
+
+  // feature_count[y][f] for every (not)feature f, the number of example in
+  // class y with f
+  vector<double> feature_count[2];
+  vector<double> feature_probability[2];
+  vector<double> example_probability;
   //@}
 
 public:
@@ -80,10 +90,10 @@ public:
   size_t size() const;
 
   // current number of positive examples
-  size_t positive_count() const;
+  size_t positiveCount() const;
 
   // current number of negative examples
-  size_t negative_count() const;
+  size_t negativeCount() const;
 
   // current number of examples
   size_t count() const;
@@ -96,14 +106,32 @@ public:
   instance NOT(instance &e) const;
 
   // compute the entropy of the feature
-  double conditional_entropy(const int feature);
+  double entropy(const int feature);
+
+  // compute the entropy
+  void computeEntropies();
+
+  // return the feature with minimum entropy in the subset "candidate"
+  int argMinEntropy(instance &candidate) const;
+  int argMaxEntropy(instance &candidate) const;
+  // int argMinProbability(SparseSet &candidate, const int limit) const;
+  // int argMaxProbability(SparseSet &candidate, const int limit) const;
+	template<class ExampleIt>
+  int argMinProbability(ExampleIt b, ExampleIt e) const;
+	template<class ExampleIt>
+  int argMaxProbability(ExampleIt b, ExampleIt e) const;
+
+  // compute the (log of the) probability for each feature / class
+  // deduce a probability for every example
+  void computeProbabilities();
+
   //@}
 
   /*!@name List Manipulation*/
   //@{
   // keeps only n positive examples, chosen randomly with a uniform distribution
   template <class random>
-  void uniform_sample(const int c, const size_t n, random generator);
+  void uniformSample(const int c, const size_t n, random generator);
   //@}
 
   /*!@name Business*/
@@ -137,13 +165,13 @@ public:
 
   /*!@name Printing*/
   //@{
-  std::ostream &to_csv(std::ostream &os) const;
+  std::ostream &toCsv(std::ostream &os) const;
 
-  std::ostream &to_txt(std::ostream &os) const;
+  std::ostream &toTxt(std::ostream &os) const;
 
   std::ostream &display(std::ostream &os) const;
 
-  std::ostream &display_example(std::ostream &os, const instance e) const;
+  std::ostream &displayExample(std::ostream &os, const instance e) const;
   //@}
 
   /*!@name Verification*/
@@ -188,10 +216,26 @@ void DataSet::add(StringListIt beg, StringListIt end) {
 }
 
 template <class random>
-void DataSet::uniform_sample(const int c, const size_t n, random generator) {
+void DataSet::uniformSample(const int c, const size_t n, random generator) {
   while (example[c].count() > n) {
     example[c].remove_back(example[c][generator() % example[c].count()]);
   }
+}
+
+template<class ExampleIt>
+int DataSet::argMinProbability(ExampleIt b, ExampleIt e) const {
+  return *std::min_element(
+      b, e, [&](const int a, const int b) {
+        return example_probability[a] < example_probability[b];
+      });
+}
+
+template<class ExampleIt>
+int DataSet::argMaxProbability(ExampleIt b, ExampleIt e) const {
+  return *std::max_element(
+      b, e, [&](const int a, const int b) {
+        return example_probability[a] < example_probability[b];
+      });
 }
 
 template <typename R>
@@ -209,11 +253,17 @@ void DataSet::computeDecisionSet(Options &opt, R &random_generator) {
   contradicting_features.resize(2 * numFeature());
 
   auto last_example{X.size() - 1};
+	size_t end[2] = {static_cast<size_t>(example[0].end() - example[0].get_iterator(0)), static_cast<size_t>(example[1].end() - example[1].get_iterator(0))};
+	// std::vector<int>::iterator end_examples[2] = {example[0].end(), example[1].end()};
+
+	
 
   size_t num_original[2];
   for (auto i{0}; i < 2; ++i)
     num_original[i] = example[i].count();
 
+
+	// vector<int> exs;
   while (true) {
 
     if (num_original[0] + num_original[1] == 0)
@@ -237,9 +287,43 @@ void DataSet::computeDecisionSet(Options &opt, R &random_generator) {
     }
 
     auto i{0};
+		
+		// exs.clear();
+		// for(auto v : example[c]) {
+		// 	if(v > last_example)
+		// 		break;
+		// 	exs.push_back(v);
+		// 	cout << " " << v;
+		// }
+		// cout << endl;
+		//
+		// if(exs.size() != (example[c].get_iterator(end[c]) - example[c].begin())) {
+		// 	cout << "sizes do not match: " << exs.size() << " != " << (example[c].get_iterator(end[c]) - example[c].begin()) << endl;
+		// 	exit(1);
+		// }
+		//
+		//
+		// for(auto v{example[c].begin()}; v!=example[c].get_iterator(end[c]); ++v) {
+		// 	cout << " " << *v;
+		// }
+		// cout << endl;
+		//
+		// for(auto v{example[c].begin()}, u{exs.begin()}; v!=example[c].get_iterator(end[c]);) {
+		// 	assert(*v == *u);
+		// 	++u;
+		// 	++v;
+		// }
+		//
+		// assert(exs.size() == (example[c].get_iterator(end[c]) - example[c].begin()));
+		
+		
 
     if (opt.example_policy == Options::RANDOM)
       i = example[c].any(num_original[c], random_generator);
+    else if (opt.example_policy == Options::HIGHEST_PROBABILITY)
+      i = argMaxProbability(example[c].begin(), example[c].get_iterator(end[c]));
+    else if (opt.example_policy == Options::LOWEST_PROBABILITY)
+      i = argMinProbability(example[c].begin(), example[c].get_iterator(end[c]));
     else
       i = example[c].front();
 
@@ -249,7 +333,7 @@ void DataSet::computeDecisionSet(Options &opt, R &random_generator) {
     if (opt.verbosity >= Options::SOLVERINFO) {
       cout << "compute a rule from the " << (c ? "positive" : "negative")
            << " example " << i << ":";
-      display_example(cout, X[i]);
+      displayExample(cout, X[i]);
       cout << endl;
     }
 
@@ -276,7 +360,7 @@ void DataSet::computeDecisionSet(Options &opt, R &random_generator) {
       if (!contradicting_features.none()) {
         if (opt.verbosity >= Options::SOLVERINFO) {
           cout << "skip " << j << " = ";
-          display_example(cout, X[j]);
+          displayExample(cout, X[j]);
           cout << " b/c it is already covered\n";
         }
         continue;
@@ -288,11 +372,11 @@ void DataSet::computeDecisionSet(Options &opt, R &random_generator) {
 
       if (opt.verbosity >= Options::SOLVERINFO) {
         cout << j << ": ";
-        display_example(cout, X[i]);
+        displayExample(cout, X[i]);
         cout << " \\ " << setw(4) << j << ":";
-        display_example(cout, X[j]);
+        displayExample(cout, X[j]);
         cout << " = ";
-        display_example(cout, contradicting_features);
+        displayExample(cout, contradicting_features);
       }
 
       // this should not happen
@@ -308,7 +392,11 @@ void DataSet::computeDecisionSet(Options &opt, R &random_generator) {
 
         // if not, then we need to add one of the contradicted literals in the
         // explanation and start with a fresh set of candidates
-        implicant.set(candidates.find_first());
+        implicant.set((opt.feature_policy == Options::LOWEST_ENTROPY
+                           ? argMinEntropy(candidates)
+                           : (opt.feature_policy == Options::HIGHEST_ENTROPY
+                                  ? argMaxEntropy(candidates)
+                                  : candidates.find_first())));
         candidates.clear();
         candidates.resize(2 * numFeature(), true);
       }
@@ -317,9 +405,9 @@ void DataSet::computeDecisionSet(Options &opt, R &random_generator) {
 
       if (opt.verbosity >= Options::SOLVERINFO) {
         cout << " -> ";
-        display_example(cout, candidates);
+        displayExample(cout, candidates);
         cout << " ";
-        display_example(cout, implicant);
+        displayExample(cout, implicant);
         cout << endl;
       }
     }
@@ -330,7 +418,7 @@ void DataSet::computeDecisionSet(Options &opt, R &random_generator) {
 
     if (opt.verbosity >= Options::YACKING) {
       cout << " -> add " << X.size() << ": ";
-      display_example(cout, implicant);
+      displayExample(cout, implicant);
       cout << " (" << implicant.count() << "/" << implicant.size() << ")"
            << endl
            << endl;
@@ -346,7 +434,7 @@ void DataSet::computeDecisionSet(Options &opt, R &random_generator) {
     if (opt.verbosity >= Options::SOLVERINFO)
       for (auto e : removed) {
         cout << " - remove " << e << ": ";
-        display_example(cout, X[e]);
+        displayExample(cout, X[e]);
         cout << endl;
       }
   }

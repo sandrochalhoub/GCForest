@@ -29,7 +29,7 @@ along with minicsp.  If not, see <http://www.gnu.org/licenses/>.
 using namespace std;
 using namespace primer;
 
-int main(int argc, char* argv[]) {
+int main(int argc, char *argv[]) {
 
   Options opt = parse(argc, argv);
 
@@ -54,10 +54,10 @@ int main(int argc, char* argv[]) {
 
   if (opt.sample != 1) {
 
-    base.uniform_sample(0, (double)(base.positive_count()) * opt.sample,
-                        random_generator);
-    base.uniform_sample(1, (double)(base.negative_count()) * opt.sample,
-                        random_generator);
+    base.uniformSample(0, (double)(base.positiveCount()) * opt.sample,
+                       random_generator);
+    base.uniformSample(1, (double)(base.negativeCount()) * opt.sample,
+                       random_generator);
   }
 
   auto count{base.count()};
@@ -72,6 +72,11 @@ int main(int argc, char* argv[]) {
       cout << "c filtered " << (count - base.count()) / 2
            << " noisy example(s)\n";
 
+	if(opt.example_policy >= Options::LOWEST_PROBABILITY)
+		base.computeProbabilities();
+	else if(opt.feature_policy != Options::MIN)
+		base.computeEntropies();
+
   if (opt.verbosity >= Options::NORMAL)
     cout << base << endl << endl;
   if (opt.verbosity >= Options::QUIET)
@@ -82,7 +87,13 @@ int main(int argc, char* argv[]) {
   do {
 
     count = base.count();
+
     base.computeDecisionSet(opt, random_generator);
+
+		if(opt.example_policy >= Options::LOWEST_PROBABILITY)
+			base.computeProbabilities();
+		else if(opt.feature_policy != Options::MIN)
+			base.computeEntropies();
 
     if (opt.verbosity >= Options::NORMAL)
       cout << base << endl;

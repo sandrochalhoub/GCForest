@@ -1,3 +1,5 @@
+include ./boost_home
+
 
 COPTIMIZE= -O3  -fno-omit-frame-pointer -flto  
 COMPILFLAGS= -D_UNIX -D_BIT64 -std=c++1z -Wno-sign-compare 

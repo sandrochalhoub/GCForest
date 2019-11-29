@@ -1,5 +1,3 @@
-BOOSTDIR = /Users/Shared/boost_1_71_0
-
 
 MAINDIR ?= .
 

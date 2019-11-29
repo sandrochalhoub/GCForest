@@ -66,6 +66,10 @@ public:
 
   std::vector<int>::const_iterator end() const;
   std::vector<int>::const_reverse_iterator rend() const;
+	
+	
+	std::vector<int>::iterator get_iterator(const size_t i);
+	std::vector<int>::const_iterator get_iterator(const size_t i) const;
 
   // std::vector<int>::iterator begin_not_in();
   // std::vector<int>::reverse_iterator rbegin_not_in();

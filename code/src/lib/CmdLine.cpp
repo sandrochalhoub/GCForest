@@ -129,6 +129,10 @@ Options parse(int argc, char *argv[]) {
                          "policy for selecting the example (0:first,1:random",
                          false, 1, "int");
 
+  cmd.add<ValueArg<int>>(opt.feature_policy, "", "feature_policy",
+                         "policy for selecting the feature (0:min,1:entropy",
+                         false, 1, "int");
+
   cmd.add<ValueArg<int>>(opt.seed, "", "seed", "random seed", false, 12345,
                          "int");
 
@@ -187,6 +191,8 @@ ostream &Options::display(ostream &os) {
      << endl
      << setw(20) << left << "p example policy:" << setw(30) << right
      << (example_policy == FIRST ? "first" : "random") << endl
+     << setw(20) << left << "p feature policy:" << setw(30) << right
+     << (class_policy == MIN ? "min" : "entropy") << endl
      << setw(20) << left << "p verified:" << setw(30) << right
      << (verified ? "yes" : "no") << endl;
   return os;

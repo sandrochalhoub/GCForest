@@ -25,8 +25,16 @@ public:
   enum class_policy { NEGATIVE = 0, POSITIVE, ALTERNATE, UNIFORM, BIASED };
   int class_policy;
 
-  enum example_policy { FIRST = 0, RANDOM };
+  enum example_policy {
+    FIRST = 0,
+    RANDOM,
+    LOWEST_PROBABILITY,
+    HIGHEST_PROBABILITY
+  };
   int example_policy;
+
+  enum feature_policy { MIN = 0, LOWEST_ENTROPY, HIGHEST_ENTROPY };
+  int feature_policy;
 
   int seed;
 
