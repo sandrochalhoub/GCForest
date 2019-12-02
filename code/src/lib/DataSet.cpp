@@ -31,6 +31,11 @@ void DataSet::reserve(const size_t n) {
 }
 
 void DataSet::duplicate_format(const instance& from, instance& to) const {
+	
+	if(from.size() != numFeature()) {
+		cout << from.size() << " != " << numFeature() << endl;
+	}
+	
 	assert(from.size() == numFeature());
 	
 	to.clear();

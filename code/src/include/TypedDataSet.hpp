@@ -175,8 +175,6 @@ void binarize(DataSet &bin) {
     if (feature_type[f] == SYMBOLIC)
       ++num_symbolic;
 
-  // std::cout << num_symbolic << endl;
-
   map<double, word> num_encoding[numFeature() - num_symbolic];
   map<string, word> str_encoding[num_symbolic];
 
@@ -217,10 +215,10 @@ void binarize(DataSet &bin) {
   // ==
   // 2);
 	
-	for (auto f{0}; f < numFeature(); ++f)
-		bin.addFeature(feature_label[f]);
+	// for (auto f{0}; f < numFeature(); ++f)
+		// bin.addFeature(feature_label[f]);
 	
-
+	auto bin_feature_count{0};
   for (auto i{0}; i < size(); ++i) {
     word binex;
     for (auto f{0}; f < numFeature(); ++f) {
@@ -230,11 +228,15 @@ void binarize(DataSet &bin) {
       } else if (feature_type[f] == SYMBOLIC) {
         binex = concatenate(binex, str_encoding[r][symbolic_value[r][i]]);
       }
+			while(bin_feature_count < binex.size()) {
+				string binf{feature_label[f] + std::to_string(binex.size() - bin_feature_count++)};
+				bin.addFeature(binf);
+			}
     }
     // cout << binex << endl;
 
 		// binex.resize(2 * binex.size());
-		word db;
+		word db;		
 		bin.duplicate_format(binex, db);
     bin.add(db, label[i] == label[0]);
   }

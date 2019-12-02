@@ -48,7 +48,8 @@ int main(int argc, char *argv[]) {
 
   csv::read(
       opt.instance_file,
-      [&](vector<string> &f) { input.setFeatures(f.begin(), f.end() - 1); },
+      [&](vector<string> &f) { 
+				input.setFeatures(f.begin(), f.end() - 1); },
       [&](vector<string> &data) {
         auto y = data.back();
         data.pop_back();
