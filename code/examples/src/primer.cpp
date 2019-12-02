@@ -25,6 +25,8 @@ along with minicsp.  If not, see <http://www.gnu.org/licenses/>.
 #include "CSVReader.hpp"
 #include "CmdLine.hpp"
 #include "DataSet.hpp"
+#include "TXTReader.hpp"
+#include "TypedDataSet.hpp"
 
 using namespace std;
 using namespace primer;
@@ -42,15 +44,20 @@ int main(int argc, char *argv[]) {
   std::mt19937 random_generator;
   random_generator.seed(opt.seed);
 
-
-  DataSet base;
+  TypedDataSet input;
 
   csv::read(
       opt.instance_file,
-      [&](vector<string> &f) { base.setFeatures(f.begin(), f.end() - 1); },
+      [&](vector<string> &f) { input.setFeatures(f.begin(), f.end() - 1); },
       [&](vector<string> &data) {
-        base.add(data.begin(), data.end());
+        auto y = data.back();
+        data.pop_back();
+        input.addExample(data.begin(), data.end(), y);
       });
+
+  DataSet base;
+
+  input.binarize(base);
 
   if (opt.sample != 1) {
 

@@ -30,35 +30,24 @@ void DataSet::reserve(const size_t n) {
   example[0].reserve(n);
 }
 
+void DataSet::duplicate_format(const instance& from, instance& to) const {
+	assert(from.size() == numFeature());
+	
+	to.clear();
+	to.resize(numFeature());
+	to |= from;
+	to.resize(2*numFeature(), true);
+	auto aux{to};
+	aux <<= numFeature();
+	aux.flip();
+	to &= aux;
+}
+
 instance &DataSet::operator[](const size_t idx) { return X[idx]; }
 
 void DataSet::addFeature(string &f) { feature_label.push_back(f); }
 
-// I AM NOT SURE WHAT WAS THE PURPOSE OF THAT
-// void DataSet::add(instance x_, const bool y) {
-//
-//   while (x_.size() > numFeature()) {
-//     string s("f" + to_string(numFeature() + 1));
-//     addFeature(s);
-//   }
-//
-//   instance x = x_;
-//   instance xp = x_;
-//
-//   x.resize(2 * numFeature(), true);
-//
-//   xp.resize(2 * numFeature(), false);
-//   xp <<= numFeature();
-//
-//   x.flip();
-//
-//   x |= xp;
-//
-//   example[y].safe_add(X.size());
-//   X.push_back(x);
-// }
-
-void DataSet::add(instance x, const bool y) {
+void DataSet::add(instance& x, const bool y) {
 
   example[y].safe_add(X.size());
   X.push_back(x);

@@ -129,11 +129,11 @@ Options parse(int argc, char *argv[]) {
       false, 2, "int");
 
   cmd.add<ValueArg<int>>(opt.example_policy, "", "example_policy",
-                         "policy for selecting the example (0:first,1:random",
-                         false, 1, "int");
+                         "policy for selecting the example (0:first,1:random,2:lowest probability,3:highest probability",
+                         false, 3, "int");
 
   cmd.add<ValueArg<int>>(opt.feature_policy, "", "feature_policy",
-                         "policy for selecting the feature (0:min,1:entropy",
+                         "policy for selecting the feature (0:min,1:lowest entropy,2:highest entropy",
                          false, 1, "int");
 
   cmd.add<ValueArg<int>>(opt.seed, "", "seed", "random seed", false, 12345,

@@ -33,6 +33,12 @@ void read(const std::string &fn, header_declaration notify_header,
     while (getline(ifs, line)) {
       row.clear();
       boost::algorithm::split(row, line, boost::is_any_of(delimeter));
+
+      std::cout << line << std::endl;
+      for (auto s : row)
+        std::cout << " " << s;
+      std::cout << std::endl;
+
       notify_data(row);
     }
 

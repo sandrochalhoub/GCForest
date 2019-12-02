@@ -105,21 +105,17 @@ public:
   }
 
   // guess the type of the k-th feature, given a value v
-  void typeFeature(string &v) {
+  void typeFeature(string &s) {
 
-    std::stringstream convert(v);
-    double d;
-    string s;
+    auto numeric{!s.empty() and std::find_if(s.begin(), s.end(), [](char c) {
+                                  return !std::isdigit(c);
+                                }) == s.end()};
 
-    try {
-      convert >> d;
-
+    if (numeric) {
       feature_type.push_back(NUMERIC);
       feature_rank.push_back(numeric_value.size());
       numeric_value.resize(numeric_value.size() + 1);
-    } catch (const std::invalid_argument &ia) {
-      // std::cerr << "Invalid argument: " << ia.what() << std::endl;
-
+    } else {
       feature_type.push_back(SYMBOLIC);
       feature_rank.push_back(symbolic_value.size());
       symbolic_value.resize(symbolic_value.size() + 1);
@@ -179,6 +175,8 @@ void binarize(DataSet &bin) {
     if (feature_type[f] == SYMBOLIC)
       ++num_symbolic;
 
+  std::cout << num_symbolic << endl;
+
   map<double, word> num_encoding[numFeature() - num_symbolic];
   map<string, word> str_encoding[num_symbolic];
 
@@ -193,21 +191,21 @@ void binarize(DataSet &bin) {
                     numeric_value[feature_rank[f]].end(),
                     num_encoding[feature_rank[f]]);
 
-      // for (std::map<double,word>::iterator it=encoding.begin();
-      // it!=encoding.end(); ++it)
-      //  cout << it->first << " => " << it->second << '\n';
+      for (std::map<double,word>::iterator it=num_encoding[feature_rank[f]].begin();
+      it!=num_encoding[feature_rank[f]].end(); ++it)
+       cout << it->first << " => " << it->second << '\n';
+			
     } else if (feature_type[f] == SYMBOLIC) {
 
       unary_equal_encode(symbolic_value[feature_rank[f]].begin(),
                          symbolic_value[feature_rank[f]].end(),
                          str_encoding[feature_rank[f]], true);
 
-      // for (std::map<double,word>::iterator it=encoding.begin();
-      // it!=encoding.end(); ++it)
-      //  cout << it->first << " => " << it->second << '\n';
+      for (std::map<string,word>::iterator it=str_encoding[feature_rank[f]].begin();
+      it!=str_encoding[feature_rank[f]].end(); ++it)
+       cout << it->first << " => " << it->second << '\n';
+			
     }
-		
-		
   }
 
   // vector<string> label_set();
@@ -215,9 +213,13 @@ void binarize(DataSet &bin) {
   // label_set.erase(unique(label_set.begin(), label_set.end()),
   //                 label_set.end());
   //
-  // 									assert(label_set.size() ==
+  // 									assert(label_set.size()
+  // ==
   // 2);
-
+	
+	for (auto f{0}; f < numFeature(); ++f)
+		bin.addFeature(feature_label[f]);
+	
 
   for (auto i{0}; i < size(); ++i) {
     word binex;
@@ -231,7 +233,10 @@ void binarize(DataSet &bin) {
     }
     // cout << binex << endl;
 
-    bin.add(binex, label[i] == label[0]);
+		// binex.resize(2 * binex.size());
+		word db;
+		bin.duplicate_format(binex, db);
+    bin.add(db, label[i] == label[0]);
   }
 }
 
@@ -256,7 +261,7 @@ std::ostream &display(std::ostream &os) const {
         break;
       }
     }
-    os << endl;
+    os << ": " << label[e] << endl;
   }
 
   return os;

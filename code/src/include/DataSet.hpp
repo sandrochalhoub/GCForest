@@ -74,6 +74,8 @@ public:
   // add a new example in string-list format (it will be translated in
   // duplicated bitset format)
   template <typename StringListIt> void add(StringListIt beg, StringListIt end);
+	
+	void duplicate_format(const instance& from, instance& to) const;
   //@}
 
   /*!@name Accessors*/
@@ -81,7 +83,7 @@ public:
   instance &operator[](const size_t idx);
 
   // add a new example / explanation in the duplicated format
-  void add(instance x_, const bool y);
+  void add(instance& x_, const bool y);
 
   // number of features
   size_t numFeature() const;
