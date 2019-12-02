@@ -175,7 +175,7 @@ void binarize(DataSet &bin) {
     if (feature_type[f] == SYMBOLIC)
       ++num_symbolic;
 
-  std::cout << num_symbolic << endl;
+  // std::cout << num_symbolic << endl;
 
   map<double, word> num_encoding[numFeature() - num_symbolic];
   map<string, word> str_encoding[num_symbolic];
@@ -191,9 +191,9 @@ void binarize(DataSet &bin) {
                     numeric_value[feature_rank[f]].end(),
                     num_encoding[feature_rank[f]]);
 
-      for (std::map<double,word>::iterator it=num_encoding[feature_rank[f]].begin();
-      it!=num_encoding[feature_rank[f]].end(); ++it)
-       cout << it->first << " => " << it->second << '\n';
+      // for (std::map<double,word>::iterator it=num_encoding[feature_rank[f]].begin();
+      // it!=num_encoding[feature_rank[f]].end(); ++it)
+      //  cout << it->first << " => " << it->second << '\n';
 			
     } else if (feature_type[f] == SYMBOLIC) {
 
@@ -201,9 +201,9 @@ void binarize(DataSet &bin) {
                          symbolic_value[feature_rank[f]].end(),
                          str_encoding[feature_rank[f]], true);
 
-      for (std::map<string,word>::iterator it=str_encoding[feature_rank[f]].begin();
-      it!=str_encoding[feature_rank[f]].end(); ++it)
-       cout << it->first << " => " << it->second << '\n';
+      // for (std::map<string,word>::iterator it=str_encoding[feature_rank[f]].begin();
+      // it!=str_encoding[feature_rank[f]].end(); ++it)
+      //  cout << it->first << " => " << it->second << '\n';
 			
     }
   }

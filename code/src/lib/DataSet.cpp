@@ -79,17 +79,28 @@ void DataSet::computeProbabilities() {
   // if(feature_count[0].empty() or feature_count[1].empty())
   computeEntropies();
 
+	
   for (auto y{0}; y < 2; ++y) {
+		
+		// cout << "class " << y << endl;
+		
+		
     feature_probability[y].resize(2 * numFeature());
-    auto total{static_cast<double>(example[y].size())};
+    auto total{static_cast<double>(example[y].count())};
 
     for (auto f{0}; f < 2 * numFeature(); ++f) {
+			
+			// cout << " -feature " << pretty(f) << ": (" << feature_count[y][f] << "/" << total << ") = "  ;
 
       if (feature_count[y][f] == 0) {
         feature_probability[y][f] = very_low;
-      } else
+				// cout << "0\n";
+      } else {
         feature_probability[y][f] =
             log(static_cast<double>(feature_count[y][f]) / total);
+				// cout << (static_cast<double>(feature_count[y][f]) / total) << endl;
+			}
+			
     }
 
     // cout << y << ":";
@@ -192,73 +203,8 @@ double DataSet::entropy(const int feature) {
 
   double feature_entropy{0};
 
-  // if (feature_count[0].size() == 0) {
-  //   auto not_feature = (feature + numFeature());
-  //
-  //   // cout << pretty(feature) << " / " << pretty(not_feature) << endl;
-  //
-  //   double npos[2] = {0, 0};
-  //   double nneg[2] = {0, 0};
-  //
-  //   // count[y][x] gives the number of examples for which the prediction Y =
-  //   y
-  //   // and
-  //   // the feature X=x
-  //   double *count[2] = {nneg, npos};
-  //   for (auto c{0}; c < 2; ++c)
-  //     for (auto e : example[c])
-  //       if (X[e][feature] != X[e][not_feature])
-  //         ++count[c][X[e][feature]];
-  //
-  //   // for (auto v{0}; v < 2; ++v)
-  //   // 	for (auto c{0}; c < 2; ++c)
-  //   // 		cout << feature << "=" << v << ": " << count[c][v] << (c
-  //   ?
-  //   // "positive"
-  //   // : " negative") << " examples\n";
-  //
-  //   // double entropy{0};
-  //   double total_size{
-  //       static_cast<double>(example[0].count() + example[1].size())};
-  //
-  //   for (auto x{0}; x < 2; ++x) {
-  //
-  //     // cout << "compute entropy of dataset w.r.t. " << pretty((val ?
-  //     feature:
-  //     // not_feature)) << " (" << count[0][val] << "/" << count[1][val] <<
-  //     // "):\n";
-  //
-  //     auto val_size{count[0][x] + count[1][x]};
-  //
-  //     // Pr(Y=y|X=x) = (count[y][x] / val_size)
-  //
-  //     // H(Y|X=x) = \sum_y (Pr(Y=y|X=x) log2 Pr(Y=y|X=x))
-  //     double entropy_x{0};
-  //     for (auto y{0}; y < 2; ++y) {
-  //       if (count[y][x] != 0 and count[y][x] != val_size) {
-  //         entropy_x -=
-  //             (count[y][x] / val_size) * std::log2(count[y][x] / val_size);
-  //         // cout << " + " << -(count[c][val] / val_size) *
-  //         // std::log(count[c][val] / val_size);
-  //       }
-  //       // else cout << " + 0";
-  //     }
-  //
-  //     // cout << " = " << (entropy_val * val_size / total_size) << endl;
-  //
-  //     // Pr(X=x) = val_size / total_size
-  //
-  //     // H(Y|X) = \sum_x Pr(X=x) H(Y|X=x)
-  //     feature_entropy += (entropy_x * val_size / total_size);
-  //   }
-  //
-  //   // cout << " ==> " << -entropy << endl;
-  //
-  // } else {
-
   int not_feature = (feature + numFeature());
   int truef[2] = {not_feature, feature};
-  // cout << pretty(feature) << " / " << pretty(not_feature) << endl;
 
   for (auto y{0}; y < 2; ++y) {
     feature_count[y][feature] = 0;
@@ -269,8 +215,11 @@ double DataSet::entropy(const int feature) {
     for (auto e : example[y]) {
       if (X[e][feature] != X[e][not_feature])
         ++feature_count[y][truef[X[e][feature]]];
-      else // irrelevant ~= equiprobable
-        feature_count[y][truef[X[e][feature]]] += .5;
+      else {
+      	// irrelevant ~= equiprobable
+        feature_count[y][feature] += .5;
+				feature_count[y][not_feature] += .5;
+			}
     }
 
   // double entropy{0};
