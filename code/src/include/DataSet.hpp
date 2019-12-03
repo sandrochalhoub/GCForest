@@ -4,6 +4,7 @@
 
 #include <boost/dynamic_bitset.hpp>
 
+#include "Heap.hpp"
 #include "CmdLine.hpp"
 #include "SparseSet.hpp"
 
@@ -53,6 +54,10 @@ private:
   vector<double> feature_count[2];
   vector<double> feature_probability[2];
   vector<double> example_probability;
+	
+	
+	// util
+	vector<int> buffer;
   //@}
 
 public:
@@ -122,6 +127,11 @@ public:
   int argMinProbability(ExampleIt b, ExampleIt e) const;
 	template<class ExampleIt>
   int argMaxProbability(ExampleIt b, ExampleIt e) const;
+	
+	template<class ExampleIt, class random>
+  int randomArgMinProbability(ExampleIt b, ExampleIt e, const size_t k, random& generator);
+	template<class ExampleIt, class random>
+  int randomArgMaxProbability(ExampleIt b, ExampleIt e, const size_t k, random& generator);
 
   // compute the (log of the) probability for each feature / class
   // deduce a probability for every example
@@ -225,6 +235,78 @@ void DataSet::uniformSample(const int c, const size_t n, random generator) {
   }
 }
 
+
+template<class ExampleIt, class random>
+int DataSet::randomArgMinProbability(ExampleIt b, ExampleIt e, const size_t k, random& generator) {	
+	if(e - b <= k)
+		return *(b + (generator() % (e - b)));
+	
+	ExampleIt it{b};
+	buffer.clear();
+	for(auto i{0}; i<k; ++i)
+		buffer.push_back(*it++);
+	
+	auto comp{[&](const int a, const int b) {return example_probability[a] > example_probability[b];}};
+
+	heap::heapify(buffer.begin(), buffer.end(), comp);
+	
+	while(it!=e)
+	{		
+		if(example_probability[*it] < example_probability[*(buffer.begin())])
+		{
+			heap::remove_min(buffer.begin(), buffer.end(), comp);
+			buffer.pop_back();
+			buffer.push_back(*it);
+			heap::percolate_up(buffer.begin(), buffer.end(), buffer.size()-1, comp);
+		}
+		
+		++it;
+	}
+	
+	auto r{generator() % buffer.size()};
+	
+	// cout << example_probability[argMinProbability(b,e)] << " " << example_probability[buffer[r]] << " " << example_probability[buffer[1-r]] << endl;
+
+	return buffer[r];
+
+}
+
+
+template<class ExampleIt, class random>
+int DataSet::randomArgMaxProbability(ExampleIt b, ExampleIt e, const size_t k, random& generator) {
+	
+	if(e - b <= k)
+		return *(b + (generator() % (e - b)));
+	
+	ExampleIt it{b};
+	buffer.clear();
+	for(auto i{0}; i<k; ++i)
+		buffer.push_back(*it++);
+	
+	auto comp{[&](const int a, const int b) {return example_probability[a] < example_probability[b];}};
+
+	heap::heapify(buffer.begin(), buffer.end(), comp);
+	
+	while(it!=e)
+	{		
+		if(example_probability[*it] > example_probability[*(buffer.begin())])
+		{
+			heap::remove_min(buffer.begin(), buffer.end(), comp);
+			buffer.pop_back();
+			buffer.push_back(*it);
+			heap::percolate_up(buffer.begin(), buffer.end(), buffer.size()-1, comp);
+		}
+		
+		++it;
+	}
+
+	auto r{generator() % buffer.size()};
+	
+	return buffer[r];
+}
+
+
+
 template<class ExampleIt>
 int DataSet::argMinProbability(ExampleIt b, ExampleIt e) const {
   return *std::min_element(
@@ -242,7 +324,7 @@ int DataSet::argMaxProbability(ExampleIt b, ExampleIt e) const {
 }
 
 template <typename R>
-void DataSet::computeDecisionSet(Options &opt, R &random_generator) {
+void DataSet::computeDecisionSet(Options& opt, R& random_generator) {
   auto c{0};
 
   // verify();
@@ -327,8 +409,13 @@ void DataSet::computeDecisionSet(Options &opt, R &random_generator) {
       i = argMaxProbability(example[c].begin(), example[c].get_iterator(end[c]));
     else if (opt.example_policy == Options::LOWEST_PROBABILITY)
       i = argMinProbability(example[c].begin(), example[c].get_iterator(end[c]));
-    else
+    else if (opt.example_policy == Options::FIRST)
       i = example[c].front();
+		else if (opt.example_policy < Options::LOWEST_PROBABILITY)
+			i = randomArgMinProbability(example[c].begin(), example[c].get_iterator(end[c]), -opt.example_policy, random_generator);
+		else
+			i = randomArgMaxProbability(example[c].begin(), example[c].get_iterator(end[c]), opt.example_policy-1, random_generator);
+			
 
     assert(i <= last_example);
 

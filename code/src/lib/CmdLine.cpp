@@ -129,8 +129,8 @@ Options parse(int argc, char *argv[]) {
       false, 2, "int");
 
   cmd.add<ValueArg<int>>(opt.example_policy, "", "example_policy",
-                         "policy for selecting the example (0:first,1:random,2:lowest probability,3:highest probability",
-                         false, 3, "int");
+                         "policy for selecting the example (X<-1:random between the -X with lowest probability,-1:lowest probability,0:first,1:random,2:highest probability,X>2:random between the X-1 with highest probability",
+                         false, 2, "int");
 
   cmd.add<ValueArg<int>>(opt.feature_policy, "", "feature_policy",
                          "policy for selecting the feature (0:min,1:lowest entropy,2:highest entropy",

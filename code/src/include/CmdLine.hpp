@@ -27,10 +27,10 @@ public:
   int class_policy;
 
   enum example_policy {
+		LOWEST_PROBABILITY = -1,
     FIRST = 0,
-    RANDOM,
-    LOWEST_PROBABILITY,
-    HIGHEST_PROBABILITY
+    RANDOM = 1,
+    HIGHEST_PROBABILITY = 2
   };
   int example_policy;
 

@@ -80,7 +80,7 @@ int main(int argc, char *argv[]) {
       cout << "c filtered " << (count - base.count()) / 2
            << " noisy example(s)\n";
 
-	if(opt.example_policy >= Options::LOWEST_PROBABILITY)
+	if(opt.example_policy <= Options::LOWEST_PROBABILITY or opt.example_policy >= Options::HIGHEST_PROBABILITY)
 		base.computeProbabilities();
 	else if(opt.feature_policy != Options::MIN)
 		base.computeEntropies();
