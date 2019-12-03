@@ -25,6 +25,7 @@
 \newcommand{\poscube}{{\setcube{1}}\xspace}
 \newcommand{\negcube}{{\setcube{0}}\xspace}
 \newcommand{\features}{\ensuremath{{\mathcal F}}\xspace}
+\newcommand{\feat}{\ensuremath{f}}
 \newcommand{\classifier}{\ensuremath{f}}
 \newcommand{\lit}[1]{\ensuremath{l_{#1}}}
 \newcommand{\var}{\ensuremath{x}}
@@ -33,6 +34,9 @@
 \newcommand{\ex}{\ensuremath{\var}}
 \newcommand{\cube}{\ensuremath{c}}
 \newcommand{\universe}{\ensuremath{{\mathcal U}}}
+\newcommand{\entropy}[1]{\ensuremath{{H}({#1})}\xspace}
+\newcommand{\probability}[2]{\ensuremath{{Pr}({#1 \mid #2})}\xspace}
+
 
 
 
@@ -88,7 +92,7 @@ Properties (\ref{poscomplete}) and (\ref{negcomplete}) state that \poscube and \
  
  \begin{algorithm}
 	\SetKwFunction{explain}{Comprime}
-   \TitleOfAlgo{\explain} 
+   \TitleOfAlgo{\explain\label{alg:comprime}} 
    \KwData{A data set $(\posex,\negex)$}
    \KwResult{An explanation set $(\poscube, \negcube)$}
 	 $(\poscube, \negcube) \gets (\emptyset, \emptyset)$\;
@@ -104,7 +108,7 @@ Properties (\ref{poscomplete}) and (\ref{negcomplete}) state that \poscube and \
 				{
 					$\delta \gets \ex^y \cap \bar{\ex}$\;
 					\If{$candidates \cap \delta = \emptyset$} {
-						choose $\lit{i} \in candidates$\;
+						\lnl{l:featselect} choose $\lit{i} \in candidates$\;
 						$implicant \gets implicant \cup \{\lit{i}\}$\;
 						$candidates \gets \ex^y$\;
 					}
@@ -120,12 +124,31 @@ Properties (\ref{poscomplete}) and (\ref{negcomplete}) state that \poscube and \
 	 
 \end{algorithm}
 
+\section*{Heuristics}
 
-\section*{Experimental results}
+We use two heuristic criteria to guide the generation of cubes. 
 
-We ran \explain on some data sets, whose number of examples and (binary) features are given respectively in the second and third columns of the following tables. We report the total \emph{size} of the set of cubes, i.e., the sum of the number of literals in all the cubes in Table~\ref{tab:vol}; the number of cubes in Table~\ref{tab:exa}; and the average number of literals per cube in Table~\ref{tab:fea};
+Firstly we favor features \feat with low entropy $\entropy{\feat} = \entropy{\feat} + \entropy{\bar{\feat}}$, with:
+\[
+\entropy{\feat} = - \sum_{y=0}^1 \probability{x \in \setex{y}}{\feat \in x} \log \probability{x \in \setex{y}}{\feat \in x}
+\]
+and 
+\[
+\entropy{\bar{\feat}} = - \sum_{y=0}^1 \probability{x \in \setex{y}}{\feat \not\in x} \log \probability{x \in \setex{y}}{\feat \not\in x}
+\]
 
-We tested several variants with five strategies for selecting the next class for which we compute a cube (at Line~\ref{l:classselect}):
+Secondly, we favor the most ``likely'' examples within a class $y$, that is, we select first the example $x \in \setex{y}$ such that 
+\[
+\prod_{\feat \in \features} \probability{\feat \in x}{x \in \setex{y}}
+\]
+is maximal.
+
+
+There are three heuristic choices in Algorithm~\ref{alg:comprime}: 
+the selection of the next class for which we compute a cube (at Line~\ref{l:classselect}); the selection of the example $\ex^y$ to minimize in $\setex{y}$ (at Line~\ref{l:exselect}); and the selection of the feature to add to the implicant (at Line~\ref{l:featselect}).
+
+
+The following five strategies for class selection are implemented:
 \begin{itemize}
 	\item \texttt{positive} always selects examples from $\posex$ first
 		\item \texttt{negative} always selects examples from $\negex$ first
@@ -133,11 +156,37 @@ We tested several variants with five strategies for selecting the next class for
 \item \texttt{uniform} selects from $\posex$ with probability $1/2$ and from $\negex$ otherwise
 \item \texttt{biased} selects from $\posex$ with probability $|\posex|/(|\posex|+|\negex|)$ and from $\negex$ otherwise
 \end{itemize}
-and two strategies for selecting the example $\ex^y$ to minimize in $\setex{y}$ (at Line~\ref{l:exselect}):
+
+
+The following four strategies for example selection are implemented:
 \begin{itemize}
 	\item \texttt{first} selects examples in input order
 	\item \texttt{random} selects any example randomly with uniform probability
+	\item \texttt{lowest probability($k$)} selects uniformly randomly between the $k$ examples with minimum probabilities
+	\item \texttt{highest probability($k$)} selects uniformly randomly between the $k$ examples with maximum probabilities
 \end{itemize}
+
+The following three strategies for feature selection are implemented:
+\begin{itemize}
+	\item \texttt{first} selects features in input order
+	\item \texttt{lowest entropy} selects the feature with minimum entropy
+	\item \texttt{highest entropy} selects the feature with maximum entropy
+\end{itemize}
+
+
+
+\section*{Experimental results}
+
+We ran \explain on some data sets, whose number of examples and (binary) features are given respectively in the second and third columns of the following tables. We report the total \emph{size} of the set of cubes, i.e., the sum of the number of literals in all the cubes in Table~\ref{tab:vol}; the number of cubes in Table~\ref{tab:exa}; and the average number of literals per cube in Table~\ref{tab:fea};
+
+
+For every dataset, we ran 100 random runs with distinct random seed and report min and average values for each of the criteria above. 
+
+
+We can see that selecting the feature with lowest entropy reduces the number of explanations as well as their sizes, and conversely selecting the feature with highest entropy increases those values. 
+We can also see that selecting the most probable example is in average beneficial. However, it tends to have an impact on the size of the explanations, but not on their number. Moreover, (perhaps because it reduces the randomness of the method -- we used $k=2$) the best values across the 100 runs are obtained with the pure random selection.
+
+
 
 \newgeometry{left=.1cm,bottom=.1cm,top=.1cm}
 
