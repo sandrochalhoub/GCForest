@@ -35,7 +35,7 @@
 \newcommand{\cube}{\ensuremath{c}}
 \newcommand{\universe}{\ensuremath{{\mathcal U}}}
 \newcommand{\entropy}[1]{\ensuremath{{H}({#1})}\xspace}
-\newcommand{\probability}[2]{\ensuremath{{Pr}({#1 \mid #2})}\xspace}
+\newcommand{\probability}[1]{\ensuremath{{Pr}({#1})}\xspace}
 
 
 
@@ -91,8 +91,9 @@ Properties (\ref{poscomplete}) and (\ref{negcomplete}) state that \poscube and \
  
  
  \begin{algorithm}
+	 \caption{\label{alg:comprime}}
 	\SetKwFunction{explain}{Comprime}
-   \TitleOfAlgo{\explain\label{alg:comprime}} 
+   \TitleOfAlgo{\explain} 
    \KwData{A data set $(\posex,\negex)$}
    \KwResult{An explanation set $(\poscube, \negcube)$}
 	 $(\poscube, \negcube) \gets (\emptyset, \emptyset)$\;
@@ -128,20 +129,20 @@ Properties (\ref{poscomplete}) and (\ref{negcomplete}) state that \poscube and \
 
 We use two heuristic criteria to guide the generation of cubes. 
 
-Firstly we favor features \feat with low entropy $\entropy{\feat} = \entropy{\feat} + \entropy{\bar{\feat}}$, with:
+Firstly we favor features \feat\ with low entropy $\entropy{\feat} = \entropy{\feat} + \entropy{\bar{\feat}}$, with:
 \[
-\entropy{\feat} = - \sum_{y=0}^1 \probability{x \in \setex{y}}{\feat \in x} \log \probability{x \in \setex{y}}{\feat \in x}
+\entropy{\feat} = - \sum_{y=0}^1 \probability{x \in \setex{y} \mid \feat \in x} \log \probability{x \in \setex{y} \mid \feat \in x}
 \]
 and 
 \[
-\entropy{\bar{\feat}} = - \sum_{y=0}^1 \probability{x \in \setex{y}}{\feat \not\in x} \log \probability{x \in \setex{y}}{\feat \not\in x}
+\entropy{\bar{\feat}} = - \sum_{y=0}^1 \probability{x \in \setex{y} \mid \feat \not\in x} \log \probability{x \in \setex{y} \mid \feat \not\in x}
 \]
 
-Secondly, we favor the most ``likely'' examples within a class $y$, that is, we select first the example $x \in \setex{y}$ such that 
+Secondly, we favor the most ``likely'' examples within a class $y$, that is, we select first the example $x \in \setex{y}$ such that maximes:
 \[
-\prod_{\feat \in \features} \probability{\feat \in x}{x \in \setex{y}}
+\probability{x \in \setex{y}} = \prod_{\feat \in x} \probability{\feat \in x' \mid x' \in \setex{y}} \times \prod_{\feat \not\in x} \probability{\feat \not\in x' \mid x' \in \setex{y}} 
 \]
-is maximal.
+
 
 
 There are three heuristic choices in Algorithm~\ref{alg:comprime}: 

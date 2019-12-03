@@ -23,7 +23,16 @@ public:
   enum verbosity { SILENT = 0, QUIET, NORMAL, YACKING, SOLVERINFO };
   int verbosity;
 
-  enum class_policy { NEGATIVE = 0, POSITIVE, ALTERNATE, UNIFORM, BIASED };
+  enum class_policy {
+    NEGATIVE = 0,
+    POSITIVE,
+    SMALLEST,
+    LARGEST,
+    ALTERNATE,
+    UNIFORM,
+    BIASED,
+    ANTI
+  };
   int class_policy;
 
   enum example_policy {

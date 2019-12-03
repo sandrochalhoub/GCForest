@@ -54,10 +54,9 @@ private:
   vector<double> feature_count[2];
   vector<double> feature_probability[2];
   vector<double> example_probability;
-	
-	
-	// util
-	vector<int> buffer;
+
+  // util
+  vector<int> buffer;
   //@}
 
 public:
@@ -79,8 +78,8 @@ public:
   // add a new example in string-list format (it will be translated in
   // duplicated bitset format)
   template <typename StringListIt> void add(StringListIt beg, StringListIt end);
-	
-	void duplicate_format(const instance& from, instance& to) const;
+
+  void duplicate_format(const instance &from, instance &to) const;
   //@}
 
   /*!@name Accessors*/
@@ -88,7 +87,7 @@ public:
   instance &operator[](const size_t idx);
 
   // add a new example / explanation in the duplicated format
-  void add(instance& x_, const bool y);
+  void add(instance &x_, const bool y);
 
   // number of features
   size_t numFeature() const;
@@ -123,15 +122,17 @@ public:
   int argMaxEntropy(instance &candidate) const;
   // int argMinProbability(SparseSet &candidate, const int limit) const;
   // int argMaxProbability(SparseSet &candidate, const int limit) const;
-	template<class ExampleIt>
+  template <class ExampleIt>
   int argMinProbability(ExampleIt b, ExampleIt e) const;
-	template<class ExampleIt>
+  template <class ExampleIt>
   int argMaxProbability(ExampleIt b, ExampleIt e) const;
-	
-	template<class ExampleIt, class random>
-  int randomArgMinProbability(ExampleIt b, ExampleIt e, const size_t k, random& generator);
-	template<class ExampleIt, class random>
-  int randomArgMaxProbability(ExampleIt b, ExampleIt e, const size_t k, random& generator);
+
+  template <class ExampleIt, class random>
+  int randomArgMinProbability(ExampleIt b, ExampleIt e, const size_t k,
+                              random &generator);
+  template <class ExampleIt, class random>
+  int randomArgMaxProbability(ExampleIt b, ExampleIt e, const size_t k,
+                              random &generator);
 
   // compute the (log of the) probability for each feature / class
   // deduce a probability for every example
@@ -235,92 +236,91 @@ void DataSet::uniformSample(const int c, const size_t n, random generator) {
   }
 }
 
+template <class ExampleIt, class random>
+int DataSet::randomArgMinProbability(ExampleIt b, ExampleIt e, const size_t k,
+                                     random &generator) {
+  if (e - b <= k)
+    return *(b + (generator() % (e - b)));
 
-template<class ExampleIt, class random>
-int DataSet::randomArgMinProbability(ExampleIt b, ExampleIt e, const size_t k, random& generator) {	
-	if(e - b <= k)
-		return *(b + (generator() % (e - b)));
-	
-	ExampleIt it{b};
-	buffer.clear();
-	for(auto i{0}; i<k; ++i)
-		buffer.push_back(*it++);
-	
-	auto comp{[&](const int a, const int b) {return example_probability[a] > example_probability[b];}};
+  ExampleIt it{b};
+  buffer.clear();
+  for (auto i{0}; i < k; ++i)
+    buffer.push_back(*it++);
 
-	heap::heapify(buffer.begin(), buffer.end(), comp);
-	
-	while(it!=e)
-	{		
-		if(example_probability[*it] < example_probability[*(buffer.begin())])
-		{
-			heap::remove_min(buffer.begin(), buffer.end(), comp);
-			buffer.pop_back();
-			buffer.push_back(*it);
-			heap::percolate_up(buffer.begin(), buffer.end(), buffer.size()-1, comp);
-		}
-		
-		++it;
-	}
-	
-	auto r{generator() % buffer.size()};
-	
-	// cout << example_probability[argMinProbability(b,e)] << " " << example_probability[buffer[r]] << " " << example_probability[buffer[1-r]] << endl;
+  auto comp{[&](const int a, const int b) {
+    return example_probability[a] > example_probability[b];
+  }};
 
-	return buffer[r];
+  heap::heapify(buffer.begin(), buffer.end(), comp);
 
+  while (it != e) {
+    if (example_probability[*it] < example_probability[*(buffer.begin())]) {
+      heap::remove_min(buffer.begin(), buffer.end(), comp);
+      buffer.pop_back();
+      buffer.push_back(*it);
+      heap::percolate_up(buffer.begin(), buffer.end(), buffer.size() - 1, comp);
+    }
+
+    ++it;
+  }
+
+  auto r{generator() % buffer.size()};
+
+  // cout << example_probability[argMinProbability(b,e)] << " " <<
+  // example_probability[buffer[r]] << " " << example_probability[buffer[1-r]]
+  // << endl;
+
+  return buffer[r];
 }
 
 
 template<class ExampleIt, class random>
 int DataSet::randomArgMaxProbability(ExampleIt b, ExampleIt e, const size_t k, random& generator) {
-	
-	if(e - b <= k)
-		return *(b + (generator() % (e - b)));
-	
-	ExampleIt it{b};
-	buffer.clear();
-	for(auto i{0}; i<k; ++i)
-		buffer.push_back(*it++);
-	
-	auto comp{[&](const int a, const int b) {return example_probability[a] < example_probability[b];}};
 
-	heap::heapify(buffer.begin(), buffer.end(), comp);
-	
-	while(it!=e)
-	{		
-		if(example_probability[*it] > example_probability[*(buffer.begin())])
-		{
-			heap::remove_min(buffer.begin(), buffer.end(), comp);
-			buffer.pop_back();
-			buffer.push_back(*it);
-			heap::percolate_up(buffer.begin(), buffer.end(), buffer.size()-1, comp);
-		}
-		
-		++it;
-	}
+  if (e - b <= k)
+    return *(b + (generator() % (e - b)));
 
-	auto r{generator() % buffer.size()};
-	
-	return buffer[r];
+  ExampleIt it{b};
+  buffer.clear();
+  for (auto i{0}; i < k; ++i)
+    buffer.push_back(*it++);
+
+  auto comp{[&](const int a, const int b) {
+    return example_probability[a] < example_probability[b];
+  }};
+
+  heap::heapify(buffer.begin(), buffer.end(), comp);
+
+  while (it != e) {
+    if (example_probability[*it] > example_probability[*(buffer.begin())]) {
+      heap::remove_min(buffer.begin(), buffer.end(), comp);
+      buffer.pop_back();
+      buffer.push_back(*it);
+      heap::percolate_up(buffer.begin(), buffer.end(), buffer.size() - 1, comp);
+    }
+
+    ++it;
+  }
+
+  auto r{generator() % buffer.size()};
+
+  return buffer[r];
 }
 
 
 
 template<class ExampleIt>
 int DataSet::argMinProbability(ExampleIt b, ExampleIt e) const {
-  return *std::min_element(
-      b, e, [&](const int a, const int b) {
-        return example_probability[a] < example_probability[b];
-      });
+  return *std::min_element(b, e, [&](const int a, const int b) {
+    return example_probability[a] < example_probability[b];
+  });
 }
 
 template<class ExampleIt>
 int DataSet::argMaxProbability(ExampleIt b, ExampleIt e) const {
-  return *std::max_element(
-      b, e, [&](const int a, const int b) {
-        return example_probability[a] < example_probability[b];
-      });
+  return *std::max_element(b, e, [&](const int a, const int b) {
+    return example_probability[a] < example_probability[b];
+  });
 }
 
 template <typename R>
@@ -338,17 +338,17 @@ void DataSet::computeDecisionSet(Options& opt, R& random_generator) {
   contradicting_features.resize(2 * numFeature());
 
   auto last_example{X.size() - 1};
-	size_t end[2] = {static_cast<size_t>(example[0].end() - example[0].get_iterator(0)), static_cast<size_t>(example[1].end() - example[1].get_iterator(0))};
-	// std::vector<int>::iterator end_examples[2] = {example[0].end(), example[1].end()};
-
-	
+  size_t end[2] = {
+      static_cast<size_t>(example[0].end() - example[0].get_iterator(0)),
+      static_cast<size_t>(example[1].end() - example[1].get_iterator(0))};
+  // std::vector<int>::iterator end_examples[2] = {example[0].end(),
+  // example[1].end()};
 
   size_t num_original[2];
   for (auto i{0}; i < 2; ++i)
     num_original[i] = example[i].count();
 
-
-	// vector<int> exs;
+  // vector<int> exs;
   while (true) {
 
     if (num_original[0] + num_original[1] == 0)
@@ -357,65 +357,79 @@ void DataSet::computeDecisionSet(Options& opt, R& random_generator) {
       c = 0;
     else if (num_original[0] == 0)
       c = 1;
-    else {
-      if (opt.class_policy == Options::BIASED)
-        c = ((random_generator() % (num_original[0] + num_original[1])) >
-             num_original[0]);
-      else if (opt.class_policy == Options::UNIFORM)
-        c = random_generator() % 2;
-      else if (opt.class_policy == Options::POSITIVE)
-        c = 1;
-      else if (opt.class_policy == Options::NEGATIVE)
-        c = 0;
-      else
-        c = 1 - c;
-    }
+    else if (opt.class_policy == Options::BIASED)
+      c = ((random_generator() % (num_original[0] + num_original[1])) >
+           num_original[0]);
+    else if (opt.class_policy == Options::ANTI)
+      c = ((random_generator() % (num_original[0] + num_original[1])) <
+           num_original[0]);
+    else if (opt.class_policy == Options::UNIFORM)
+      c = random_generator() % 2;
+    else if (opt.class_policy == Options::POSITIVE)
+      c = 1;
+    else if (opt.class_policy == Options::NEGATIVE)
+      c = 0;
+    else if (opt.class_policy == Options::SMALLEST)
+      c = (num_original[0] > num_original[1]);
+    else if (opt.class_policy == Options::LARGEST)
+      c = (num_original[0] < num_original[1]);
+    else
+      c = 1 - c;
+    // }
 
     auto i{0};
-		
-		// exs.clear();
-		// for(auto v : example[c]) {
-		// 	if(v > last_example)
-		// 		break;
-		// 	exs.push_back(v);
-		// 	cout << " " << v;
-		// }
-		// cout << endl;
-		//
-		// if(exs.size() != (example[c].get_iterator(end[c]) - example[c].begin())) {
-		// 	cout << "sizes do not match: " << exs.size() << " != " << (example[c].get_iterator(end[c]) - example[c].begin()) << endl;
-		// 	exit(1);
-		// }
-		//
-		//
-		// for(auto v{example[c].begin()}; v!=example[c].get_iterator(end[c]); ++v) {
-		// 	cout << " " << *v;
-		// }
-		// cout << endl;
-		//
-		// for(auto v{example[c].begin()}, u{exs.begin()}; v!=example[c].get_iterator(end[c]);) {
-		// 	assert(*v == *u);
-		// 	++u;
-		// 	++v;
-		// }
-		//
-		// assert(exs.size() == (example[c].get_iterator(end[c]) - example[c].begin()));
-		
-		
+
+    // exs.clear();
+    // for(auto v : example[c]) {
+    // 	if(v > last_example)
+    // 		break;
+    // 	exs.push_back(v);
+    // 	cout << " " << v;
+    // }
+    // cout << endl;
+    //
+    // if(exs.size() != (example[c].get_iterator(end[c]) - example[c].begin()))
+    // {
+    // 	cout << "sizes do not match: " << exs.size() << " != " <<
+    // (example[c].get_iterator(end[c]) - example[c].begin()) << endl;
+    // 	exit(1);
+    // }
+    //
+    //
+    // for(auto v{example[c].begin()}; v!=example[c].get_iterator(end[c]); ++v)
+    // {
+    // 	cout << " " << *v;
+    // }
+    // cout << endl;
+    //
+    // for(auto v{example[c].begin()}, u{exs.begin()};
+    // v!=example[c].get_iterator(end[c]);) {
+    // 	assert(*v == *u);
+    // 	++u;
+    // 	++v;
+    // }
+    //
+    // assert(exs.size() == (example[c].get_iterator(end[c]) -
+    // example[c].begin()));
 
     if (opt.example_policy == Options::RANDOM)
       i = example[c].any(num_original[c], random_generator);
     else if (opt.example_policy == Options::HIGHEST_PROBABILITY)
-      i = argMaxProbability(example[c].begin(), example[c].get_iterator(end[c]));
+      i = argMaxProbability(example[c].begin(),
+                            example[c].get_iterator(end[c]));
     else if (opt.example_policy == Options::LOWEST_PROBABILITY)
-      i = argMinProbability(example[c].begin(), example[c].get_iterator(end[c]));
+      i = argMinProbability(example[c].begin(),
+                            example[c].get_iterator(end[c]));
     else if (opt.example_policy == Options::FIRST)
       i = example[c].front();
-		else if (opt.example_policy < Options::LOWEST_PROBABILITY)
-			i = randomArgMinProbability(example[c].begin(), example[c].get_iterator(end[c]), -opt.example_policy, random_generator);
-		else
-			i = randomArgMaxProbability(example[c].begin(), example[c].get_iterator(end[c]), opt.example_policy-1, random_generator);
-			
+    else if (opt.example_policy < Options::LOWEST_PROBABILITY)
+      i = randomArgMinProbability(example[c].begin(),
+                                  example[c].get_iterator(end[c]),
+                                  -opt.example_policy, random_generator);
+    else
+      i = randomArgMaxProbability(example[c].begin(),
+                                  example[c].get_iterator(end[c]),
+                                  opt.example_policy - 1, random_generator);
 
     assert(i <= last_example);
 

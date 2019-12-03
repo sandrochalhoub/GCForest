@@ -104,7 +104,7 @@ public:
 Options parse(int argc, char *argv[]) {
   using namespace TCLAP;
   // using namespace string_literals;
-  cmdline cmd("NameOfTheExec", ' ');
+  cmdline cmd("primer", ' ');
 
   Options opt;
   opt.cmdline =
@@ -122,18 +122,23 @@ Options parse(int argc, char *argv[]) {
       "verbosity level (0:silent,1:quiet,2:improvements only,3:verbose", false,
       2, "int");
 
-  cmd.add<ValueArg<int>>(
-      opt.class_policy, "", "class_policy",
-      "policy for selecting the class "
-      "(0:negative,1:positive,2:alternate,3:random uniform,4:biased",
-      false, 2, "int");
+  cmd.add<ValueArg<int>>(opt.class_policy, "", "class_policy",
+                         "policy for selecting the class\n 0:negative\n "
+                         "1:positive\n 2:smallest\n 3:largest\n 4:alternate\n "
+                         "5:random uniform\n 6:biased\n 7:anti",
+                         false, 7, "int");
 
   cmd.add<ValueArg<int>>(opt.example_policy, "", "example_policy",
-                         "policy for selecting the example (X<-1:random between the -X with lowest probability,-1:lowest probability,0:first,1:random,2:highest probability,X>2:random between the X-1 with highest probability",
-                         false, 2, "int");
+                         "policy for selecting the example\n X<-1:random "
+                         "between the -X with lowest probability\n -1:lowest "
+                         "probability\n 0:first\n 1:random\n 2:highest "
+                         "probability\n X>2:random between the X-1 with "
+                         "highest probability",
+                         false, 10, "int");
 
   cmd.add<ValueArg<int>>(opt.feature_policy, "", "feature_policy",
-                         "policy for selecting the feature (0:min,1:lowest entropy,2:highest entropy",
+                         "policy for selecting the feature (0:min,1:lowest "
+                         "entropy,2:highest entropy)",
                          false, 1, "int");
 
   cmd.add<ValueArg<int>>(opt.seed, "", "seed", "random seed", false, 12345,
@@ -190,12 +195,35 @@ ostream &Options::display(ostream &os) {
                     ? "positive"
                     : (class_policy == ALTERNATE
                            ? "alternate"
-                           : (class_policy == UNIFORM ? "uniform" : "biased"))))
+                           : (class_policy == UNIFORM
+                                  ? "uniform"
+                                  : (class_policy == LARGEST
+                                         ? "largest"
+                                         : (class_policy == SMALLEST
+                                                ? "smallest"
+                                                : (class_policy == ANTI
+                                                       ? "anti"
+                                                       : "biased")))))))
      << endl
-     << setw(20) << left << "p example policy:" << setw(30) << right
-     << (example_policy == FIRST ? "first" : "random") << endl
-     << setw(20) << left << "p feature policy:" << setw(30) << right
-     << (class_policy == MIN ? "min" : "entropy") << endl
+     << setw(20) << left << "p example policy:" << setw(30) << right;
+	
+	if(example_policy <= LOWEST_PROBABILITY) {
+		auto k{LOWEST_PROBABILITY - example_policy};
+		os << "lowest probability";
+		if(k>1)
+			os << " (" << k << ")";
+		os << endl;
+	} else if(example_policy >= HIGHEST_PROBABILITY) {
+		auto k{example_policy - HIGHEST_PROBABILITY};
+		os << "highest probability";
+		if(k>1)
+			os << " (" << k << ")";
+		os << endl;
+	} else
+   os  << (example_policy == FIRST ? "first" : "random" ) << endl;
+	
+   os << setw(20) << left << "p feature policy:" << setw(30) << right
+     << (feature_policy == MIN ? "mininum" : (feature_policy == LOWEST_ENTROPY ? "lowest entropy" : "highest entropy" )) << endl
      << setw(20) << left << "p verified:" << setw(30) << right
      << (verified ? "yes" : "no") << endl;
   return os;
