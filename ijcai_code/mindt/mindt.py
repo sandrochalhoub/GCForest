@@ -20,7 +20,7 @@ sys.path.insert(0, os.path.join(os.path.realpath(os.path.abspath(os.path.split(i
 
 from dtencoder import DTEncoder
 
-from data import Data
+from data import Data, PrepData
 from options import Options
 import resource
 
@@ -59,7 +59,13 @@ if __name__ == '__main__':
     else:
         data = Data(fpointer=sys.stdin, mapfile=options.mapfile,
                 separator=options.separator)
+    
+    if not(options.prepfile is None):
+        print(options.prepfile)
+        prepData = PrepData(origdata = data, filename=options.prepfile,
+                separator=options.separator)
 
+    
     if options.verb:
         print('c0 # of samps: {0} ({1} weighted)'.format(sum(data.wghts), len(data.samps)))
         print('c0 # of feats: {0} ({1} binary)'.format(len(data.names) - 1, len(filter(lambda x: x > 0, data.fvmap.opp.keys())) - len(data.feats[-1])))
@@ -93,7 +99,10 @@ if __name__ == '__main__':
         print(N_to_try)
         
         while (res):
-            dtencoder = DTEncoder(data, options)
+            if not(options.prepfile is None):
+                dtencoder = DTEncoder(prepData, options)
+            else:
+                dtencoder = DTEncoder(data, options)
             res, sat_time = dtencoder.generate_formula(N = N_to_try)
             total_sat_time += sat_time
             if (res == False):

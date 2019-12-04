@@ -64,6 +64,7 @@ class Options(object):
         self.iti_result_file = None
         self.accmin = 0.95
         self.scilearn = None
+        self.prepfile = None
         if command:
             self.parse(command)
 
@@ -91,6 +92,7 @@ class Options(object):
                                         'rdump',
                                         'plimit=',
                                         'primer=',
+                                        'prep=',
                                         'sep=',
                                         'solver=',
                                         'trim=',
@@ -108,6 +110,8 @@ class Options(object):
         for opt, arg in opts:
             if opt in ('-a', '--approach'):
                 self.approach = str(arg)
+            elif opt in ('--prep'):
+                self.prepfile = str(arg)                
             elif opt == '--approx':
                 self.approx = int(arg)
             elif opt == '--cdump':

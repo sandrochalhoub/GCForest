@@ -35,3 +35,4 @@ PRINT_OPT_TREE_SIZE_RESULTS  = "Optimal tree"
 PRINT_COUNTER_RESULTS  = "Counter" 
 
 
+DONOTCARE = -2

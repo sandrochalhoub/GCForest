@@ -75,7 +75,7 @@ def hierarchy_pos(G, root, width=1., vert_gap=0.2, vert_loc=0, xcenter=0.5,
 #==============================================================================
 class DTEncoder(object):
 
-    def __init__(self, data, options):
+    def __init__(self, data,  options):
         """
             Constructor.
         """
@@ -93,16 +93,23 @@ class DTEncoder(object):
             if (out not in outs):
                 outs[out] = nb_classes
                 nb_classes += 1
-            # print(samp_bin)
+            print("samp_bin", samp_bin)
             for l in samp_bin:
-                if l > 0:  # negative literal means that the feature is binary
+                if l > 0:  
                     name, lit = self.data.fvmap.opp[l]
                     j = self.data.nm2id[name]
-
+                    #print(l, name, lit, j, self.data.feats[j])
                     if len(self.data.feats[j]) > 2:
-                        samp_bin += [-self.data.fvmap.dir[(name, l)] for l in list(self.data.feats[j].difference(set([lit])))]
+                        assert(False)
+                        #samp_bin += [-self.data.fvmap.dir[(name, l)] for l in list(self.data.feats[j].difference(set([lit])))]
+                else:
+                    if (l == DONOTCARE):
+                        assert(not(options.prepfile is None))
+            #exit()
 
             self.data.samps[i] = samp_bin + [outs[out]]
+            #print(self.data.samps[i])
+            #exit()
             # ##print(self.data.samps[i])
         # ##print(self.data.fvmap.dir.keys())
         self.max_id = max(self.data.fvmap.dir.values()) + 1
@@ -767,9 +774,9 @@ class DTEncoder(object):
         for sample in self.data.samps:
             pos = sample[-1]
             sample = sample[:-1]
-            # ##print(sample)
-            sample = [1 if x > 0 else 0 for x in sample]
-            # ##print("binary", sample)
+            print("generate_account_for_examples", sample)
+            #sample = [1 if x > 0 else 0 for x in sample]
+            #print("binary", sample)
             for j in range(1, N + 1):
                 v_var_name, v_var_id = self.lookup_varid(self.create_indexed_variable_name(LABEL_V_VARS, [j]))
                 c_var_name, c_var_id = self.lookup_varid(self.create_indexed_variable_name(LABEL_C_VARS, [j]))
@@ -787,7 +794,10 @@ class DTEncoder(object):
                         r_or_names.append(d0_var_name)
                         r_or.append(d0_var_id)
 
-                    assert((sample[r - 1] == 1)  or (sample[r - 1] == 0))
+                    if (self.options.prepfile is None):
+                        assert((sample[r - 1] == 1)  or (sample[r - 1] == 0))
+                    else:
+                        assert((sample[r - 1] == DONOTCARE) or (sample[r - 1] == 1)  or (sample[r - 1] == 0))
 
 
                 if (pos == 1):
@@ -800,7 +810,7 @@ class DTEncoder(object):
                 # self.s.add_clause([-c_var_id])
                 ####print([-c_var_id])
                 # ##print("Example sign {}: add constraint {} -> {}".format(pos, temp_v_c_var_name, r_or_names))
-
+        #exit()
     def generate_atmost_one4non_binary_features(self, N, K):
         for j in range(1, N + 1):
             for nonbin, binfeats in self.data.nonbin2bin.items():
