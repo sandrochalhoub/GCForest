@@ -298,11 +298,11 @@ class PrepData(object):
         for i in range(len(self.samps)):
             #print(self.samps[i])
             for j in range(len(self.samps[i])):
-                print("looking --->", self.samps[i])
+                #print("looking --->", self.samps[i])
                 if self.samps[i][j] !=  DONOTCARE:
                     print(self.names[j], self.samps[i][j],  self.fvmap.dir[(self.names[j], self.samps[i][j])])
                     self.samps[i][j] = self.fvmap.dir[(self.names[j], self.samps[i][j])]
-                print("~~~~~~~", self.samps[i])
+                #print("~~~~~~~", self.samps[i])
 
         # determining feature variables (excluding class variables)
         for v, pair in self.fvmap.opp.items():

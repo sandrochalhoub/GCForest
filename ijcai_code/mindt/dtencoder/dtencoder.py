@@ -93,7 +93,7 @@ class DTEncoder(object):
             if (out not in outs):
                 outs[out] = nb_classes
                 nb_classes += 1
-            print("samp_bin", samp_bin)
+            #print("samp_bin", samp_bin)
             for l in samp_bin:
                 if l > 0:  
                     name, lit = self.data.fvmap.opp[l]
@@ -774,7 +774,7 @@ class DTEncoder(object):
         for sample in self.data.samps:
             pos = sample[-1]
             sample = sample[:-1]
-            print("generate_account_for_examples", sample)
+            #print("generate_account_for_examples", sample)
             #sample = [1 if x > 0 else 0 for x in sample]
             #print("binary", sample)
             for j in range(1, N + 1):
@@ -1030,7 +1030,10 @@ class DTEncoder(object):
         t = time.time()
         res = self.s.solve()
         if  res == True:
-            sol_file_name = self.options.files[0].replace("Samples", "Results") + "_" +  "{}".format("best") + ".sol";
+            file_name =  self.options.files[0]
+            if not (self.options.prepfile is None):
+                file_name = self.options.prepfile                 
+            sol_file_name = file_name.replace("Samples", "Results") + "_" +  "{}".format("best") + ".sol";
             self.build_graph(N=N, model=self.s.get_model(), filename=sol_file_name, K=K, labeled=True)
             # self.print_solution_d_zero(model = self.s.get_model(), N = N, K = K)
             # self.print_solution_d_one(model = self.s.get_model(), N = N, K = K)

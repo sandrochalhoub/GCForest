@@ -95,9 +95,13 @@ if __name__ == '__main__':
                     N_to_try = int(s[1])
                     break
                  
-        
-        print(N_to_try)
-        
+            if not(options.prepfile is None):
+                N_to_try = N_to_try + 14
+        print(N_to_try, len(data.names)-2,  2**(len(data.names)-2))
+        if (N_to_try >= 2**(len(data.names)-2)):
+            N_to_try = 2**(len(data.names)-2) - 1
+            print("reduce to ", N_to_try)
+
         while (res):
             if not(options.prepfile is None):
                 dtencoder = DTEncoder(prepData, options)

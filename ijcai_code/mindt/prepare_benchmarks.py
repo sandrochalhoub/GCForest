@@ -309,9 +309,9 @@ if __name__ == '__main__':
 
     
     if (gen_parse_results == False):
-        path_manu_bench = "./benchs/Datasets/Emmanuel/"
-        path_penn_bench = "./benchs/Datasets/PennML/"
-        path_others_bench = "./benchs/Datasets/Others/"
+        path_manu_bench = "./ijcai_code/data/Emmanuel/"
+        path_penn_bench = "./ijcai_code/data/PennML/"
+        path_others_bench = "./ijcai_code/data/Others/"
 
     else:
         path_manu_bench = "/home/nina/prom_titan_1/workspace/xai/benchs/Datasets/Emmanuel/"
@@ -510,7 +510,7 @@ if __name__ == '__main__':
     #exit()
 
     if (gen_reduced_scilearn != True):
-
+# 
 #         original_benckmarks[path_penn_bench + "flags/flags-un" + LABEL_SUFFIX_REDUCED_CSV] =  {}
 #         original_benckmarks[path_penn_bench + "haberman/haberman-un" + LABEL_SUFFIX_REDUCED_CSV] =  {}
 #         original_benckmarks[path_penn_bench + "heart-c/heart-c-un" + LABEL_SUFFIX_REDUCED_CSV] =  {}
@@ -527,7 +527,7 @@ if __name__ == '__main__':
 #         #original_benckmarks[path_penn_bench + "postoperative-patient-data/postoperative-patient-data-un" + LABEL_SUFFIX_REDUCED_CSV] =  {}            
 #         original_benckmarks[path_penn_bench + "promoters/promoters-un" + LABEL_SUFFIX_REDUCED_CSV] =  {}     
 #         #original_benckmarks[path_penn_bench + "glass2/glass2-un" + LABEL_SUFFIX_REDUCED_CSV] =  {}            
-#                    
+#                     
 #         original_benckmarks[path_manu_bench + "Mouse/mouse-un" + LABEL_SUFFIX_REDUCED_CSV ] = {}
 #         original_benckmarks[path_manu_bench + "Weather/meteo-un" + LABEL_SUFFIX_REDUCED_CSV] = {}
 #         original_benckmarks[path_manu_bench + "Car/car-un" + LABEL_SUFFIX_REDUCED_CSV] = {}#, 0.2, 0.3,0.5,0.7,0.9}
@@ -544,11 +544,11 @@ if __name__ == '__main__':
 #         #original_benckmarks[path_penn_bench + "diabetes/diabetes-un" + LABEL_SUFFIX_REDUCED_CSV] =  {}
 #         original_benckmarks[path_penn_bench + "new-thyroid/new-thyroid-un" + LABEL_SUFFIX_REDUCED_CSV] =  {}
 #         original_benckmarks[path_penn_bench + "Corral/corral-un" + LABEL_SUFFIX_REDUCED_CSV] = {}
-#  
+#   
 #         original_benckmarks[path_others_bench + "HouseVotes/house-votes-84-un" + LABEL_SUFFIX_REDUCED_CSV] = {}
 #         #original_benckmarks[path_others_bench + "Mammography/uci_mammo_data-un" + LABEL_SUFFIX_REDUCED_CSV] = {}
 #         original_benckmarks[path_others_bench + "Titanic/titanic-un" + LABEL_SUFFIX_REDUCED_CSV] = {}
-
+# 
 #         original_benckmarks[path_penn_bench + "flags/flags-un" + ".csv"] =  {}
 #         original_benckmarks[path_penn_bench + "haberman/haberman-un" + ".csv"] =  {}
 #         original_benckmarks[path_penn_bench + "heart-c/heart-c-un" + ".csv"] =  {}
@@ -556,7 +556,6 @@ if __name__ == '__main__':
 #         original_benckmarks[path_penn_bench + "heart-statlog/heart-statlog-un" + ".csv"] =  {}
 #         original_benckmarks[path_penn_bench + "hepatitis/hepatitis-un" + ".csv"] =  {}
 #         original_benckmarks[path_penn_bench + "hungarian/hungarian-un" + ".csv"] =  {}
-#         original_benckmarks[path_penn_bench + "irish/irish-un" + ".csv"] =  {}
 #         #original_benckmarks[path_penn_bench + "liver-disorder/liver-disorder-un" + ".csv"] =  {}
 #         #original_benckmarks[path_penn_bench + "lupus/lupus-un" + ".csv"] =  {}
 #         original_benckmarks[path_penn_bench + "spect/spect-un" + ".csv"] =  {}
@@ -565,7 +564,7 @@ if __name__ == '__main__':
 #         original_benckmarks[path_penn_bench + "postoperative-patient-data/postoperative-patient-data-un" + ".csv"] =  {}            
 #         original_benckmarks[path_penn_bench + "promoters/promoters-un" + ".csv"] =  {}     
 #         #original_benckmarks[path_penn_bench + "glass2/glass2-un" + ".csv"] =  {}            
-#                  
+                  
 #         original_benckmarks[path_manu_bench + "Mouse/mouse-un" + ".csv" ] = {}
 #         original_benckmarks[path_manu_bench + "Weather/meteo-un" + ".csv"] = {}
 #         original_benckmarks[path_manu_bench + "Car/car-un" + ".csv"] = {}#, 0.2, 0.3,0.5,0.7,0.9}
@@ -580,16 +579,16 @@ if __name__ == '__main__':
 #         #original_benckmarks[path_penn_bench + "bupa/bupa-un" + ".csv"] =  {}
 #         original_benckmarks[path_penn_bench + "cleve/cleve-un" + ".csv"] =  {}
 #         #original_benckmarks[path_penn_bench + "diabetes/diabetes-un" + ".csv"] =  {}
-#         original_benckmarks[path_penn_bench + "new-thyroid/new-thyroid-un" + ".csv"] =  {}
+#         #original_benckmarks[path_penn_bench + "new-thyroid/new-thyroid-un" + ".csv"] =  {}
 #         original_benckmarks[path_penn_bench + "Corral/corral-un" + ".csv"] = {}
-#   
-#         original_benckmarks[path_penn_bench + "flags/flags-un" + ".csv"] =  {}
-#         original_benckmarks[path_penn_bench + "haberman/haberman-un" + ".csv"] =  {}
-#         original_benckmarks[path_penn_bench + "heart-c/heart-c-un" + ".csv"] =  {}
-#         original_benckmarks[path_penn_bench + "heart-h/heart-h-un" + ".csv"] =  {}
-#         original_benckmarks[path_penn_bench + "heart-statlog/heart-statlog-un" + ".csv"] =  {}
-#         original_benckmarks[path_penn_bench + "hepatitis/hepatitis-un" + ".csv"] =  {}
-#         original_benckmarks[path_penn_bench + "hungarian/hungarian-un" + ".csv"] =  {}
+#    
+#         #original_benckmarks[path_penn_bench + "flags/flags-un" + ".csv"] =  {}
+#         #original_benckmarks[path_penn_bench + "haberman/haberman-un" + ".csv"] =  {}
+#         #original_benckmarks[path_penn_bench + "heart-c/heart-c-un" + ".csv"] =  {}
+#         #original_benckmarks[path_penn_bench + "heart-h/heart-h-un" + ".csv"] =  {}
+#         #original_benckmarks[path_penn_bench + "heart-statlog/heart-statlog-un" + ".csv"] =  {}        
+#         #original_benckmarks[path_penn_bench + "hepatitis/hepatitis-un" + ".csv"] =  {}
+#         #original_benckmarks[path_penn_bench + "hungarian/hungarian-un" + ".csv"] =  {}
 #         original_benckmarks[path_penn_bench + "irish/irish-un" + ".csv"] =  {}
 #         #original_benckmarks[path_penn_bench + "liver-disorder/liver-disorder-un" + ".csv"] =  {}
 #         #original_benckmarks[path_penn_bench + "lupus/lupus-un" + ".csv"] =  {}
@@ -599,38 +598,37 @@ if __name__ == '__main__':
 #         #original_benckmarks[path_penn_bench + "postoperative-patient-data/postoperative-patient-data-un" + ".csv"] =  {}            
 #         original_benckmarks[path_penn_bench + "promoters/promoters-un" + ".csv"] =  {}     
 #         #original_benckmarks[path_penn_bench + "glass2/glass2-un" + ".csv"] =  {}            
-#                    
-#         original_benckmarks[path_manu_bench + "Mouse/mouse-un"  + ".csv"] =  {}
-#         original_benckmarks[path_manu_bench + "Weather/meteo-un"  + ".csv"] =  {}
-#         original_benckmarks[path_manu_bench + "Car/car-un"  + ".csv"] =  {}#, 0.2, 0.3,0.5,0.7,0.9}
-#         original_benckmarks[path_manu_bench + "Cancer/cancer-un"  + ".csv"] =  {}#, 0.5, 0.7,0.9} 
-#         original_benckmarks[path_penn_bench + "ShuttleM/shuttleM-un"  + ".csv"] =  {}
-#         #original_benckmarks[path_penn_bench + "Balance/balance-un"  + ".csv"] =  {}
-#         original_benckmarks[path_penn_bench + "Colic/colic-un"  + ".csv"] =  {}
-#         original_benckmarks[path_penn_bench + "appendicitis/appendicitis-un"  + ".csv"] =  {}
-#         original_benckmarks[path_penn_bench + "australian/australian-un"  + ".csv"] =  {}
-#         original_benckmarks[path_penn_bench + "backache/backache-un" + ".csv"] =  {}
-#         #original_benckmarks[path_penn_bench + "biomed/biomed-un" + ".csv"] =  {}
-#         #original_benckmarks[path_penn_bench + "bupa/bupa-un" + ".csv"] =  {}
-#         original_benckmarks[path_penn_bench + "cleve/cleve-un" + ".csv"] =  {}
-#         #original_benckmarks[path_penn_bench + "diabetes/diabetes-un" + ".csv"] =  {}
-#         original_benckmarks[path_penn_bench + "new-thyroid/new-thyroid-un" + ".csv"] =  {}
-#         original_benckmarks[path_penn_bench + "Corral/corral-un"  + ".csv"] =  {}
-#  
-#         original_benckmarks[path_others_bench + "HouseVotes/house-votes-84-un"  + ".csv"] =  {}
-#         #original_benckmarks[path_others_bench + "Mammography/uci_mammo_data-un"  + ".csv"] =  {}
-#         original_benckmarks[path_others_bench + "Titanic/titanic-un"  + ".csv"] =  {}
+                    
+        original_benckmarks[path_manu_bench + "Mouse/mouse-un"  + ".csv"] =  {}
+        original_benckmarks[path_manu_bench + "Weather/meteo-un"  + ".csv"] =  {}
+        original_benckmarks[path_penn_bench + "Corral/corral-un"  + ".csv"] =  {}
+        original_benckmarks[path_penn_bench + "irish/irish-un" + ".csv"] =  {}
+        original_benckmarks[path_penn_bench + "mux6/mux6-un" + ".csv"] =  {}
+        original_benckmarks[path_manu_bench + "Car/car-un"  + ".csv"] =  {0.05,0.1}
+        original_benckmarks[path_manu_bench + "Cancer/cancer-un"  + ".csv"] =  {0.1, 0.2,0.25} 
+        original_benckmarks[path_penn_bench + "ShuttleM/shuttleM-un"  + ".csv"] =  {}
+        original_benckmarks[path_penn_bench + "Colic/colic-un"  + ".csv"] =  {}
+        original_benckmarks[path_penn_bench + "appendicitis/appendicitis-un"  + ".csv"] =  {}
+        original_benckmarks[path_penn_bench + "australian/australian-un"  + ".csv"] =  {}
+        original_benckmarks[path_penn_bench + "backache/backache-un" + ".csv"] =  {}
+        original_benckmarks[path_penn_bench + "cleve/cleve-un" + ".csv"] =  {}
+        #original_benckmarks[path_penn_bench + "diabetes/diabetes-un" + ".csv"] =  {}
+        #original_benckmarks[path_penn_bench + "new-thyroid/new-thyroid-un" + ".csv"] =  {}
 
-        original_benckmarks[path_manu_bench + "Mouse/mouse" + ".csv"] = {}
-        original_benckmarks[path_manu_bench + "Weather/meteo" + ".csv"] = {}
-        original_benckmarks[path_manu_bench + "Car/car" + ".csv"] = {0.05, 0.1}#, 0.2, 0.3,0.5,0.7,0.9}
-        original_benckmarks[path_manu_bench + "Cancer/cancer" + ".csv"] = {0.1, 0.2}#, 0.5, 0.7,0.9} 
-        original_benckmarks[path_penn_bench + "ShuttleM/shuttleM" + ".csv"] = {0.05, 0.1}
-        original_benckmarks[path_penn_bench + "Colic/colic" + ".csv"] = {0.05, 0.1}
-        original_benckmarks[path_penn_bench + "appendicitis/appendicitis" + ".csv"] = {0.3, 0.4}
-        original_benckmarks[path_penn_bench + "australian/australian" + ".csv"] = {0.05, 0.1}
-        original_benckmarks[path_penn_bench + "backache/backache" + ".csv"] =  {0.3, 0.4}
-        original_benckmarks[path_penn_bench + "cleve/cleve" + ".csv"] =  {0.1, 0.2}
+        #original_benckmarks[path_others_bench + "HouseVotes/house-votes-84-un"  + ".csv"] =  {}
+        #original_benckmarks[path_others_bench + "Mammography/uci_mammo_data-un"  + ".csv"] =  {}
+        #original_benckmarks[path_others_bench + "Titanic/titanic-un"  + ".csv"] =  {}
+
+#         original_benckmarks[path_manu_bench + "Mouse/mouse" + ".csv"] = {}
+#         original_benckmarks[path_manu_bench + "Weather/meteo" + ".csv"] = {}
+#         original_benckmarks[path_manu_bench + "Car/car" + ".csv"] = {0.05, 0.1}#, 0.2, 0.3,0.5,0.7,0.9}
+#         original_benckmarks[path_manu_bench + "Cancer/cancer" + ".csv"] = {0.1, 0.2}#, 0.5, 0.7,0.9} 
+#         original_benckmarks[path_penn_bench + "ShuttleM/shuttleM" + ".csv"] = {0.05, 0.1}
+#         original_benckmarks[path_penn_bench + "Colic/colic" + ".csv"] = {0.05, 0.1}
+#         original_benckmarks[path_penn_bench + "appendicitis/appendicitis" + ".csv"] = {0.3, 0.4}
+#         original_benckmarks[path_penn_bench + "australian/australian" + ".csv"] = {0.05, 0.1}
+#         original_benckmarks[path_penn_bench + "backache/backache" + ".csv"] =  {0.3, 0.4}
+#         original_benckmarks[path_penn_bench + "cleve/cleve" + ".csv"] =  {0.1, 0.2}
     
     #original_benckmarks[path_penn_bench + "new-thyroid/new-thyroid.csv"] =  {0.1, 0.2}
     #original_benckmarks[path_penn_bench + "ContraceptiveM/contraceptiveM.csv"] = {0.1, 0.3, 0.5}
@@ -649,11 +647,11 @@ if __name__ == '__main__':
     
     gen_runs_all =open("list_dt", 'w+')
     commands_all = []
+    commands_all_prep = []
 
 
     for bench_name, ratios in original_benckmarks.items():
         print(bench_name)
-    
         head, tail = os.path.split(bench_name)
         output_file =  os.path.basename(bench_name)
         output_dir = head  +  "/Samples/"   
@@ -676,30 +674,41 @@ if __name__ == '__main__':
             print(output_path)
             if (gen_benchs == True):
                 #bin_file = convertor2binary.convertor2binary(data = data, output_file = output_path)
-                bin_file =  output_path.replace(".csv","-un.csv")
+                bin_file =  output_path#.replace(".csv","-un.csv")
                 bin_file_copy_from =  bin_file.replace("Samples/", "")
-                os.system(" cp " + bin_file_copy_from + " " + bin_file)
-                if (gen_reduced_scilearn == True):
-                    reduced_bin_file = convertor2binary.convertor2reduced(data = data, bin_file = bin_file, acc = acc[bench_name])
+                #os.system(" cp " + bin_file_copy_from + " " + bin_file)
+                #if (gen_reduced_scilearn == True):
+                #    reduced_bin_file = convertor2binary.convertor2reduced(data = data, bin_file = bin_file, acc = acc[bench_name])
                 
-                convertor2binary.convertor2iti(data = data, output_file = output_path, file_to_run = iti_all)
+                #convertor2binary.convertor2iti(data = data, output_file = output_path, file_to_run = iti_all)
             if (gen_runs == True):                
                 results_dir = output_dir.replace("Samples", LABEL_SUFFIX_DIR_RESULTS)
                 commands_all.insert(0,"mkdir " + results_dir)
+
+                output_clean = output_path.replace("/Samples","")
+                output_prep = output_clean.replace("-un.csv", "-un-pred.csv")
+                output_clean_s = output_path.replace("Samples", LABEL_SUFFIX_DIR_RESULTS)
+                output_prep_s = output_clean_s.replace("-un.csv", "-un-pred.csv")
                 
                 
-                s = "/home/nina/workspace/xai/timeout -t 1000 -m 20000000 "
-                s += "python src/mindt/mindt.py -a dtencoding "
-                s+= "--iti " + output_path + "." + LABEL_SUFFIX_RESULTS + " "
+                s = "/home/nina/workspace/deeplever/timeout -t 1000 -m 20000000 "
+                s += "python ./ijcai_code/mindt/mindt.py -a dtencoding "
+                s += "--iti " + output_path + "." + LABEL_SUFFIX_RESULTS + " "
+                s += " --prep " + output_prep  + " "
                 s += output_path.replace("/Samples","")  
-                s += "  >  " + results_dir + output_file + LABEL_SUFFIX_SAVE_RESULTS
+                s += "  >  "  + output_prep_s+ LABEL_SUFFIX_SAVE_RESULTS
                 commands_all.append(s)
+                t = "/home/nina/workspace/deeplever/timeout -t 1000 -m 20000000 "
+                t+= "./code/bin/primer "
+                t+= output_clean
+                t+= " -o " + output_prep
+                commands_all_prep.append(t)
+                #./code/bin/primer ./ijcai_code/data/Emmanuel/Mouse/mouse-un.csv -o ./ijcai_code/data/Emmanuel/Mouse/mouse-un-pred.csv
                 
-            if (gen_feat_reduce == True):    
+            #if (gen_feat_reduce == True):    
             # collect stats
-                convertor2binary.convertor2iti_collect_stats(data = data, output_file = output_path)    
-               
-                    
+            #    convertor2binary.convertor2iti_collect_stats(data = data, output_file = output_path)    
+       
         for r in ratios:
             print (r)
             output_dir_r = output_dir  +  "/" + str(r)  + "/"   
@@ -713,14 +722,14 @@ if __name__ == '__main__':
             nb_samples = int(len(data.samps)*(rp))
             print(nb_samples)
             for i in range(nb_samples_bench):
-                output_file =  os.path.basename(bench_name).replace(".csv", "_" + str(i) + ".csv")
+                output_file =  os.path.basename(bench_name).replace("-un.csv", "_" + str(i) + "-un.csv")
                 output_path = output_dir_r + output_file
                 if (gen_benchs == True):
                     data_r = copy.deepcopy(data)
                     data_r.samps = random.sample(data.samps, nb_samples)
                     print(output_path)
                     #print(nb_samples, len(data.samps))
-                    convertor2binary.convertor2binary(data = data_r, output_file = output_path)
+                    #convertor2binary.convertor2binary(data = data_r, output_file = output_path)
                     #iti_all =open("execute_iti", 'w+')
                     #convertor2binary.convertor2iti(data = data_r, output_file = output_path, file_to_run = iti_all)            
                     #iti_all.close()
@@ -733,18 +742,39 @@ if __name__ == '__main__':
                     commands_all.insert(0,"mkdir  "+ results_dir_up)
                     commands_all.insert(0,"mkdir  "+ results_dir)
                     
-                    
-                    s = "/home/nina/workspace/xai/timeout -t 1000 -m 20000000 "
-                    s += "python src/mindt/mindt.py -a dtencoding "
-                    s+= "--iti " + output_path + "." + LABEL_SUFFIX_RESULTS + " "
-                    s += output_path.replace(".csv","-un.csv") 
-                    s += "  >  " + results_dir + output_file + "_save"
-                    commands_all.append(s)
-                if (gen_feat_reduce == True):    
-                    # collect stats
-                    convertor2binary.convertor2iti_collect_stats(data = data, output_file = output_path)    
 
+                    output_clean = output_path
+                    
+                    output_prep = output_clean.replace("-un.csv", "-un-pred.csv")                    
+                    output_clean_s = output_path.replace("Samples", LABEL_SUFFIX_DIR_RESULTS)
+                    output_prep_s = output_clean_s.replace("-un.csv", "-un-pred.csv")
+                    
+                    
+                    s = "/home/nina/workspace/deeplever/timeout -t 1000 -m 20000000 "
+                    s += "python ./ijcai_code/mindt/mindt.py -a dtencoding "
+                    s += "--iti " + output_path.replace("-un.csv", ".csv") + "." + LABEL_SUFFIX_RESULTS + " "
+                    s += " --prep " + output_prep  + " "
+                    s += output_path 
+                    s += "  >  "  + output_prep_s+ LABEL_SUFFIX_SAVE_RESULTS                    
+                    commands_all.append(s)
+                    
+                    print(s)
+                    #exit()
+
+                    #print(output_clean)
+                    #print(output_prep)
+                    #exit()
+                    t = "/home/nina/workspace/deeplever/timeout -t 1000 -m 20000000 "
+                    t+= "./code/bin/primer "
+                    t+= output_clean
+                    t+= " -o " + output_prep
+                    commands_all_prep.append(t)  
+                    #exit()                  
+                #if (gen_feat_reduce == True):    
+                    # collect stats
+                #    convertor2binary.convertor2iti_collect_stats(data = data, output_file = output_path)    
     print(commands_all)
+
     for s in commands_all:
         print(s, file = gen_runs_all)
     gen_runs_all.close()
