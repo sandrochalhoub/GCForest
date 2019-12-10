@@ -42,6 +42,12 @@ private:
   // positive) examples in X
   SparseSet example[2];
 
+  // features that belong to all examples of the class
+  instance lower_bound[2];
+
+  // features that belong to at least one example of the class
+  instance upper_bound[2];
+
   // TODO
   vector<int> literal_count;
 
@@ -152,6 +158,9 @@ public:
   // look for examples that are both positive and negative and remove them
   void filter();
 
+  // compute intersections and unions of positive/negative examples
+  void computeBounds();
+
   // the set of true features of x1 that are false in x2 we cannot do set
   // difference because features might neighter be true nor false
   void getContradictingFeatures(instance &x1, instance &x2, instance &buffer);
@@ -179,6 +188,8 @@ public:
   /*!@name Printing*/
   //@{
   // std::ostream &toCsv(std::ostream &os) const;
+
+  const std::string featureName(const int i) const;
 
   std::ostream &write(std::ostream &os, string &delimiter, string &wildcard,
                       const bool matrix, const bool header) const;
@@ -379,39 +390,6 @@ void DataSet::computeDecisionSet(Options& opt, R& random_generator) {
 
     auto i{0};
 
-    // exs.clear();
-    // for(auto v : example[c]) {
-    // 	if(v > last_example)
-    // 		break;
-    // 	exs.push_back(v);
-    // 	cout << " " << v;
-    // }
-    // cout << endl;
-    //
-    // if(exs.size() != (example[c].get_iterator(end[c]) - example[c].begin()))
-    // {
-    // 	cout << "sizes do not match: " << exs.size() << " != " <<
-    // (example[c].get_iterator(end[c]) - example[c].begin()) << endl;
-    // 	exit(1);
-    // }
-    //
-    //
-    // for(auto v{example[c].begin()}; v!=example[c].get_iterator(end[c]); ++v)
-    // {
-    // 	cout << " " << *v;
-    // }
-    // cout << endl;
-    //
-    // for(auto v{example[c].begin()}, u{exs.begin()};
-    // v!=example[c].get_iterator(end[c]);) {
-    // 	assert(*v == *u);
-    // 	++u;
-    // 	++v;
-    // }
-    //
-    // assert(exs.size() == (example[c].get_iterator(end[c]) -
-    // example[c].begin()));
-
     if (opt.example_policy == Options::RANDOM)
       i = example[c].any(num_original[c], random_generator);
     else if (opt.example_policy == Options::HIGHEST_PROBABILITY)
@@ -475,7 +453,7 @@ void DataSet::computeDecisionSet(Options& opt, R& random_generator) {
       getContradictingFeatures(X[i], X[j], contradicting_features);
 
       if (opt.verbosity >= Options::SOLVERINFO) {
-        cout << j << ": ";
+        cout << i << ": ";
         displayExample(cout, X[i]);
         cout << " \\ " << setw(4) << j << ":";
         displayExample(cout, X[j]);
@@ -518,7 +496,11 @@ void DataSet::computeDecisionSet(Options& opt, R& random_generator) {
 
     // make sure that the explanation contradicts the last batch of examples
     // from 1-c
-    implicant.set(candidates.find_first());
+    implicant.set((opt.feature_policy == Options::LOWEST_ENTROPY
+                       ? argMinEntropy(candidates)
+                       : (opt.feature_policy == Options::HIGHEST_ENTROPY
+                              ? argMaxEntropy(candidates)
+                              : candidates.find_first())));
 
     if (opt.verbosity >= Options::YACKING) {
       cout << " -> add " << X.size() << ": ";

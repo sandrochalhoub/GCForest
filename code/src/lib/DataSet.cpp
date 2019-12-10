@@ -78,6 +78,69 @@ instance DataSet::NOT(instance &e) const {
   return not_e;
 }
 
+void DataSet::computeBounds() {
+  for (auto y{0}; y < 2; ++y) {
+    lower_bound[y].resize(2 * numFeature(), true);
+    upper_bound[y].resize(2 * numFeature(), false);
+
+    for (auto x : example[y]) {
+      lower_bound[y] &= X[x];
+      upper_bound[y] |= X[x];
+    }
+
+    cout << "\nlb[" << y << "]=";
+    displayExample(cout, lower_bound[y]);
+    cout << endl;
+
+    cout << "\nub[" << y << "]=";
+    displayExample(cout, upper_bound[y]);
+    cout << endl;
+  }
+
+  auto inter{lower_bound[0]};
+  inter &= lower_bound[1];
+
+  cout << "\nfeatures necessary for both class 0 and 1 (" << inter.count()
+       << "): ";
+  displayExample(cout, inter);
+  cout << endl;
+
+  inter = upper_bound[0];
+  inter &= upper_bound[1];
+
+  cout << "\nfeatures allowed both in class 0 and 1 (" << inter.count()
+       << "): ";
+  displayExample(cout, inter);
+  cout << endl;
+
+  for (auto y{0}; y < 2; ++y) {
+
+    inter = lower_bound[y];
+    inter -= upper_bound[1 - y];
+
+    cout << "\nfeatures necessary for " << y << " and not allowed in "
+         << (1 - y) << " (" << inter.count() << "): ";
+    displayExample(cout, inter);
+    cout << endl;
+
+    inter = upper_bound[y];
+    inter -= upper_bound[1 - y];
+
+    cout << "\nfeatures allowed in " << y << " and not allowed in " << (1 - y)
+         << " (" << inter.count() << "): ";
+    displayExample(cout, inter);
+    cout << endl;
+
+    inter = lower_bound[y];
+    inter -= lower_bound[1 - y];
+
+    cout << "\nfeatures necessary for " << y << " and not necessary for "
+         << (1 - y) << " (" << inter.count() << "): ";
+    displayExample(cout, inter);
+    cout << endl;
+  }
+}
+
 void DataSet::computeProbabilities() {
   double very_low{log(1.0 / static_cast<double>(1000 * size()))};
 
@@ -206,6 +269,8 @@ void DataSet::computeEntropies() {
 
 double DataSet::entropy(const int feature) {
 
+  // cout << "compute entropy of " << featureName(feature) << endl;
+
   double feature_entropy{0};
 
   int not_feature = (feature + numFeature());
@@ -216,8 +281,9 @@ double DataSet::entropy(const int feature) {
     feature_count[y][not_feature] = 0;
   }
 
-  for (auto y{0}; y < 2; ++y)
+  for (auto y{0}; y < 2; ++y) {
     for (auto e : example[y]) {
+      // cout << X[e] << endl;
       if (X[e][feature] != X[e][not_feature])
         ++feature_count[y][truef[X[e][feature]]];
       else {
@@ -226,6 +292,10 @@ double DataSet::entropy(const int feature) {
 				feature_count[y][not_feature] += .5;
 			}
     }
+
+    // cout << " - class " << y << ": " << feature_count[y][feature] << "/" <<
+    // feature_count[y][not_feature] << endl;
+  }
 
   // double entropy{0};
   double total_size{
@@ -260,6 +330,8 @@ double DataSet::entropy(const int feature) {
     // H(Y|X) = \sum_x Pr(X=x) H(Y|X=x)
     feature_entropy += (entropy_x * val_size / total_size);
   }
+
+  // cout << " ==> " << feature_entropy << endl << endl;
 
   return feature_entropy;
 }
@@ -336,9 +408,15 @@ bool DataSet::classify(instance &x) {
   return proba[1] > proba[0];
 }
 
+const std::string DataSet::featureName(const int i) const {
+  // const string name{};
+  return (i < numFeature() ? feature_label[i]
+                           : "¬" + feature_label[i % numFeature()]);
+}
+
 std::ostream &DataSet::write(std::ostream &os, string &delimiter,
                              string &wildcard, const bool matrix,
-                             const bool header) const {
+                             const bool original_header) const {
 
   SparseSet relevant_feature(numFeature());
   relevant_feature.fill();
@@ -355,7 +433,11 @@ std::ostream &DataSet::write(std::ostream &os, string &delimiter,
       relevant_feature.remove_back(i);
   }
 
-  if (header) {
+  if (original_header) {
+    for (auto i : relevant_feature)
+      os << feature_label[i] << delimiter << " ";
+    os << "label" << endl;
+  } else {
     for (auto i : relevant_feature)
       os << i << delimiter << " ";
     os << "label" << endl;
@@ -467,35 +549,40 @@ std::ostream &DataSet::displayExample(std::ostream &os,
   int last;
   size_t n{e.count()};
 
-  os << "(";
-  for (auto f{0}; f < 2 * numFeature(); ++f) {
-    if (e[f]) {
+  os << "{";
+  if (n == 0) {
+    os << "}";
+  } else {
 
-      // os << "[" << f << "]";
+    for (auto f{0}; f < 2 * numFeature(); ++f) {
+      if (e[f]) {
 
-      if (!--n) {
-        if (flag)
-          os << ",";
-        os << pretty(f) << ")"; // feature_label[f];
-        break;
+        // os << "[" << f << "]";
+
+        if (!--n) {
+          if (flag)
+            os << ",";
+          os << pretty(f) << "}"; // feature_label[f];
+          break;
+        }
+
+        if (f < 2 * numFeature() - 1 and e[f + 1])
+          nxt = true;
+        else
+          nxt = false;
+
+        if (!nxt or f != last + 1 or f == numFeature()) {
+          if (flag)
+            os << ",";
+          os << pretty(f); // feature_label[f];
+          flag = true;
+        } else if (flag) {
+          os << "..";
+          flag = false;
+        }
+
+        last = f;
       }
-
-      if (f < 2 * numFeature() - 1 and e[f + 1])
-        nxt = true;
-      else
-        nxt = false;
-
-      if (!nxt or f != last + 1 or f == numFeature()) {
-        if (flag)
-          os << ",";
-        os << pretty(f); // feature_label[f];
-        flag = true;
-      } else if (flag) {
-        os << "..";
-        flag = false;
-      }
-
-      last = f;
     }
   }
 

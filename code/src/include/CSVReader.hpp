@@ -5,7 +5,7 @@
 #include <sstream>
 
 #include <boost/algorithm/string.hpp>
-
+#include <boost/algorithm/string/trim.hpp>
 
 namespace csv
 {
@@ -33,6 +33,8 @@ void read(const std::string &fn, header_declaration notify_header,
     while (getline(ifs, line)) {
       row.clear();
       boost::algorithm::split(row, line, boost::is_any_of(delimeter));
+      for (auto i{0}; i < row.size(); ++i)
+        boost::algorithm::trim(row[i]);
       notify_data(row);
     }
 

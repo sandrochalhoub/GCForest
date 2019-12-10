@@ -46,6 +46,13 @@ public:
   enum feature_policy { MIN = 0, LOWEST_ENTROPY, HIGHEST_ENTROPY };
   int feature_policy;
 
+  string delimiter;
+  string wildcard;
+  bool original;
+  bool reduced;
+
+  string format;
+
   int seed;
 
   bool print_sol;
@@ -62,10 +69,14 @@ public:
   Options(){};
   Options(const Options &opt)
       : cmdline(opt.cmdline), instance_file(opt.instance_file),
-        verbosity(opt.verbosity), seed(opt.seed), print_sol(opt.print_sol),
-        print_par(opt.print_par), print_mod(opt.print_mod),
-        print_ins(opt.print_ins), print_sta(opt.print_sta),
-        print_cmd(opt.print_cmd) {}
+        verbosity(opt.verbosity), class_policy(opt.class_policy),
+        example_policy(opt.example_policy), feature_policy(opt.feature_policy),
+        delimiter(opt.delimiter), wildcard(opt.wildcard),
+        original(opt.original), reduced(opt.reduced), format(opt.format),
+        seed(opt.seed), print_sol(opt.print_sol), print_par(opt.print_par),
+        print_mod(opt.print_mod), print_ins(opt.print_ins),
+        print_sta(opt.print_sta), print_cmd(opt.print_cmd),
+        verified(opt.verified), sample(opt.sample) {}
 
   ostream &display(ostream &os);
 };

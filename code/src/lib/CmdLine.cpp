@@ -117,6 +117,22 @@ Options parse(int argc, char *argv[]) {
   cmd.add<ValueArg<string>>(opt.output, "o", "output", "output file", false, "",
                             "string");
 
+  cmd.add<ValueArg<string>>(opt.delimiter, "", "delimiter",
+                            "csv format delimiter", false, ",", "string");
+
+  cmd.add<ValueArg<string>>(opt.wildcard, "", "wildcard", "csv format wildcard",
+                            false, "*", "string");
+
+  cmd.add<SwitchArg>(opt.original, "", "original",
+                     "output with original feature names", false);
+
+  cmd.add<SwitchArg>(opt.reduced, "", "reduced", "output in list format",
+                     false);
+
+  cmd.add<ValueArg<string>>(opt.format, "", "format",
+                            "input format (csv or txt)", false, "csv",
+                            "string");
+
   cmd.add<ValueArg<int>>(
       opt.verbosity, "", "verbosity",
       "verbosity level (0:silent,1:quiet,2:improvements only,3:verbose", false,

@@ -46,15 +46,21 @@ int main(int argc, char *argv[]) {
 
   TypedDataSet input;
 
-  csv::read(
-      opt.instance_file,
-      [&](vector<string> &f) { 
-				input.setFeatures(f.begin(), f.end() - 1); },
-      [&](vector<string> &data) {
-        auto y = data.back();
-        data.pop_back();
-        input.addExample(data.begin(), data.end(), y);
-      });
+  if (opt.format == "csv")
+    csv::read(
+        opt.instance_file,
+        [&](vector<string> &f) { input.setFeatures(f.begin(), f.end() - 1); },
+        [&](vector<string> &data) {
+          auto y = data.back();
+          data.pop_back();
+          input.addExample(data.begin(), data.end(), y);
+        });
+  else
+    txt::read(opt.instance_file, [&](vector<string> &data) {
+      auto y = data.back();
+      data.pop_back();
+      input.addExample(data.begin(), data.end(), y);
+    });
 
   DataSet base;
 
@@ -74,6 +80,10 @@ int main(int argc, char *argv[]) {
     cout << "c filter base\n";
 
   base.filter();
+
+  // base.computeBounds();
+
+  // exit(1);
 
   if (opt.verbosity >= Options::QUIET)
     if (base.count() < count)
@@ -120,9 +130,10 @@ int main(int argc, char *argv[]) {
   if (opt.output != "") {
     ofstream outfile(opt.output, std::ios_base::out);
 
-		string del=",";
-		string wld="*";
-    base.write(outfile, del, wld, true, true);
+    // string del=",";
+    string wld = "*";
+    base.write(outfile, opt.delimiter, opt.wildcard, !opt.reduced,
+               opt.original);
 
     outfile.close();
   }
