@@ -199,10 +199,10 @@ public:
 
     ClassicEncoding<T>::encode(beg, end);
 
-    cout << "unary order encode\n";
-    for (auto v : ClassicEncoding<T>::value_set)
-      cout << " " << v;
-    cout << endl;
+    // cout << "unary order encode\n";
+    // for (auto v : ClassicEncoding<T>::value_set)
+    //   cout << " " << v;
+    // cout << endl;
 
     auto vb{ClassicEncoding<T>::value_set.begin()};
     auto ve{ClassicEncoding<T>::value_set.end() - 1};
@@ -231,10 +231,10 @@ public:
 
     ClassicEncoding<T>::encode(beg, end);
 
-    cout << "unary direct encode\n";
-    for (auto v : ClassicEncoding<T>::value_set)
-      cout << " " << v;
-    cout << endl;
+    // cout << "unary direct encode\n";
+    // for (auto v : ClassicEncoding<T>::value_set)
+    //   cout << " " << v;
+    // cout << endl;
 
     auto vb{ClassicEncoding<T>::value_set.begin()};
     auto ve{ClassicEncoding<T>::value_set.end()};
@@ -394,11 +394,11 @@ public:
           int_encoder.push_back(enc);
         }
 
-        cout << "int (" << feature_rank[f] << "/" << int_encoder.size() << "):";
-        for (auto v : int_buffer)
-          cout << "\n" << v << " -> " << enc->getEncoding(v);
-        cout << endl;
-        cout << endl;
+        // cout << "int (" << feature_rank[f] << "/" << int_encoder.size() << "):";
+        // for (auto v : int_buffer)
+        //   cout << "\n" << v << " -> " << enc->getEncoding(v);
+        // cout << endl;
+        // cout << endl;
 
       } else if (feature_type[f] == FLOAT) {
 
@@ -408,12 +408,12 @@ public:
         enc->encode(float_buffer.begin(), float_buffer.end());
         float_encoder.push_back(enc);
 
-        cout << "float (" << feature_rank[f] << "/" << float_encoder.size()
-             << "):";
-        for (auto v : float_buffer)
-          cout << "\n" << v << " -> " << enc->getEncoding(v);
-        cout << endl;
-        cout << endl;
+        // cout << "float (" << feature_rank[f] << "/" << float_encoder.size()
+        //      << "):";
+        // for (auto v : float_buffer)
+        //   cout << "\n" << v << " -> " << enc->getEncoding(v);
+        // cout << endl;
+        // cout << endl;
 
       } else if (feature_type[f] == SYMBOL) {
 
@@ -430,12 +430,12 @@ public:
           symb_encoder.push_back(enc);
         }
 
-        cout << "str (" << feature_rank[f] << "/" << symb_encoder.size()
-             << "):";
-        for (auto v : str_buffer)
-          cout << "\n" << v << " -> " << enc->getEncoding(v);
-        cout << endl;
-        cout << endl;
+        // cout << "str (" << feature_rank[f] << "/" << symb_encoder.size()
+        //      << "):";
+        // for (auto v : str_buffer)
+        //   cout << "\n" << v << " -> " << enc->getEncoding(v);
+        // cout << endl;
+        // cout << endl;
       }
     }
 
