@@ -61,8 +61,15 @@ public:
   // returns the word associated to value x
   virtual const word &getEncoding(T &x) const = 0;
 
-  // returns (in string format) the test x[i]
-  virtual const string getLabel(const int i) const = 0;
+  virtual size_t size() const = 0;
+	
+	virtual const string getType() const = 0;
+
+  // returns (in string format) the test corresponding to x[i]==v
+  virtual const string getLabel(const int i, const int v) const = 0;
+  virtual const string getLabel(const int i) const {
+    return this->getLabel(i, 1);
+  }
 
   //
   // const bool test()
@@ -76,6 +83,8 @@ protected:
   vector<word> lit;
 
 public:
+  virtual size_t size() const { return 1; }
+
   // encode the values of the iterator
   virtual void encode(typename std::vector<T>::iterator beg,
                       typename std::vector<T>::iterator end) {
@@ -90,8 +99,21 @@ public:
   virtual const word &getEncoding(T &x) const {
     return lit[(x == value_set[1])];
   }
+	
+	virtual const string getType() const {
+    std::stringstream ss;
+    ss << "trivial " << value_set[0] << " " << value_set[1];
+		return ss.str();
+	}
 
   // returns (in string format) the test x[i]
+  virtual const string getLabel(const int i, const int v) const {
+    assert(i == 0);
+    std::stringstream ss;
+    ss << "=" << value_set[v];
+    return ss.str();
+  }
+
   virtual const string getLabel(const int i) const { return ""; }
 
   //
@@ -127,6 +149,11 @@ public:
 template <typename T> class BinaryDirect : public ClassicEncoding<T> {
 
 public:
+  bool is_signed;
+  size_t encoding_size;
+
+  virtual size_t size() const { return encoding_size; }
+
   // encode the values of the iterator
   // template <typename RandomIt>
   void encode(typename std::vector<T>::iterator beg,
@@ -139,31 +166,40 @@ public:
     auto minv{*vb};
     auto maxv{*(ve - 1)};
 
-    auto is_signed{(minv < 0 && maxv > 0)};
+    is_signed = (minv < 0 && maxv > 0);
 
-    auto encoding_size{is_signed +
-                       max((minv < 0 ? ceil(log2(abs(minv) + 1)) : 0),
-                           (maxv > 0 ? ceil(log2(maxv + 1)) : 0))};
+    encoding_size = is_signed + max((minv < 0 ? ceil(log2(abs(minv) + 1)) : 0),
+                                    (maxv > 0 ? ceil(log2(maxv + 1)) : 0));
 
     for (auto i{vb}; i != ve; ++i) {
       dynamic_bitset<> e;
       if (is_signed)
-        e.resize(encoding_size, abs(*i * 2) + is_signed);
+        e.resize(encoding_size, abs(*i * 2) + (minv < 0));
       else
         e.resize(encoding_size, *i);
       ClassicEncoding<T>::encoding_map[*i] = e;
     }
   }
 
+	virtual const string getType() const {return "binary-direct";}
+
   // returns (in string format) the test x[i]
-  const string getLabel(const int i) const {
-    return ":2^" + to_string(ClassicEncoding<T>::value_set[i]);
+  const string getLabel(const int i, const int v) const {
+    if (i == 0)
+      return "<0";
+    std::stringstream ss;
+    ss << "&2^" << i << (v ? "!=0" : "=0");
+    return ss.str();
   }
 };
 
 template <typename T> class BinaryScaled : public ClassicEncoding<T> {
 
 public:
+  size_t encoding_size;
+
+  virtual size_t size() const { return encoding_size; }
+
   // encode the values of the iterator
   // template <typename RandomIt>
   void encode(typename std::vector<T>::iterator beg,
@@ -176,7 +212,7 @@ public:
     auto minv{*vb};
     auto maxv{*(ve - 1)};
 
-    auto encoding_size{ceil(log2(vb - ve))};
+    encoding_size = ceil(log2(vb - ve));
 
     for (auto i{vb}; i != ve; ++i) {
       dynamic_bitset<> e;
@@ -184,14 +220,20 @@ public:
       ClassicEncoding<T>::encoding_map[*i] = e;
     }
   }
+	
+	virtual const string getType() const {return "binary-scaled";}
 
   // returns (in string format) the test x[i]
-  const string getLabel(const int i) const { return "&=?"; }
+  const string getLabel(const int i, const int v) const { return "&=?"; }
 };
 
 template <typename T> class Order : public ClassicEncoding<T> {
 
 public:
+  virtual size_t size() const {
+    return ClassicEncoding<T>::value_set.size() - 1;
+  }
+
   // encode the values of the iterator
   // template <typename RandomIt>
   void encode(typename std::vector<T>::iterator beg,
@@ -214,16 +256,22 @@ public:
       ClassicEncoding<T>::encoding_map[*i] = e;
     }
   }
+	
+	virtual const string getType() const {return "order";}
 
   // returns (in string format) the test x[i]
-  const string getLabel(const int i) const {
-    return "<=" + to_string(ClassicEncoding<T>::value_set[i]);
+  const string getLabel(const int i, const int v) const {
+    std::stringstream ss;
+    ss << (v ? "<=" : ">") << ClassicEncoding<T>::value_set[i];
+    return ss.str();
   }
 };
 
 template <typename T> class Direct : public ClassicEncoding<T> {
 
 public:
+  virtual size_t size() const { return ClassicEncoding<T>::value_set.size(); }
+
   // encode the values of the iterator
   // template <typename RandomIt>
   void encode(typename std::vector<T>::iterator beg,
@@ -248,11 +296,13 @@ public:
       ClassicEncoding<T>::encoding_map[*i] = e;
     }
   }
+	
+	virtual const string getType() const {return "direct";}
 
   // returns (in string format) the test x[i]
-  const string getLabel(const int i) const {
+  const string getLabel(const int i, const int v) const {
     std::stringstream ss;
-    ss << "=" << ClassicEncoding<T>::value_set[i];
+    ss << (v ? "=" : "!=") << ClassicEncoding<T>::value_set[i];
     return ss.str();
   }
 };
@@ -280,12 +330,16 @@ public:
   std::vector<std::vector<std::string>> symb_value;
 
   std::vector<string> label;
+  string max_label;
+  string min_label;
   //@}
 
 private:
   std::vector<std::string> str_buffer;
   std::vector<int> int_buffer;
   std::vector<float> float_buffer;
+
+  // size_t threshold{3};
 
   template <typename T>
   void computeSet(const std::vector<T> &elts, std::vector<T> &set) {
@@ -384,12 +438,19 @@ public:
         computeSet(int_value[feature_rank[f]], int_buffer);
 
         Encoding<int> *enc;
-        if (int_buffer.size() > 2) {
-          enc = new Order<int>();
+        if (int_buffer.size() == 2) {
+          enc = new TrivialEncoding<int>();
           enc->encode(int_buffer.begin(), int_buffer.end());
           int_encoder.push_back(enc);
-        } else {
-          enc = new TrivialEncoding<int>();
+        }
+        // else if(int_buffer.size() > threshold and log2(*(int_buffer.begin()))
+        // + log2(*(int_buffer.rbegin())) + 1 < int_buffer.size()) {
+        //           enc = new BinaryDirect<int>();
+        //           enc->encode(int_buffer.begin(), int_buffer.end());
+        //           int_encoder.push_back(enc);
+        //       	}
+        else {
+          enc = new Order<int>();
           enc->encode(int_buffer.begin(), int_buffer.end());
           int_encoder.push_back(enc);
         }
@@ -439,6 +500,9 @@ public:
       }
     }
 
+    min_label = *std::min_element(label.begin(), label.end());
+    max_label = *std::max_element(label.begin(), label.end());
+
     auto bin_feature_count{0};
     for (auto i{0}; i < size(); ++i) {
       word binex;
@@ -473,7 +537,7 @@ public:
       // binex.resize(2 * binex.size());
       word db;
       bin.duplicate_format(binex, db);
-      bin.add(db, label[i] == label[0]);
+      bin.add(db, label[i] != min_label);
     }
 
   }
@@ -505,6 +569,40 @@ public:
       os << ": " << label[e] << endl;
     }
 
+    return os;
+  }
+
+  std::ostream &writeMapping(std::ostream &os) const {
+    os << "# label 2 " << min_label << " " << max_label;
+    for (int f{0}; f < feature_label.size(); ++f) {
+      os << "\n# " << feature_label[f];
+      dtype t{feature_type[f]};
+      int r{feature_rank[f]};
+      switch (t) {
+      case INTEGER:
+        os << " " << int_encoder[r]->getType() ;
+				if(int_encoder[r]->size() > 1)
+					os << " " << int_encoder[r]->size();
+        for (int j{0}; j < int_encoder[r]->size(); ++j)
+          os << " " << int_encoder[r]->getLabel(j);
+        break;
+      case FLOAT:
+        os << " " << float_encoder[r]->getType() ;
+				if(float_encoder[r]->size() > 1)
+					os << " " << float_encoder[r]->size();
+        for (int j{0}; j < float_encoder[r]->size(); ++j)
+          os << " " << float_encoder[r]->getLabel(j);
+        break;
+      case SYMBOL:
+        os << " " << symb_encoder[r]->getType() ;
+				if(symb_encoder[r]->size() > 1)
+					os << " " << symb_encoder[r]->size();
+        for (int j{0}; j < symb_encoder[r]->size(); ++j)
+          os << " " << symb_encoder[r]->getLabel(j);
+        break;
+      }
+    }
+    os << endl;
     return os;
   }
 };

@@ -53,6 +53,8 @@ public:
 
   string format;
 
+  bool mapping;
+
   int seed;
 
   bool print_sol;
@@ -73,10 +75,10 @@ public:
         example_policy(opt.example_policy), feature_policy(opt.feature_policy),
         delimiter(opt.delimiter), wildcard(opt.wildcard),
         original(opt.original), reduced(opt.reduced), format(opt.format),
-        seed(opt.seed), print_sol(opt.print_sol), print_par(opt.print_par),
-        print_mod(opt.print_mod), print_ins(opt.print_ins),
-        print_sta(opt.print_sta), print_cmd(opt.print_cmd),
-        verified(opt.verified), sample(opt.sample) {}
+        mapping(opt.mapping), seed(opt.seed), print_sol(opt.print_sol),
+        print_par(opt.print_par), print_mod(opt.print_mod),
+        print_ins(opt.print_ins), print_sta(opt.print_sta),
+        print_cmd(opt.print_cmd), verified(opt.verified), sample(opt.sample) {}
 
   ostream &display(ostream &os);
 };

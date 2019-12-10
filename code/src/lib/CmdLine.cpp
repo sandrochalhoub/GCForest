@@ -157,6 +157,8 @@ Options parse(int argc, char *argv[]) {
                          "entropy,2:highest entropy)",
                          false, 1, "int");
 
+  cmd.add<SwitchArg>(opt.mapping, "", "mapping", "add legend to output", false);
+
   cmd.add<ValueArg<int>>(opt.seed, "", "seed", "random seed", false, 12345,
                          "int");
 

@@ -108,10 +108,10 @@ int main(int argc, char *argv[]) {
 
     base.computeDecisionSet(opt, random_generator);
 
-		if(opt.example_policy >= Options::LOWEST_PROBABILITY)
-			base.computeProbabilities();
-		else if(opt.feature_policy != Options::MIN)
-			base.computeEntropies();
+    if (opt.example_policy >= Options::LOWEST_PROBABILITY)
+      base.computeProbabilities();
+    else if (opt.feature_policy != Options::MIN)
+      base.computeEntropies();
 
     if (opt.verbosity >= Options::NORMAL)
       cout << base << endl;
@@ -130,8 +130,9 @@ int main(int argc, char *argv[]) {
   if (opt.output != "") {
     ofstream outfile(opt.output, std::ios_base::out);
 
-    // string del=",";
-    string wld = "*";
+    if (opt.mapping)
+      input.writeMapping(outfile);
+
     base.write(outfile, opt.delimiter, opt.wildcard, !opt.reduced,
                opt.original);
 
