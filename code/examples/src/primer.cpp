@@ -94,7 +94,7 @@ int main(int argc, char *argv[]) {
 		base.computeProbabilities();
 	else if(opt.feature_policy != Options::MIN)
 		base.computeEntropies();
-
+	
   if (opt.verbosity >= Options::NORMAL)
     cout << base << endl << endl;
   if (opt.verbosity >= Options::QUIET)

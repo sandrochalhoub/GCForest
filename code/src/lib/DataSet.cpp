@@ -50,6 +50,10 @@ void DataSet::duplicate_format(const instance& from, instance& to) const {
 
 instance &DataSet::operator[](const size_t idx) { return X[idx]; }
 
+int DataSet::getClass(const int i) const {
+	return example[1].contain(i);
+}
+
 void DataSet::addFeature(string &f) { feature_label.push_back(f); }
 
 void DataSet::add(instance& x, const bool y) {
@@ -141,70 +145,56 @@ void DataSet::computeBounds() {
   }
 }
 
+// [log of the] probability of instance x in class y
+double DataSet::p_x_given_y(const instance& x, const int y) const {
+  double proba_x_y{0};
+  for (auto f{0}; f < numFeature(); ++f) {
+    auto not_f{f + numFeature()};
+    if (x[f] == x[not_f])
+      --proba_x_y; // x may have f or not(f) with equiprobability
+    else if (x[f])
+      proba_x_y += feature_probability[y][f];
+    else
+      proba_x_y += feature_probability[y][not_f];
+  }
+
+  return proba_x_y;
+}
+
 void DataSet::computeProbabilities() {
   double very_low{log(1.0 / static_cast<double>(1000 * size()))};
 
-  // if(feature_count[0].empty() or feature_count[1].empty())
   computeEntropies();
 
-	
   for (auto y{0}; y < 2; ++y) {
-		
-		// cout << "class " << y << endl;
-		
-		
     feature_probability[y].resize(2 * numFeature());
     auto total{static_cast<double>(example[y].count())};
-
     for (auto f{0}; f < 2 * numFeature(); ++f) {
-			
-			// cout << " -feature " << pretty(f) << ": (" << feature_count[y][f] << "/" << total << ") = "  ;
-
       if (feature_count[y][f] == 0) {
         feature_probability[y][f] = very_low;
-				// cout << "0\n";
       } else {
         feature_probability[y][f] =
             log(static_cast<double>(feature_count[y][f]) / total);
-				// cout << (static_cast<double>(feature_count[y][f]) / total) << endl;
-			}
-			
+      }
     }
-
-    // cout << y << ":";
-    // for (auto f{0}; f < numFeature(); ++f)
-    //   cout << " " << setw(5) << setprecision(3)
-    //        << (static_cast<double>(feature_count[y][f]) / total);
-    // cout << endl << "  ";
-    // for (auto f{numFeature()}; f < 2 * numFeature(); ++f)
-    //   cout << " " << setw(5) << setprecision(3)
-    //        << (static_cast<double>(feature_count[y][f]) / total);
-    // cout << endl;
-    //
-    // cout << y << ":";
-    // for (auto f{0}; f < numFeature(); ++f)
-    //   cout << " " << setw(5) << setprecision(3) << feature_probability[y][f];
-    // cout << endl << "  ";
-    // for (auto f{numFeature()}; f < 2 * numFeature(); ++f)
-    //   cout << " " << setw(5) << setprecision(3) << feature_probability[y][f];
-    // cout << endl;
   }
 
   example_probability.resize(size());
   for (auto y{0}; y < 2; ++y)
     for (auto x : example[y]) {
-      double proba_x{0};
-      for (auto f{0}; f < numFeature(); ++f) {
-        auto not_f{f + numFeature()};
-        if (X[x][f] == X[x][not_f])
-          --proba_x; //
-        else if (X[x][f])
-          proba_x += feature_probability[y][f];
-        else
-          proba_x += feature_probability[y][not_f];
-      }
-
-      example_probability[x] = proba_x;
+      // double proba_x{0};
+      // for (auto f{0}; f < numFeature(); ++f) {
+      //   auto not_f{f + numFeature()};
+      //   if (X[x][f] == X[x][not_f])
+      //     --proba_x; //
+      //   else if (X[x][f])
+      //     proba_x += feature_probability[y][f];
+      //   else
+      //     proba_x += feature_probability[y][not_f];
+      // }
+      //
+      // example_probability[x] = proba_x;
+      example_probability[x] = p_x_given_y(X[x], y);
     }
 }
 
@@ -385,7 +375,42 @@ void DataSet::close() {
       literal_count[e] = X[e].count();
 }
 
-bool DataSet::classify(instance &x) {
+void DataSet::bayesianPrediction(instance &x, double *prob) const {
+  double l_p_x[2] = {p_x_given_y(x, 0), p_x_given_y(x, 1)};
+
+  double total_size{static_cast<double>(example[0].size() + example[1].size())};
+
+  double p[2] = {static_cast<double>(example[0].size()) / total_size,
+                 static_cast<double>(example[0].size()) / total_size};
+
+  // P(A|B) = P(B|A)P(A) / P(B)
+  // A = prediction is y
+  // B = instance is x
+  // P(y|x) = P(x|y)P(y) / P(x)
+  // P(x|y) = 2^l_p_x[y]
+  // P(y) = p[y]
+  // P(x) = \sum_k 2^l_p_x[k] * p[k]
+
+  // cout << "\nBayesian prediction for " << x << endl;
+
+  double px{0};
+  for (auto y{0}; y < 2; ++y)
+    px += pow(2.0, l_p_x[y]) * p[y];
+
+  // for (auto y{0}; y < 2; ++y) {
+  //   cout << "P(x|" << y << ")=" << pow(2.0, l_p_x[y]) << endl;
+  //   cout << "P(" << y << ")=" << p[y] << endl;
+  //   cout << "P(x)=" << px << endl;
+  //   cout << "P(" << y << "|x)=" << pow(2.0, l_p_x[y]) * p[y] / px << endl;
+  //               cout << "P(" << y << "|x)=" << pow(2.0,(l_p_x[y] + log2(p[y]) - log2(px))) << endl;
+  // }
+  // cout << endl;
+	
+  for (auto y{0}; y < 2; ++y) 
+    prob[y] = pow(2.0, l_p_x[y]) * p[y] / px ;
+}
+
+bool DataSet::classify(instance &x) const {
   for (auto c{0}; c < 2; ++c)
     for (auto e : example[c])
       if (X[e].is_subset_of(x))

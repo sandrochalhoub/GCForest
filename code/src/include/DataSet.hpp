@@ -91,6 +91,7 @@ public:
   /*!@name Accessors*/
   //@{
   instance &operator[](const size_t idx);
+	int getClass(const int i) const;
 
   // add a new example / explanation in the duplicated format
   void add(instance &x_, const bool y);
@@ -116,6 +117,8 @@ public:
   // returns an instance with the relevant bits of e flipped and irrelevant bits
   // unchanged (=0)
   instance NOT(instance &e) const;
+
+  double p_x_given_y(const instance& x, const int y) const;
 
   // compute the entropy of the feature
   double entropy(const int feature);
@@ -176,13 +179,18 @@ public:
   // add them to examples and remove entailed ones
   template <typename R>
   void computeDecisionSet(Options &opt, R &random_generator);
+	
+  template <typename R>
+  void computeDecisionSetSorted(Options &opt, R &random_generator);
 
   // TODO
   void close();
 
   // TODO (return a preiction based on the explanations -- if the instance is
   // not covered a probabilistic argument is used)
-  bool classify(instance &x);
+  bool classify(instance &x) const;
+
+  void bayesianPrediction(instance &x, double *p) const;
   //@}
 
   /*!@name Printing*/
@@ -333,6 +341,222 @@ int DataSet::argMaxProbability(ExampleIt b, ExampleIt e) const {
     return example_probability[a] < example_probability[b];
   });
 }
+
+template <typename R>
+void DataSet::computeDecisionSetSorted(Options& opt, R& random_generator) {
+  auto c{0};
+
+	double p[2];
+	vector<double> bayes;
+	vector<int> sorted[2];
+	
+	
+	
+	bayes.resize(X.size());
+	for(auto y{0}; y<2; ++y) {
+		
+		cout << endl;
+		
+		sorted[y].resize(example[y].size());
+		for(auto i : example[y]) {
+			sorted[y].push_back(i);
+			bayesianPrediction(X[i], p);
+			bayes[i] = p[y];
+		}
+		std::sort(sorted[y].begin(), sorted[y].end(), [&](const int i, const int j) {return bayes[i] > bayes[j];});
+		
+		for(auto i : sorted[y])
+		{
+			cout << X[i] << " " << bayes[i] << endl;
+		}
+	}
+	
+
+  instance contradicting_features;
+  instance candidates;
+  instance implicant;
+
+  vector<int> removed;
+
+  contradicting_features.resize(2 * numFeature());
+
+  auto last_example{X.size() - 1};
+  size_t end[2] = {
+      static_cast<size_t>(example[0].end() - example[0].get_iterator(0)),
+      static_cast<size_t>(example[1].end() - example[1].get_iterator(0))};
+
+  size_t num_original[2];
+  for (auto i{0}; i < 2; ++i)
+    num_original[i] = example[i].count();
+
+  // vector<int> exs;
+  while (true) {
+
+    if (num_original[0] + num_original[1] == 0)
+      break;
+    if (num_original[1] == 0)
+      c = 0;
+    else if (num_original[0] == 0)
+      c = 1;
+    else if (opt.class_policy == Options::BIASED)
+      c = ((random_generator() % (num_original[0] + num_original[1])) >
+           num_original[0]);
+    else if (opt.class_policy == Options::ANTI)
+      c = ((random_generator() % (num_original[0] + num_original[1])) <
+           num_original[0]);
+    else if (opt.class_policy == Options::UNIFORM)
+      c = random_generator() % 2;
+    else if (opt.class_policy == Options::POSITIVE)
+      c = 1;
+    else if (opt.class_policy == Options::NEGATIVE)
+      c = 0;
+    else if (opt.class_policy == Options::SMALLEST)
+      c = (num_original[0] > num_original[1]);
+    else if (opt.class_policy == Options::LARGEST)
+      c = (num_original[0] < num_original[1]);
+    else
+      c = 1 - c;
+    // }
+
+    auto i{0};
+
+    if (opt.example_policy == Options::RANDOM)
+      i = example[c].any(num_original[c], random_generator);
+    else if (opt.example_policy == Options::HIGHEST_PROBABILITY)
+      i = argMaxProbability(example[c].begin(),
+                            example[c].get_iterator(end[c]));
+    else if (opt.example_policy == Options::LOWEST_PROBABILITY)
+      i = argMinProbability(example[c].begin(),
+                            example[c].get_iterator(end[c]));
+    else if (opt.example_policy == Options::FIRST)
+      i = example[c].front();
+    else if (opt.example_policy < Options::LOWEST_PROBABILITY)
+      i = randomArgMinProbability(example[c].begin(),
+                                  example[c].get_iterator(end[c]),
+                                  -opt.example_policy, random_generator);
+    else
+      i = randomArgMaxProbability(example[c].begin(),
+                                  example[c].get_iterator(end[c]),
+                                  opt.example_policy - 1, random_generator);
+
+    assert(i <= last_example);
+
+    // now X[i] is the first remaining example of class c
+    if (opt.verbosity >= Options::SOLVERINFO) {
+      cout << "compute a rule from the " << (c ? "positive" : "negative")
+           << " example " << i << ":";
+      displayExample(cout, X[i]);
+      cout << endl;
+    }
+
+    // implicant is empty
+    implicant.clear();
+    implicant.resize(2 * numFeature(), false);
+
+    // cnadidates contains all features
+    candidates.clear();
+    candidates.resize(2 * numFeature(), true);
+
+    // example[1 - c] contains both examples and explanations
+    // for (auto j : example[1 - c]) {
+
+    // cout << example[1 - c] << endl;
+    for (auto jptr{example[1 - c].rbegin()}; jptr != example[1 - c].rend();
+         ++jptr) {
+      auto j{*jptr};
+      // cout << " " << j << endl;
+
+      // there is already a feature of the explanation that contradicts X[j],
+      // so no need to take X[j] into account
+      getContradictingFeatures(X[j], implicant, contradicting_features);
+      if (!contradicting_features.none()) {
+        if (opt.verbosity >= Options::SOLVERINFO) {
+          cout << "skip " << j << " = ";
+          displayExample(cout, X[j]);
+          cout << " b/c it is already covered\n";
+        }
+        continue;
+      }
+
+      // X[j] satisfies the current explanation, so we need to add at least
+      // one contradicting feature among:
+      getContradictingFeatures(X[i], X[j], contradicting_features);
+
+      if (opt.verbosity >= Options::SOLVERINFO) {
+        cout << i << ": ";
+        displayExample(cout, X[i]);
+        cout << " \\ " << setw(4) << j << ":";
+        displayExample(cout, X[j]);
+        cout << " = ";
+        displayExample(cout, contradicting_features);
+      }
+
+      // this should not happen
+      if (contradicting_features.none()) {
+        if (opt.verbosity >= Options::SOLVERINFO)
+          cout << " inconsistent example\?\?!\n";
+        continue;
+      }
+
+      // check if the contradicting features intersect the current set of
+      // candidates
+      if (!candidates.intersects(contradicting_features)) {
+
+        // if not, then we need to add one of the contradicted literals in the
+        // explanation and start with a fresh set of candidates
+        implicant.set((opt.feature_policy == Options::LOWEST_ENTROPY
+                           ? argMinEntropy(candidates)
+                           : (opt.feature_policy == Options::HIGHEST_ENTROPY
+                                  ? argMaxEntropy(candidates)
+                                  : candidates.find_first())));
+        candidates.clear();
+        candidates.resize(2 * numFeature(), true);
+      }
+      // make sure that the explanation will contradict X[j]
+      candidates &= contradicting_features;
+
+      if (opt.verbosity >= Options::SOLVERINFO) {
+        cout << " -> ";
+        displayExample(cout, candidates);
+        cout << " ";
+        displayExample(cout, implicant);
+        cout << endl;
+      }
+    }
+
+    // make sure that the explanation contradicts the last batch of examples
+    // from 1-c
+    implicant.set((opt.feature_policy == Options::LOWEST_ENTROPY
+                       ? argMinEntropy(candidates)
+                       : (opt.feature_policy == Options::HIGHEST_ENTROPY
+                              ? argMaxEntropy(candidates)
+                              : candidates.find_first())));
+
+    if (opt.verbosity >= Options::YACKING) {
+      cout << " -> add " << X.size() << ": ";
+      displayExample(cout, implicant);
+      cout << " (" << implicant.count() << "/" << implicant.size() << ")"
+           << endl
+           << endl;
+    }
+
+    // add the explanation to example[c] and remove all the examples that are
+    // entailed (they're into removed)
+    addExplanation(implicant, c, last_example, removed);
+
+    assert(removed.size() <= num_original[c]);
+    num_original[c] -= removed.size();
+
+    if (opt.verbosity >= Options::SOLVERINFO)
+      for (auto e : removed) {
+        cout << " - remove " << e << ": ";
+        displayExample(cout, X[e]);
+        cout << endl;
+      }
+  }
+}
+
+
 
 template <typename R>
 void DataSet::computeDecisionSet(Options& opt, R& random_generator) {
