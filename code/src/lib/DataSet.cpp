@@ -161,7 +161,7 @@ double DataSet::p_x_given_y(const instance& x, const int y) const {
   return proba_x_y;
 }
 
-void DataSet::computeProbabilities() {
+void DataSet::computeProbabilities(const bool bayesian) {
   double very_low{log(1.0 / static_cast<double>(1000 * size()))};
 
   computeEntropies();
@@ -179,23 +179,24 @@ void DataSet::computeProbabilities() {
     }
   }
 
+  double p[2];
   example_probability.resize(size());
-  for (auto y{0}; y < 2; ++y)
+  for (auto y{0}; y < 2; ++y) {
+
+    // cout << endl;
+
     for (auto x : example[y]) {
-      // double proba_x{0};
-      // for (auto f{0}; f < numFeature(); ++f) {
-      //   auto not_f{f + numFeature()};
-      //   if (X[x][f] == X[x][not_f])
-      //     --proba_x; //
-      //   else if (X[x][f])
-      //     proba_x += feature_probability[y][f];
-      //   else
-      //     proba_x += feature_probability[y][not_f];
-      // }
-      //
-      // example_probability[x] = proba_x;
-      example_probability[x] = p_x_given_y(X[x], y);
+
+      if (bayesian) {
+        bayesianPrediction(X[x], p);
+        example_probability[x] = p[y];
+      } else
+        example_probability[x] = p_x_given_y(X[x], y);
+
+      // cout << X[x] << " " << example_probability[x] << " " <<
+      // p_x_given_y(X[x], y) << endl;
     }
+  }
 }
 
 int DataSet::argMinEntropy(instance &candidate) const {
@@ -441,7 +442,7 @@ const std::string DataSet::featureName(const int i) const {
 
 std::ostream &DataSet::write(std::ostream &os, string &delimiter,
                              string &wildcard, const bool matrix,
-                             const bool original_header) const {
+                             const bool header, const bool original) const {
 
   SparseSet relevant_feature(numFeature());
   relevant_feature.fill();
@@ -458,14 +459,16 @@ std::ostream &DataSet::write(std::ostream &os, string &delimiter,
       relevant_feature.remove_back(i);
   }
 
-  if (original_header) {
-    for (auto i : relevant_feature)
-      os << feature_label[i] << delimiter << " ";
-    os << "label" << endl;
-  } else {
-    for (auto i : relevant_feature)
-      os << i << delimiter << " ";
-    os << "label" << endl;
+  if (header) {
+    if (original) {
+      for (auto i : relevant_feature)
+        os << feature_label[i] << delimiter;
+      os << "label" << endl;
+    } else {
+      for (auto i : relevant_feature)
+        os << i << delimiter;
+      os << "label" << endl;
+    }
   }
 
   for (auto c{0}; c < 2; ++c)
@@ -473,18 +476,25 @@ std::ostream &DataSet::write(std::ostream &os, string &delimiter,
       for (auto i : relevant_feature) {
         if (X[j][i] == X[j][i + numFeature()]) {
           if (matrix)
-            os << "*" << delimiter << " ";
+            os << "*" << delimiter;
         } else {
           if (matrix)
-            os << X[j][i] << delimiter << " ";
+            os << X[j][i] << delimiter;
           else
-            os << (X[j][i] ? (i + 1) : -(i + 1)) << delimiter << " ";
+            os << (X[j][i] ? (i + 1) : -(i + 1)) << delimiter;
         }
       }
       os << c << endl;
     }
 
   return os;
+}
+
+std::ostream &DataSet::writeCaption(std::ostream &os) const {
+  os << "0,1.\n";
+  for (auto i{0}; i < numFeature(); ++i)
+    os << featureName(i) << ":.\n";
+	return os;
 }
 
 // std::ostream &DataSet::toCsv(std::ostream &os) const {

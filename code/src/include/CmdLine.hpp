@@ -46,10 +46,16 @@ public:
   enum feature_policy { MIN = 0, LOWEST_ENTROPY, HIGHEST_ENTROPY };
   int feature_policy;
 
+  bool bayesian;
+
+  int max_iteration;
+
   string delimiter;
   string wildcard;
   bool original;
   bool reduced;
+
+  string caption;
 
   string format;
 
@@ -73,12 +79,14 @@ public:
       : cmdline(opt.cmdline), instance_file(opt.instance_file),
         verbosity(opt.verbosity), class_policy(opt.class_policy),
         example_policy(opt.example_policy), feature_policy(opt.feature_policy),
+        bayesian(opt.bayesian), max_iteration(opt.max_iteration),
         delimiter(opt.delimiter), wildcard(opt.wildcard),
-        original(opt.original), reduced(opt.reduced), format(opt.format),
-        mapping(opt.mapping), seed(opt.seed), print_sol(opt.print_sol),
-        print_par(opt.print_par), print_mod(opt.print_mod),
-        print_ins(opt.print_ins), print_sta(opt.print_sta),
-        print_cmd(opt.print_cmd), verified(opt.verified), sample(opt.sample) {}
+        original(opt.original), reduced(opt.reduced), caption(opt.caption),
+        format(opt.format), mapping(opt.mapping), seed(opt.seed),
+        print_sol(opt.print_sol), print_par(opt.print_par),
+        print_mod(opt.print_mod), print_ins(opt.print_ins),
+        print_sta(opt.print_sta), print_cmd(opt.print_cmd),
+        verified(opt.verified), sample(opt.sample) {}
 
   ostream &display(ostream &os);
 };

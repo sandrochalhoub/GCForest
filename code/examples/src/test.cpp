@@ -28,27 +28,30 @@ along with minicsp.  If not, see <http://www.gnu.org/licenses/>.
 using namespace std;
 
 int main(int argc, char* argv[]) {
-	
-	Options opt = parse(argc, argv);
-	
-	
-	if(opt.print_cmd)
-		cout << opt.cmdline << endl;	
-	
-	if(opt.print_par)	
-		opt.display(cout);
 
+  double x{3.0};
 
-  boost::dynamic_bitset<> x(5); // all 0's by default
-  x[0] = 1;
-  x[1] = 1;
-  x[4] = 1;
-  for (boost::dynamic_bitset<>::size_type i = 0; i < x.size(); ++i)
-    std::cout << x[i];
-  std::cout << "\n";
-  std::cout << x << "\n";
-  return EXIT_SUCCESS;
+  cout << log2(x) << endl;
 
+  // Options opt = parse(argc, argv);
+  //
+  //
+  // if(opt.print_cmd)
+  // 	cout << opt.cmdline << endl;
+  //
+  // if(opt.print_par)
+  // 	opt.display(cout);
+  //
+  //
+  //   boost::dynamic_bitset<> x(5); // all 0's by default
+  //   x[0] = 1;
+  //   x[1] = 1;
+  //   x[4] = 1;
+  //   for (boost::dynamic_bitset<>::size_type i = 0; i < x.size(); ++i)
+  //     std::cout << x[i];
+  //   std::cout << "\n";
+  //   std::cout << x << "\n";
+  //   return EXIT_SUCCESS;
 }
 
 

@@ -118,7 +118,7 @@ Options parse(int argc, char *argv[]) {
                             "string");
 
   cmd.add<ValueArg<string>>(opt.delimiter, "", "delimiter",
-                            "csv format delimiter", false, ",", "string");
+                            "csv format delimiter", false, ", ", "string");
 
   cmd.add<ValueArg<string>>(opt.wildcard, "", "wildcard", "csv format wildcard",
                             false, "*", "string");
@@ -133,8 +133,11 @@ Options parse(int argc, char *argv[]) {
                             "input format (csv or txt)", false, "csv",
                             "string");
 
+  cmd.add<ValueArg<string>>(opt.caption, "", "caption", "caption file", false,
+                            "", "string");
+
   cmd.add<ValueArg<int>>(
-      opt.verbosity, "", "verbosity",
+      opt.verbosity, "v", "verbosity",
       "verbosity level (0:silent,1:quiet,2:improvements only,3:verbose", false,
       2, "int");
 
@@ -157,9 +160,16 @@ Options parse(int argc, char *argv[]) {
                          "entropy,2:highest entropy)",
                          false, 1, "int");
 
+  cmd.add<SwitchArg>(opt.bayesian, "", "bayesian",
+                     "use Bayesian probabilities instead", false);
+
+  cmd.add<ValueArg<int>>(opt.max_iteration, "", "max_iteration",
+                         "max number of comprime iterations", false, 1000,
+                         "int");
+
   cmd.add<SwitchArg>(opt.mapping, "", "mapping", "add legend to output", false);
 
-  cmd.add<ValueArg<int>>(opt.seed, "", "seed", "random seed", false, 12345,
+  cmd.add<ValueArg<int>>(opt.seed, "s", "seed", "random seed", false, 12345,
                          "int");
 
   cmd.add<SwitchArg>(opt.print_sol, "", "print_sol",
@@ -233,16 +243,21 @@ ostream &Options::display(ostream &os) {
 		os << endl;
 	} else if(example_policy >= HIGHEST_PROBABILITY) {
 		auto k{example_policy - HIGHEST_PROBABILITY};
-		os << "highest probability";
-		if(k>1)
-			os << " (" << k << ")";
-		os << endl;
-	} else
-   os  << (example_policy == FIRST ? "first" : "random" ) << endl;
-	
-   os << setw(20) << left << "p feature policy:" << setw(30) << right
-     << (feature_policy == MIN ? "mininum" : (feature_policy == LOWEST_ENTROPY ? "lowest entropy" : "highest entropy" )) << endl
-     << setw(20) << left << "p verified:" << setw(30) << right
-     << (verified ? "yes" : "no") << endl;
-  return os;
+                os << "highest " << (bayesian ? "Bayesian " : "")
+                   << "probability";
+                if (k > 1)
+                  os << " (" << k << ")";
+                os << endl;
+        } else
+          os << (example_policy == FIRST ? "first" : "random") << endl;
+
+        os << setw(20) << left << "p feature policy:" << setw(30) << right
+           << (feature_policy == MIN
+                   ? "mininum"
+                   : (feature_policy == LOWEST_ENTROPY ? "lowest entropy"
+                                                       : "highest entropy"))
+           << endl
+           << setw(20) << left << "p verified:" << setw(30) << right
+           << (verified ? "yes" : "no") << endl;
+        return os;
 }

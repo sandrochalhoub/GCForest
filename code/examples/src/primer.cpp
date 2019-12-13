@@ -40,7 +40,7 @@ int main(int argc, char *argv[]) {
 
   if (opt.print_par)
     opt.display(cout);
-	
+
   std::mt19937 random_generator;
   random_generator.seed(opt.seed);
 
@@ -90,26 +90,28 @@ int main(int argc, char *argv[]) {
       cout << "c filtered " << (count - base.count()) / 2
            << " noisy example(s)\n";
 
-	if(opt.example_policy <= Options::LOWEST_PROBABILITY or opt.example_policy >= Options::HIGHEST_PROBABILITY)
-		base.computeProbabilities();
-	else if(opt.feature_policy != Options::MIN)
-		base.computeEntropies();
-	
+  if (opt.example_policy <= Options::LOWEST_PROBABILITY or
+      opt.example_policy >= Options::HIGHEST_PROBABILITY)
+    base.computeProbabilities(opt.bayesian);
+  else if (opt.feature_policy != Options::MIN)
+    base.computeEntropies();
+
   if (opt.verbosity >= Options::NORMAL)
     cout << base << endl << endl;
   if (opt.verbosity >= Options::QUIET)
     cout << "d #examples = " << setw(10) << right << base.count()
-         << ", avgsize = " << setw(10) << right<< base.numFeature()
-         << ", volume = " << setw(12) << right<< base.volume() << endl;
+         << ", avgsize = " << setw(10) << right << base.numFeature()
+         << ", volume = " << setw(12) << right << base.volume() << endl;
 
-  do {
+  for (auto i{0}; i < opt.max_iteration; ++i) {
+    // do {
 
     count = base.count();
 
     base.computeDecisionSet(opt, random_generator);
 
     if (opt.example_policy >= Options::LOWEST_PROBABILITY)
-      base.computeProbabilities();
+      base.computeProbabilities(opt.bayesian);
     else if (opt.feature_policy != Options::MIN)
       base.computeEntropies();
 
@@ -125,7 +127,10 @@ int main(int argc, char *argv[]) {
     if (opt.verified)
       base.verify();
 
-  } while (count != base.count());
+    if (count == base.count())
+      break;
+  }
+  // } while (count != base.count());
 
   if (opt.output != "") {
     ofstream outfile(opt.output, std::ios_base::out);
@@ -134,9 +139,16 @@ int main(int argc, char *argv[]) {
       input.writeMapping(outfile);
 
     base.write(outfile, opt.delimiter, opt.wildcard, !opt.reduced,
-               opt.original);
+               (opt.caption == ""), opt.original);
 
     outfile.close();
+
+    if (opt.caption != "") {
+      ofstream capfile(opt.caption, std::ios_base::out);
+      base.writeCaption(capfile);
+			capfile.close();
+    }
+
   }
 }
 

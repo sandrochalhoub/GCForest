@@ -145,7 +145,7 @@ public:
 
   // compute the (log of the) probability for each feature / class
   // deduce a probability for every example
-  void computeProbabilities();
+  void computeProbabilities(const bool bayesian);
 
   //@}
 
@@ -200,7 +200,10 @@ public:
   const std::string featureName(const int i) const;
 
   std::ostream &write(std::ostream &os, string &delimiter, string &wildcard,
-                      const bool matrix, const bool header) const;
+                      const bool matrix, const bool header,
+                      const bool original) const;
+
+  std::ostream &writeCaption(std::ostream &os) const;
 
   std::ostream &display(std::ostream &os) const;
 
