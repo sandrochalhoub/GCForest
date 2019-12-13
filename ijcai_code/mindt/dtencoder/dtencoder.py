@@ -807,6 +807,7 @@ class DTEncoder(object):
 
                 r_or.append(-temp_v_c_var_id)
                 self.s.add_clause(r_or)
+                #print(r_or_names)
                 # self.s.add_clause([-c_var_id])
                 ####print([-c_var_id])
                 # ##print("Example sign {}: add constraint {} -> {}".format(pos, temp_v_c_var_name, r_or_names))
