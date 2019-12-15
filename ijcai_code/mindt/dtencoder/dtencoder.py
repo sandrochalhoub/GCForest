@@ -32,9 +32,9 @@ from pysat.solvers import Solver  # standard way to import the library
 from pysat.solvers import Minisat22, Glucose3  # more direct way
 
 #
-# import matplotlib.pyplot as plt
-# import networkx as nx
-# from networkx.drawing.nx_pydot import write_dot
+import matplotlib.pyplot as plt
+import networkx as nx
+from networkx.drawing.nx_pydot import write_dot
 def hierarchy_pos(G, root, width=1., vert_gap=0.2, vert_loc=0, xcenter=0.5,
                   pos=None, parent=None):
     '''If there is a cycle that is reachable from root, then this will see infinite recursion.
@@ -962,60 +962,61 @@ class DTEncoder(object):
 
         print (edges);
         self.s.file_dt.close()
-#         exit()
-#         G = nx.DiGraph()
-#         edges = []
-#         
-#         
-#         # ##print(model)
-#         for i in range(1, N + 1):
-#             for j in self.get_l_bounds(i=i, N=N):
-#                 if (j % 2 == 0):
-#                     l_i_j_var_name, l_i_j_var_id = self.lookup_varid(self.create_indexed_variable_name(LABEL_L_VARS, [i, j]))
-#                     if (model[l_i_j_var_id - 1] > 0):
-#                         # we know that i is parent of j
-#                         G.add_edge(i, j, weight=0)
-#                         edges.append((i, j))
-#             for j in self.get_r_bounds(i=i, N=N):
-#                 if(j % 2 == 1):
-#                     r_i_j_var_name, r_i_j_var_id = self.lookup_varid(self.create_indexed_variable_name(LABEL_R_VARS, [i, j]))
-#                     if (model[r_i_j_var_id - 1] > 0):
-#                         # we know that i is parent of j
-#                         edges.append((i, j))
-#                         G.add_edge(i, j, weight=1)
-# 
-#         print(edges)
-# 
-#         labeldict = None
-#         if (labeled == True):
-#                 labeldict = {}
-#                 for r in range(1, K + 1):
-#                     for j in range(1, N + 1):
-#                         a_r_j_var_name, a_r_j_var_id = self.lookup_varid(self.create_indexed_variable_name(LABEL_A_VARS, [r, j]))
-#                         if (model[a_r_j_var_id - 1] > 0):
-#                             labeldict[j] = "             " + self.data.names[r - 1] + "_" + str(r)
-#                             # ##print("r = {}, j = {}".format(r, j))
-#                 for j in range(1, N + 1):
-#                     v_var_name, v_var_id = self.lookup_varid(self.create_indexed_variable_name(LABEL_V_VARS, [j]))
-#                     c_var_name, c_var_id = self.lookup_varid(self.create_indexed_variable_name(LABEL_C_VARS, [j]))
-#                     if (model[v_var_id - 1] > 0):
-#                         # terminal
-#                         v = 1  if (model[c_var_id - 1] > 0) else 0
-#                         labeldict[j] = "             c_" + str(v)
-# 
-# 
-#         # ##print(labeldict)
-# 
-#         pos = hierarchy_pos(G, 1)
-#         nx.draw(G, pos=pos, with_labels=True)
-# 
-#         # node_labels = nx.get_node_attributes(G,'state')
-#         nx.draw_networkx_labels(G, pos, labels=labeldict)
-#         edge_labels = nx.get_edge_attributes(G, 'state')
-#         nx.draw_networkx_edge_labels(G, pos, labels=edge_labels)
-#         plt.savefig("bn_" + filename)
-#         # ##print("nb of clauses", self.s.nof_clauses())
-#         # plt.show()
+        #exit()
+        if (True):
+            G = nx.DiGraph()
+            edges = []
+             
+             
+            # ##print(model)
+            for i in range(1, N + 1):
+                for j in self.get_l_bounds(i=i, N=N):
+                    if (j % 2 == 0):
+                        l_i_j_var_name, l_i_j_var_id = self.lookup_varid(self.create_indexed_variable_name(LABEL_L_VARS, [i, j]))
+                        if (model[l_i_j_var_id - 1] > 0):
+                            # we know that i is parent of j
+                            G.add_edge(i, j, weight=0)
+                            edges.append((i, j))
+                for j in self.get_r_bounds(i=i, N=N):
+                    if(j % 2 == 1):
+                        r_i_j_var_name, r_i_j_var_id = self.lookup_varid(self.create_indexed_variable_name(LABEL_R_VARS, [i, j]))
+                        if (model[r_i_j_var_id - 1] > 0):
+                            # we know that i is parent of j
+                            edges.append((i, j))
+                            G.add_edge(i, j, weight=1)
+     
+            print(edges)
+     
+            labeldict = None
+            if (labeled == True):
+                    labeldict = {}
+                    for r in range(1, K + 1):
+                        for j in range(1, N + 1):
+                            a_r_j_var_name, a_r_j_var_id = self.lookup_varid(self.create_indexed_variable_name(LABEL_A_VARS, [r, j]))
+                            if (model[a_r_j_var_id - 1] > 0):
+                                labeldict[j] = "             " + self.data.names[r - 1] + "_" + str(r)
+                                # ##print("r = {}, j = {}".format(r, j))
+                    for j in range(1, N + 1):
+                        v_var_name, v_var_id = self.lookup_varid(self.create_indexed_variable_name(LABEL_V_VARS, [j]))
+                        c_var_name, c_var_id = self.lookup_varid(self.create_indexed_variable_name(LABEL_C_VARS, [j]))
+                        if (model[v_var_id - 1] > 0):
+                            # terminal
+                            v = 1  if (model[c_var_id - 1] > 0) else 0
+                            labeldict[j] = "             c_" + str(v)
+     
+     
+            # ##print(labeldict)
+     
+            pos = hierarchy_pos(G, 1)
+            nx.draw(G, pos=pos, with_labels=True)
+     
+            # node_labels = nx.get_node_attributes(G,'state')
+            nx.draw_networkx_labels(G, pos, labels=labeldict)
+            edge_labels = nx.get_edge_attributes(G, 'state')
+            nx.draw_networkx_edge_labels(G, pos, labels=edge_labels)
+            plt.savefig(filename + ".png")
+            # ##print("nb of clauses", self.s.nof_clauses())
+            # plt.show()
 
     def test_5_nodes(self, var_id):
         self.s.add_clause([-var_id])
