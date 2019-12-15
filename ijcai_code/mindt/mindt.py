@@ -94,30 +94,47 @@ if __name__ == '__main__':
                     s = line.split()
                     N_to_try = int(s[1])
                     break
-                 
-            if not(options.prepfile is None):
-                N_to_try = N_to_try + 14
-        print(N_to_try, len(data.names)-2,  2**(len(data.names)-2))
-        if (N_to_try >= 2**(len(data.names)-2)):
-            N_to_try = 2**(len(data.names)-2) - 1
-            print("reduce to ", N_to_try)
+        nb_used_features = len(data.names[:-1])
+        if not(options.prepfile is None):
+            nb_used_features = len(prepData.names[:-1])
+    
+        
+        if (N_to_try >  2**(nb_used_features) + 1):
+            N_to_try =  2**(nb_used_features) + 1
+            print("-----> reduce to ", N_to_try)
 
-        while (res):
+        N_to_try_init = N_to_try
+        up  = False
+        while (True):
             if not(options.prepfile is None):
                 dtencoder = DTEncoder(prepData, options)
             else:
                 dtencoder = DTEncoder(data, options)
             res, sat_time = dtencoder.generate_formula(N = N_to_try)
             total_sat_time += sat_time
-            if (res == False):
+            if (N_to_try_init  == N_to_try) and (res == False):
+                up = True
+            if (res == False) and (not up):
+                N_to_try = N_to_try + 2
                 break
-            is_solution = 1
-            print("Tree of size {}, time  {}, total {}".format(N_to_try, sat_time, total_sat_time))
-            N_to_try = N_to_try - 2
+            if (res == True) and (up):
+                print("Tree of size {}, time  {}, total {}, going down".format(N_to_try, sat_time, total_sat_time))                
+                is_solution = 1
+                break
+
+
+            if (up):
+                print("No tree of size {}, time  {}, total {}, going up".format(N_to_try, sat_time, total_sat_time))
+                N_to_try = N_to_try + 2
+
+            else:
+                print("Tree of size {}, time  {}, total {}, going down".format(N_to_try, sat_time, total_sat_time))
+                is_solution = 1
+                N_to_try = N_to_try - 2
             #exit()
 
         if (is_solution > 0):
-            print("Optimal tree  {}, total time {}".format( N_to_try +  2, total_sat_time))
+            print("Optimal tree  {}, total time {}".format( N_to_try, total_sat_time))
         else:    
             print("No tree  with <=  {} nodes".format( N_to_try, total_sat_time))
         

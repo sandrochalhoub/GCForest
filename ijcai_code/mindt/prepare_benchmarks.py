@@ -294,7 +294,7 @@ if __name__ == '__main__':
 
 
     nb_samples_bench = 20
-    gen_benchs = True
+    gen_benchs = False
     gen_runs = True
     gen_feat_reduce = False
     gen_parse_results = False
@@ -604,14 +604,14 @@ if __name__ == '__main__':
         original_benckmarks[path_penn_bench + "Corral/corral-un"  + ".csv"] =  {}
         original_benckmarks[path_penn_bench + "irish/irish-un" + ".csv"] =  {}
         original_benckmarks[path_penn_bench + "mux6/mux6-un" + ".csv"] =  {}
-        original_benckmarks[path_manu_bench + "Car/car-un"  + ".csv"] =  {0.05,0.1}
-        original_benckmarks[path_manu_bench + "Cancer/cancer-un"  + ".csv"] =  {0.1, 0.2,0.25} 
-        original_benckmarks[path_penn_bench + "ShuttleM/shuttleM-un"  + ".csv"] =  {}
-        original_benckmarks[path_penn_bench + "Colic/colic-un"  + ".csv"] =  {}
-        original_benckmarks[path_penn_bench + "appendicitis/appendicitis-un"  + ".csv"] =  {}
-        original_benckmarks[path_penn_bench + "australian/australian-un"  + ".csv"] =  {}
-        original_benckmarks[path_penn_bench + "backache/backache-un" + ".csv"] =  {}
-        original_benckmarks[path_penn_bench + "cleve/cleve-un" + ".csv"] =  {}
+#         #original_benckmarks[path_manu_bench + "Car/car-un"  + ".csv"] =  {0.05,0.1}
+#         #original_benckmarks[path_manu_bench + "Cancer/cancer-un"  + ".csv"] =  {0.1, 0.2,0.25} 
+#         original_benckmarks[path_penn_bench + "ShuttleM/shuttleM-un"  + ".csv"] =  {}
+#         original_benckmarks[path_penn_bench + "Colic/colic-un"  + ".csv"] =  {}
+#         original_benckmarks[path_penn_bench + "appendicitis/appendicitis-un"  + ".csv"] =  {}
+#         original_benckmarks[path_penn_bench + "australian/australian-un"  + ".csv"] =  {}
+#         original_benckmarks[path_penn_bench + "backache/backache-un" + ".csv"] =  {}
+#         original_benckmarks[path_penn_bench + "cleve/cleve-un" + ".csv"] =  {}
         #original_benckmarks[path_penn_bench + "diabetes/diabetes-un" + ".csv"] =  {}
         #original_benckmarks[path_penn_bench + "new-thyroid/new-thyroid-un" + ".csv"] =  {}
 
@@ -621,14 +621,15 @@ if __name__ == '__main__':
 
 #         original_benckmarks[path_manu_bench + "Mouse/mouse" + ".csv"] = {}
 #         original_benckmarks[path_manu_bench + "Weather/meteo" + ".csv"] = {}
-#         original_benckmarks[path_manu_bench + "Car/car" + ".csv"] = {0.05, 0.1}#, 0.2, 0.3,0.5,0.7,0.9}
-#         original_benckmarks[path_manu_bench + "Cancer/cancer" + ".csv"] = {0.1, 0.2}#, 0.5, 0.7,0.9} 
-#         original_benckmarks[path_penn_bench + "ShuttleM/shuttleM" + ".csv"] = {0.05, 0.1}
-#         original_benckmarks[path_penn_bench + "Colic/colic" + ".csv"] = {0.05, 0.1}
-#         original_benckmarks[path_penn_bench + "appendicitis/appendicitis" + ".csv"] = {0.3, 0.4}
-#         original_benckmarks[path_penn_bench + "australian/australian" + ".csv"] = {0.05, 0.1}
-#         original_benckmarks[path_penn_bench + "backache/backache" + ".csv"] =  {0.3, 0.4}
-#         original_benckmarks[path_penn_bench + "cleve/cleve" + ".csv"] =  {0.1, 0.2}
+    if (False):
+        original_benckmarks[path_penn_bench + "appendicitis/appendicitis-un" + ".csv"] = {0.3, 0.4}
+        original_benckmarks[path_penn_bench + "australian/australian-un" + ".csv"] = {0.05, 0.1}
+        original_benckmarks[path_penn_bench + "backache/backache-un" + ".csv"] =  {0.3, 0.4}
+        original_benckmarks[path_penn_bench + "cleve/cleve-un" + ".csv"] =  {0.1}
+        original_benckmarks[path_manu_bench + "Car/car-un" + ".csv"] = {0.05, 0.1}#, 0.2, 0.3,0.5,0.7,0.9}
+        original_benckmarks[path_manu_bench + "Cancer/cancer-un" + ".csv"] = {0.1, 0.2, 0.25}#, 0.5, 0.7,0.9} 
+        original_benckmarks[path_penn_bench + "ShuttleM/shuttleM-un" + ".csv"] = {0.05, 0.1}
+        original_benckmarks[path_penn_bench + "Colic/colic-un" + ".csv"] = {0.05, 0.1}
     
     #original_benckmarks[path_penn_bench + "new-thyroid/new-thyroid.csv"] =  {0.1, 0.2}
     #original_benckmarks[path_penn_bench + "ContraceptiveM/contraceptiveM.csv"] = {0.1, 0.3, 0.5}
@@ -645,7 +646,13 @@ if __name__ == '__main__':
 #     
     
     
-    gen_runs_all =open("list_dt", 'w+')
+    #gen_prep_all =open("list_dt_prep", 'w+')
+    #gen_runs_all =open("list_dt_ex", 'w+')
+
+    gen_prep_all =open("list_dt_prep_small", 'w+')
+    gen_runs_all =open("list_dt_ex_small", 'w+')
+
+
     commands_all = []
     commands_all_prep = []
 
@@ -664,8 +671,8 @@ if __name__ == '__main__':
         
         
         print(output_path)
-        data = Data(filename=bench_name, mapfile=options.mapfile,
-                separator=options.separator)
+        #data = Data(filename=bench_name, mapfile=options.mapfile,
+        #        separator=options.separator)
         
         l = len(ratios)
         print(l)
@@ -686,9 +693,9 @@ if __name__ == '__main__':
                 commands_all.insert(0,"mkdir " + results_dir)
 
                 output_clean = output_path.replace("/Samples","")
-                output_prep = output_clean.replace("-un.csv", "-un-pred.csv")
+                output_prep = output_clean.replace("-un.csv", "-un-pred-fp1.csv")
                 output_clean_s = output_path.replace("Samples", LABEL_SUFFIX_DIR_RESULTS)
-                output_prep_s = output_clean_s.replace("-un.csv", "-un-pred.csv")
+                output_prep_s = output_clean_s.replace("-un.csv", "-un-pred-fp1.csv")
                 
                 
                 s = "/home/nina/workspace/deeplever/timeout -t 1000 -m 20000000 "
@@ -699,10 +706,12 @@ if __name__ == '__main__':
                 s += "  >  "  + output_prep_s+ LABEL_SUFFIX_SAVE_RESULTS
                 commands_all.append(s)
                 t = "/home/nina/workspace/deeplever/timeout -t 1000 -m 20000000 "
-                t+= "./code/bin/primer "
+                t+= "./code/bin/primer  --feature_policy 1 "
                 t+= output_clean
                 t+= " -o " + output_prep
                 commands_all_prep.append(t)
+                
+                print(t)
                 #./code/bin/primer ./ijcai_code/data/Emmanuel/Mouse/mouse-un.csv -o ./ijcai_code/data/Emmanuel/Mouse/mouse-un-pred.csv
                 
             #if (gen_feat_reduce == True):    
@@ -719,15 +728,16 @@ if __name__ == '__main__':
             print("dir", output_dir_r)    
 
             rp = r#/(r+1)
-            nb_samples = int(len(data.samps)*(rp))
-            print(nb_samples)
+
             for i in range(nb_samples_bench):
                 output_file =  os.path.basename(bench_name).replace("-un.csv", "_" + str(i) + "-un.csv")
                 output_path = output_dir_r + output_file
                 if (gen_benchs == True):
+                    nb_samples = int(len(data.samps)*(rp))
+                    print(nb_samples)
                     data_r = copy.deepcopy(data)
-                    data_r.samps = random.sample(data.samps, nb_samples)
-                    print(output_path)
+                    #data_r.samps = random.sample(data.samps, nb_samples)
+                    #print(output_path)
                     #print(nb_samples, len(data.samps))
                     #convertor2binary.convertor2binary(data = data_r, output_file = output_path)
                     #iti_all =open("execute_iti", 'w+')
@@ -742,12 +752,14 @@ if __name__ == '__main__':
                     commands_all.insert(0,"mkdir  "+ results_dir_up)
                     commands_all.insert(0,"mkdir  "+ results_dir)
                     
-
+                    
+                    print(output_path)
+                    #exit()
                     output_clean = output_path
                     
-                    output_prep = output_clean.replace("-un.csv", "-un-pred.csv")                    
+                    output_prep = output_clean.replace("-un.csv", "-un-pred-fp1.csv")                    
                     output_clean_s = output_path.replace("Samples", LABEL_SUFFIX_DIR_RESULTS)
-                    output_prep_s = output_clean_s.replace("-un.csv", "-un-pred.csv")
+                    output_prep_s = output_clean_s.replace("-un.csv", "-un-pred-fp1.csv")
                     
                     
                     s = "/home/nina/workspace/deeplever/timeout -t 1000 -m 20000000 "
@@ -758,14 +770,14 @@ if __name__ == '__main__':
                     s += "  >  "  + output_prep_s+ LABEL_SUFFIX_SAVE_RESULTS                    
                     commands_all.append(s)
                     
-                    print(s)
+                    #print(s)
                     #exit()
 
                     #print(output_clean)
                     #print(output_prep)
                     #exit()
                     t = "/home/nina/workspace/deeplever/timeout -t 1000 -m 20000000 "
-                    t+= "./code/bin/primer "
+                    t+= "./code/bin/primer  --feature_policy 1 "
                     t+= output_clean
                     t+= " -o " + output_prep
                     commands_all_prep.append(t)  
@@ -773,8 +785,12 @@ if __name__ == '__main__':
                 #if (gen_feat_reduce == True):    
                     # collect stats
                 #    convertor2binary.convertor2iti_collect_stats(data = data, output_file = output_path)    
-    print(commands_all)
-
+    print(commands_all_prep, commands_all)
     for s in commands_all:
         print(s, file = gen_runs_all)
     gen_runs_all.close()
+
+    for s in commands_all_prep:
+        print(s, file = gen_prep_all)
+    gen_prep_all.close()    
+    exit()
