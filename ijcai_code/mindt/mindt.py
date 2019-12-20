@@ -118,7 +118,7 @@ if __name__ == '__main__':
                 N_to_try = N_to_try + 2
                 break
             if (res == True) and (up):
-                print("Tree of size {}, time  {}, total {}, going down".format(N_to_try, sat_time, total_sat_time))                
+                print("Tree of size {}, time  {}, total {}, stop".format(N_to_try, sat_time, total_sat_time))                
                 is_solution = 1
                 break
 
