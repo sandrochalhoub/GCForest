@@ -93,22 +93,24 @@ void Part::split(Part& l1, Part& l2, boolean_function condition) {
 	auto i{begin()};
 	auto j{end()};
 	
+	assert(begin() <= end());
 	
 	
 	
 	while(true) {
 		
+		cout << "split " << (i - begin()) << ".." << (j-begin()) << endl;
 		// cout << "split " << *i << ".." << *(j-1) << endl;
 		
 		while(i < j and condition(*i)) ++i;
-		if(i >= j)
+		if(i+1 >= j)
 			break;
 		
 		while(j > i and not condition(*(--j)));
 		if(i == j)
 			break;
 		
-		// cout << "swap " << *i << ".." << *(j-1) << endl;
+		cout << "swap " << *i << ".." << *(j-1) << endl;
 		
 		std::swap(*i,*j);
 		
@@ -118,8 +120,15 @@ void Part::split(Part& l1, Part& l2, boolean_function condition) {
 		++i;
 	}
 
+	cout << "stop on " << (i - begin()) << ".." << (j-begin()) << endl;
+
+
 	assert(i == end() or not condition(*i));
 	assert(i == begin() or condition(*(i-1)));	
+
+
+
+	
 
 
 	l1.begin_idx = begin_idx;
@@ -127,6 +136,18 @@ void Part::split(Part& l1, Part& l2, boolean_function condition) {
 
 	l2.begin_idx = l1.end_idx;
 	l2.end_idx = end_idx;
+	
+	cout << begin_idx << " " << l1.begin_idx << endl;
+	cout << (i - begin()) << " " << l1.end_idx << endl;
+	cout << l1.end_idx << " " << l2.begin_idx << endl;
+	cout << end_idx << " " << l2.end_idx << endl;
+	
+	
+	cout << "split result: " << count() << " -> " << l1.count() << " / " << l2.count() << endl;
+	
+	
+	assert(l1.begin() <= l1.end());
+	assert(l2.begin() <= l2.end());
 	
 }
 
