@@ -85,7 +85,7 @@ vector<int>::const_iterator Part::end() const {
 
 std::ostream& Part::display(std::ostream& os) const {
 	
-	assert(begin() > end());
+	assert(begin() <= end());
 	
 	assert(count() < 10000);
 	
