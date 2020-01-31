@@ -38,10 +38,13 @@ private:
   // followed by its negation, irrelevant bits are 0 in both copies
   std::vector<instance> X;
 
+public:
   // example[0] (resp. example[1]) is a set of indices of negative (resp.
   // positive) examples in X
   SparseSet example[2];
 
+
+private:
   // features that belong to all examples of the class
   instance lower_bound[2];
 
@@ -71,12 +74,14 @@ public:
   explicit DataSet();
   explicit DataSet(const int n_feature);
 
-  // allocate memory for n examples
-  void reserve(const size_t n);
+  // allocate memory for n examples  
+	void reserve(const size_t n);
 
   // declare a set of new feature names
   template <typename StringListIt>
   void setFeatures(StringListIt beg, StringListIt end);
+	
+	bool hasFeature(const int e, const int f) const;
 
   // declare a new feature name
   void addFeature(string &f);

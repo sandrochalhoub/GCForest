@@ -82,6 +82,10 @@ instance DataSet::NOT(instance &e) const {
   return not_e;
 }
 
+bool DataSet::hasFeature(const int e, const int f) const {
+	return X[e][f];
+}
+
 void DataSet::computeBounds() {
   for (auto y{0}; y < 2; ++y) {
     lower_bound[y].resize(2 * numFeature(), true);
