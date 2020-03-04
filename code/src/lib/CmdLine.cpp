@@ -1,4 +1,5 @@
 
+#include <limits>
 #include <numeric>
 
 #include <CmdLine.hpp>
@@ -199,6 +200,29 @@ Options parse(int argc, char *argv[]) {
   // Constraint<double> *range = new RangeConstraint<double>(0, 1);
   cmd.add<ValueArg<double>>(opt.sample, "", "sample", "sampling ratio", false,
                             1.0, "double");
+
+  cmd.add<ValueArg<int>>(opt.width, "", "width",
+                         "number of tied features for random selection", false,
+                         3, "int");
+
+  cmd.add<ValueArg<double>>(opt.focus, "", "focus",
+                            "probability of choosing the best feature", false,
+                            .9, "int");
+
+  cmd.add<ValueArg<int>>(opt.max_size, "", "max_size",
+                         "maximum number of nodes in the tree", false,
+                         numeric_limits<int>::max(), "int");
+
+  cmd.add<ValueArg<int>>(opt.max_depth, "", "max_depth",
+                         "maximum depth of the tree", false,
+                         numeric_limits<int>::max(), "int");
+
+  cmd.add<ValueArg<int>>(opt.restart_base, "", "restart_base",
+                         "number of backtracks before first restart", false, -1,
+                         "int");
+
+  cmd.add<ValueArg<double>>(opt.restart_factor, "", "restart_factor",
+                            "geometric factor", false, 1, "double");
 
   cmd.parse(argc, argv);
   return opt;

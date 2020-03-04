@@ -86,6 +86,10 @@ bool DataSet::hasFeature(const int e, const int f) const {
 	return X[e][f];
 }
 
+bool DataSet::ithHasFeature(const int y, const int i, const int f) const {
+  return X[example[y][i]][f];
+}
+
 void DataSet::computeBounds() {
   for (auto y{0}; y < 2; ++y) {
     lower_bound[y].resize(2 * numFeature(), true);
