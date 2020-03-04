@@ -91,39 +91,60 @@ int main(int argc, char *argv[]) {
       cout << "c filtered " << (count - base.count()) / 2
            << " noisy example(s)\n";
 
+  BacktrackingAlgorithm A(base, opt);
 
-	BacktrackingAlgorithm A(base, 10);
-	
-	
-	//
-	// for(auto f{0}; f<base.numFeature(); ++f)
-	// {
-	// 	 cout << f << " " << A.entropy(0, f) << endl;
-	// }
-	//
-	// cout << A << endl;
-	//
-	// A.split(0,4);
-	
-	cout << A << endl;
-	
-	A.expend();
-	
-	cout << A << endl;
-	
-	A.expend();
-	
-	cout << A << endl;
-	
-	A.expend();
-	
-	cout << A << endl;
-	
-	// A.expend();
-	//
-	// cout << A << endl;
-	
+  // cout << opt.depth << endl;
 
+  // A.resize(3);
+  // A.seed(opt.seed);
+
+  //
+  // for(auto f{0}; f<base.numFeature(); ++f)
+  // {
+  // 	 cout << f << " " << A.entropy(0, f) << endl;
+  // }
+  //
+  // cout << A << endl;
+  //
+  // A.split(0,4);
+
+  // for (auto c{0}; c < 2; ++c) {
+  //   for (auto i{0}; i < base.example[c].size(); ++i) {
+  //     if (base.ithHasFeature(c, i, 53) != base.ithHasFeature(c, i, 54))
+  //       cout << "diff! " << c << base.ithHasFeature(c, i, 53)
+  //            << base.ithHasFeature(c, i, 54) << "\n";
+  //     // else
+  //     // 	cout << "eq.\n";
+  //   }
+  // }
+
+  // exit(1);
+
+  // cout << A << endl;
+
+  // auto min_size{static_cast<size_t>(-1)};
+  // double max_accuracy{0.0};
+
+  // for (auto i{0}; i < opt.max_iteration; ++i) {
+  // A.greedy(opt.width, opt.focus, opt.max_size);
+  A.search(); // opt.width, opt.focus, opt.max_size);
+
+  // cout << A.size() << endl;
+
+  // if (A.accuracy() > max_accuracy or
+  //     (A.accuracy() == max_accuracy and A.size() < min_size)) {
+  //   cout << setw(4) << A.size() << " " << setw(10) << A.accuracy() << endl;
+  //   min_size = A.size();
+  //   max_accuracy = A.accuracy();
+  //   if (max_accuracy == 1)
+  //     A.setUb(min_size);
+  // }
+  //
+  // A.clear();
+  // }
+  // A.expend();
+  //
+  // cout << A << endl;
 }
 
 

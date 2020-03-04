@@ -82,143 +82,153 @@ public:
   void setFeatures(StringListIt beg, StringListIt end);
 	
 	bool hasFeature(const int e, const int f) const;
+        bool ithHasFeature(const int y, const int i, const int f) const;
 
-  // declare a new feature name
-  void addFeature(string &f);
+        // declare a new feature name
+        void addFeature(string &f);
 
-  // add a new example in string-list format (it will be translated in
-  // duplicated bitset format)
-  template <typename StringListIt> void add(StringListIt beg, StringListIt end);
+        // add a new example in string-list format (it will be translated in
+        // duplicated bitset format)
+        template <typename StringListIt>
+        void add(StringListIt beg, StringListIt end);
 
-  void duplicate_format(const instance &from, instance &to) const;
-  //@}
+        void duplicate_format(const instance &from, instance &to) const;
+        //@}
 
-  /*!@name Accessors*/
-  //@{
-  instance &operator[](const size_t idx);
-	int getClass(const int i) const;
+        /*!@name Accessors*/
+        //@{
+        instance &operator[](const size_t idx);
+        int getClass(const int i) const;
 
-  // add a new example / explanation in the duplicated format
-  void add(instance &x_, const bool y);
+        // add a new example / explanation in the duplicated format
+        void add(instance &x_, const bool y);
 
-  // number of features
-  size_t numFeature() const;
+        // number of features
+        size_t numFeature() const;
 
-  // total number of examples, including those that have been removed
-  size_t size() const;
+        // total number of examples, including those that have been removed
+        size_t size() const;
 
-  // current number of positive examples
-  size_t positiveCount() const;
+        // current number of positive examples
+        size_t positiveCount() const;
 
-  // current number of negative examples
-  size_t negativeCount() const;
+        // current number of negative examples
+        size_t negativeCount() const;
 
-  // current number of examples
-  size_t count() const;
+        // current number of examples
+        size_t count() const;
 
-  // current total of literals in examples
-  size_t volume() const;
+        // current total of literals in examples
+        size_t volume() const;
 
-  // returns an instance with the relevant bits of e flipped and irrelevant bits
-  // unchanged (=0)
-  instance NOT(instance &e) const;
+        // returns an instance with the relevant bits of e flipped and
+        // irrelevant bits
+        // unchanged (=0)
+        instance NOT(instance &e) const;
 
-  double p_x_given_y(const instance& x, const int y) const;
+        double p_x_given_y(const instance &x, const int y) const;
 
-  // compute the entropy of the feature
-  double entropy(const int feature);
+        // compute the entropy of the feature
+        double entropy(const int feature);
 
-  // compute the entropy
-  void computeEntropies();
+        // compute the entropy
+        void computeEntropies();
 
-  // return the feature with minimum entropy in the subset "candidate"
-  int argMinEntropy(instance &candidate) const;
-  int argMaxEntropy(instance &candidate) const;
-  // int argMinProbability(SparseSet &candidate, const int limit) const;
-  // int argMaxProbability(SparseSet &candidate, const int limit) const;
-  template <class ExampleIt>
-  int argMinProbability(ExampleIt b, ExampleIt e) const;
-  template <class ExampleIt>
-  int argMaxProbability(ExampleIt b, ExampleIt e) const;
+        // return the feature with minimum entropy in the subset "candidate"
+        int argMinEntropy(instance &candidate) const;
+        int argMaxEntropy(instance &candidate) const;
+        // int argMinProbability(SparseSet &candidate, const int limit) const;
+        // int argMaxProbability(SparseSet &candidate, const int limit) const;
+        template <class ExampleIt>
+        int argMinProbability(ExampleIt b, ExampleIt e) const;
+        template <class ExampleIt>
+        int argMaxProbability(ExampleIt b, ExampleIt e) const;
 
-  template <class ExampleIt, class random>
-  int randomArgMinProbability(ExampleIt b, ExampleIt e, const size_t k,
-                              random &generator);
-  template <class ExampleIt, class random>
-  int randomArgMaxProbability(ExampleIt b, ExampleIt e, const size_t k,
-                              random &generator);
+        template <class ExampleIt, class random>
+        int randomArgMinProbability(ExampleIt b, ExampleIt e, const size_t k,
+                                    random &generator);
+        template <class ExampleIt, class random>
+        int randomArgMaxProbability(ExampleIt b, ExampleIt e, const size_t k,
+                                    random &generator);
 
-  // compute the (log of the) probability for each feature / class
-  // deduce a probability for every example
-  void computeProbabilities(const bool bayesian);
+        // compute the (log of the) probability for each feature / class
+        // deduce a probability for every example
+        void computeProbabilities(const bool bayesian);
 
-  //@}
+        //@}
 
-  /*!@name List Manipulation*/
-  //@{
-  // keeps only n positive examples, chosen randomly with a uniform distribution
-  template <class random>
-  void uniformSample(const int c, const size_t n, random generator);
-  //@}
+        /*!@name List Manipulation*/
+        //@{
+        // keeps only n positive examples, chosen randomly with a uniform
+        // distribution
+        template <class random>
+        void uniformSample(const int c, const size_t n, random generator);
+        //@}
 
-  /*!@name Business*/
-  //@{
-  // look for examples that are both positive and negative and remove them
-  void filter();
+        /*!@name Business*/
+        //@{
+        // look for examples that are both positive and negative and remove them
+        void filter();
 
-  // compute intersections and unions of positive/negative examples
-  void computeBounds();
+        // compute intersections and unions of positive/negative examples
+        void computeBounds();
 
-  // the set of true features of x1 that are false in x2 we cannot do set
-  // difference because features might neighter be true nor false
-  void getContradictingFeatures(instance &x1, instance &x2, instance &buffer);
+        // the set of true features of x1 that are false in x2 we cannot do set
+        // difference because features might neighter be true nor false
+        void getContradictingFeatures(instance &x1, instance &x2,
+                                      instance &buffer);
 
-  // add the explanation impl for y, removed implied examples and store them in
-  // "entailed". examples with indices larger than or equal to limit are not
-  // checked for entailment (this is used to avoid checking new explanations to
-  // old ones, as we know already that they are not entailed)
-  void addExplanation(instance &impl, const bool y, const int limit,
-                      vector<int> &entailed);
+        // add the explanation impl for y, removed implied examples and store
+        // them in
+        // "entailed". examples with indices larger than or equal to limit are
+        // not
+        // checked for entailment (this is used to avoid checking new
+        // explanations to
+        // old ones, as we know already that they are not entailed)
+        void addExplanation(instance &impl, const bool y, const int limit,
+                            vector<int> &entailed);
 
-  // consider the current content of examples as examples, compute explanations,
-  // add them to examples and remove entailed ones
-  template <typename R>
-  void computeDecisionSet(Options &opt, R &random_generator);
-	
-  template <typename R>
-  void computeDecisionSetSorted(Options &opt, R &random_generator);
+        // consider the current content of examples as examples, compute
+        // explanations,
+        // add them to examples and remove entailed ones
+        template <typename R>
+        void computeDecisionSet(Options &opt, R &random_generator);
 
-  // TODO
-  void close();
+        template <typename R>
+        void computeDecisionSetSorted(Options &opt, R &random_generator);
 
-  // TODO (return a preiction based on the explanations -- if the instance is
-  // not covered a probabilistic argument is used)
-  bool classify(instance &x) const;
+        // TODO
+        void close();
 
-  void bayesianPrediction(instance &x, double *p) const;
-  //@}
+        // TODO (return a preiction based on the explanations -- if the instance
+        // is
+        // not covered a probabilistic argument is used)
+        bool classify(instance &x) const;
 
-  /*!@name Printing*/
-  //@{
-  // std::ostream &toCsv(std::ostream &os) const;
+        void bayesianPrediction(instance &x, double *p) const;
+        //@}
 
-  const std::string featureName(const int i) const;
+        /*!@name Printing*/
+        //@{
+        // std::ostream &toCsv(std::ostream &os) const;
 
-  std::ostream &write(std::ostream &os, string &delimiter, string &wildcard,
-                      const bool matrix, const bool header,
-                      const bool original) const;
+        const std::string featureName(const int i) const;
 
-  std::ostream &writeCaption(std::ostream &os) const;
+        std::ostream &write(std::ostream &os, string &delimiter,
+                            string &wildcard, const bool matrix,
+                            const bool header, const bool original) const;
 
-  std::ostream &display(std::ostream &os) const;
+        std::ostream &writeCaption(std::ostream &os) const;
 
-  std::ostream &displayExample(std::ostream &os, const instance e) const;
-  //@}
+        std::ostream &display(std::ostream &os) const;
 
-  /*!@name Verification*/
-  //@{
-  void verify();
-  //@}
+        std::ostream &displayExample(std::ostream &os, const instance e) const;
+        //@}
+
+        /*!@name Verification*/
+        //@{
+        void verify();
+        //@}
 };
 
 template <typename StringListIt>

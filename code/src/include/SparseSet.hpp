@@ -66,10 +66,21 @@ public:
 
   std::vector<int>::const_iterator end() const;
   std::vector<int>::const_reverse_iterator rend() const;
-	
-	
-	std::vector<int>::iterator get_iterator(const size_t i);
-	std::vector<int>::const_iterator get_iterator(const size_t i) const;
+
+  std::vector<int>::iterator fbegin();
+  std::vector<int>::reverse_iterator frbegin();
+
+  std::vector<int>::iterator fend();
+  std::vector<int>::reverse_iterator frend();
+
+  std::vector<int>::const_iterator fbegin() const;
+  std::vector<int>::const_reverse_iterator frbegin() const;
+
+  std::vector<int>::const_iterator fend() const;
+  std::vector<int>::const_reverse_iterator frend() const;
+
+  std::vector<int>::iterator get_iterator(const size_t i);
+  std::vector<int>::const_iterator get_iterator(const size_t i) const;
 
   // std::vector<int>::iterator begin_not_in();
   // std::vector<int>::reverse_iterator rbegin_not_in();
@@ -117,8 +128,10 @@ public:
 
   int index(const int elt) const;
 
-  void save(size_t&, size_t &);
-  void restore(const size_t, const size_t);
+  void save_start(size_t &);
+  void save_size(size_t &);
+  void restore_start(const size_t);
+  void restore_size(const size_t);
   //@}
 	
   /*!@name Miscellaneous*/

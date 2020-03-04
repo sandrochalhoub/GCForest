@@ -15,9 +15,16 @@ void SparseSet::reserve(const size_t n) {
     list_.push_back(list_.size());
   }
 }
+//
+// void SparseSet::save(size_t &stamp1, size_t &stamp2) { stamp1 = size_; stamp2
+// = start_; }
+// void SparseSet::restore(const size_t stamp1, const size_t stamp2) { size_ =
+// stamp1; start_ = stamp2; }
 
-void SparseSet::save(size_t &stamp1, size_t &stamp2) { stamp1 = size_; stamp2 = start_; }
-void SparseSet::restore(const size_t stamp1, const size_t stamp2) { size_ = stamp1; start_ = stamp2; }
+void SparseSet::save_start(size_t &stamp) { stamp = start_; }
+void SparseSet::save_size(size_t &stamp) { stamp = size_; }
+void SparseSet::restore_start(const size_t stamp) { start_ = stamp; }
+void SparseSet::restore_size(const size_t stamp) { size_ = stamp; }
 
 //@}
 
@@ -58,25 +65,47 @@ int &SparseSet::operator[](const size_t idx) { return list_[idx+start_]; }
 
 /*!@name List Manipulation*/
 //@{
+std::vector<int>::iterator SparseSet::fbegin() { return list_.begin(); }
 std::vector<int>::iterator SparseSet::begin() { return list_.begin() + start_; }
+
+std::vector<int>::reverse_iterator SparseSet::frbegin() {
+  return list_.rend() - start_;
+}
 std::vector<int>::reverse_iterator SparseSet::rbegin() {
   return list_.rend() - size_;
 }
 
+std::vector<int>::iterator SparseSet::fend() { return list_.begin() + start_; }
 std::vector<int>::iterator SparseSet::end() { return list_.begin() + size_; }
+
+std::vector<int>::reverse_iterator SparseSet::frend() { return list_.rend(); }
 std::vector<int>::reverse_iterator SparseSet::rend() {
   return list_.rend() - start_;
 }
 
+std::vector<int>::const_iterator SparseSet::fbegin() const {
+  return list_.begin();
+}
 std::vector<int>::const_iterator SparseSet::begin() const {
   return list_.begin() + start_;
+}
+
+std::vector<int>::const_reverse_iterator SparseSet::frbegin() const {
+  return list_.rend() - start_;
 }
 std::vector<int>::const_reverse_iterator SparseSet::rbegin() const {
   return list_.rend() - size_;
 }
 
+std::vector<int>::const_iterator SparseSet::fend() const {
+  return list_.begin() + start_;
+}
 std::vector<int>::const_iterator SparseSet::end() const {
   return list_.begin() + size_;
+}
+
+std::vector<int>::const_reverse_iterator SparseSet::frend() const {
+  return list_.rend();
 }
 std::vector<int>::const_reverse_iterator SparseSet::rend() const {
   return list_.rend() - start_;
@@ -224,7 +253,7 @@ std::ostream &SparseSet::display(std::ostream &os) const {
       os << " |";
     os << " " << list_[i];
   }
-  os << std::endl;
+  // os << std::endl;
 
   // os << "(";
   // for (auto it = begin(); it < end(); ++it) {
