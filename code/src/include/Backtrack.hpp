@@ -34,15 +34,18 @@ private:
 
   /// store the parent of node i
   vector<int> depth;
+	
+  /// store the maximum depth at each level of the search tree
+  vector<int> max_depth;
 
   /// -1 if the optimal subtree was not found yet, parent node if it was
   vector<int> optimal;
 
-  // internal nodes are popped front, potential nodes and closed leaves are back
-  SparseSet open;
+  // internal nodes are popped front, potential nodes and leaves are back
+  SparseSet blossom;
 	
-  // stores leaves (open nodes that cannot be expended because of depth constraints, or because we already explored subtrees where this node is expended)
-  SparseSet leaf;
+  // // stores leaves (blossom nodes that cannot be expended because of depth constraints, or because we already explored subtrees where this node is expended)
+  // SparseSet leaf;
 
   /// structure to partition the examples in the tree
   TreePartition P[2];
@@ -118,6 +121,10 @@ public:
   double accuracy();
 
   size_t error();
+	
+	// whether we reached a leaf of the SEARCH tree
+	// if we did and it's a solution, new best are stored
+	// bool dead_end();
 
   void set_optimal(const int node);
 

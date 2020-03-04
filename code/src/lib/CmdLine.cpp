@@ -218,11 +218,11 @@ Options parse(int argc, char *argv[]) {
                          numeric_limits<int>::max(), "int");
 
   cmd.add<ValueArg<int>>(opt.restart_base, "", "restart_base",
-                         "number of backtracks before first restart", false, -1,
+                         "number of backtracks before first restart", false, 2,
                          "int");
 
   cmd.add<ValueArg<double>>(opt.restart_factor, "", "restart_factor",
-                            "geometric factor", false, 1, "double");
+                            "geometric factor", false, 1.1, "double");
 
   cmd.parse(argc, argv);
   return opt;
