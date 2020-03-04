@@ -1,4 +1,8 @@
 
+#include <sys/time.h>
+#include <sys/resource.h>
+#include <unistd.h>
+
 #include "Backtrack.hpp"
 
 double cpu_time(void) {
