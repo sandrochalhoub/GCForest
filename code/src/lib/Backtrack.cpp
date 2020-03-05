@@ -370,130 +370,111 @@ void BacktrackingAlgorithm::print_new_best() const {
        << endl;
 }
 
+bool BacktrackingAlgorithm::dead_end(const int branching_node) {
 
+  if (not blossom.count()) {
 
-// bool BacktrackingAlgorithm::dead_end() {
-//
-//
-// if(not blossom.count()) {
-// 	// this is a solution, and the tree is correct!!!
-//   ub_error = 0;
-//   ub_node = num_node;
-// }
-//
-//
-//   auto end_branch{not blossom.count()};
-//
-//   if (end_branch) {
-//     if (options.verbosity >= Options::YACKING) {
-//       cout << "leaf because correct!\n";
-//     }
-//     ub_error = 0;
-//     ub_node = num_node;
-//
-//     if (options.verbosity >= Options::NORMAL) {
-//       print_new_best();
-//     }
-//
-//   } else {
-//     auto node_limit{num_node >= ub_node};
-// 		// auto depth_limit{}
-// 		end_branch = node_limit;
-//     if (end_branch) {
-//
-//       auto err{error()};
-//
-//       if (options.verbosity >= Options::YACKING) {
-//         cout << "leaf because the node limit (" << ub_node
-//              << ") is reached, error=" << err << "\n";
-//       }
-//
-//       // assert(err < ub_error);
-//
-//       if (err < ub_error) {//} or (err == ub_error and max_depth < ub_depth)) {
-//         ub_error = err;
-// 				// max_depth;
-//
-//         if (options.verbosity >= Options::NORMAL) {
-//           print_new_best();
-//         }
-//       }
-//     }
-//
-//     //
-//     //           num_node + 2 * blossom.count() >= ub_node or ;
-//     //
-//     //       if (end_branch) {
-//     //
-//     // auto err{error()};
-//     //
-//     // assert(err < ub_error);
-//     //
-//     //
-//     //
-//     //
-//     //         if (num_node + 2 * blossom.count() >= ub_node)
-//     //           cout << "blossom because there is no correct subtree of size
-//     //           less than "
-//     //                << ub_node << endl;
-//     //         else {
-//     //           assert(num_node >= max_num_node);
-//     //           cout << "blossom because the node limit (" << max_num_node
-//     //                << ") is reached\n";
-//     //         }
-//     //       }
-//   }
-//
-//   if (not end_branch and branching_node >= 0) {
-//     end_branch = is_optimal(branching_node) or no_feature(branching_node) or
-//                  max_entropy(branching_node, *(feature[branching_node]));
-//
-//     if (options.verbosity >= Options::YACKING) {
-//       if (end_branch) {
-//         for (auto i{0}; i < num_node; ++i)
-//           cout << " ";
-//         if (is_optimal(branching_node))
-//           cout << "subtree is optimal!\n";
-//         else
-//           cout << "domain end!\n";
-//       }
-//     }
-//   }
-//
-//   if (not end_branch) {
-//
-//     if (ub_error > 0) {
-//       auto lb{error_lower_bound()};
-//
-//       if (lb >= ub_error) {
-//         end_branch = true;
-//         if (options.verbosity >= Options::YACKING) {
-//           for (auto i{0}; i < num_node; ++i)
-//             cout << " ";
-//           cout << "OPTIMISTIC LOWER BOUND (ERROR) = " << lb << "/" << ub_error
-//                << endl;
-//         }
-//       }
-//     } else {
-//
-//       auto lb{node_lower_bound()};
-//
-//       if (lb >= ub_node) {
-//         end_branch = true;
-//         if (options.verbosity >= Options::YACKING) {
-//           for (auto i{0}; i < num_node; ++i)
-//             cout << " ";
-//           cout << "OPTIMISTIC LOWER BOUND (NODE) = " << lb << "/" << ub_node
-//                << endl;
-//         }
-//       }
-//     }
-//   }
-//
-//
-// }
+    assert(branching_node < 0);
 
+    // this is a solution, and the tree is correct!!!
+    ub_error = 0;
+    ub_node = num_node;
+    ub_depth = max_depth.back();
 
+    if (options.verbosity >= Options::NORMAL) {
+      print_new_best();
+    }
+
+    return true;
+  }
+
+  if (num_node >= ub_node) {
+
+    assert(branching_node < 0);
+
+    // new tree, check if the accuracy is better
+    auto err{error()};
+    if (err < ub_error or (err == ub_error and max_depth.back() < ub_depth)) {
+      ub_error = err;
+      ub_depth = max_depth.back();
+
+      if (options.verbosity >= Options::NORMAL) {
+        print_new_best();
+      }
+    }
+
+    return true;
+  }
+
+  if (branching_node >= 0 and
+      (is_optimal(branching_node) or no_feature(branching_node) or
+       max_entropy(branching_node, *(feature[branching_node])))) {
+
+    if (options.verbosity >= Options::YACKING) {
+      for (auto i{0}; i < num_node; ++i)
+        cout << " ";
+      if (is_optimal(branching_node))
+        cout << "subtree is optimal!\n";
+      else
+        cout << "domain end!\n";
+    }
+
+    return true;
+  }
+
+  auto depth_limit{true};
+  auto i{blossom.begin()};
+  while (depth_limit and i++ != blossom.end())
+    depth_limit = (depth[*i] == ub_depth);
+
+  if (depth_limit) {
+    assert(false);
+
+    // new tree, check if the accuracy is better
+    auto err{error()};
+    if (err < ub_error) {
+      ub_error = err;
+      ub_node = num_node;
+
+      if (options.verbosity >= Options::NORMAL) {
+        print_new_best();
+      }
+    }
+
+    return true;
+  }
+
+  if (ub_error > 0) {
+
+		auto lb{error_lower_bound()};
+    if (lb >= ub_error) {
+      if (options.verbosity >= Options::YACKING) {
+        for (auto i{0}; i < num_node; ++i)
+          cout << " ";
+        cout << "OPTIMISTIC LOWER BOUND (ERROR) = " << lb << "/" << ub_error
+             << endl;
+      }
+      return true;
+    }
+
+  } else {
+
+		auto lb{node_lower_bound()};
+    if (max_depth.back() >= ub_depth or lb > ub_node) {
+
+      if (options.verbosity >= Options::YACKING) {
+        for (auto i{0}; i < num_node; ++i)
+          cout << " ";
+        cout << "OPTIMISTIC LOWER BOUND (NODE) = " << lb << "/" << ub_node
+             << endl;
+      }
+
+      return true;
+    }
+  }
+
+  return false;
+}
 
 void BacktrackingAlgorithm::search() {
   // const int kbest, const double p,
@@ -519,38 +500,39 @@ void BacktrackingAlgorithm::search() {
 
   auto branching_node{-1};
 
-  size_t restart_base{static_cast<size_t>(options.restart_base)};
-  size_t restart_limit{restart_base};
-  size_t restart_factor{static_cast<size_t>(options.restart_factor * 1024)};
-  size_t restart_divisor{1024};
+  double restart_base{static_cast<double>(options.restart_base)};
+  size_t restart_limit{static_cast<size_t>(restart_base)};
+  double restart_factor{options.restart_factor};
+  // size_t restart_divisor{1024};
 
   while (true) {
-		
-		auto md{0};
-		for(auto i : blossom) {
-			if(depth[i] > md)
-				md = depth[i];
-			// cout << " " << depth[i];
-		}
-		for(auto i{blossom.fbegin()}; i!=blossom.fend(); ++i) {
-			if(depth[*i] > md)
-				md = depth[*i];
-			// cout << " *" << depth[*i];
-		}
-		// cout << " // " << max_depth.back() << endl;
-		assert(md == max_depth.back());
-		
-		
+
+    // auto md{0};
+    // for(auto i : blossom) {
+    // 	if(depth[i] > md)
+    // 		md = depth[i];
+    // 	// cout << " " << depth[i];
+    // }
+    // for(auto i{blossom.fbegin()}; i!=blossom.fend(); ++i) {
+    // 	if(depth[*i] > md)
+    // 		md = depth[*i];
+    // 	// cout << " *" << depth[*i];
+    // }
+    // // cout << " // " << max_depth.back() << endl;
+    // assert(md == max_depth.back());
 
     ++search_size;
     if (num_backtracks == restart_limit) {
       // cout << "restart (" << search_size << ")!\n";
 
       restart_base *= restart_factor;
-      restart_base /= restart_divisor;
-      restart_limit += restart_base;
+      // restart_base /= restart_divisor;
+      restart_limit += static_cast<size_t>(restart_base);
 
       // branching_node = -1;
+			
+			// cout << "restart (limit=" << static_cast<size_t>(restart_base) << ")\n";
+			
 
       ++num_restarts;
       clear(branching_node);

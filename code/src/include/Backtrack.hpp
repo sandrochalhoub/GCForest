@@ -124,7 +124,7 @@ public:
 	
 	// whether we reached a leaf of the SEARCH tree
 	// if we did and it's a solution, new best are stored
-	// bool dead_end();
+	bool dead_end(const int node);
 
   void set_optimal(const int node);
 
