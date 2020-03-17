@@ -375,6 +375,10 @@ bool BacktrackingAlgorithm::no_feature(const int node) const {
   return feature[node] == ranked_feature[node].end();
 }
 
+bool BacktrackingAlgorithm::last_feature(const int node) const {
+  return feature[node] == ranked_feature[node].end()-1;
+}
+
 // return true if the feature f is true/false in all examples
 bool BacktrackingAlgorithm::max_entropy(const int node, const int f) const {
   // auto f{*(feature[node])};
@@ -890,6 +894,9 @@ void BacktrackingAlgorithm::expend() {
     // cout << r << " -> " << blossom[r] << endl;
     selected_node = bourgeon[r];
     cbest_error[selected_node] = data.count(); // error(selected_node);
+
+    feature[selected_node] = ranked_feature[selected_node].begin();
+
   } else {
 		
 		assert(left_child[selected_node] >= 0);
@@ -899,11 +906,11 @@ void BacktrackingAlgorithm::expend() {
     auto err{cbest_error[left_child[selected_node]] +
              cbest_error[right_child[selected_node]]};
 
-    if (PRINTTRACE)
-      cout << "new best for node " << selected_node << "? feat"
-           << *feature[selected_node] << ", error=" << err << " ("
-           << left_child[selected_node] << "/" << right_child[selected_node]
-           << ")" << endl;
+    // if (PRINTTRACE)
+    //   cout << "new best for node " << selected_node << "? feat"
+    //        << *feature[selected_node] << ", error=" << err << " ("
+    //        << left_child[selected_node] << "/" << right_child[selected_node]
+    //        << ")" << endl;
 
     if (err < cbest_error[selected_node]) {
       cbest_error[selected_node] = err;
@@ -911,12 +918,25 @@ void BacktrackingAlgorithm::expend() {
 
       if (PRINTTRACE)
         cout << "new best for node " << selected_node
-             << ": feat=" << cbest_feature[selected_node]
+             << ": feat=" << cbest_feature[selected_node] << "("
+             << ")"
              << ", error=" << cbest_error[selected_node] << endl;
     }
 
     ++feature[backtrack_node];
   }
+
+  if (PRINTTRACE)
+    cout << "branching " << selected_node
+         << ": feat=" << *(feature[selected_node]) << "("
+         << (feature[selected_node] - ranked_feature[selected_node].begin())
+         << "/" << (ranked_feature[selected_node].end() -
+                    ranked_feature[selected_node].begin())
+         << ")" << endl;
+	
+  assert(feature[selected_node] >= ranked_feature[selected_node].begin() and
+         feature[selected_node] < ranked_feature[selected_node].end());
+	
 
   branch(selected_node, *(feature[selected_node]));
   // ++feature[selected_node];
@@ -1010,8 +1030,11 @@ bool BacktrackingAlgorithm::backtrack() {
     cout << endl;
 
   // if there aren't any, backtrack once step further
-  if (no_feature(backtrack_node)) {
+  // if (no_feature(backtrack_node)) {
+	if(last_feature(backtrack_node)) {
 
+		if(backtrack_node == 0)
+			return false;
     // prune(backtrack_node);
 
     feature[backtrack_node] = ranked_feature[backtrack_node].begin();
