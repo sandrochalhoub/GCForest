@@ -166,6 +166,8 @@ public:
   bool is_optimal(const int node) const;
 
   bool no_feature(const int node) const;
+	
+	bool last_feature(const int node) const;
 
   bool not_branched(const int node) const;
 
