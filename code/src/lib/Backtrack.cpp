@@ -889,6 +889,10 @@ void BacktrackingAlgorithm::expend() {
     selected_node = bourgeon[r];
     cbest_error[selected_node] = data.count(); // error(selected_node);
   } else {
+		
+		assert(left_child[selected_node] >= 0);
+		assert(right_child[selected_node] >= 0);
+		
     // if we backtrack to this node, it is not optimal, but its children are
     auto err{cbest_error[left_child[selected_node]] +
              cbest_error[right_child[selected_node]]};
@@ -1027,8 +1031,8 @@ bool BacktrackingAlgorithm::backtrack() {
   // make sure that children are not assigned
   prune(left_child[backtrack_node]);
   prune(right_child[backtrack_node]);
-	left_child[backtrack_node] = -1;
-	right_child[backtrack_node] = -1;
+	// left_child[backtrack_node] = -1;
+	// right_child[backtrack_node] = -1;
 
   // search can continue
   return true;
@@ -1199,11 +1203,11 @@ void BacktrackingAlgorithm::new_search() {
       //     total_error += error(*d);
       // }
 
-      if (current_error != total_error) {
-        cout << "discrepancy in error " << current_error << "/" << total_error
-             << endl;
-        exit(1);
-      }
+      // if (current_error != total_error) {
+      //   cout << "discrepancy in error " << current_error << "/" << total_error
+      //        << endl;
+      //   exit(1);
+      // }
     }
 
     if (bourgeon.empty()) {
