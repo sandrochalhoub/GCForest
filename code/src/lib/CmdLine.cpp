@@ -115,6 +115,9 @@ Options parse(int argc, char *argv[]) {
   cmd.add<UnlabeledValueArg<std::string>>(opt.instance_file, "file",
                                           "instance file", true, "", "string");
 
+  cmd.add<ValueArg<string>>(opt.debug, "", "debug", "debug file", false, "",
+                            "string");
+
   cmd.add<ValueArg<string>>(opt.output, "o", "output", "output file", false, "",
                             "string");
 
@@ -184,7 +187,7 @@ Options parse(int argc, char *argv[]) {
   cmd.add<SwitchArg>(opt.print_ins, "", "print_ins", "print the instance",
                      false);
 
-  cmd.add<SwitchArg>(opt.print_sol, "", "print_sta", "print the statistics",
+  cmd.add<SwitchArg>(opt.print_sta, "", "print_sta", "print the statistics",
                      false);
 
   cmd.add<SwitchArg>(opt.print_cmd, "", "print_cmd", "print the command-line",

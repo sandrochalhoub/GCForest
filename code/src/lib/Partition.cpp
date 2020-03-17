@@ -16,6 +16,8 @@ void TreePartition::init(const int n) {
     element.push_back(e);
 }
 
+size_t TreePartition::size() const { return part.size(); }
+
 void TreePartition::clear() { part.clear(); }
 
 size_t TreePartition::addNode() {

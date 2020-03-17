@@ -6,9 +6,14 @@
 #include "DataSet.hpp"
 #include "Partition.hpp"
 #include "SparseSet.hpp"
+#include "Tree.hpp"
 
 #ifndef _PRIMER_BACKTRACK_HPP
 #define _PRIMER_BACKTRACK_HPP
+
+#define INFTY static_cast<size_t>(numeric_limits<int>::max())
+
+#define DEBUG_MODE
 
 using namespace boost;
 using namespace std;
@@ -31,6 +36,8 @@ private:
 
   /// store the parent of node i
   vector<int> parent;
+  vector<int> left_child;
+  vector<int> right_child;
 
   /// store the parent of node i
   vector<int> depth;
@@ -43,7 +50,10 @@ private:
 
   // internal nodes are popped front, potential nodes and leaves are back
   SparseSet blossom;
-	
+
+  // all current nodes, potential nodes are back
+  SparseSet nodes;
+
   // // stores leaves (blossom nodes that cannot be expended because of depth constraints, or because we already explored subtrees where this node is expended)
   // SparseSet leaf;
 
@@ -60,14 +70,18 @@ private:
   vector<vector<int>::iterator> feature;
 
   /// best solution
+  vector<int> best_child;
   vector<int> best_feature;
-  vector<size_t> best_error;
-  vector<size_t> best_size;
+
+  vector<int> cbest_feature;
+  vector<size_t> cbest_error;
+  vector<size_t> cbest_size;
 
   // vector<size_t> st_trail;
   // vector<size_t> sz_trail;
 
   // vector<int> best_feature;
+  vector<int> f_error;
   vector<double> f_entropy;
   vector<size_t> buffer;
 
@@ -87,10 +101,29 @@ private:
 
   size_t num_restarts;
 
+  bool size_matters;
+
+  size_t current_error;
+
+  int backtrack_node;
+
+  void store_new_best();
+
+  void store_solution();
+
   void print_new_best() const;
   //@}
 
+  /// decision nodes in sequence -> vector
+  /// blossoms / available nodes -> SparseSet assigned/blossom/available
+  SparseSet bourgeon;
+  vector<int> decision;
+
 public:
+#ifdef DEBUG_MODE
+  Tree *debug_sol;
+#endif
+
   /*!@name Constructors*/
   //@{
   explicit BacktrackingAlgorithm(DataSet &d, Options &o);
@@ -118,17 +151,17 @@ public:
 
   void clear(int &node);
 
-  double accuracy();
+  double accuracy() const;
 
-  size_t error();
-	
-	// whether we reached a leaf of the SEARCH tree
-	// if we did and it's a solution, new best are stored
-	bool dead_end(const int node);
+  size_t error() const;
+
+  // whether we reached a leaf of the SEARCH tree
+  // if we did and it's a solution, new best are stored
+  bool dead_end(const int node);
 
   void set_optimal(const int node);
 
-  void unset_optimal(const int node);
+  void unset(const int node);
 
   bool is_optimal(const int node) const;
 
@@ -169,11 +202,40 @@ public:
 
   void deduce_from_sibling(const int node, const int sibling, const int y);
 
+  int get_feature_error(const int n, const int f) const;
+
   int get_feature_count(const int y, const int n, const int f) const;
+
+  int solutionTreeSize() const;
+
+  int solutionError() const;
+
+  int solutionFeature(const int i) const;
+
+  int solutionChild(const int i, const bool t) const;
   //@}
+
+  size_t error(const int i) const;
+  bool notify_solution();
+  bool perfect();
+  bool fail();
+  bool bottom();
+  void resize_n(const int k);
+  void branch(const int node, const int f);
+  void expend();
+  void prune(const int node);
+  bool backtrack();
+  void new_search();
+
+  // int get_feature(const int node) const;
+  // int get_left(const int node) const;
+  // int get_right(const int node) const;
+  // // int get_(const int node) const;
+  //
 
   /*!@name Printing*/
   //@{
+  void verify();
   // std::ostream &toCsv(std::ostream &os) const;
   std::ostream &display(std::ostream &os) const;
   //@}

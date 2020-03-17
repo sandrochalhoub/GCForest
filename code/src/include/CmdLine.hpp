@@ -18,6 +18,7 @@ public:
   // the actual options
   string cmdline; // for reference
   string instance_file;
+  string debug;
   string output;
 
   enum verbosity { SILENT = 0, QUIET, NORMAL, YACKING, SOLVERINFO };
@@ -85,13 +86,13 @@ public:
   Options(){};
   Options(const Options &opt)
       : cmdline(opt.cmdline), instance_file(opt.instance_file),
-        verbosity(opt.verbosity), class_policy(opt.class_policy),
-        example_policy(opt.example_policy), feature_policy(opt.feature_policy),
-        bayesian(opt.bayesian), max_iteration(opt.max_iteration),
-        delimiter(opt.delimiter), wildcard(opt.wildcard),
-        original(opt.original), reduced(opt.reduced), caption(opt.caption),
-        format(opt.format), mapping(opt.mapping), seed(opt.seed),
-        print_sol(opt.print_sol), print_par(opt.print_par),
+        debug(opt.debug), verbosity(opt.verbosity),
+        class_policy(opt.class_policy), example_policy(opt.example_policy),
+        feature_policy(opt.feature_policy), bayesian(opt.bayesian),
+        max_iteration(opt.max_iteration), delimiter(opt.delimiter),
+        wildcard(opt.wildcard), original(opt.original), reduced(opt.reduced),
+        caption(opt.caption), format(opt.format), mapping(opt.mapping),
+        seed(opt.seed), print_sol(opt.print_sol), print_par(opt.print_par),
         print_mod(opt.print_mod), print_ins(opt.print_ins),
         print_sta(opt.print_sta), print_cmd(opt.print_cmd),
         verified(opt.verified), sample(opt.sample), width(opt.width),

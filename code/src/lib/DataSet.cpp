@@ -49,6 +49,7 @@ void DataSet::duplicate_format(const instance& from, instance& to) const {
 }
 
 instance &DataSet::operator[](const size_t idx) { return X[idx]; }
+const instance &DataSet::operator[](const size_t idx) const { return X[idx]; }
 
 int DataSet::getClass(const int i) const {
 	return example[1].contain(i);

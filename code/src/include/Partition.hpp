@@ -63,6 +63,8 @@ public:
   TreePartition();
   void clear();
 
+  size_t size() const;
+
   Part &operator[](const int i);
   const Part &operator[](const int i) const;
 
@@ -75,6 +77,10 @@ public:
   template <typename boolean_function>
   void branch(const int node, boolean_function condition);
 
+  template <typename boolean_function>
+  void branch(const int node, const int x, const int y,
+              boolean_function condition);
+
   /*!@name Miscellaneous*/
   //@{
   std::ostream &display(std::ostream &os) const;
@@ -83,6 +89,11 @@ public:
 
 
 std::ostream& operator<<(std::ostream& os, const TreePartition& x);
+
+// template <typename boolean_function>
+// void Part::split(const int l1, const int l0, boolean_function condition) {
+// 	split(part[l1], part[l0], condition);
+// }
 
 template <typename boolean_function>
 void Part::split(Part &l1, Part &l0, boolean_function condition) {
@@ -170,9 +181,13 @@ void TreePartition::branch(const int node, boolean_function condition) {
   part[node].split(part[c1], part[c0], condition);
 }
 
-
-
-
+template <typename boolean_function>
+void TreePartition::branch(const int node, const int c1, const int c0,
+                           boolean_function condition) {
+  // auto c1{addNode()};
+  // auto c0{addNode()};
+  part[node].split(part[c1], part[c0], condition);
+}
 }
 
 
