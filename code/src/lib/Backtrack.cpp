@@ -771,6 +771,8 @@ void BacktrackingAlgorithm::branch(const int node, const int f) {
     // cout << "branch on " << node << " (" << y << ") with feature " << f <<
     // "(" << P[y].size() << ")\n";
 
+		assert(f < data.numFeature());
+
     P[y].branch(node, c[1], c[0],
                 [&](const int x) { return data.ithHasFeature(y, x, f); });
   }
