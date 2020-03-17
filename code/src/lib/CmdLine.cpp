@@ -115,6 +115,9 @@ Options parse(int argc, char *argv[]) {
   cmd.add<UnlabeledValueArg<std::string>>(opt.instance_file, "file",
                                           "instance file", true, "", "string");
 
+  cmd.add<ValueArg<string>>(opt.debug, "", "debug", "debug file", false, "",
+                            "string");
+
   cmd.add<ValueArg<string>>(opt.output, "o", "output", "output file", false, "",
                             "string");
 
@@ -184,7 +187,7 @@ Options parse(int argc, char *argv[]) {
   cmd.add<SwitchArg>(opt.print_ins, "", "print_ins", "print the instance",
                      false);
 
-  cmd.add<SwitchArg>(opt.print_sol, "", "print_sta", "print the statistics",
+  cmd.add<SwitchArg>(opt.print_sta, "", "print_sta", "print the statistics",
                      false);
 
   cmd.add<SwitchArg>(opt.print_cmd, "", "print_cmd", "print the command-line",
@@ -218,11 +221,11 @@ Options parse(int argc, char *argv[]) {
                          numeric_limits<int>::max(), "int");
 
   cmd.add<ValueArg<int>>(opt.restart_base, "", "restart_base",
-                         "number of backtracks before first restart", false, -1,
+                         "number of backtracks before first restart", false, 2,
                          "int");
 
   cmd.add<ValueArg<double>>(opt.restart_factor, "", "restart_factor",
-                            "geometric factor", false, 1, "double");
+                            "geometric factor", false, 1.1, "double");
 
   cmd.parse(argc, argv);
   return opt;

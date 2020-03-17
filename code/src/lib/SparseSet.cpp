@@ -67,6 +67,7 @@ int &SparseSet::operator[](const size_t idx) { return list_[idx+start_]; }
 //@{
 std::vector<int>::iterator SparseSet::fbegin() { return list_.begin(); }
 std::vector<int>::iterator SparseSet::begin() { return list_.begin() + start_; }
+std::vector<int>::iterator SparseSet::bbegin() { return list_.begin() + size_; }
 
 std::vector<int>::reverse_iterator SparseSet::frbegin() {
   return list_.rend() - start_;
@@ -74,13 +75,20 @@ std::vector<int>::reverse_iterator SparseSet::frbegin() {
 std::vector<int>::reverse_iterator SparseSet::rbegin() {
   return list_.rend() - size_;
 }
+std::vector<int>::reverse_iterator SparseSet::brbegin() {
+  return list_.rbegin();
+}
 
 std::vector<int>::iterator SparseSet::fend() { return list_.begin() + start_; }
 std::vector<int>::iterator SparseSet::end() { return list_.begin() + size_; }
+std::vector<int>::iterator SparseSet::bend() { return list_.end(); }
 
 std::vector<int>::reverse_iterator SparseSet::frend() { return list_.rend(); }
 std::vector<int>::reverse_iterator SparseSet::rend() {
   return list_.rend() - start_;
+}
+std::vector<int>::reverse_iterator SparseSet::brend() {
+  return list_.rend() - size_;
 }
 
 std::vector<int>::const_iterator SparseSet::fbegin() const {
@@ -89,12 +97,18 @@ std::vector<int>::const_iterator SparseSet::fbegin() const {
 std::vector<int>::const_iterator SparseSet::begin() const {
   return list_.begin() + start_;
 }
+std::vector<int>::const_iterator SparseSet::bbegin() const {
+  return list_.begin() + size_;
+}
 
 std::vector<int>::const_reverse_iterator SparseSet::frbegin() const {
   return list_.rend() - start_;
 }
 std::vector<int>::const_reverse_iterator SparseSet::rbegin() const {
   return list_.rend() - size_;
+}
+std::vector<int>::const_reverse_iterator SparseSet::brbegin() const {
+  return list_.rbegin();
 }
 
 std::vector<int>::const_iterator SparseSet::fend() const {
@@ -103,12 +117,16 @@ std::vector<int>::const_iterator SparseSet::fend() const {
 std::vector<int>::const_iterator SparseSet::end() const {
   return list_.begin() + size_;
 }
+std::vector<int>::const_iterator SparseSet::bend() const { return list_.end(); }
 
 std::vector<int>::const_reverse_iterator SparseSet::frend() const {
   return list_.rend();
 }
 std::vector<int>::const_reverse_iterator SparseSet::rend() const {
   return list_.rend() - start_;
+}
+std::vector<int>::const_reverse_iterator SparseSet::brend() const {
+  return list_.rend() - size_;
 }
 
 std::vector<int>::const_iterator SparseSet::get_iterator(const size_t i) const {
@@ -249,10 +267,14 @@ int SparseSet::index(const int elt) const { return index_[elt]; }
 
 std::ostream &SparseSet::display(std::ostream &os) const {
   for (auto i = 0; i < capacity(); ++i) {
-    if (start_ == i or size_ == i)
+    if (start_ == i)
+      os << " |";
+    if (size_ == i)
       os << " |";
     os << " " << list_[i];
   }
+  if (size_ == capacity())
+    os << " |";
   // os << std::endl;
 
   // os << "(";

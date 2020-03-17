@@ -79,6 +79,18 @@ public:
   std::vector<int>::const_iterator fend() const;
   std::vector<int>::const_reverse_iterator frend() const;
 
+  std::vector<int>::iterator bbegin();
+  std::vector<int>::reverse_iterator brbegin();
+
+  std::vector<int>::iterator bend();
+  std::vector<int>::reverse_iterator brend();
+
+  std::vector<int>::const_iterator bbegin() const;
+  std::vector<int>::const_reverse_iterator brbegin() const;
+
+  std::vector<int>::const_iterator bend() const;
+  std::vector<int>::const_reverse_iterator brend() const;
+
   std::vector<int>::iterator get_iterator(const size_t i);
   std::vector<int>::const_iterator get_iterator(const size_t i) const;
 
