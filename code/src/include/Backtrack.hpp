@@ -7,13 +7,11 @@
 #include "Partition.hpp"
 #include "SparseSet.hpp"
 #include "Tree.hpp"
+#include "utils.hpp"
 
 #ifndef _PRIMER_BACKTRACK_HPP
 #define _PRIMER_BACKTRACK_HPP
 
-#define INFTY static_cast<size_t>(numeric_limits<int>::max())
-
-#define DEBUG_MODE
 
 using namespace boost;
 using namespace std;
@@ -36,12 +34,12 @@ private:
 
   /// store the parent of node i
   vector<int> parent;
-  vector<int> left_child;
-  vector<int> right_child;
+  vector<int> child[2];
+  // vector<int> right_child;
 
   /// store the parent of node i
   vector<int> depth;
-	
+
   /// store the maximum depth at each level of the search tree
   vector<int> max_depth;
 
@@ -54,7 +52,9 @@ private:
   // all current nodes, potential nodes are back
   SparseSet nodes;
 
-  // // stores leaves (blossom nodes that cannot be expended because of depth constraints, or because we already explored subtrees where this node is expended)
+  // // stores leaves (blossom nodes that cannot be expended because of depth
+  // constraints, or because we already explored subtrees where this node is
+  // expended)
   // SparseSet leaf;
 
   /// structure to partition the examples in the tree
@@ -70,9 +70,11 @@ private:
   vector<vector<int>::iterator> feature;
 
   /// best solution
-  vector<int> best_child;
+  vector<int> best_child[2];
   vector<int> best_feature;
 
+  // best subtree w.r.t. the current father node
+  vector<int> cbest_child[2];
   vector<int> cbest_feature;
   vector<size_t> cbest_error;
   vector<size_t> cbest_size;
@@ -166,8 +168,8 @@ public:
   bool is_optimal(const int node) const;
 
   bool no_feature(const int node) const;
-	
-	bool last_feature(const int node) const;
+
+  bool last_feature(const int node) const;
 
   bool not_branched(const int node) const;
 
@@ -229,6 +231,16 @@ public:
   bool backtrack();
   void new_search();
 
+  int choose() const;
+
+  int getLeaf(const instance &x) const;
+
+  bool predict(const instance &x) const;
+
+  int predict(DataSet &test) const;
+
+  // void store_solution();
+
   // int get_feature(const int node) const;
   // int get_left(const int node) const;
   // int get_right(const int node) const;
@@ -242,7 +254,6 @@ public:
   std::ostream &display(std::ostream &os) const;
   //@}
 };
-
 
 std::ostream &operator<<(std::ostream &os, const BacktrackingAlgorithm &x);
 }
