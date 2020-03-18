@@ -1,17 +1,18 @@
 
-#include <sys/time.h>
-#include <sys/resource.h>
-#include <unistd.h>
+// #include <sys/time.h>
+// #include <sys/resource.h>
+// #include <unistd.h>
 
 #include "Backtrack.hpp"
 
-#define PRINTTRACE (options.verbosity >= Options::YACKING)
-
-double cpu_time(void) {
-  struct rusage ru;
-  getrusage(RUSAGE_SELF, &ru);
-  return (double)ru.ru_utime.tv_sec + (double)ru.ru_utime.tv_usec / 1000000;
-}
+// #define PRINTTRACE                                                             \
+//   (options.verbosity >= Options::YACKING and search_size >= 23899)
+//
+// double cpu_time(void) {
+//   struct rusage ru;
+//   getrusage(RUSAGE_SELF, &ru);
+//   return (double)ru.ru_utime.tv_sec + (double)ru.ru_utime.tv_usec / 1000000;
+// }
 
 namespace primer {
 
@@ -122,7 +123,8 @@ void BacktrackingAlgorithm::resize(const int k) {
   optimal.resize(k, -2);
 
   best_feature.resize(k, -1);
-  best_child.resize(k, -1);
+  best_child[0].resize(k, -1);
+  best_child[1].resize(k, -1);
 
   cbest_feature.resize(k, -1);
   cbest_error.resize(k, data.count());
@@ -412,15 +414,15 @@ bool BacktrackingAlgorithm::null_entropy(const int node, const int f) const {
 void BacktrackingAlgorithm::store_new_best() {
 
   for (auto i{0}; i < num_node; ++i)
-    best_child[i] = -1;
+    best_child[0][i] = -1;
 
   for (auto i{1}; i < num_node; i += 2) {
-    best_child[parent[i]] = i;
+    best_child[0][parent[i]] = i;
     // cout << "child of " << parent[i] << " is " << i << endl;
   }
 
   for (auto i{0}; i < num_node; ++i) {
-    if (i == 0 or best_child[i] >= 0)
+    if (i == 0 or best_child[0][i] >= 0)
       best_feature[i] = *(feature[i] - 1);
     else
       best_feature[i] = (P[1][i].count() > P[0][i].count() ? -1 : -2);
@@ -485,7 +487,7 @@ int BacktrackingAlgorithm::solutionFeature(const int i) const {
 }
 
 int BacktrackingAlgorithm::solutionChild(const int i, const bool t) const {
-  return best_child[i] + 1 - t;
+  return best_child[0][i] + 1 - t;
 }
 
 void BacktrackingAlgorithm::print_new_best() const {
@@ -671,6 +673,121 @@ bool BacktrackingAlgorithm::dead_end(const int branching_node) {
   return false;
 }
 
+int BacktrackingAlgorithm::getLeaf(const instance &x) const {
+
+  // cout << x << endl << "0";
+
+  int node{0};
+  while (best_feature[node] >= 0) {
+
+    // cout << " (" << (x[best_feature[node]] ? best_feature[node] :
+    // -best_feature[node]) ;
+
+    node = best_child[x[best_feature[node]]][node];
+    // cout << ") -> " << node;
+  }
+  // cout << " => " << best_feature[node] << endl;
+  return node;
+}
+
+bool BacktrackingAlgorithm::predict(const instance &x) const {
+  return best_feature[getLeaf(x)] == -1;
+}
+
+int BacktrackingAlgorithm::predict(DataSet &test) const {
+
+  vector<int> count[2];
+  count[0].resize(bourgeon.capacity(), 0);
+  count[1].resize(bourgeon.capacity(), 0);
+
+  instance used_feature;
+  used_feature.resize(data.numFeature(), 0);
+
+  for (auto i{0}; i < bourgeon.capacity(); ++i)
+    if (best_feature[i] >= 0) {
+
+      // cout << feature[i] << "/" << 	used_feature.size() << endl;
+
+      used_feature.set(best_feature[i]);
+    }
+
+  auto err{0};
+  for (auto y{0}; y < 2; ++y) {
+    for (auto i : test.example[y]) {
+
+      // for(auto f{0}; f<test.numFeature(); ++f)
+      // 	if(used_feature[f])
+      // 		cout << " " << (test[i][f] ? f : -f) ;
+      // cout << endl;
+
+      auto p{predict(test[i])};
+
+      ++count[p][getLeaf(test[i])];
+
+      // cout << p;
+
+      if (p != y)
+        ++err;
+    }
+    // cout << endl;
+  }
+
+  return err;
+}
+
+void BacktrackingAlgorithm::store_solution() {
+
+  best_feature.clear();
+  best_feature.resize(bourgeon.capacity(), -1);
+
+  for (auto it{bourgeon.fbegin()}; it != bourgeon.fend(); ++it) {
+    auto i{*it};
+    best_child[0][i] = child[0][i];
+    best_child[1][i] = child[1][i];
+
+    cout << i << " (" << error(i) << ") " << best_child[0][i] << " / "
+         << best_child[1][i] << ": ";
+
+    if (depth[i] < ub_depth and error(i) != 0) {
+      if (optimal[i])
+        best_feature[i] = cbest_feature[i];
+      else
+        best_feature[i] = *feature[i];
+    } else {
+      cout << P[1][i].count() << "|" << P[0][i].count() << " ";
+
+      best_feature[i] = (P[1][i].count() > P[0][i].count() ? -1 : -2);
+    }
+
+    cout << best_feature[i] << endl;
+  }
+
+  // exit(1);
+
+  if (options.verified) {
+    cout << "verify\n";
+    auto p{predict(data)};
+    auto e{current_error};
+
+    cout << p << " / " << e << " (" << data.count() << ")\n";
+
+    assert(p == e);
+  }
+
+  // for (auto i{0}; i < num_node; ++i) {
+  // 		if(i % 2) {
+  // 			best_child[parent[i]] = i;
+  // 			cout << "child of " << parent[i] << " is " << i << endl;
+  // 		}
+  //   if (parent[i] >= 0)
+  //     best_feature[i] = *feature[i];
+  //   else
+  //     best_feature[i] = (P[0][i].count() > P[0][i].count() ? -1 : -2);
+  // }
+
+  // print_new_best();
+}
+
 bool BacktrackingAlgorithm::notify_solution() {
   // cout << "solution (" << current_error << ")!\n";
 
@@ -682,7 +799,9 @@ bool BacktrackingAlgorithm::notify_solution() {
     ub_node = bourgeon.size();
 		
 		// cout << "print\n";
-		
+
+    store_solution();
+
     print_new_best();
   }
 
@@ -750,8 +869,8 @@ void BacktrackingAlgorithm::resize_n(const int k) {
 
   nodes.reserve(k);
 
-  left_child.resize(k, -1);
-  right_child.resize(k, -1);
+  child[0].resize(k, -1);
+  child[1].resize(k, -1);
 
   for (auto y{0}; y < 2; ++y)
     while (P[y].size() < k)
@@ -787,7 +906,7 @@ void BacktrackingAlgorithm::branch(const int node, const int f) {
   // cout << P[0][num_node-1].count() << "/" << P[1][num_node-1].count() <<
   // endl;
 
-  // cout << "children " << left_child.size() << "/" << right_child.size() <<
+  // cout << "children " << child[0].size() << "/" << child[1].size() <<
   // "\n";
 
   if (PRINTTRACE)
@@ -796,8 +915,8 @@ void BacktrackingAlgorithm::branch(const int node, const int f) {
          << c[1] << "(" << P[0][c[1]].count() << "/" << P[1][c[1]].count()
          << ")" << endl;
 
-  left_child[node] = c[0];
-  right_child[node] = c[1];
+  child[0][node] = c[0];
+  child[1][node] = c[1];
 
   // auto nb{blossom.count()};
 
@@ -876,6 +995,38 @@ void BacktrackingAlgorithm::branch(const int node, const int f) {
   // num_node += 2;
 }
 
+int BacktrackingAlgorithm::choose() const {
+
+  // cout << "select a node to expend\n";
+
+  auto selected_node{-1};
+  auto max_error{0};
+
+  auto max_reduction{0};
+
+  // for (auto i{blossom.fbegin()}; i!=blossom.fend(); ++i) {// : blossom) {
+  for (auto i : bourgeon) {
+    assert(depth[i] < ub_depth);
+
+    auto err{error(i)};
+
+    auto reduction{err - get_feature_error(i, *(feature[i]))};
+
+    if (reduction > max_reduction or
+        (reduction == max_reduction and err > max_error)) {
+      max_reduction = reduction;
+      max_error = err;
+      selected_node = i;
+    }
+  }
+
+  assert(selected_node >= 0);
+
+  // cout << "--> " << selected_node << endl;
+
+  return selected_node;
+}
+
 void BacktrackingAlgorithm::expend() {
 
   // cout << "expend ";
@@ -890,31 +1041,40 @@ void BacktrackingAlgorithm::expend() {
   auto selected_node{backtrack_node};
 
   if (selected_node < 0) {
-    auto r{random_generator() % bourgeon.count()};
-    // cout << r << " -> " << blossom[r] << endl;
-    selected_node = bourgeon[r];
+    // auto r{random_generator() % bourgeon.count()};
+    // selected_node = bourgeon[r];
+
+    // selected_node = choose();
+
+    selected_node = bourgeon[0];
+
+    if (PRINTTRACE)
+      cout << "select " << selected_node << endl;
+
     cbest_error[selected_node] = data.count(); // error(selected_node);
 
-    feature[selected_node] = ranked_feature[selected_node].begin();
+    assert(feature[selected_node] == ranked_feature[selected_node].begin());
+
+    // feature[selected_node] = ranked_feature[selected_node].begin();
 
   } else {
-		
-		assert(left_child[selected_node] >= 0);
-		assert(right_child[selected_node] >= 0);
-		
+
+    assert(child[0][selected_node] >= 0);
+    assert(child[1][selected_node] >= 0);
+
     // if we backtrack to this node, it is not optimal, but its children are
-    auto err{cbest_error[left_child[selected_node]] +
-             cbest_error[right_child[selected_node]]};
+    auto err{cbest_error[child[0][selected_node]] +
+             cbest_error[child[1][selected_node]]};
 
     // if (PRINTTRACE)
     //   cout << "new best for node " << selected_node << "? feat"
     //        << *feature[selected_node] << ", error=" << err << " ("
-    //        << left_child[selected_node] << "/" << right_child[selected_node]
+    //        << child[0][selected_node] << "/" << child[1][selected_node]
     //        << ")" << endl;
 
     if (err < cbest_error[selected_node]) {
       cbest_error[selected_node] = err;
-      cbest_feature[selected_node] = *feature[selected_node];
+      cbest_feature[selected_node] = *(feature[selected_node] - 1);
 
       if (PRINTTRACE)
         cout << "new best for node " << selected_node
@@ -923,17 +1083,17 @@ void BacktrackingAlgorithm::expend() {
              << ", error=" << cbest_error[selected_node] << endl;
     }
 
-    ++feature[backtrack_node];
+    // ++feature[backtrack_node];
   }
 
-  if (PRINTTRACE)
-    cout << "branching " << selected_node
-         << ": feat=" << *(feature[selected_node]) << "("
-         << (feature[selected_node] - ranked_feature[selected_node].begin())
-         << "/" << (ranked_feature[selected_node].end() -
-                    ranked_feature[selected_node].begin())
-         << ")" << endl;
-	
+  // if (PRINTTRACE)
+  //   cout << "branching " << selected_node
+  //        << ": feat=" << *(feature[selected_node]) << "("
+  //        << (feature[selected_node] - ranked_feature[selected_node].begin())
+  //        << "/" << (ranked_feature[selected_node].end() -
+  //                   ranked_feature[selected_node].begin())
+  //        << ")" << endl;
+
   assert(feature[selected_node] >= ranked_feature[selected_node].begin() and
          feature[selected_node] < ranked_feature[selected_node].end());
 	
@@ -945,7 +1105,7 @@ void BacktrackingAlgorithm::expend() {
     optimal[selected_node] = true;
 
     cbest_error[selected_node] =
-        error(left_child[selected_node]) + error(right_child[selected_node]);
+        error(child[0][selected_node]) + error(child[1][selected_node]);
     cbest_feature[selected_node] = *feature[selected_node];
 
     if (PRINTTRACE)
@@ -971,13 +1131,13 @@ void BacktrackingAlgorithm::prune(const int node) {
     optimal[node] = false;
     parent[node] = -1;
 
-    if (left_child[node] >= 0 and parent[left_child[node]] == node) {
-      assert(right_child[node] >= 0);
+    if (child[0][node] >= 0 and parent[child[0][node]] == node) {
+      assert(child[1][node] >= 0);
 
-      prune(left_child[node]);
-      left_child[node] = -1;
-      prune(right_child[node]);
-      right_child[node] = -1;
+      prune(child[0][node]);
+      child[0][node] = -1;
+      prune(child[1][node]);
+      child[1][node] = -1;
     } else {
       current_error -= error(node);
 
@@ -1000,6 +1160,50 @@ void BacktrackingAlgorithm::prune(const int node) {
   assert(bourgeon.size() == num_node);
   //
 }
+
+// void BacktrackingAlgorithm::fix(const int node) {
+//
+//   // cout << "prune\n";
+//   //
+//   if (PRINTTRACE)
+//     cout << "SET-OPTIMAL: " << node << endl;
+//
+//   if (node >= 0 and parent[node] >= 0) {
+//
+//     // assert(blossom.index(node) >= blossom.size());
+//
+//     optimal[node] = true;
+//     parent[node] = -1;
+//
+//     if (child[0][node] >= 0 and parent[child[0][node]] == node) {
+//       assert(child[1][node] >= 0);
+//
+//       prune(child[0][node]);
+//       child[0][node] = -1;
+//       prune(child[1][node]);
+//       child[1][node] = -1;
+//     } else {
+//       current_error -= error(node);
+//
+//       // cout << "error -= " << error(node) << endl;
+//     }
+//
+//     bourgeon.add(node);
+//     bourgeon.remove_back(node);
+//     // nodes.remove_back(node);
+//
+//     --num_node;
+//   }
+//
+//   // if(nodes.count() != num_node)
+//   // {
+//   // 	cout << nodes << endl;
+//   // 	cout << nodes.size() << "/" << num_node << endl;
+//   // }
+//
+//   assert(bourgeon.size() == num_node);
+//   //
+// }
 
 bool BacktrackingAlgorithm::backtrack() {
 
@@ -1029,12 +1233,14 @@ bool BacktrackingAlgorithm::backtrack() {
   if (PRINTTRACE)
     cout << endl;
 
-  // if there aren't any, backtrack once step further
-  // if (no_feature(backtrack_node)) {
-	if(last_feature(backtrack_node)) {
+  ++feature[backtrack_node];
 
-		if(backtrack_node == 0)
-			return false;
+  // if there aren't any, backtrack once step further
+  if (no_feature(backtrack_node)) {
+    // if(last_feature(backtrack_node)) {
+
+    if (backtrack_node == 0)
+      return false;
     // prune(backtrack_node);
 
     feature[backtrack_node] = ranked_feature[backtrack_node].begin();
@@ -1054,10 +1260,10 @@ bool BacktrackingAlgorithm::backtrack() {
   // cout << "error += " << error(backtrack_node) << endl;
 
   // make sure that children are not assigned
-  prune(left_child[backtrack_node]);
-  prune(right_child[backtrack_node]);
-	// left_child[backtrack_node] = -1;
-	// right_child[backtrack_node] = -1;
+  prune(child[0][backtrack_node]);
+  prune(child[1][backtrack_node]);
+  // child[0][backtrack_node] = -1;
+  // child[1][backtrack_node] = -1;
 
   // search can continue
   return true;
@@ -1077,7 +1283,7 @@ void BacktrackingAlgorithm::new_search() {
     if (PRINTTRACE) {
 
       cout << "ub (error) = " << ub_error << "; ub (depth) = " << ub_depth
-           << endl;
+           << "; search=" << search_size << endl;
       cout << "nodes: ";
       for (auto d{bourgeon.fbegin()}; d != bourgeon.fend(); ++d) {
         cout << setw(3) << *d << (optimal[*d] or error(*d) == 0 ? "*" : " ");
@@ -1116,22 +1322,22 @@ void BacktrackingAlgorithm::new_search() {
       cout << endl << "parent ";
       for (auto d{bourgeon.fbegin()}; d != bourgeon.fend(); ++d) {
         cout << setw(3) << parent[*d] << " ";
-        // assert(*d == 0 or parent[left_child[parent[*d]]] == parent[*d]);
-        // assert(*d == 0 or parent[right_child[parent[*d]]] == parent[*d]);
+        // assert(*d == 0 or parent[child[0][parent[*d]]] == parent[*d]);
+        // assert(*d == 0 or parent[child[1][parent[*d]]] == parent[*d]);
       }
       cout << "  ";
       for (auto b : bourgeon) {
         cout << setw(3) << parent[b] << " ";
-        // assert(b == 0 or parent[left_child[parent[b]]] == parent[b]);
-        // assert(b == 0 or parent[right_child[parent[b]]] == parent[b]);
+        // assert(b == 0 or parent[child[0][parent[b]]] == parent[b]);
+        // assert(b == 0 or parent[child[1][parent[b]]] == parent[b]);
       }
       // cout << "  ";
       // for (auto d{bourgeon.bbegin()}; d != bourgeon.bend(); ++d) {
       //   cout << "    ";
       //   // assert(not nodes.contain(*d) or
-      //   //        parent[left_child[parent[*d]]] == parent[*d]);
+      //   //        parent[child[0][parent[*d]]] == parent[*d]);
       //   // assert(not nodes.contain(*d) or
-      //   //        parent[right_child[parent[*d]]] == parent[*d]);
+      //   //        parent[child[1][parent[*d]]] == parent[*d]);
       // }
       // auto total_error{0};
       cout << endl << "depth: ";
@@ -1172,17 +1378,34 @@ void BacktrackingAlgorithm::new_search() {
       cout << "  ";
       for (auto b : bourgeon) {
         cout << setw(3) << cbest_error[b] << " ";
-        // total_error += cbest_error[b];
       }
-      // cout << "  ";
-      // for (auto d{bourgeon.bbegin()}; d != bourgeon.bend(); ++d) {
-      //   if (nodes.contain(*d)) {
-      //     cout << setw(3) << cbest_error[*d] << " ";
-      //     // total_error += error(*d);
-      //   } else {
-      //     cout << "    ";
-      //   }
-      // }
+      for (auto d{bourgeon.bbegin()}; d != bourgeon.bend(); ++d) {
+        cout << setw(3) << cbest_error[*d] << " ";
+      }
+      cout << endl << "featu: ";
+      for (auto d{bourgeon.fbegin()}; d != bourgeon.fend(); ++d) {
+        cout << setw(3) << *feature[*d] << " ";
+      }
+      cout << "  ";
+      for (auto b : bourgeon) {
+        cout << setw(3) << *feature[b] << " ";
+      }
+      cout << endl << "cfeat: ";
+      for (auto d{bourgeon.fbegin()}; d != bourgeon.fend(); ++d) {
+        cout << setw(3) << cbest_feature[*d] << " ";
+      }
+      cout << "  ";
+      for (auto b : bourgeon) {
+        cout << setw(3) << cbest_feature[b] << " ";
+      }
+      cout << endl << "bfeat: ";
+      for (auto d{bourgeon.fbegin()}; d != bourgeon.fend(); ++d) {
+        cout << setw(3) << best_feature[*d] << " ";
+      }
+      cout << "  ";
+      for (auto b : bourgeon) {
+        cout << setw(3) << best_feature[b] << " ";
+      }
       cout << endl;
 
       for (auto b : bourgeon) {
@@ -1194,18 +1417,18 @@ void BacktrackingAlgorithm::new_search() {
         // cout << setw(3) << *d << " ";
         // assert(*d == 0 or bourgeon.index(parent[*d]) < bourgeon.index(*d));
         // assert(nodes.contain(*d));
-        assert(*d == 0 or parent[left_child[parent[*d]]] == parent[*d]);
-        assert(*d == 0 or parent[right_child[parent[*d]]] == parent[*d]);
-				if(left_child[*d] < 0)
-					total_error += error(*d);
+        assert(*d == 0 or parent[child[0][parent[*d]]] == parent[*d]);
+        assert(*d == 0 or parent[child[1][parent[*d]]] == parent[*d]);
+        if (child[0][*d] < 0)
+          total_error += error(*d);
       }
       // cout << "| ";
       for (auto b : bourgeon) {
         // cout << setw(3) << b << " ";
         // assert(nodes.contain(b));
         // assert(b == 0 or bourgeon.index(parent[b]) < bourgeon.index(b));
-        assert(b == 0 or parent[left_child[parent[b]]] == parent[b]);
-        assert(b == 0 or parent[right_child[parent[b]]] == parent[b]);
+        assert(b == 0 or parent[child[0][parent[b]]] == parent[b]);
+        assert(b == 0 or parent[child[1][parent[b]]] == parent[b]);
         total_error += error(b);
       }
 
@@ -1221,9 +1444,9 @@ void BacktrackingAlgorithm::new_search() {
       //   // assert(parent[*d] < 0 or bourgeon.index(parent[*d]) <
       //   bourgeon.index(*d));
       //   assert(not nodes.contain(*d) or
-      //          parent[left_child[parent[*d]]] == parent[*d]);
+      //          parent[child[0][parent[*d]]] == parent[*d]);
       //   assert(not nodes.contain(*d) or
-      //          parent[right_child[parent[*d]]] == parent[*d]);
+      //          parent[child[1][parent[*d]]] == parent[*d]);
       //   if (nodes.contain(*d))
       //     total_error += error(*d);
       // }
@@ -2052,7 +2275,7 @@ void BacktrackingAlgorithm::split(const int node, const int f) {
 
   // cout << "parents\n";
 
-  int child;
+  int child_;
   auto nb{blossom.count()};
 
   // cout << "before: " << blossom << endl;
@@ -2060,16 +2283,16 @@ void BacktrackingAlgorithm::split(const int node, const int f) {
   blossom.remove_front(node);
   // if (num_node < parent.size()) {
   for (auto i{0}; i < 2; ++i) {
-    child = num_node - 2 + i;
+    child_ = num_node - 2 + i;
 
     // cout << "child " << child << ":" << P[0][child].count() << "/" <<
     // P[1][child].count() << endl;
 
-    parent[child] = node;
-    depth[child] = depth[node] + 1;
+    parent[child_] = node;
+    depth[child_] = depth[node] + 1;
     // blossom.add(child);
-    if (P[0][child].count() > 0 and P[1][child].count() > 0) {
-      blossom.add(child);
+    if (P[0][child_].count() > 0 and P[1][child_].count() > 0) {
+      blossom.add(child_);
     }
   }
 
@@ -2090,9 +2313,9 @@ void BacktrackingAlgorithm::split(const int node, const int f) {
   // blossom.remove_front(node);
 
   for (auto y{0}; y < 2; ++y) {
-    auto smallest_child{
-        (P[y][child].count() > P[y][child - 1].count() ? child - 1 : child)};
-    auto largest_child{(child == smallest_child ? child - 1 : child)};
+    auto smallest_child{(
+        P[y][child_].count() > P[y][child_ - 1].count() ? child_ - 1 : child_)};
+    auto largest_child{(child_ == smallest_child ? child_ - 1 : child_)};
 
     // cout << "-> " << smallest_child << " and " << largest_child <<
     // endl;
