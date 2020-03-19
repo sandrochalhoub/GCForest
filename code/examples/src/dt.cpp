@@ -93,42 +93,42 @@ int main(int argc, char *argv[]) {
       cout << "c filtered " << (count - base.count()) / 2
            << " noisy example(s)\n";
 
-  // BacktrackingAlgorithm A(base, opt);
+  BacktrackingAlgorithm A(base, opt);
 
-	DL8 A(base, opt);
+	// DL8 A(base, opt);
 
-  // Tree T;
-  //
-  // if (opt.debug != "") {
-  //   ifstream ifs(opt.debug, ios_base::in);
-  //
-  //   int i, f, c, k{0};
-  //   while (true) {
-  //     ifs >> i;
-  //     if (not ifs.good())
-  //       break;
-  //
-  //     assert(i == k++);
-  //
-  //     ifs >> f;
-  //     if (f < 0)
-  //       T.addNode(-1, f);
-  //     else {
-  //       ifs >> c;
-  //       T.addNode(c, f);
-  //       ifs >> c;
-  //     }
-  //   }
-  //   //
-  //   //
-  //   // cout << "debug!\n";
-  //   //
-  //   // cout << T << endl;
-  //   //
-  //   // exit(1);
-  //
-  //   A.debug_sol = &T;
-  // }
+  Tree T;
+
+  if (opt.debug != "") {
+    ifstream ifs(opt.debug, ios_base::in);
+
+    int i, f, c, k{0};
+    while (true) {
+      ifs >> i;
+      if (not ifs.good())
+        break;
+
+      assert(i == k++);
+
+      ifs >> f;
+      if (f < 0)
+        T.addNode(-1, f);
+      else {
+        ifs >> c;
+        T.addNode(c, f);
+        ifs >> c;
+      }
+    }
+    //
+    //
+    // cout << "debug!\n";
+    //
+    // cout << T << endl;
+    //
+    // exit(1);
+
+    A.debug_sol = &T;
+  }
 
   // cout << opt.depth << endl;
 
@@ -166,9 +166,9 @@ int main(int argc, char *argv[]) {
   // A.greedy(opt.width, opt.focus, opt.max_size);
   // A.new_search(); // opt.width, opt.focus, opt.max_size);
 
-	A.optimize();
+	// A.optimize();
 
-  // A.search();
+  A.search();
 
   // cout << A.size() << endl;
 
@@ -187,29 +187,29 @@ int main(int argc, char *argv[]) {
   //
   // cout << A << endl;
 
-  // if (opt.print_sol or opt.verified) {
-  //   Tree T;
-  //   for (auto i{0}; i < A.solutionTreeSize(); ++i) {
-  //     T.addNode(A.solutionChild(i, true), A.solutionFeature(i));
-  //   }
-  //
-  //   auto e{T.predict(base)};
-  //
-  //   if (opt.print_sol) {
-  //     cout << T << endl
-  //          << e << "/" << base.count() << " ("
-  //          << 1.0 - static_cast<double>(e) /
-  //          static_cast<double>(base.count())
-  //          << ")\n";
-  //   }
-  //
-  //   if (opt.output != "") {
-  //     ofstream ofs(opt.output, ios_base::out);
-  //     ofs << T << endl;
-  //   }
-  //
-  //   assert(e == A.solutionError());
-  // }
+  if (opt.print_sol or opt.verified) {
+    Tree T;
+    for (auto i{0}; i < A.solutionTreeSize(); ++i) {
+      T.addNode(A.solutionChild(i, true), A.solutionFeature(i));
+    }
+
+    auto e{T.predict(base)};
+
+    if (opt.print_sol) {
+      cout << T << endl
+           << e << "/" << base.count() << " ("
+           << 1.0 - static_cast<double>(e) /
+           static_cast<double>(base.count())
+           << ")\n";
+    }
+
+    if (opt.output != "") {
+      ofstream ofs(opt.output, ios_base::out);
+      ofs << T << endl;
+    }
+
+    assert(e == A.solutionError());
+  }
 }
 
 

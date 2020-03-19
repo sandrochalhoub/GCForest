@@ -48,9 +48,11 @@ void DL8::resize(const int k) {
 	node_error.resize(k, data.count());
   parent.resize(k, -1);
 
-  for (auto y{0}; y < 2; ++y) 
-    P[y].addNode();
-
+  for (auto y{0}; y < 2; ++y)
+    while (P[y].size() < k)
+      P[y].addNode();
+	
+	sorted_feature.resize(k);
 }
 
 
@@ -71,18 +73,17 @@ double DL8::accuracy() const {
   return 1.0 - static_cast<double>(error()) / static_cast<double>(data.count());
 }
 
-// void DL8::print_new_best() const {
-//
-//   cout << " size=" << left << setw(10) << ub_node << " depth=" << left
-//        << setw(10) << ub_depth << "  accuracy=" << setw(10)
-//        << (1.0 -
-//            static_cast<double>(ub_error) / static_cast<double>(data.count()))
-//        // << " backtracks=" << setw(10) << num_backtracks
-//        << " choices=" << setw(10) << search_size << " restarts=" << setw(10)
-//        << num_restarts << " time=" << setw(10) << cpu_time()
-//
-//        << right << endl;
-// }
+void DL8::print_new_best() const {
+
+  cout //<< " size=" << left << setw(10) << ub_node 
+		<< " depth=" << left
+       << setw(10) << ub_depth << "  accuracy=" << setw(10)
+       << accuracy()
+       << " choices=" << setw(10) << search_size 
+			 // << " restarts=" << setw(10) << num_restarts
+			 << " time=" << setw(10) << cpu_time()
+       << right << endl;
+}
 
 
 size_t DL8::optimize() {
@@ -100,7 +101,7 @@ size_t DL8::optimize() {
 	
 	recurse(branch, n, 0, 0);
 	
-	cout << accuracy() << endl;
+	print_new_best();
 	
 	return error();
 }
@@ -111,13 +112,22 @@ size_t DL8::optimize() {
 /// partition s is the one pointed to by the branch
 /// n is the number of nodes with feature tests
 void DL8::recurse(SparseSet &branch, int &n, const int d, const int s) {
-	
-	if(PRINTTRACE) {
-		for(auto i{0}; i<d; ++i)
-			cout << " ";
-		cout << "recurse(" << branch << "," << n << "," << d << "," << s << ") error=" << node_error[s] << "\n";
-	}
-	
+
+	++search_size;
+
+  if (PRINTTRACE) {
+    for (auto i{0}; i < d; ++i)
+      cout << "   ";
+    cout << "recurse({";
+    if (branch.fbegin() != branch.fend()) {
+      cout << *branch.fbegin();
+      for (auto i{branch.fbegin()+1}; i != branch.fend(); ++i)
+        cout << "," << *i;
+    }
+    cout << "}," << n << "," << d << "," << s
+         << ") error=" << node_error[s] << " [" << error() << "]\n";
+  }
+
   // is it a leaf?
   if (d == ub_depth or node_error[s] == 0)
     return;
@@ -132,18 +142,28 @@ void DL8::recurse(SparseSet &branch, int &n, const int d, const int s) {
   if (size() < n)
     resize(n);
 
+	// not safe to iterate on branch because the order changes, and anyway we'll need to sort 'em
+	sorted_feature.clear();
+  for (auto f : branch) 
+		sorted_feature[s].push_back(f);
+
+	int width{static_cast<int>(sorted_feature[s].size())};
+
+
   // to store the number of used nodes, couting previous nodes, plus the size of
   // the optimal subtree
-  size_t node_size{0};
-  for (auto f : branch) {
-
+  int node_size{n};
+	for(auto f : sorted_feature[s]) {
+		
+		assert(--width >= 0);
+		
     // restart from the same count for every feature
     auto sz{n};
 
 		if(PRINTTRACE) {
 			for(auto i{0}; i<d; ++i)
-				cout << " ";
-			cout << "branch with " << f << ": " ;
+				cout << "   ";
+			cout << "branch with " << s << "=" << f << ":" ;
 		}
 
     // branch with respect to f
@@ -155,7 +175,7 @@ void DL8::recurse(SparseSet &branch, int &n, const int d, const int s) {
     for (auto i{0}; i < 2; ++i) {
 			
 			if(PRINTTRACE)
-				cout << c[i] << " (" << P[0][c[i]].count() << "/" << P[1][c[i]].count() << ")";
+				cout << " c" << c[i] << " (" << P[0][c[i]].count() << "/" << P[1][c[i]].count() << ")";
 			
       node_error[c[i]] = error(c[i]);
       node_feature[c[i]] = -1;
@@ -165,10 +185,24 @@ void DL8::recurse(SparseSet &branch, int &n, const int d, const int s) {
 		if(PRINTTRACE)
 			cout << endl;
 
+
+		auto largest{node_error[c[1]] > node_error[c[0]]};
+
+
+		assert(node_error[c[largest]] >= node_error[c[1-largest]]);
+
 		// optimize left subtree
 		branch.remove_front(f);
-		recurse(branch, sz, d+1, c[0]);
-		recurse(branch, sz, d+1, c[1]);
+		recurse(branch, sz, d+1, c[largest]);
+			
+		if(node_error[c[largest]] >= node_error[s])
+		{
+			branch.add(f);
+			// cout << "first branch too big\n";
+			continue;
+		}
+		
+		recurse(branch, sz, d+1, c[1-largest]);
     branch.add(f);
 				
     auto f_error{node_error[c[0]] + node_error[c[1]]};
@@ -178,10 +212,19 @@ void DL8::recurse(SparseSet &branch, int &n, const int d, const int s) {
       node_feature[s] = f;
       node_size = sz;
 			
+			if(node_error[s] == 0) {
+				cout << "stop?\n";
+				break;
+			}
+			
 			if(PRINTTRACE) {
 				for(auto i{0}; i<d; ++i)
-					cout << " ";
-				cout << "new best feature for node " << s << ": " << f << " (" << f_error << ")\n";
+					cout << "   ";
+				cout << "new best feature for node " << s << ": " << f << " (" << f_error << ") size=" << sz << "\n";
+			}
+			
+			if(s == 0) {
+				print_new_best();
 			}
     }
   }
