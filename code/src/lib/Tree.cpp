@@ -17,10 +17,15 @@ int Tree::getFeature(const int node) const {
 
 void Tree::addNode(const int c, const int f) {
 	left_child.push_back(c);
+	child[0].push_back(c+1);
+	child[1].push_back(c);
 	feature.push_back(f);
 }
 
-int Tree::child(const int x, const bool t) const {
+int Tree::getChild(const int x, const bool t) const {
+	
+	assert(left_child[x]+1-t == child[t][x]);
+	
 	return left_child[x]+1-t;
 }
 
@@ -55,7 +60,7 @@ int Tree::getLeaf(const instance& x) const {
 		
 		// cout << " (" << (x[feature[node]] ? feature[node] : -feature[node]) ;
 		
-		node = child(node, x[feature[node]]);
+		node = getChild(node, x[feature[node]]);
 		// cout << ") -> " << node;
 	}
 	// cout << " => " << feature[node] << endl;
@@ -124,7 +129,7 @@ std::ostream &Tree::display(std::ostream &os) const {
   for (auto i{0}; i<left_child.size(); ++i) {
     os << i << " " << feature[i] ;
 		if(feature[i]>=0)
-			os << " " << child(i, true) << " " << child(i, false) ;
+			os << " " << getChild(i, true) << " " << getChild(i, false) ;
 		os << endl;
   }
 	// os << "EDGES\n";

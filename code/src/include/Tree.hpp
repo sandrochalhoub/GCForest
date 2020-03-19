@@ -21,6 +21,7 @@ class Tree
 private:
   ///
   vector<int> left_child;
+	vector<int> child[2];
 	vector<int> feature;
   //@}
 
@@ -37,7 +38,7 @@ public:
 
 	int predict(const DataSet& data) const;
 	
-	int child(const int x, const bool t) const;
+	int getChild(const int x, const bool t) const;
 	
 	void addNode(const int p, const int f);
 	//@}

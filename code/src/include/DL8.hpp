@@ -44,6 +44,9 @@ private:
   vector<int> node_error;
   vector<int> node_feature;
 	vector<int> parent;
+	
+	/// for branching
+	vector<vector<int>> sorted_feature;
 
   mt19937 random_generator;
 
@@ -67,8 +70,8 @@ public:
   double accuracy() const;
 
   size_t error() const;
-	
-	  size_t error(const int i) const;
+		
+	size_t error(const int i) const;
 
 	size_t optimize();
 
@@ -81,6 +84,8 @@ public:
 
   /*!@name Printing*/
   //@{
+	void print_new_best() const;
+	
   void verify();
   // std::ostream &toCsv(std::ostream &os) const;
   std::ostream &display(std::ostream &os) const;
