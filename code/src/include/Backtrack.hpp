@@ -28,6 +28,7 @@ private:
   /*!@name Parameters*/
   //@{
   /// Argument
+  Wood &wood;
   DataSet &data;
   Options &options;
   vector<vector<int>> example[2];
@@ -76,6 +77,11 @@ private:
   // best subtree w.r.t. the current father node
   vector<int> cbest_child[2];
   vector<int> cbest_feature;
+
+  // to replace the struct above. Stores the root of the best subtree found for
+  // the current feature of the parent node
+  vector<TreeNode *> best_tree;
+
   vector<size_t> cbest_error;
   vector<size_t> cbest_size;
 
@@ -128,7 +134,7 @@ public:
 
   /*!@name Constructors*/
   //@{
-  explicit BacktrackingAlgorithm(DataSet &d, Options &o);
+  explicit BacktrackingAlgorithm(DataSet &d, Wood &w, Options &o);
   void resize(const int num_nodes);
   void seed(const int s);
   //@}
@@ -231,6 +237,8 @@ public:
   bool backtrack();
   void new_search();
 
+  void setLeaf(const int node, const int c[2]);
+  void setChild(const int node, const bool branch, const int c);
   int choose() const;
 
   int getLeaf(const instance &x) const;
@@ -238,6 +246,18 @@ public:
   bool predict(const instance &x) const;
 
   int predict(DataSet &test) const;
+
+  bool isLeaf(const int node) const;
+  void store_best_tree(const int node);
+
+  size_t new_error(const int i) const;
+  bool new_notify_solution();
+  void new_prune(const int node);
+  bool new_backtrack();
+  void new_setChild(const int node, const bool branch, const int c);
+  void new_branch(const int node, const int f);
+  void new_expend();
+  void really_new_search();
 
   // void store_solution();
 
