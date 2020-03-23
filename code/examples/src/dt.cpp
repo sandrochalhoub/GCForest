@@ -99,37 +99,37 @@ int main(int argc, char *argv[]) {
 
   // DL8 A(base, opt);
 
-  Tree T;
-
-  if (opt.debug != "") {
-    ifstream ifs(opt.debug, ios_base::in);
-
-    int i, f, c_true, c_false, k{0};
-    while (true) {
-      ifs >> i;
-      if (not ifs.good())
-        break;
-
-      assert(i == k++);
-
-      ifs >> f;
-      if (f < 0)
-        T.addNode(-1, -1, f);
-      else {
-        ifs >> c_true >> c_false;
-        T.addNode(c_true, c_false, f);
-      }
-    }
-    //
-    //
-    // cout << "debug!\n";
-    //
-    // cout << T << endl;
-    //
-    // exit(1);
-
-    A.debug_sol = &T;
-  }
+  // Tree T;
+  //
+  // if (opt.debug != "") {
+  //   ifstream ifs(opt.debug, ios_base::in);
+  //
+  //   int i, f, c_true, c_false, k{0};
+  //   while (true) {
+  //     ifs >> i;
+  //     if (not ifs.good())
+  //       break;
+  //
+  //     assert(i == k++);
+  //
+  //     ifs >> f;
+  //     if (f < 0)
+  //       T.addNode(-1, -1, f);
+  //     else {
+  //       ifs >> c_true >> c_false;
+  //       T.addNode(c_true, c_false, f);
+  //     }
+  //   }
+  //   //
+  //   //
+  //   // cout << "debug!\n";
+  //   //
+  //   // cout << T << endl;
+  //   //
+  //   // exit(1);
+  //
+  //   A.debug_sol = &T;
+  // }
 
   // cout << opt.depth << endl;
 
@@ -165,7 +165,7 @@ int main(int argc, char *argv[]) {
 
   // for (auto i{0}; i < opt.max_iteration; ++i) {
   // A.greedy(opt.width, opt.focus, opt.max_size);
-  A.really_new_search(); // opt.width, opt.focus, opt.max_size);
+  A.search(); // opt.width, opt.focus, opt.max_size);
 
   // A.optimize();
 

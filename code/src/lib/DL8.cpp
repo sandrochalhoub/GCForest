@@ -110,6 +110,7 @@ void DL8::recurse(SparseSet &branch, int &n, const int d, const int s) {
 
   ++search_size;
 
+#ifdef PRINTTRACE
   if (PRINTTRACE) {
     for (auto i{0}; i < d; ++i)
       cout << "   ";
@@ -122,6 +123,7 @@ void DL8::recurse(SparseSet &branch, int &n, const int d, const int s) {
     cout << "}," << n << "," << d << "," << s << ") error=" << node_error[s]
          << " [" << error() << "]\n";
   }
+#endif
 
   // is it a leaf?
   if (d == ub_depth or node_error[s] == 0) {
@@ -165,11 +167,13 @@ void DL8::recurse(SparseSet &branch, int &n, const int d, const int s) {
     // restart from the same count for every feature
     auto sz{n};
 
+#ifdef PRINTTRACE
     if (PRINTTRACE) {
       for (auto i{0}; i < d; ++i)
         cout << "   ";
       cout << "branch with " << s << "=" << f << ":";
     }
+#endif
 
     // branch with respect to f
     for (auto y{0}; y < 2; ++y)
@@ -179,17 +183,21 @@ void DL8::recurse(SparseSet &branch, int &n, const int d, const int s) {
     // initialise stats for the two subtrees
     for (auto i{0}; i < 2; ++i) {
 
+#ifdef PRINTTRACE
       if (PRINTTRACE)
         cout << " c" << c[i] << " (" << P[0][c[i]].count() << "/"
              << P[1][c[i]].count() << ")";
+#endif
 
       node_error[c[i]] = error(c[i]);
       node_feature[c[i]] = -1;
       parent[c[i]] = s;
     }
 
+#ifdef PRINTTRACE
     if (PRINTTRACE)
       cout << endl;
+#endif
 
     auto largest{node_error[c[1]] > node_error[c[0]]};
 
@@ -214,16 +222,18 @@ void DL8::recurse(SparseSet &branch, int &n, const int d, const int s) {
       node_size = sz;
 
       if (node_error[s] == 0) {
-        cout << "stop?\n";
+        // cout << "stop?\n";
         break;
       }
 
+#ifdef PRINTTRACE
       if (PRINTTRACE) {
         for (auto i{0}; i < d; ++i)
           cout << "   ";
         cout << "new best feature for node " << s << ": " << f << " ("
              << f_error << ") size=" << sz << "\n";
       }
+#endif
 
       if (s == 0) {
 

@@ -9,6 +9,9 @@
 #include "Tree.hpp"
 #include "utils.hpp"
 
+// #define PRINT_TRACE print_trace();
+#define PRINT_TRACE
+
 #ifndef _PRIMER_BACKTRACK_HPP
 #define _PRIMER_BACKTRACK_HPP
 
@@ -47,19 +50,14 @@ private:
   /// -1 if the optimal subtree was not found yet, parent node if it was
   vector<int> optimal;
 
-  // internal nodes are popped front, potential nodes and leaves are back
+  // internal nodes are popped front, potential nodes are back
   SparseSet blossom;
-
-  // all current nodes, potential nodes are back
-  SparseSet nodes;
-
-  // // stores leaves (blossom nodes that cannot be expended because of depth
-  // constraints, or because we already explored subtrees where this node is
-  // expended)
-  // SparseSet leaf;
 
   /// structure to partition the examples in the tree
   TreePartition P[2];
+
+  /// decision nodes in sequence
+  vector<int> decision;
 
   /// buffers to compute the entropy, one copy per node, in order to backtrack
   vector<vector<int>> pos_feature_count[2];
@@ -69,10 +67,6 @@ private:
 
   /// store the feature tested at node i (in ranked features)
   vector<vector<int>::iterator> feature;
-
-  /// best solution
-  vector<int> best_child[2];
-  vector<int> best_feature;
 
   // best subtree w.r.t. the current father node
   vector<int> cbest_child[2];
@@ -90,8 +84,6 @@ private:
 
   // vector<int> best_feature;
   vector<int> f_error;
-  vector<double> f_entropy;
-  vector<size_t> buffer;
 
   mt19937 random_generator;
 
@@ -109,8 +101,6 @@ private:
 
   size_t num_restarts;
 
-  bool size_matters;
-
   size_t current_error;
 
   int backtrack_node;
@@ -118,66 +108,20 @@ private:
   void store_new_best();
 
   void store_solution();
-
-  void print_new_best() const;
   //@}
 
-  /// decision nodes in sequence -> vector
-  /// blossoms / available nodes -> SparseSet assigned/blossom/available
-  SparseSet bourgeon;
-  vector<int> decision;
-
-public:
-#ifdef DEBUG_MODE
-  Tree *debug_sol;
+#ifdef PRINTTRACE
+  void print_trace();
 #endif
 
-  /*!@name Constructors*/
-  //@{
-  explicit BacktrackingAlgorithm(DataSet &d, Wood &w, Options &o);
-  void resize(const int num_nodes);
-  void seed(const int s);
-  //@}
+  // resize the data structures for up to k nodes
+  void resize(const int k);
 
-  size_t depth_lower_bound();
-
-  size_t node_lower_bound();
-
-  size_t error_lower_bound();
-
-  /*!@name Accessors*/
-  //@{
+  // current size of the data structures (current node capacity)
   size_t size();
 
-  void setUbDepth(const size_t u);
-
-  void setUbNode(const size_t u);
-
-  void setUbError(const size_t u);
-
-  // void setMaxNodes(const size_t m);
-
-  void clear(int &node);
-
-  double accuracy() const;
-
-  size_t error() const;
-
-  // whether we reached a leaf of the SEARCH tree
-  // if we did and it's a solution, new best are stored
-  bool dead_end(const int node);
-
-  void set_optimal(const int node);
-
-  void unset(const int node);
-
-  bool is_optimal(const int node) const;
-
+  // return true if all features have been tried feature
   bool no_feature(const int node) const;
-
-  bool last_feature(const int node) const;
-
-  bool not_branched(const int node) const;
 
   // return true if the feature f is true/false in all examples
   bool max_entropy(const int node, const int f) const;
@@ -185,91 +129,85 @@ public:
   // return true if the feature f classifies all examples
   bool null_entropy(const int node, const int f) const;
 
-  void undo(const int node);
+  // swap a random feature among the k best for node i with probability p/1000
+  void random_perturbation(const int i, const int k, const int p);
 
-  // void undo(const int node);
-
-  void backtrack(int &node);
-
-  // void greedy(const int kbest, const double focus, const int m);
-
-  void search(); // const int kbest, const double focus, const int m);
-
-  int select();
-
-  void random_perturbation(const int selected_node, const int kbest,
-                           const int p);
-
+	// sort the features by minimum projected error (leave 1-entropy node at the)
   void sort_features(const int selected_node);
 
-  void expend(const int selected_node);
-
-  void split(const int node, const int feature);
-
+	// compute the conditional entropy of feature at node
   double entropy(const int node, const int feature);
 
+	// count, for every feature, the number of examples of class y at node with that feature
   void count_by_example(const int node, const int y);
 
+	// deduce, for every feature, the number of examples of class y at node without that feature
   void deduce_from_sibling(const int node, const int sibling, const int y);
 
-  int get_feature_error(const int n, const int f) const;
+	// returns the error if testing feature f at node i (f must be in [1,m], m=data.numFeature)
+  int get_feature_error(const int i, const int f) const;
 
-  int get_feature_count(const int y, const int n, const int f) const;
+	// returns the number of examples of class y having feature f (f + m represents not-f)
+  int get_feature_count(const int y, const int i, const int f) const;
 
-  int solutionTreeSize() const;
+	// returns the error if we do not test any feature on node i
+  size_t node_error(const int i) const;
 
-  int solutionError() const;
+	// returns the real error for "leaf" nodes (deepest test), and node_error otherwise
+	size_t leaf_error(const int i) const;
 
-  int solutionFeature(const int i) const;
-
-  int solutionChild(const int i, const bool t) const;
-  //@}
-
-  size_t error(const int i) const;
-  bool notify_solution();
-  bool perfect();
-  bool fail();
-  bool bottom();
-  void resize_n(const int k);
-  void branch(const int node, const int f);
-  void expend();
-  void prune(const int node);
-  bool backtrack();
-  void new_search();
-
-  void setLeaf(const int node, const int c[2]);
-  void setChild(const int node, const bool branch, const int c);
+	// select the most promising node to branch on
   int choose() const;
 
-  int getLeaf(const instance &x) const;
-
-  bool predict(const instance &x) const;
-
-  int predict(DataSet &test) const;
-
+	// whether node is a leaf (deepest test)
   bool isLeaf(const int node) const;
+
+	// save the current subtree of node as best tree
   void store_best_tree(const int node);
 
-  size_t new_error(const int i) const;
-  bool new_notify_solution();
-  void new_prune(const int node);
-  bool new_backtrack();
-  void new_setChild(const int node, const bool branch, const int c);
-  void new_branch(const int node, const int f);
-  void new_expend();
-  void really_new_search();
+  // lower bound, maybe?
+  bool fail();
+	
+	// as name suggests
+  bool notify_solution();
+	
+	// remove the node and its descendants from the tree
+  void prune(const int node);
+	
+	// undo the last decision and remove the previous feature as possible choice
+  bool backtrack();
+	
+	// set c as the branch-child of node (branch is 0/1 i.e. left/right)
+  void setChild(const int node, const bool branch, const int c);
+	
+	// branch on node by testing f
+  void branch(const int node, const int f);
+	
+	// select a node to branch on, the feature to test and create the children
+  void expend();
 
-  // void store_solution();
+	// should verify something
+  void verify();
 
-  // int get_feature(const int node) const;
-  // int get_left(const int node) const;
-  // int get_right(const int node) const;
-  // // int get_(const int node) const;
-  //
+public:
+  /*!@name Constructors*/
+  //@{
+  explicit BacktrackingAlgorithm(DataSet &d, Wood &w, Options &o);
+  void seed(const int s);
+  //@}
+
+  void print_new_best() const;
+
+  void setUbDepth(const size_t u);
+
+  void setUbNode(const size_t u);
+
+  void setUbError(const size_t u);
+
+  void search();
 
   /*!@name Printing*/
   //@{
-  void verify();
   // std::ostream &toCsv(std::ostream &os) const;
   std::ostream &display(std::ostream &os) const;
   //@}
