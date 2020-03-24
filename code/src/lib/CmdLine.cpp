@@ -206,7 +206,7 @@ Options parse(int argc, char *argv[]) {
 
   cmd.add<ValueArg<int>>(opt.width, "", "width",
                          "number of tied features for random selection", false,
-                         3, "int");
+                         1, "int");
 
   cmd.add<ValueArg<double>>(opt.focus, "", "focus",
                             "probability of choosing the best feature", false,
@@ -221,11 +221,11 @@ Options parse(int argc, char *argv[]) {
                          numeric_limits<int>::max(), "int");
 
   cmd.add<ValueArg<int>>(opt.restart_base, "", "restart_base",
-                         "number of backtracks before first restart", false, 2,
+                         "number of backtracks before first restart", false, -1,
                          "int");
 
   cmd.add<ValueArg<double>>(opt.restart_factor, "", "restart_factor",
-                            "geometric factor", false, 1.1, "double");
+                            "geometric factor", false, 1, "double");
 
   cmd.parse(argc, argv);
   return opt;

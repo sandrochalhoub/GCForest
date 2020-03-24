@@ -10,7 +10,9 @@
 #include "utils.hpp"
 
 // #define PRINT_TRACE print_trace();
+// #define DO_ASSERTS do_asserts();
 #define PRINT_TRACE
+#define DO_ASSERTS
 
 #ifndef _PRIMER_BACKTRACK_HPP
 #define _PRIMER_BACKTRACK_HPP
@@ -112,6 +114,7 @@ private:
 
 #ifdef PRINTTRACE
   void print_trace();
+  void do_asserts();
 #endif
 
   // resize the data structures for up to k nodes
@@ -188,6 +191,8 @@ private:
 
 	// should verify something
   void verify();
+
+  void restart();
 
 public:
   /*!@name Constructors*/

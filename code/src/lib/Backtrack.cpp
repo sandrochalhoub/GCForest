@@ -102,15 +102,63 @@ void BacktrackingAlgorithm::print_trace() {
 }
 #endif
 
+#ifdef PRINTTRACE
+void BacktrackingAlgorithm::do_asserts() {
+
+  for (auto b : blossom) {
+    assert(not optimal[b]);
+  }
+
+  auto total_error{0};
+  for (auto d{blossom.fbegin()}; d != blossom.fend(); ++d) {
+    assert(*d == 0 or child[0][parent[*d]] < 0 or
+           parent[child[0][parent[*d]]] == parent[*d]);
+    assert(*d == 0 or child[1][parent[*d]] < 0 or
+           parent[child[1][parent[*d]]] == parent[*d]);
+    if (isLeaf(*d)) {
+      total_error += leaf_error(*d);
+    }
+  }
+  for (auto b : blossom) {
+    assert(b == 0 or child[0][parent[b]] < 0 or
+           parent[child[0][parent[b]]] == parent[b]);
+    assert(b == 0 or child[1][parent[b]] < 0 or
+           parent[child[1][parent[b]]] == parent[b]);
+    total_error += leaf_error(b);
+  }
+
+  for (auto d : decision) {
+    assert((d == 0 or parent[d] >= 0));
+    assert(blossom.index(d) < blossom.size());
+  }
+
+  if (total_error != current_error)
+    cout << current_error << " / " << total_error << endl;
+
+  assert(current_error == total_error);
+}
+#endif
+
 BacktrackingAlgorithm::BacktrackingAlgorithm(DataSet &d, Wood &w, Options &opt)
     : wood(w), data(d), options(opt) {
-  auto m{data.numFeature()};
 
+  // statistics and options
+  ub_error = static_cast<size_t>(data.count());
+  ub_node = options.max_size;
+  ub_depth = options.max_depth;
+
+  search_size = 0;
+  num_backtracks = 0;
+  num_restarts = 0;
+
+  seed(options.seed);
+
+  //
+  auto m{data.numFeature()};
   f_error.resize(m, 1);
 
-  ub_node = static_cast<size_t>(-1);
-  ub_error = static_cast<size_t>(data.count());
-
+  // initialize the data structure to store the examples (vectors of positive
+  // feature indices)
   for (int y{0}; y < 2; ++y) {
     example[y].resize(data.example[y].count());
     auto k{0};
@@ -121,50 +169,12 @@ BacktrackingAlgorithm::BacktrackingAlgorithm(DataSet &d, Wood &w, Options &opt)
       ++k;
     }
 
+    // Partition of the examples
     P[y].init(data.example[y].count());
   }
 
+  // tree must have at least one node (0)
   resize(1);
-
-  for (auto y{0}; y < 2; ++y) {
-    // P[y].init(data.example[y].count());
-    // P[y].addNode();
-    count_by_example(0, y);
-  }
-
-  //
-  // // leaf.reserve(1);
-  // blossom.reserve(1);
-  // blossom.add(0);
-  //
-  // nodes.reserve(1);
-  // nodes.add(0);
-  // // blossom.remove_front(0);
-
-  // max_depth.push_back(0);
-
-  // cout << "end constructor\n";
-
-  // cout << P[0][0].count() << endl;
-
-  // cout << P[1][0].count() << endl;
-
-  ub_node = options.max_size;
-
-  ub_depth = options.max_depth;
-
-  search_size = 0;
-  num_backtracks = 0;
-  num_restarts = 0;
-
-  seed(options.seed);
-
-  // size_matters = false;
-
-  current_error = node_error(0);
-
-  blossom.reserve(1);
-  blossom.add(0);
 }
 
 
@@ -232,15 +242,14 @@ bool BacktrackingAlgorithm::null_entropy(const int node, const int f) const {
 
 void BacktrackingAlgorithm::print_new_best() const {
 
-  cout << " size=" << left << setw(10) << ub_node << " depth=" << left
-       << setw(10) << ub_depth << "  accuracy=" << setw(10)
+  cout << " size=" << left << setw(4) << ub_node << " depth=" << left << setw(3)
+       << ub_depth << " accuracy=" << setw(9) << setprecision(6)
        << (1.0 -
            static_cast<double>(ub_error) / static_cast<double>(data.count()))
-       // << " backtracks=" << setw(10) << num_backtracks
-       << " choices=" << setw(10) << search_size << " restarts=" << setw(10)
-       << num_restarts << " time=" << setw(10) << cpu_time()
-
-       << right << endl;
+       // << " backtracks=" << setw(9) << num_backtracks
+       << " choices=" << setw(9) << search_size << " restarts=" << setw(5)
+       << num_restarts << " time=" << setprecision(3) << cpu_time() << right
+       << endl;
 }
 
 bool BacktrackingAlgorithm::isLeaf(const int node) const {
@@ -292,10 +301,6 @@ void BacktrackingAlgorithm::resize(const int k) {
 
   optimal.resize(k, -2);
 
-  // best_feature.resize(k, -1);
-  // best_child[0].resize(k, -1);
-  // best_child[1].resize(k, -1);
-
   cbest_feature.resize(k, -1);
   cbest_error.resize(k, data.count());
   cbest_size.resize(k, numeric_limits<int>::max());
@@ -307,7 +312,6 @@ void BacktrackingAlgorithm::resize(const int k) {
       ranked_feature[i].push_back(f);
     feature[i] = ranked_feature[i].begin();
   }
-  // cout << "here 5\n";
 
   for (int y{0}; y < 2; ++y) {
     auto i = pos_feature_count[y].size();
@@ -316,12 +320,6 @@ void BacktrackingAlgorithm::resize(const int k) {
       pos_feature_count[y][i++].resize(data.numFeature());
     }
   }
-
-  // best_error.resize(k, data.count());
-  // best_left_child.resize(k, -1);
-  // best_right_child.resize(k, -1);
-
-  // nodes.reserve(k);
 
   child[0].resize(k, -1);
   child[1].resize(k, -1);
@@ -365,12 +363,9 @@ int BacktrackingAlgorithm::choose() const {
 
 void BacktrackingAlgorithm::random_perturbation(const int selected_node,
                                                 const int kbest, const int p) {
-  // if (f_entropy[*(ranked_feature[selected_node].begin())] != 0 and
+
   if (f_error[*(ranked_feature[selected_node].begin())] != 0 and
-      random_generator() % 1000 < p) {
-
-    // cout << "random for " << selected_node << ": "
-
+      random_generator() % 1000 > p) {
     swap(*(ranked_feature[selected_node].begin()),
          *(ranked_feature[selected_node].begin() +
            (random_generator() % kbest)));
@@ -379,7 +374,9 @@ void BacktrackingAlgorithm::random_perturbation(const int selected_node,
 
 void BacktrackingAlgorithm::sort_features(const int selected_node) {
   if (feature[selected_node] != ranked_feature[selected_node].begin()) {
-    cout << selected_node << endl;
+    cout << "sort features of " << selected_node
+         << (feature[selected_node] - ranked_feature[selected_node].begin())
+         << endl;
     exit(1);
   }
 
@@ -530,13 +527,13 @@ size_t BacktrackingAlgorithm::leaf_error(const int node) const {
 bool BacktrackingAlgorithm::notify_solution() {
   // cout << "solution (" << current_error << ")!\n";
 
-  auto total{0};
-  for (auto i{blossom.fbegin()}; i != blossom.fend(); ++i) {
-    if (isLeaf(*i))
-      total += leaf_error(*i);
-  }
-
-  assert(total == current_error);
+  // auto total{0};
+  // for (auto i{blossom.fbegin()}; i != blossom.fend(); ++i) {
+  //   if (isLeaf(*i))
+  //     total += leaf_error(*i);
+  // }
+  //
+  // assert(total == current_error);
 
   if (current_error < ub_error) {
     ub_error = current_error;
@@ -557,16 +554,16 @@ void BacktrackingAlgorithm::prune(const int node) {
 
   // cout << "prune\n";
   //
-  // if (PRINTTRACE)
-  //   cout << "PRUNE " << node << endl;
+
+#ifdef PRINTTRACE
+  if (options.verbosity >= Options::SOLVERINFO)
+    cout << "PRUNE " << node << endl;
+#endif
 
   if (node >= 0) {
 
     optimal[node] = false;
-    // parent[node] = -1;
-    // cbest_error[node] = data.count();
-    // child[0][node] = -1;
-    // child[1][node] = -1;
+    feature[node] = ranked_feature[node].begin();
 
     if (child[0][node] < 0 and child[1][node] < 0) {
 
@@ -591,6 +588,23 @@ void BacktrackingAlgorithm::prune(const int node) {
     blossom.add(node);
     blossom.remove_back(node);
   }
+}
+
+void BacktrackingAlgorithm::restart() {
+  ++num_restarts;
+
+  decision.clear();
+
+  prune(child[0][0]);
+  prune(child[1][0]);
+
+  current_error = node_error(0);
+
+  blossom.add(0);
+
+  backtrack_node = -1;
+
+  assert(blossom.count() == blossom.size() and blossom.size() == 1);
 }
 
 bool BacktrackingAlgorithm::backtrack() {
@@ -660,8 +674,16 @@ bool BacktrackingAlgorithm::backtrack() {
   child[0][backtrack_node] = -1;
   child[1][backtrack_node] = -1;
 
+  // if(current_error >= ub_error) {
+  // 	cout << "fail because " << current_error << " >= " << ub_error <<
+  // "!!\n";
+  // }
+
   // if there aren't any, backtrack once step further
-  if (cbest_error[backtrack_node] == 0 or no_feature(backtrack_node) or
+  if (
+			//current_error >= ub_error or 
+			cbest_error[backtrack_node] == 0 or
+      no_feature(backtrack_node) or
       max_entropy(backtrack_node, *feature[backtrack_node])) {
     // if(last_feature(backtrack_node)) {
     // prune(backtrack_node);
@@ -830,15 +852,26 @@ void BacktrackingAlgorithm::branch(const int node, const int f) {
   }
 }
 
-bool BacktrackingAlgorithm::fail() { return false; }
+bool BacktrackingAlgorithm::fail() {
+	return false;
+	
+  auto lb{current_error};
+
+  for (auto b : blossom)
+    lb -= node_error(b);
+
+  return lb >= ub_error;
+}
 
 void BacktrackingAlgorithm::expend() {
 
   auto selected_node{backtrack_node};
 
   if (selected_node < 0) {
-    // selected_node = choose();
-    selected_node = blossom[0];
+    selected_node = choose();
+    // selected_node = blossom[0];
+    random_perturbation(selected_node, options.width,
+                        static_cast<int>(options.focus * 1000.0));
   } 
 
   assert(feature[selected_node] >= ranked_feature[selected_node].begin() and
@@ -850,72 +883,48 @@ void BacktrackingAlgorithm::expend() {
 }
 
 void BacktrackingAlgorithm::search() {
-  resize(1);
-  sort_features(0);
-  cbest_error[0] = node_error(0);
-  optimal[0] = false;
 
+  auto restart_limit{options.restart_base};
+  double restart_base{static_cast<double>(restart_limit)};
+
+  // compute error and sort features for the root node
+  for (auto y{0}; y < 2; ++y)
+    count_by_example(0, y);
+  sort_features(0);
+
+  // init structures
+  current_error = node_error(0);
+  blossom.add(0);
+  cbest_error[0] = node_error(0);
   backtrack_node = -1;
 
   while (true) {
 
     ++search_size;
 
+    if (num_backtracks > restart_limit) {
+      restart();
+      restart_base *= options.restart_factor;
+      restart_limit += static_cast<int>(restart_base);
+      // cout << "restart " << restart_base << endl;
+    }
+
     PRINT_TRACE;
 
-    for (auto b : blossom) {
-      assert(not optimal[b]);
-    }
-
-    auto total_error{0};
-    for (auto d{blossom.fbegin()}; d != blossom.fend(); ++d) {
-      assert(*d == 0 or child[0][parent[*d]] < 0 or
-             parent[child[0][parent[*d]]] == parent[*d]);
-      assert(*d == 0 or child[1][parent[*d]] < 0 or
-             parent[child[1][parent[*d]]] == parent[*d]);
-      if (isLeaf(*d)) {
-
-        // cout << *d << " " << leaf_error(*d) << endl;
-
-        total_error += leaf_error(*d);
-      }
-    }
-    // cout << "| ";
-    for (auto b : blossom) {
-      // cout << setw(3) << b << " ";
-      // assert(nodes.contain(b));
-      // assert(b == 0 or blossom.index(parent[b]) < blossom.index(b));
-      assert(b == 0 or child[0][parent[b]] < 0 or
-             parent[child[0][parent[b]]] == parent[b]);
-      assert(b == 0 or child[1][parent[b]] < 0 or
-             parent[child[1][parent[b]]] == parent[b]);
-      total_error += leaf_error(b);
-    }
-
-    for (auto d : decision) {
-      assert((d == 0 or parent[d] >= 0));
-      assert(blossom.index(d) < blossom.size());
-    }
-
-    if (total_error != current_error)
-      cout << current_error << " / " << total_error << endl;
-
-    assert(current_error == total_error);
-    // }
+    DO_ASSERTS;
 
     if (blossom.empty()) {
       if (not notify_solution())
         break;
-    }
-    // else if (fail()) {
-    //       if (not backtrack())
-    //         break;
-    //     }
-    else {
+    } else if (fail()) {
+      if (not backtrack())
+        break;
+    } else {
       expend();
     }
   }
 
   print_new_best();
+	cout << "error = " << ub_error << endl;
 }
 }
