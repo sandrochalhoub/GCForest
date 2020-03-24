@@ -21,38 +21,37 @@ void TreeNode::free() {
       wood[child_[i]].free();
 }
 
+void TreeNode::setLeaf(const bool y) {
+	feature = y;
+}
+
 const TreeNode &TreeNode::child(const bool t) const { return wood[child_[t]]; }
+
 const TreeNode &TreeNode::next(const instance x) const {
   return wood[child_[x[feature]]];
 }
 
-bool TreeNode::isLeaf() const { return feature < 0; }
+bool TreeNode::isLeaf() const { return child_[0] < 0; }
 
-bool TreeNode::prediction() const { return feature == -1; }
+bool TreeNode::prediction() const { return feature; }
 
 void TreeNode::setChild(const bool branch, const TreeNode &node) {
   child_[branch] = node.getIndex();
 }
 
 void TreeNode::setLeaf(const bool branch, const bool y) {
-  child_[branch] = -1 - y;
+  child_[branch] = y;
 }
-
-// void TreeNode::setRight(const TreeNode &node) { child_[0] = node.getIndex();
-// }
 
 int TreeNode::getIndex() const { return idx; }
 
-TreeNode &TreeNode::getLeaf(const instance &x) const {
+TreeNode &TreeNode::getLeaf(const instance &x) const {	
   if (isLeaf())
     return wood[idx];
   return next(x).getLeaf(x);
 }
 
 bool TreeNode::predict(const instance &x) const {
-  // if(isLeaf())
-  // 	return prediction();
-  // return next(x).predict(x);
   TreeNode &leaf{getLeaf(x)};
   return leaf.prediction();
 }
@@ -65,7 +64,28 @@ int TreeNode::predict(const DataSet &data) const {
   return error;
 }
 
-Wood::Wood() {}
+std::ostream &TreeNode::display(std::ostream &os, const int depth) const {
+	if(isLeaf())
+		os << "class " << feature << endl;
+	else {
+		os << feature << endl;
+		for(auto i{0}; i<depth; ++i)
+			os << "  ";
+		os << "yes:";
+		child(true).display(os, depth+1);
+		os << endl;
+		for(auto i{0}; i<depth; ++i)
+			os << "  ";
+		os << "no:";
+		child(false).display(os, depth+1);
+	}
+	return os;
+}
+
+Wood::Wood() {
+	grow()->setLeaf(false);
+	grow()->setLeaf(true);
+}
 
 size_t Wood::size() { return stock.size(); }
 
@@ -238,6 +258,11 @@ std::ostream &Tree::display(std::ostream &os) const {
 
 std::ostream &operator<<(std::ostream &os, const Tree &x) {
   x.display(os);
+  return os;
+}
+
+std::ostream &operator<<(std::ostream &os, const TreeNode &x) {
+  x.display(os,0);
   return os;
 }
 

@@ -36,12 +36,18 @@ public:
   void setChild(const bool branch, const TreeNode &node);
 
   void setLeaf(const bool branch, const bool y);
+	void setLeaf(const bool y);
 
   int getIndex() const;
 
   TreeNode &getLeaf(const instance &x) const;
   bool predict(const instance &x) const;
   int predict(const DataSet &data) const;
+	
+  /*!@name Miscellaneous*/
+  //@{
+  std::ostream &display(std::ostream &os, const int depth) const;
+  //@}
 };
 
 // M
