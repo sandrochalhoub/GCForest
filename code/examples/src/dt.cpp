@@ -93,19 +93,31 @@ int main(int argc, char *argv[]) {
            << " noisy example(s)\n";
 
   Wood yallen;
-	
-	// // TreeNode *root{yallen.grow()};
-	// // root->feature = 83;
-	// vector<TreeNode*> nds;
-	// for(auto i{0}; i<6; ++i)
-	// {
-	// 	nds.push_back(yallen.grow());
-	// 	nds.back()->feature = random_generator() % 100;
-	// }
-	//
-	// nds[0]->setChild(true, *nds[1]);
-	// nds[0]->setChild(false, *nds[2]);
-	
+
+  // vector<int> nds(7);
+  // for (auto i{0}; i < 6; ++i) {
+  //   nds[i] = yallen.grow();
+  //   yallen[nds[i]].feature = 100 + i;
+  // }
+  //
+  // //
+  // yallen[nds[0]].setChild(true, nds[1]);
+  // yallen[nds[0]].setChild(false, nds[2]);
+  // yallen[nds[1]].setChild(true, nds[3]);
+  // yallen[nds[1]].setChild(false, nds[4]);
+  //
+  // yallen[nds[2]].setChild(true, nds[5]);
+  // yallen[nds[2]].setChild(false, true);
+  // yallen[nds[3]].setChild(true, true);
+  // yallen[nds[3]].setChild(false, false);
+  // yallen[nds[4]].setChild(true, false);
+  // yallen[nds[4]].setChild(false, true);
+  // yallen[nds[5]].setChild(true, false);
+  // yallen[nds[5]].setChild(false, true);
+  //
+  // cout << yallen[nds[0]] << endl;
+  //
+  // exit(1);
 
   BacktrackingAlgorithm A(base, yallen, opt);
 

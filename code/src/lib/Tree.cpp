@@ -14,16 +14,19 @@ TreeNode::TreeNode(Wood &w) : wood(w) {
   child_[0] = -1;
   child_[1] = -1;
 }
+
 void TreeNode::free() {
   wood.freeNode(idx);
-  for (auto i{0}; i < 2; ++i)
-    if (child_[i] >= 0)
+  for (auto i{0}; i < 2; ++i) {
+    assert(child_[i] != idx);
+    if (child_[i] >= 2)
       wood[child_[i]].free();
+  }
 }
 
-void TreeNode::setLeaf(const bool y) {
-	feature = y;
-}
+// void TreeNode::setLeaf(const bool y) {
+// 	feature = y;
+// }
 
 const TreeNode &TreeNode::child(const bool t) const { return wood[child_[t]]; }
 
@@ -35,13 +38,16 @@ bool TreeNode::isLeaf() const { return child_[0] < 0; }
 
 bool TreeNode::prediction() const { return feature; }
 
-void TreeNode::setChild(const bool branch, const TreeNode &node) {
-  child_[branch] = node.getIndex();
+void TreeNode::setChild(const bool branch, const int node_id) {
+  // cout << "set child[" << branch << "] of " << getIndex() << " is " <<
+  // node.getIndex() << endl;
+  child_[branch] = node_id; //.getIndex();
+  // cout << "(" << feature << "|" << child_[0] << "|" << child_[1] << ")\n";
 }
 
-void TreeNode::setLeaf(const bool branch, const bool y) {
-  child_[branch] = y;
-}
+// void TreeNode::setLeaf(const bool branch, const bool y) {
+//   child_[branch] = y;
+// }
 
 int TreeNode::getIndex() const { return idx; }
 
@@ -65,26 +71,40 @@ int TreeNode::predict(const DataSet &data) const {
 }
 
 std::ostream &TreeNode::display(std::ostream &os, const int depth) const {
-	if(isLeaf())
-		os << "class " << feature << endl;
-	else {
-		os << feature << endl;
-		for(auto i{0}; i<depth; ++i)
-			os << "  ";
-		os << "yes:";
-		child(true).display(os, depth+1);
-		os << endl;
-		for(auto i{0}; i<depth; ++i)
-			os << "  ";
-		os << "no:";
-		child(false).display(os, depth+1);
-	}
-	return os;
+
+  // cout << "(" << feature << "|" << child_[0] << "|" << child_[1] << ") ";
+
+  if (depth > 5) {
+    cout << "cutting\n";
+    return os;
+  }
+
+  if (isLeaf())
+    os << "class-" << feature << endl;
+  else {
+    os << " [" << idx << "] " << feature << endl;
+    for (auto i{0}; i < depth; ++i)
+      os << "  ";
+    os << " yes:";
+
+    assert(child(true).getIndex() != getIndex());
+
+    child(true).display(os, depth + 1);
+    // os << endl;
+    for (auto i{0}; i < depth; ++i)
+      os << "  ";
+    os << " no:";
+
+    assert(child(false).getIndex() != getIndex());
+
+    child(false).display(os, depth + 1);
+  }
+  return os;
 }
 
 Wood::Wood() {
-	grow()->setLeaf(false);
-	grow()->setLeaf(true);
+  stock[grow()].feature = false;
+  stock[grow()].feature = true;
 }
 
 size_t Wood::size() { return stock.size(); }
@@ -103,15 +123,22 @@ void Wood::resize(const int k) {
 }
 
 //
-TreeNode *Wood::grow() {
+int Wood::grow() {
   if (available.empty())
-    resize(stock.size() + 2);
+    resize(stock.size() + 1);
   auto node{*available.begin()};
   available.remove_front(node);
-  return &(stock[node]);
+
+  cout << "grow (" << node << "): " << available << endl;
+
+  return node;
 }
 
-void Wood::freeNode(const int node) { available.add(node); }
+void Wood::freeNode(const int node) {
+  available.add(node);
+
+  cout << "free (" << node << "): " << available << endl;
+}
 
 Tree::Tree() {}
 

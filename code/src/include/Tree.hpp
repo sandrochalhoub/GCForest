@@ -33,10 +33,10 @@ public:
   bool isLeaf() const;
   bool prediction() const;
 
-  void setChild(const bool branch, const TreeNode &node);
+  void setChild(const bool branch, const int node_id);
 
-  void setLeaf(const bool branch, const bool y);
-	void setLeaf(const bool y);
+  // void setLeaf(const bool branch, const bool y);
+  // void setLeaf(const bool y);
 
   int getIndex() const;
 
@@ -68,7 +68,7 @@ public:
   size_t size();
 
   //
-  TreeNode *grow();
+  int grow();
 
   void freeNode(const int);
 
@@ -111,6 +111,8 @@ public:
   std::ostream &display(std::ostream &os) const;
   //@}
 };
+
+std::ostream &operator<<(std::ostream &os, const TreeNode &x);
 
 std::ostream& operator<<(std::ostream& os, const Tree& x);
 

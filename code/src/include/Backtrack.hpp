@@ -9,10 +9,10 @@
 #include "Tree.hpp"
 #include "utils.hpp"
 
-// #define PRINT_TRACE print_trace();
-// #define DO_ASSERTS do_asserts();
-#define PRINT_TRACE
-#define DO_ASSERTS
+#define PRINT_TRACE print_trace();
+#define DO_ASSERTS do_asserts();
+// #define PRINT_TRACE
+// #define DO_ASSERTS
 
 #ifndef _PRIMER_BACKTRACK_HPP
 #define _PRIMER_BACKTRACK_HPP
@@ -76,7 +76,7 @@ private:
 
   // to replace the struct above. Stores the root of the best subtree found for
   // the current feature of the parent node
-  vector<TreeNode *> best_tree;
+  vector<int> best_tree;
 
   vector<size_t> cbest_error;
   vector<size_t> cbest_size;
@@ -166,7 +166,7 @@ private:
   bool isLeaf(const int node) const;
 
 	// save the current subtree of node as best tree
-  void store_best_tree(const int node);
+  void store_best_tree(const int node, const bool global);
 
   // lower bound, maybe?
   bool fail();
@@ -189,7 +189,10 @@ private:
 	// select a node to branch on, the feature to test and create the children
   void expend();
 
-	// should verify something
+  //
+  void grow(const int node);
+
+  // should verify something
   void verify();
 
   void restart();
