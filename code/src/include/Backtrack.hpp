@@ -9,10 +9,10 @@
 #include "Tree.hpp"
 #include "utils.hpp"
 
-#define PRINT_TRACE print_trace();
-#define DO_ASSERTS do_asserts();
-// #define PRINT_TRACE
-// #define DO_ASSERTS
+// #define PRINT_TRACE print_trace();
+// #define DO_ASSERTS do_asserts();
+#define PRINT_TRACE
+#define DO_ASSERTS
 
 #ifndef _PRIMER_BACKTRACK_HPP
 #define _PRIMER_BACKTRACK_HPP
@@ -71,15 +71,15 @@ private:
   vector<vector<int>::iterator> feature;
 
   // best subtree w.r.t. the current father node
-  vector<int> cbest_child[2];
-  vector<int> cbest_feature;
+  // vector<int> cbest_child[2];
+  // vector<int> cbest_feature;
 
   // to replace the struct above. Stores the root of the best subtree found for
   // the current feature of the parent node
   vector<int> best_tree;
 
-  vector<size_t> cbest_error;
-  vector<size_t> cbest_size;
+  vector<size_t> best_error;
+  // vector<size_t> cbest_size;
 
   // vector<size_t> st_trail;
   // vector<size_t> sz_trail;
@@ -192,9 +192,6 @@ private:
   //
   void grow(const int node);
 
-  // should verify something
-  void verify();
-
   void restart();
 
 public:
@@ -204,6 +201,7 @@ public:
   void seed(const int s);
   //@}
 
+	void separator() const;
   void print_new_best() const;
 
   void setUbDepth(const size_t u);
