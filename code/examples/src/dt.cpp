@@ -86,130 +86,43 @@ int main(int argc, char *argv[]) {
 
   // base.computeBounds();
 
-  // exit(1);
 
   if (opt.verbosity >= Options::QUIET)
     if (base.count() < count)
       cout << "c filtered " << (count - base.count()) / 2
            << " noisy example(s)\n";
 
-  BacktrackingAlgorithm A(base, opt);
+  Wood yallen;
 
-	// DL8 A(base, opt);
-
-  Tree T;
-
-  if (opt.debug != "") {
-    ifstream ifs(opt.debug, ios_base::in);
-
-    int i, f, c, k{0};
-    while (true) {
-      ifs >> i;
-      if (not ifs.good())
-        break;
-
-      assert(i == k++);
-
-      ifs >> f;
-      if (f < 0)
-        T.addNode(-1, f);
-      else {
-        ifs >> c;
-        T.addNode(c, f);
-        ifs >> c;
-      }
-    }
-    //
-    //
-    // cout << "debug!\n";
-    //
-    // cout << T << endl;
-    //
-    // exit(1);
-
-    A.debug_sol = &T;
-  }
-
-  // cout << opt.depth << endl;
-
-  // A.resize(3);
-  // A.seed(opt.seed);
-
-  //
-  // for(auto f{0}; f<base.numFeature(); ++f)
-  // {
-  // 	 cout << f << " " << A.entropy(0, f) << endl;
+  // vector<int> nds(7);
+  // for (auto i{0}; i < 6; ++i) {
+  //   nds[i] = yallen.grow();
+  //   yallen[nds[i]].feature = 100 + i;
   // }
   //
-  // cout << A << endl;
+  // //
+  // yallen[nds[0]].setChild(true, nds[1]);
+  // yallen[nds[0]].setChild(false, nds[2]);
+  // yallen[nds[1]].setChild(true, nds[3]);
+  // yallen[nds[1]].setChild(false, nds[4]);
   //
-  // A.split(0,4);
-
-  // for (auto c{0}; c < 2; ++c) {
-  //   for (auto i{0}; i < base.example[c].size(); ++i) {
-  //     if (base.ithHasFeature(c, i, 53) != base.ithHasFeature(c, i, 54))
-  //       cout << "diff! " << c << base.ithHasFeature(c, i, 53)
-  //            << base.ithHasFeature(c, i, 54) << "\n";
-  //     // else
-  //     // 	cout << "eq.\n";
-  //   }
-  // }
-
+  // yallen[nds[2]].setChild(true, nds[5]);
+  // yallen[nds[2]].setChild(false, true);
+  // yallen[nds[3]].setChild(true, true);
+  // yallen[nds[3]].setChild(false, false);
+  // yallen[nds[4]].setChild(true, false);
+  // yallen[nds[4]].setChild(false, true);
+  // yallen[nds[5]].setChild(true, false);
+  // yallen[nds[5]].setChild(false, true);
+  //
+  // cout << yallen[nds[0]] << endl;
+  //
   // exit(1);
 
-  // cout << A << endl;
-
-  // auto min_size{static_cast<size_t>(-1)};
-  // double max_accuracy{0.0};
-
-  // for (auto i{0}; i < opt.max_iteration; ++i) {
-  // A.greedy(opt.width, opt.focus, opt.max_size);
-  // A.new_search(); // opt.width, opt.focus, opt.max_size);
-
-	// A.optimize();
+  BacktrackingAlgorithm A(base, yallen, opt);
 
   A.search();
 
-  // cout << A.size() << endl;
-
-  // if (A.accuracy() > max_accuracy or
-  //     (A.accuracy() == max_accuracy and A.size() < min_size)) {
-  //   cout << setw(4) << A.size() << " " << setw(10) << A.accuracy() << endl;
-  //   min_size = A.size();
-  //   max_accuracy = A.accuracy();
-  //   if (max_accuracy == 1)
-  //     A.setUb(min_size);
-  // }
-  //
-  // A.clear();
-  // }
-  // A.expend();
-  //
-  // cout << A << endl;
-
-  if (opt.print_sol or opt.verified) {
-    Tree T;
-    for (auto i{0}; i < A.solutionTreeSize(); ++i) {
-      T.addNode(A.solutionChild(i, true), A.solutionFeature(i));
-    }
-
-    auto e{T.predict(base)};
-
-    if (opt.print_sol) {
-      cout << T << endl
-           << e << "/" << base.count() << " ("
-           << 1.0 - static_cast<double>(e) /
-           static_cast<double>(base.count())
-           << ")\n";
-    }
-
-    if (opt.output != "") {
-      ofstream ofs(opt.output, ios_base::out);
-      ofs << T << endl;
-    }
-
-    assert(e == A.solutionError());
-  }
 }
 
 
