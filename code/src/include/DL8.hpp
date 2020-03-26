@@ -28,7 +28,7 @@ private:
   //@{
   /// Argument
   DataSet &data;
-  Options &options;
+  DTOptions &options;
   vector<vector<int>> example[2];
 
 	// 
@@ -57,7 +57,7 @@ public:
 
   /*!@name Constructors*/
   //@{
-  explicit DL8(DataSet &d, Options &o);
+  explicit DL8(DataSet &d, DTOptions &o);
   void resize(const int num_nodes);
   void seed(const int s);
   //@}

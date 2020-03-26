@@ -36,7 +36,7 @@ using namespace primer;
 
 int main(int argc, char *argv[]) {
 
-  Options opt = parse(argc, argv);
+  DTOptions opt = parse_dt(argc, argv);
 
   if (opt.print_cmd)
     cout << opt.cmdline << endl;
@@ -79,45 +79,21 @@ int main(int argc, char *argv[]) {
 
   auto count{base.count()};
 
-  // if (opt.verbosity >= Options::QUIET)
-  //   cout << "c filter base\n";
-  //
-  // base.filter();
+  if (opt.filter) {
+    if (opt.verbosity >= DTOptions::QUIET)
+      cout << "c filter base\n";
+
+    base.filter();
+  }
 
   // base.computeBounds();
 
-
-  if (opt.verbosity >= Options::QUIET)
+  if (opt.verbosity >= DTOptions::QUIET)
     if (base.count() < count)
       cout << "c filtered " << (count - base.count()) / 2
            << " noisy example(s)\n";
 
   Wood yallen;
-
-  // vector<int> nds(7);
-  // for (auto i{0}; i < 6; ++i) {
-  //   nds[i] = yallen.grow();
-  //   yallen[nds[i]].feature = 100 + i;
-  // }
-  //
-  // //
-  // yallen[nds[0]].setChild(true, nds[1]);
-  // yallen[nds[0]].setChild(false, nds[2]);
-  // yallen[nds[1]].setChild(true, nds[3]);
-  // yallen[nds[1]].setChild(false, nds[4]);
-  //
-  // yallen[nds[2]].setChild(true, nds[5]);
-  // yallen[nds[2]].setChild(false, true);
-  // yallen[nds[3]].setChild(true, true);
-  // yallen[nds[3]].setChild(false, false);
-  // yallen[nds[4]].setChild(true, false);
-  // yallen[nds[4]].setChild(false, true);
-  // yallen[nds[5]].setChild(true, false);
-  // yallen[nds[5]].setChild(false, true);
-  //
-  // cout << yallen[nds[0]] << endl;
-  //
-  // exit(1);
 
   BacktrackingAlgorithm A(base, yallen, opt);
 

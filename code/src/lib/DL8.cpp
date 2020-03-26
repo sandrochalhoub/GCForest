@@ -6,7 +6,7 @@
 
 namespace primer {
 
-DL8::DL8(DataSet &d, Options &opt) : data(d), options(opt) {
+DL8::DL8(DataSet &d, DTOptions &opt) : data(d), options(opt) {
 
   seed(options.seed);
 
@@ -263,31 +263,32 @@ void DL8::recurse(SparseSet &branch, int &n, const int d, const int s) {
 
         print_new_best();
 
-        if (options.verified) {
-
-          vector<int> lchild;
-          lchild.resize(node_size, -1);
-          Tree T;
-          for (auto i{1}; i < node_size; ++i) {
-            if (i % 2)
-              lchild[parent[i]] = i;
-            else
-              assert(lchild[parent[i]] == i - 1);
-          }
-          for (auto i{0}; i < node_size; ++i) {
-            if (lchild[i] >= 0)
-              T.addNode(lchild[i], lchild[i] + 1, node_feature[i]);
-            else
-              T.addNode(-1, -1, (P[1][i].count() > P[0][i].count() ? -1 : -2));
-          }
-
-          cout << T << endl;
-          auto err{T.predict(data)};
-
-          cout << err << " / " << error() << endl;
-
-          assert(err == error());
-        }
+        // if (options.verified) {
+        //
+        //   vector<int> lchild;
+        //   lchild.resize(node_size, -1);
+        //   Tree T;
+        //   for (auto i{1}; i < node_size; ++i) {
+        //     if (i % 2)
+        //       lchild[parent[i]] = i;
+        //     else
+        //       assert(lchild[parent[i]] == i - 1);
+        //   }
+        //   for (auto i{0}; i < node_size; ++i) {
+        //     if (lchild[i] >= 0)
+        //       T.addNode(lchild[i], lchild[i] + 1, node_feature[i]);
+        //     else
+        //       T.addNode(-1, -1, (P[1][i].count() > P[0][i].count() ? -1 :
+        //       -2));
+        //   }
+        //
+        //   cout << T << endl;
+        //   auto err{T.predict(data)};
+        //
+        //   cout << err << " / " << error() << endl;
+        //
+        //   assert(err == error());
+        // }
       }
     }
   }

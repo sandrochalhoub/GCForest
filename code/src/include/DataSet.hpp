@@ -190,10 +190,10 @@ public:
   // explanations,
   // add them to examples and remove entailed ones
   template <typename R>
-  void computeDecisionSet(Options &opt, R &random_generator);
+  void computeDecisionSet(PrimerOptions &opt, R &random_generator);
 
   template <typename R>
-  void computeDecisionSetSorted(Options &opt, R &random_generator);
+  void computeDecisionSetSorted(PrimerOptions &opt, R &random_generator);
 
   // TODO
   void close();
@@ -359,7 +359,8 @@ int DataSet::argMaxProbability(ExampleIt b, ExampleIt e) const {
 }
 
 template <typename R>
-void DataSet::computeDecisionSetSorted(Options& opt, R& random_generator) {
+void DataSet::computeDecisionSetSorted(PrimerOptions &opt,
+                                       R &random_generator) {
   auto c{0};
 
   double p[2];
@@ -411,21 +412,21 @@ void DataSet::computeDecisionSetSorted(Options& opt, R& random_generator) {
       c = 0;
     else if (num_original[0] == 0)
       c = 1;
-    else if (opt.class_policy == Options::BIASED)
+    else if (opt.class_policy == PrimerOptions::BIASED)
       c = ((random_generator() % (num_original[0] + num_original[1])) >
            num_original[0]);
-    else if (opt.class_policy == Options::ANTI)
+    else if (opt.class_policy == PrimerOptions::ANTI)
       c = ((random_generator() % (num_original[0] + num_original[1])) <
            num_original[0]);
-    else if (opt.class_policy == Options::UNIFORM)
+    else if (opt.class_policy == PrimerOptions::UNIFORM)
       c = random_generator() % 2;
-    else if (opt.class_policy == Options::POSITIVE)
+    else if (opt.class_policy == PrimerOptions::POSITIVE)
       c = 1;
-    else if (opt.class_policy == Options::NEGATIVE)
+    else if (opt.class_policy == PrimerOptions::NEGATIVE)
       c = 0;
-    else if (opt.class_policy == Options::SMALLEST)
+    else if (opt.class_policy == PrimerOptions::SMALLEST)
       c = (num_original[0] > num_original[1]);
-    else if (opt.class_policy == Options::LARGEST)
+    else if (opt.class_policy == PrimerOptions::LARGEST)
       c = (num_original[0] < num_original[1]);
     else
       c = 1 - c;
@@ -433,17 +434,17 @@ void DataSet::computeDecisionSetSorted(Options& opt, R& random_generator) {
 
     auto i{0};
 
-    if (opt.example_policy == Options::RANDOM)
+    if (opt.example_policy == PrimerOptions::RANDOM)
       i = example[c].any(num_original[c], random_generator);
-    else if (opt.example_policy == Options::HIGHEST_PROBABILITY)
+    else if (opt.example_policy == PrimerOptions::HIGHEST_PROBABILITY)
       i = argMaxProbability(example[c].begin(),
                             example[c].get_iterator(end[c]));
-    else if (opt.example_policy == Options::LOWEST_PROBABILITY)
+    else if (opt.example_policy == PrimerOptions::LOWEST_PROBABILITY)
       i = argMinProbability(example[c].begin(),
                             example[c].get_iterator(end[c]));
-    else if (opt.example_policy == Options::FIRST)
+    else if (opt.example_policy == PrimerOptions::FIRST)
       i = example[c].front();
-    else if (opt.example_policy < Options::LOWEST_PROBABILITY)
+    else if (opt.example_policy < PrimerOptions::LOWEST_PROBABILITY)
       i = randomArgMinProbability(example[c].begin(),
                                   example[c].get_iterator(end[c]),
                                   -opt.example_policy, random_generator);
@@ -455,7 +456,7 @@ void DataSet::computeDecisionSetSorted(Options& opt, R& random_generator) {
     assert(i <= last_example);
 
     // now X[i] is the first remaining example of class c
-    if (opt.verbosity >= Options::SOLVERINFO) {
+    if (opt.verbosity >= PrimerOptions::SOLVERINFO) {
       cout << "compute a rule from the " << (c ? "positive" : "negative")
            << " example " << i << ":";
       displayExample(cout, X[i]);
@@ -483,7 +484,7 @@ void DataSet::computeDecisionSetSorted(Options& opt, R& random_generator) {
       // so no need to take X[j] into account
       getContradictingFeatures(X[j], implicant, contradicting_features);
       if (!contradicting_features.none()) {
-        if (opt.verbosity >= Options::SOLVERINFO) {
+        if (opt.verbosity >= PrimerOptions::SOLVERINFO) {
           cout << "skip " << j << " = ";
           displayExample(cout, X[j]);
           cout << " b/c it is already covered\n";
@@ -495,7 +496,7 @@ void DataSet::computeDecisionSetSorted(Options& opt, R& random_generator) {
       // one contradicting feature among:
       getContradictingFeatures(X[i], X[j], contradicting_features);
 
-      if (opt.verbosity >= Options::SOLVERINFO) {
+      if (opt.verbosity >= PrimerOptions::SOLVERINFO) {
         cout << i << ": ";
         displayExample(cout, X[i]);
         cout << " \\ " << setw(4) << j << ":";
@@ -506,7 +507,7 @@ void DataSet::computeDecisionSetSorted(Options& opt, R& random_generator) {
 
       // this should not happen
       if (contradicting_features.none()) {
-        if (opt.verbosity >= Options::SOLVERINFO)
+        if (opt.verbosity >= PrimerOptions::SOLVERINFO)
           cout << " inconsistent example\?\?!\n";
         continue;
       }
@@ -517,18 +518,19 @@ void DataSet::computeDecisionSetSorted(Options& opt, R& random_generator) {
 
         // if not, then we need to add one of the contradicted literals in the
         // explanation and start with a fresh set of candidates
-        implicant.set((opt.feature_policy == Options::LOWEST_ENTROPY
-                           ? argMinEntropy(candidates)
-                           : (opt.feature_policy == Options::HIGHEST_ENTROPY
-                                  ? argMaxEntropy(candidates)
-                                  : candidates.find_first())));
+        implicant.set(
+            (opt.feature_policy == PrimerOptions::LOWEST_ENTROPY
+                 ? argMinEntropy(candidates)
+                 : (opt.feature_policy == PrimerOptions::HIGHEST_ENTROPY
+                        ? argMaxEntropy(candidates)
+                        : candidates.find_first())));
         candidates.clear();
         candidates.resize(2 * numFeature(), true);
       }
       // make sure that the explanation will contradict X[j]
       candidates &= contradicting_features;
 
-      if (opt.verbosity >= Options::SOLVERINFO) {
+      if (opt.verbosity >= PrimerOptions::SOLVERINFO) {
         cout << " -> ";
         displayExample(cout, candidates);
         cout << " ";
@@ -539,13 +541,13 @@ void DataSet::computeDecisionSetSorted(Options& opt, R& random_generator) {
 
     // make sure that the explanation contradicts the last batch of examples
     // from 1-c
-    implicant.set((opt.feature_policy == Options::LOWEST_ENTROPY
+    implicant.set((opt.feature_policy == PrimerOptions::LOWEST_ENTROPY
                        ? argMinEntropy(candidates)
-                       : (opt.feature_policy == Options::HIGHEST_ENTROPY
+                       : (opt.feature_policy == PrimerOptions::HIGHEST_ENTROPY
                               ? argMaxEntropy(candidates)
                               : candidates.find_first())));
 
-    if (opt.verbosity >= Options::YACKING) {
+    if (opt.verbosity >= PrimerOptions::YACKING) {
       cout << " -> add " << X.size() << ": ";
       displayExample(cout, implicant);
       cout << " (" << implicant.count() << "/" << implicant.size() << ")"
@@ -560,7 +562,7 @@ void DataSet::computeDecisionSetSorted(Options& opt, R& random_generator) {
     assert(removed.size() <= num_original[c]);
     num_original[c] -= removed.size();
 
-    if (opt.verbosity >= Options::SOLVERINFO)
+    if (opt.verbosity >= PrimerOptions::SOLVERINFO)
       for (auto e : removed) {
         cout << " - remove " << e << ": ";
         displayExample(cout, X[e]);
@@ -569,10 +571,8 @@ void DataSet::computeDecisionSetSorted(Options& opt, R& random_generator) {
   }
 }
 
-
-
 template <typename R>
-void DataSet::computeDecisionSet(Options& opt, R& random_generator) {
+void DataSet::computeDecisionSet(PrimerOptions &opt, R &random_generator) {
   auto c{0};
 
   // verify();
@@ -605,21 +605,21 @@ void DataSet::computeDecisionSet(Options& opt, R& random_generator) {
       c = 0;
     else if (num_original[0] == 0)
       c = 1;
-    else if (opt.class_policy == Options::BIASED)
+    else if (opt.class_policy == PrimerOptions::BIASED)
       c = ((random_generator() % (num_original[0] + num_original[1])) >
            num_original[0]);
-    else if (opt.class_policy == Options::ANTI)
+    else if (opt.class_policy == PrimerOptions::ANTI)
       c = ((random_generator() % (num_original[0] + num_original[1])) <
            num_original[0]);
-    else if (opt.class_policy == Options::UNIFORM)
+    else if (opt.class_policy == PrimerOptions::UNIFORM)
       c = random_generator() % 2;
-    else if (opt.class_policy == Options::POSITIVE)
+    else if (opt.class_policy == PrimerOptions::POSITIVE)
       c = 1;
-    else if (opt.class_policy == Options::NEGATIVE)
+    else if (opt.class_policy == PrimerOptions::NEGATIVE)
       c = 0;
-    else if (opt.class_policy == Options::SMALLEST)
+    else if (opt.class_policy == PrimerOptions::SMALLEST)
       c = (num_original[0] > num_original[1]);
-    else if (opt.class_policy == Options::LARGEST)
+    else if (opt.class_policy == PrimerOptions::LARGEST)
       c = (num_original[0] < num_original[1]);
     else
       c = 1 - c;
@@ -627,17 +627,17 @@ void DataSet::computeDecisionSet(Options& opt, R& random_generator) {
 
     auto i{0};
 
-    if (opt.example_policy == Options::RANDOM)
+    if (opt.example_policy == PrimerOptions::RANDOM)
       i = example[c].any(num_original[c], random_generator);
-    else if (opt.example_policy == Options::HIGHEST_PROBABILITY)
+    else if (opt.example_policy == PrimerOptions::HIGHEST_PROBABILITY)
       i = argMaxProbability(example[c].begin(),
                             example[c].get_iterator(end[c]));
-    else if (opt.example_policy == Options::LOWEST_PROBABILITY)
+    else if (opt.example_policy == PrimerOptions::LOWEST_PROBABILITY)
       i = argMinProbability(example[c].begin(),
                             example[c].get_iterator(end[c]));
-    else if (opt.example_policy == Options::FIRST)
+    else if (opt.example_policy == PrimerOptions::FIRST)
       i = example[c].front();
-    else if (opt.example_policy < Options::LOWEST_PROBABILITY)
+    else if (opt.example_policy < PrimerOptions::LOWEST_PROBABILITY)
       i = randomArgMinProbability(example[c].begin(),
                                   example[c].get_iterator(end[c]),
                                   -opt.example_policy, random_generator);
@@ -649,7 +649,7 @@ void DataSet::computeDecisionSet(Options& opt, R& random_generator) {
     assert(i <= last_example);
 
     // now X[i] is the first remaining example of class c
-    if (opt.verbosity >= Options::SOLVERINFO) {
+    if (opt.verbosity >= PrimerOptions::SOLVERINFO) {
       cout << "compute a rule from the " << (c ? "positive" : "negative")
            << " example " << i << ":";
       displayExample(cout, X[i]);
@@ -677,7 +677,7 @@ void DataSet::computeDecisionSet(Options& opt, R& random_generator) {
       // so no need to take X[j] into account
       getContradictingFeatures(X[j], implicant, contradicting_features);
       if (!contradicting_features.none()) {
-        if (opt.verbosity >= Options::SOLVERINFO) {
+        if (opt.verbosity >= PrimerOptions::SOLVERINFO) {
           cout << "skip " << j << " = ";
           displayExample(cout, X[j]);
           cout << " b/c it is already covered\n";
@@ -689,7 +689,7 @@ void DataSet::computeDecisionSet(Options& opt, R& random_generator) {
       // one contradicting feature among:
       getContradictingFeatures(X[i], X[j], contradicting_features);
 
-      if (opt.verbosity >= Options::SOLVERINFO) {
+      if (opt.verbosity >= PrimerOptions::SOLVERINFO) {
         cout << i << ": ";
         displayExample(cout, X[i]);
         cout << " \\ " << setw(4) << j << ":";
@@ -700,7 +700,7 @@ void DataSet::computeDecisionSet(Options& opt, R& random_generator) {
 
       // this should not happen
       if (contradicting_features.none()) {
-        if (opt.verbosity >= Options::SOLVERINFO)
+        if (opt.verbosity >= PrimerOptions::SOLVERINFO)
           cout << " inconsistent example\?\?!\n";
         continue;
       }
@@ -711,18 +711,19 @@ void DataSet::computeDecisionSet(Options& opt, R& random_generator) {
 
         // if not, then we need to add one of the contradicted literals in the
         // explanation and start with a fresh set of candidates
-        implicant.set((opt.feature_policy == Options::LOWEST_ENTROPY
-                           ? argMinEntropy(candidates)
-                           : (opt.feature_policy == Options::HIGHEST_ENTROPY
-                                  ? argMaxEntropy(candidates)
-                                  : candidates.find_first())));
+        implicant.set(
+            (opt.feature_policy == PrimerOptions::LOWEST_ENTROPY
+                 ? argMinEntropy(candidates)
+                 : (opt.feature_policy == PrimerOptions::HIGHEST_ENTROPY
+                        ? argMaxEntropy(candidates)
+                        : candidates.find_first())));
         candidates.clear();
         candidates.resize(2 * numFeature(), true);
       }
       // make sure that the explanation will contradict X[j]
       candidates &= contradicting_features;
 
-      if (opt.verbosity >= Options::SOLVERINFO) {
+      if (opt.verbosity >= PrimerOptions::SOLVERINFO) {
         cout << " -> ";
         displayExample(cout, candidates);
         cout << " ";
@@ -733,13 +734,13 @@ void DataSet::computeDecisionSet(Options& opt, R& random_generator) {
 
     // make sure that the explanation contradicts the last batch of examples
     // from 1-c
-    implicant.set((opt.feature_policy == Options::LOWEST_ENTROPY
+    implicant.set((opt.feature_policy == PrimerOptions::LOWEST_ENTROPY
                        ? argMinEntropy(candidates)
-                       : (opt.feature_policy == Options::HIGHEST_ENTROPY
+                       : (opt.feature_policy == PrimerOptions::HIGHEST_ENTROPY
                               ? argMaxEntropy(candidates)
                               : candidates.find_first())));
 
-    if (opt.verbosity >= Options::YACKING) {
+    if (opt.verbosity >= PrimerOptions::YACKING) {
       cout << " -> add " << X.size() << ": ";
       displayExample(cout, implicant);
       cout << " (" << implicant.count() << "/" << implicant.size() << ")"
@@ -754,7 +755,7 @@ void DataSet::computeDecisionSet(Options& opt, R& random_generator) {
     assert(removed.size() <= num_original[c]);
     num_original[c] -= removed.size();
 
-    if (opt.verbosity >= Options::SOLVERINFO)
+    if (opt.verbosity >= PrimerOptions::SOLVERINFO)
       for (auto e : removed) {
         cout << " - remove " << e << ": ";
         displayExample(cout, X[e]);

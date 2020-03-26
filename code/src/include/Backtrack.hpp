@@ -35,7 +35,7 @@ private:
   /// Argument
   Wood &wood;
   DataSet &data;
-  Options &options;
+  DTOptions &options;
   vector<vector<int>> example[2];
 
   /// store the children of node i
@@ -196,7 +196,7 @@ private:
 public:
   /*!@name Constructors*/
   //@{
-  explicit BacktrackingAlgorithm(DataSet &d, Wood &w, Options &o);
+  explicit BacktrackingAlgorithm(DataSet &d, Wood &w, DTOptions &o);
   void seed(const int s);
   //@}
 

@@ -4,9 +4,8 @@
 
 namespace primer {
 
-
-
-BacktrackingAlgorithm::BacktrackingAlgorithm(DataSet &d, Wood &w, Options &opt)
+BacktrackingAlgorithm::BacktrackingAlgorithm(DataSet &d, Wood &w,
+                                             DTOptions &opt)
     : wood(w), data(d), options(opt) {
 
   // statistics and options
@@ -307,7 +306,7 @@ bool BacktrackingAlgorithm::notify_solution() {
 void BacktrackingAlgorithm::prune(const int node) {
 
 #ifdef PRINTTRACE
-  if (options.verbosity >= Options::SOLVERINFO)
+  if (options.verbosity >= DTOptions::SOLVERINFO)
     cout << "PRUNE " << node << endl;
 #endif
 
@@ -316,7 +315,7 @@ void BacktrackingAlgorithm::prune(const int node) {
     if (depth[node] == ub_depth - 1 or optimal[node]) {
 
 #ifdef PRINTTRACE
-      if (options.verbosity >= Options::SOLVERINFO)
+      if (options.verbosity >= DTOptions::SOLVERINFO)
         cout << "ERROR = " << current_error << " - " << best_error[node]
              << endl;
 #endif
@@ -429,7 +428,7 @@ bool BacktrackingAlgorithm::backtrack() {
         cout << "end domain for " << backtrack_node << "! ==> set optimal\n";
       }
 
-      if (options.verbosity >= Options::SOLVERINFO) {
+      if (options.verbosity >= DTOptions::SOLVERINFO) {
         cout << "ERROR = " << current_error << " + "
              << best_error[backtrack_node] << endl;
       }
@@ -449,7 +448,7 @@ bool BacktrackingAlgorithm::backtrack() {
   blossom.add(backtrack_node);
 
 #ifdef PRINTTRACE
-  if (options.verbosity >= Options::SOLVERINFO)
+  if (options.verbosity >= DTOptions::SOLVERINFO)
     cout << "ERROR = " << current_error << " + " << node_error(backtrack_node)
          << endl;
 #endif
@@ -519,7 +518,7 @@ void BacktrackingAlgorithm::branch(const int node, const int f) {
   }
 
 #ifdef PRINTTRACE
-  if (options.verbosity >= Options::SOLVERINFO)
+  if (options.verbosity >= DTOptions::SOLVERINFO)
     cout << "ERROR = " << current_error << " - " << node_error(node) << endl;
 #endif
 
@@ -530,7 +529,7 @@ void BacktrackingAlgorithm::branch(const int node, const int f) {
       grow(c);
 
 #ifdef PRINTTRACE
-      if (options.verbosity >= Options::SOLVERINFO)
+      if (options.verbosity >= DTOptions::SOLVERINFO)
         cout << "ERROR = " << current_error << " + " << best_error[c] << endl;
 #endif
 
@@ -756,7 +755,7 @@ void BacktrackingAlgorithm::print_trace() {
     cout << "ub (error) = " << ub_error << "; ub (depth) = " << ub_depth
          << "; search=" << search_size << endl;
 
-    if (options.verbosity >= Options::SOLVERINFO) {
+    if (options.verbosity >= DTOptions::SOLVERINFO) {
       cout << "nodes: ";
       for (auto d{blossom.fbegin()}; d != blossom.fend(); ++d) {
         cout << setw(3) << *d << (optimal[*d] ? "*" : " ");

@@ -102,12 +102,12 @@ public:
   virtual ~RangeConstraint() { ; }
 };
 
-Options parse(int argc, char *argv[]) {
+PrimerOptions parse_primer(int argc, char *argv[]) {
   using namespace TCLAP;
   // using namespace string_literals;
   cmdline cmd("primer", ' ');
 
-  Options opt;
+  PrimerOptions opt;
   opt.cmdline =
       accumulate(argv, argv + argc, ""s,
                  [&](string acc, const char *arg) { return acc + " " + arg; });
@@ -231,7 +231,7 @@ Options parse(int argc, char *argv[]) {
   return opt;
 }
 
-ostream &Options::display(ostream &os) {
+ostream &PrimerOptions::display(ostream &os) {
   os << setw(20) << left << "p data file:" << setw(30) << right << instance_file
      << endl
      << setw(20) << left << "p seed:" << setw(30) << right << seed << endl
@@ -261,30 +261,159 @@ ostream &Options::display(ostream &os) {
                                                        : "biased")))))))
      << endl
      << setw(20) << left << "p example policy:" << setw(30) << right;
-	
-	if(example_policy <= LOWEST_PROBABILITY) {
-		auto k{LOWEST_PROBABILITY - example_policy};
-		os << "lowest probability";
-		if(k>1)
-			os << " (" << k << ")";
-		os << endl;
-	} else if(example_policy >= HIGHEST_PROBABILITY) {
-		auto k{example_policy - HIGHEST_PROBABILITY};
-                os << "highest " << (bayesian ? "Bayesian " : "")
-                   << "probability";
-                if (k > 1)
-                  os << " (" << k << ")";
-                os << endl;
-        } else
-          os << (example_policy == FIRST ? "first" : "random") << endl;
 
-        os << setw(20) << left << "p feature policy:" << setw(30) << right
-           << (feature_policy == MIN
-                   ? "mininum"
-                   : (feature_policy == LOWEST_ENTROPY ? "lowest entropy"
-                                                       : "highest entropy"))
-           << endl
-           << setw(20) << left << "p verified:" << setw(30) << right
-           << (verified ? "yes" : "no") << endl;
-        return os;
+  if (example_policy <= LOWEST_PROBABILITY) {
+    auto k{LOWEST_PROBABILITY - example_policy};
+    os << "lowest probability";
+    if (k > 1)
+      os << " (" << k << ")";
+    os << endl;
+  } else if (example_policy >= HIGHEST_PROBABILITY) {
+    auto k{example_policy - HIGHEST_PROBABILITY};
+    os << "highest " << (bayesian ? "Bayesian " : "") << "probability";
+    if (k > 1)
+      os << " (" << k << ")";
+    os << endl;
+  } else
+    os << (example_policy == FIRST ? "first" : "random") << endl;
+
+  os << setw(20) << left << "p feature policy:" << setw(30) << right
+     << (feature_policy == MIN ? "mininum" : (feature_policy == LOWEST_ENTROPY
+                                                  ? "lowest entropy"
+                                                  : "highest entropy"))
+     << endl
+     << setw(20) << left << "p verified:" << setw(30) << right
+     << (verified ? "yes" : "no") << endl;
+  return os;
+}
+
+DTOptions parse_dt(int argc, char *argv[]) {
+  using namespace TCLAP;
+  // using namespace string_literals;
+  cmdline cmd("dt", ' ');
+
+  DTOptions opt;
+  opt.cmdline =
+      accumulate(argv, argv + argc, ""s,
+                 [&](string acc, const char *arg) { return acc + " " + arg; });
+
+  cmd.add<UnlabeledValueArg<std::string>>(opt.instance_file, "file",
+                                          "instance file", true, "", "string");
+
+  cmd.add<ValueArg<string>>(opt.debug, "", "debug", "debug file", false, "",
+                            "string");
+
+  cmd.add<ValueArg<string>>(opt.output, "o", "output", "output file", false, "",
+                            "string");
+
+  cmd.add<ValueArg<string>>(opt.format, "", "format",
+                            "input format (csv or txt)", false, "csv",
+                            "string");
+
+  cmd.add<ValueArg<int>>(
+      opt.verbosity, "v", "verbosity",
+      "verbosity level (0:silent,1:quiet,2:improvements only,3:verbose", false,
+      2, "int");
+
+  cmd.add<ValueArg<int>>(opt.seed, "s", "seed", "random seed", false, 12345,
+                         "int");
+
+  cmd.add<SwitchArg>(opt.print_sol, "", "print_sol",
+                     "print the best found schedule", false);
+
+  cmd.add<SwitchArg>(opt.print_par, "", "print_par", "print the paramters",
+                     false);
+
+  cmd.add<SwitchArg>(opt.print_ins, "", "print_ins", "print the instance",
+                     false);
+
+  cmd.add<SwitchArg>(opt.print_sta, "", "print_sta", "print the statistics",
+                     false);
+
+  cmd.add<SwitchArg>(opt.print_cmd, "", "print_cmd", "print the command-line",
+                     false);
+
+  cmd.add<SwitchArg>(opt.verified, "", "verified", "verify the solution",
+                     false);
+
+  cmd.add<SwitchArg>(opt.filter, "", "filter", "remove contradictory examples",
+                     false);
+
+  // ValueArg (const std::string &flag, const std::string &name, const
+  // std::string &desc, bool req, T value, Constraint< T > *constraint, Visitor
+  // *v=NULL)
+
+  // Constraint<double> *range = new RangeConstraint<double>(0, 1);
+  cmd.add<ValueArg<double>>(opt.sample, "", "sample", "sampling ratio", false,
+                            1.0, "double");
+
+  cmd.add<ValueArg<int>>(opt.width, "", "width",
+                         "number of tied features for random selection", false,
+                         1, "int");
+
+  cmd.add<ValueArg<double>>(opt.focus, "", "focus",
+                            "probability of choosing the best feature", false,
+                            .9, "int");
+
+  cmd.add<ValueArg<int>>(opt.max_size, "", "max_size",
+                         "maximum number of nodes in the tree", false,
+                         numeric_limits<int>::max(), "int");
+
+  cmd.add<ValueArg<int>>(opt.max_depth, "", "max_depth",
+                         "maximum depth of the tree", false,
+                         numeric_limits<int>::max(), "int");
+
+  cmd.add<ValueArg<int>>(opt.restart_base, "", "restart_base",
+                         "number of backtracks before first restart", false, -1,
+                         "int");
+
+  cmd.add<ValueArg<double>>(opt.restart_factor, "", "restart_factor",
+                            "geometric factor", false, 1.1, "double");
+
+  cmd.parse(argc, argv);
+  return opt;
+}
+
+ostream &DTOptions::display(ostream &os) {
+  os << setw(20) << left << "p data file:" << setw(30) << right << instance_file
+     << endl
+     << setw(20) << left << "p seed:" << setw(30) << right << seed << endl
+     << setw(20) << left << "p sample:" << setw(30) << right << sample << endl
+     << setw(20) << left << "p verbosity:" << setw(30) << right
+     << (verbosity == SILENT
+             ? "silent"
+             : (verbosity == QUIET
+                    ? "quiet"
+                    : (verbosity == NORMAL ? "normal" : "yacking")))
+     << endl
+     << setw(20) << left << "p verified:" << setw(30) << right
+     << (verified ? "yes" : "no") << endl
+     << setw(20) << left << "p filter:" << setw(30) << right
+     << (filter ? "yes" : "no") << endl
+     << setw(20) << left << "p randomization:" << setw(30) << right;
+
+  if (width == 1 or focus == 1)
+    os << "no" << endl;
+  else {
+    stringstream ss;
+    ss << "among " << width << " best w prob. " << (1 - focus);
+    os << ss.str() << endl;
+  }
+
+  os << setw(20) << left << "p restart:" << setw(30) << right;
+
+  if (restart_base < 0)
+    os << "no" << endl;
+  else {
+    stringstream ss;
+    ss << "base " << restart_base << " factor. " << restart_factor;
+    os << ss.str() << endl;
+  }
+
+  os << setw(20) << left << "p maximum depth:" << setw(30) << right << max_depth
+     << endl
+     << setw(20) << left << "p maximum size:" << setw(30) << right << max_size
+     << endl;
+
+  return os;
 }
