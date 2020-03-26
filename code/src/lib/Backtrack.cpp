@@ -78,6 +78,10 @@ bool BacktrackingAlgorithm::no_feature(const int node) const {
 
 // return true if the feature f is true/false in all examples
 bool BacktrackingAlgorithm::max_entropy(const int node, const int f) const {
+
+  // auto error_parent{node_error(node)};
+  // auto error_feature{get_feature_error(node, f)};
+
   // auto f{*(feature[node])};
   auto numNeg{P[0][node].count()};
   auto numPos{P[1][node].count()};
@@ -88,6 +92,15 @@ bool BacktrackingAlgorithm::max_entropy(const int node, const int f) const {
            pos_feature_count[0][node][f] == 0)};
 
   return me;
+}
+
+// return true if the feature f reduces the error
+bool BacktrackingAlgorithm::reduce_error(const int node, const int f) const {
+
+  // auto error_parent{node_error(node)};
+  // auto error_feature{get_feature_error(node,f)};
+
+  return get_feature_error(node, f) < node_error(node);
 }
 
 // return true if the feature f classifies all examples
@@ -220,6 +233,8 @@ void BacktrackingAlgorithm::sort_features(const int selected_node) {
       ranked_feature[selected_node].end(),
       // [&](const int a, const int b) { return f_entropy[a] < f_entropy[b]; });
       [&](const int a, const int b) { return f_error[a] < f_error[b]; });
+
+  // while()
 }
 
 void BacktrackingAlgorithm::count_by_example(const int node, const int y) {
@@ -374,13 +389,6 @@ bool BacktrackingAlgorithm::backtrack() {
         cout << "new best for node " << backtrack_node
              << ": feat=" << *feature[backtrack_node]
              << ", error=" << best_error[backtrack_node] << endl;
-// if(options.verbosity >= Options::SOLVERINFO) {
-//
-// 	cout << wood[best_tree[backtrack_node]].child(0).getIndex() << " "
-// 		<< wood[best_tree[backtrack_node]].child(1).getIndex() << endl;
-//
-// 	cout << wood[best_tree[backtrack_node]] << endl;
-// }
 #endif
 
     } else {
@@ -393,8 +401,9 @@ bool BacktrackingAlgorithm::backtrack() {
 #endif
 
       for (auto i{0}; i < 2; ++i)
-        if (child[i][backtrack_node] >= 0)
+        if (child[i][backtrack_node] >= 0 and best_tree[child[i][backtrack_node]] > 1)
           wood[best_tree[child[i][backtrack_node]]].free();
+			
     }
 
     ++feature[backtrack_node];
@@ -418,21 +427,18 @@ bool BacktrackingAlgorithm::backtrack() {
         for (auto i{0}; i < decision.size(); ++i)
           cout << "   ";
         cout << "end domain for " << backtrack_node << "! ==> set optimal\n";
-
-        // cout << wood[best_tree[backtrack_node]] << endl;
       }
 
       if (options.verbosity >= Options::SOLVERINFO) {
         cout << "ERROR = " << current_error << " + "
-             << best_error[backtrack_node] << endl
-             << wood[best_tree[backtrack_node]] << endl;
+             << best_error[backtrack_node] << endl;
+      }
+#endif
+			
         if (backtrack_node == 0) {
           auto err{wood[best_tree[backtrack_node]].predict(data)};
           assert(err == ub_error);
-					cout << "TREE ERROR = " << err << endl;
         }
-      }
-#endif
 
       current_error += best_error[backtrack_node];
     }
@@ -536,7 +542,7 @@ void BacktrackingAlgorithm::branch(const int node, const int f) {
 void BacktrackingAlgorithm::grow(const int node) {
   blossom.add(node);
   feature[node] = ranked_feature[node].begin();
-  best_tree[node] = -1;
+  best_tree[node] = (P[0][node].count() < P[1][node].count());
   optimal[node] = false;
   sort_features(node);
 
@@ -554,7 +560,9 @@ void BacktrackingAlgorithm::grow(const int node) {
       child[branch][node] = -1 - (get_feature_count(1, node, f[branch]) <
                                   get_feature_count(0, node, f[branch]));
     }
+
     store_best_tree(node, false);
+
     optimal[node] = true;
 
   } else {
@@ -648,20 +656,20 @@ void BacktrackingAlgorithm::store_best_tree(const int node, const bool global) {
   assert(not optimal[node]);
 
   // the previous best tree can be forgotten
-  if (global and best_tree[node] >= 0)
+  if (global and best_tree[node] > 1)
     wood[best_tree[node]].free();
 
   // grow a new one
   best_tree[node] = wood.grow();
 
-  auto rc{(child[true][node] >= 0 ? best_tree[child[true][node]]
-                                  : child[true][node] == -1)};
+  // auto rc{(child[true][node] >= 0 ? best_tree[child[true][node]]
+  //                                 : child[true][node] == -1)};
+  //
+  // auto lc{(child[false][node] >= 0 ? best_tree[child[false][node]]
+  //                                  : child[false][node] == -1)};
 
-  auto lc{(child[false][node] >= 0 ? best_tree[child[false][node]]
-                                   : child[false][node] == -1)};
-
-  cout << "store best tree for node " << node << " (use " << best_tree[node]
-       << ") -> " << lc << "/" << rc << endl;
+  // cout << "store best tree for node " << node << " (use " << best_tree[node]
+  //      << ") -> " << lc << "/" << rc << endl;
 
   assert(child[true][node] < 0 or optimal[child[true][node]]);
   assert(child[false][node] < 0 or optimal[child[false][node]]);
@@ -683,25 +691,6 @@ void BacktrackingAlgorithm::store_best_tree(const int node, const bool global) {
       wood[best_tree[node]].setChild(i, child[i][node] == -1);
     }
   }
-
-  // wood[best_tree[node]].setChild(true, (child[true][node] >= 0
-  //                                           ? best_tree[child[true][node]]
-  //                                           : child[true][node] == -1));
-  // wood[best_tree[node]].setChild(false, (child[false][node] >= 0
-  //                                            ? best_tree[child[false][node]]
-  //                                            : child[false][node] == -1));
-
-  // if (isLeaf(node)) {
-  //   wood[best_tree[node]].feature =
-  //       (P[1][node].count() > P[0][node].count() ? -1 : -2);
-  // } else {
-  //   wood[best_tree[node]].feature = *feature[node];
-  //
-  //   // the left and right branches of this tree are those that we just
-  //   computed
-  //   for (auto i{0}; i < 2; ++i)
-  //     wood[best_tree[node]].setChild(i, wood[best_tree[child[i][node]]]);
-  // }
 }
 
 std::ostream &BacktrackingAlgorithm::display(std::ostream &os) const {

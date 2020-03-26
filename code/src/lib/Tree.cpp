@@ -133,7 +133,7 @@ int Wood::grow() {
   auto node{*available.begin()};
   available.remove_front(node);
 
-  cout << "grow (" << node << "): " << available << endl;
+  // cout << "grow (" << node << "): " << available << endl;
 
   return node;
 }
@@ -141,7 +141,7 @@ int Wood::grow() {
 void Wood::freeNode(const int node) {
   available.add(node);
 
-  cout << "free (" << node << "): " << available << endl;
+  // cout << "free (" << node << "): " << available << endl;
 }
 
 Tree::Tree() {}
