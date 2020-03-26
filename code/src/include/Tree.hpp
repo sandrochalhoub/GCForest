@@ -17,7 +17,8 @@ namespace primer {
 
 class Wood;
 class TreeNode {
-private:
+  // private:
+public:
   Wood &wood;
   int child_[2];
   int idx;

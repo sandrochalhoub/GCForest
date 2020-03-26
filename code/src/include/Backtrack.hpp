@@ -9,10 +9,10 @@
 #include "Tree.hpp"
 #include "utils.hpp"
 
-// #define PRINT_TRACE print_trace();
-// #define DO_ASSERTS do_asserts();
-#define PRINT_TRACE
-#define DO_ASSERTS
+#define PRINT_TRACE print_trace();
+#define DO_ASSERTS do_asserts();
+// #define PRINT_TRACE
+// #define DO_ASSERTS
 
 #ifndef _PRIMER_BACKTRACK_HPP
 #define _PRIMER_BACKTRACK_HPP
@@ -38,10 +38,8 @@ private:
   Options &options;
   vector<vector<int>> example[2];
 
-  /// store the parent of node i
-  vector<int> parent;
+  /// store the children of node i
   vector<int> child[2];
-  // vector<int> right_child;
 
   /// store the parent of node i
   vector<int> depth;
@@ -70,21 +68,17 @@ private:
   /// store the feature tested at node i (in ranked features)
   vector<vector<int>::iterator> feature;
 
-  // best subtree w.r.t. the current father node
-  // vector<int> cbest_child[2];
-  // vector<int> cbest_feature;
-
-  // to replace the struct above. Stores the root of the best subtree found for
-  // the current feature of the parent node
+  // Stores the root of the best subtree found for the current feature of the
+  // parent node
+  // if the node is not optimal, it points to the optimal trees of the childrens
+  // given its root-feature
+  // therefore, *optimal* best trees should not be freed when pruning the node
+  // however, they can be freed when replacing the current best.
   vector<int> best_tree;
 
   vector<size_t> best_error;
-  // vector<size_t> cbest_size;
+  // vector<size_t> best_size;
 
-  // vector<size_t> st_trail;
-  // vector<size_t> sz_trail;
-
-  // vector<int> best_feature;
   vector<int> f_error;
 
   mt19937 random_generator;
@@ -115,6 +109,9 @@ private:
 #ifdef PRINTTRACE
   void print_trace();
   void do_asserts();
+  // returns the real error for "leaf" nodes (deepest test), and node_error
+  // otherwise
+  size_t leaf_error(const int i) const;
 #endif
 
   // resize the data structures for up to k nodes
@@ -145,9 +142,11 @@ private:
   void count_by_example(const int node, const int y);
 
 	// deduce, for every feature, the number of examples of class y at node without that feature
-  void deduce_from_sibling(const int node, const int sibling, const int y);
+  void deduce_from_sibling(const int parent, const int node, const int sibling,
+                           const int y);
 
-	// returns the error if testing feature f at node i (f must be in [1,m], m=data.numFeature)
+  // returns the error if testing feature f at node i (f must be in [1,m],
+  // m=data.numFeature)
   int get_feature_error(const int i, const int f) const;
 
 	// returns the number of examples of class y having feature f (f + m represents not-f)
@@ -155,9 +154,6 @@ private:
 
 	// returns the error if we do not test any feature on node i
   size_t node_error(const int i) const;
-
-	// returns the real error for "leaf" nodes (deepest test), and node_error otherwise
-	size_t leaf_error(const int i) const;
 
 	// select the most promising node to branch on
   int choose() const;

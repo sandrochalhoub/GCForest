@@ -82,17 +82,21 @@ std::ostream &TreeNode::display(std::ostream &os, const int depth) const {
   if (isLeaf())
     os << "class-" << feature << endl;
   else {
-    os << " [" << idx << "] " << feature << endl;
+    os << " [" << idx << ":" << child_[0] << "|" << child_[1] << "] " << feature
+       << endl;
+
+    assert(child_[0] >= 0 and child_[1] >= 0);
+
     for (auto i{0}; i < depth; ++i)
-      os << "  ";
+      os << "    ";
     os << " yes:";
 
     assert(child(true).getIndex() != getIndex());
 
     child(true).display(os, depth + 1);
-    // os << endl;
+
     for (auto i{0}; i < depth; ++i)
-      os << "  ";
+      os << "    ";
     os << " no:";
 
     assert(child(false).getIndex() != getIndex());
