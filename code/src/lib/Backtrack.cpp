@@ -260,7 +260,7 @@ void BacktrackingAlgorithm::deduce_from_sibling(const int parent,
 
 bool BacktrackingAlgorithm::notify_solution() {
 
-  if (current_error < ub_error) {
+  if (current_error < ub_error or (current_error == ub_error and blossom.size() < ub_node)) {
     ub_error = current_error;
     ub_node = blossom.size();
 
@@ -460,13 +460,10 @@ bool BacktrackingAlgorithm::backtrack() {
 
 void BacktrackingAlgorithm::setChild(const int node, const bool branch,
                                      const int c) {
-
   if (P[0][c].count() == 0 or P[1][c].count() == 0) {
     child[branch][node] = -1 - (P[1][c].count() < P[0][c].count());
-    // parent[c] = -1;
   } else {
     child[branch][node] = c;
-    // parent[c] = node;
     depth[c] = depth[node] + 1;
   }
 }

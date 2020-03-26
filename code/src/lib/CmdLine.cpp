@@ -378,7 +378,7 @@ ostream &DTOptions::display(ostream &os) {
   os << setw(20) << left << "p data file:" << setw(30) << right << instance_file
      << endl
      << setw(20) << left << "p seed:" << setw(30) << right << seed << endl
-     << setw(20) << left << "p sample:" << setw(30) << right << sample << endl
+     << setw(20) << left << "p sampling ratio:" << setw(30) << right << sample << endl
      << setw(20) << left << "p verbosity:" << setw(30) << right
      << (verbosity == SILENT
              ? "silent"
