@@ -9,10 +9,10 @@
 #include "Tree.hpp"
 #include "utils.hpp"
 
-#define PRINT_TRACE print_trace();
-#define DO_ASSERTS do_asserts();
-// #define PRINT_TRACE
-// #define DO_ASSERTS
+// #define PRINT_TRACE print_trace();
+// #define DO_ASSERTS do_asserts();
+#define PRINT_TRACE
+#define DO_ASSERTS
 
 #ifndef _PRIMER_BACKTRACK_HPP
 #define _PRIMER_BACKTRACK_HPP
@@ -35,7 +35,7 @@ private:
   /// Argument
   Wood &wood;
   DataSet &data;
-  Options &options;
+  DTOptions &options;
   vector<vector<int>> example[2];
 
   /// store the children of node i
@@ -123,6 +123,9 @@ private:
   // return true if all features have been tried feature
   bool no_feature(const int node) const;
 
+  // return true if the feature f reduces the error
+  bool reduce_error(const int node, const int f) const;
+
   // return true if the feature f is true/false in all examples
   bool max_entropy(const int node, const int f) const;
 
@@ -193,7 +196,7 @@ private:
 public:
   /*!@name Constructors*/
   //@{
-  explicit BacktrackingAlgorithm(DataSet &d, Wood &w, Options &o);
+  explicit BacktrackingAlgorithm(DataSet &d, Wood &w, DTOptions &o);
   void seed(const int s);
   //@}
 

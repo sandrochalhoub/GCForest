@@ -9,7 +9,7 @@ using namespace std;
 
 // namespace somename {
 
-class Options {
+class PrimerOptions {
 
 public:
   // outputs a nice description of all options
@@ -83,8 +83,10 @@ public:
   int restart_base;
   double restart_factor;
 
-  Options(){};
-  Options(const Options &opt)
+  bool filter;
+
+  PrimerOptions(){};
+  PrimerOptions(const PrimerOptions &opt)
       : cmdline(opt.cmdline), instance_file(opt.instance_file),
         debug(opt.debug), verbosity(opt.verbosity),
         class_policy(opt.class_policy), example_policy(opt.example_policy),
@@ -97,12 +99,68 @@ public:
         print_sta(opt.print_sta), print_cmd(opt.print_cmd),
         verified(opt.verified), sample(opt.sample), width(opt.width),
         focus(opt.focus), max_size(opt.max_size), max_depth(opt.max_depth),
-        restart_base(opt.restart_base), restart_factor(opt.restart_factor) {}
+        restart_base(opt.restart_base), restart_factor(opt.restart_factor),
+        filter(opt.filter) {}
 
   ostream &display(ostream &os);
 };
 
-Options parse(int argc, char *argv[]);
+PrimerOptions parse_primer(int argc, char *argv[]);
+
+class DTOptions {
+
+public:
+  // outputs a nice description of all options
+  // void describe(std::ostream &);
+
+  // the actual options
+  string cmdline; // for reference
+  string instance_file;
+  string debug;
+  string output;
+  string format;
+
+  enum verbosity { SILENT = 0, QUIET, NORMAL, YACKING, SOLVERINFO };
+  int verbosity;
+
+  int seed;
+
+  bool print_sol;
+  bool print_par;
+  bool print_ins;
+  bool print_sta;
+  bool print_cmd;
+
+  bool verified;
+
+  double sample;
+
+  int width;
+  double focus;
+  int max_size;
+  int max_depth;
+
+  int restart_base;
+  double restart_factor;
+
+  bool filter;
+
+  DTOptions(){};
+  DTOptions(const DTOptions &opt)
+      : cmdline(opt.cmdline), instance_file(opt.instance_file),
+        debug(opt.debug), output(opt.output), format(opt.format),
+        verbosity(opt.verbosity), seed(opt.seed), print_sol(opt.print_sol),
+        print_par(opt.print_par), print_ins(opt.print_ins),
+        print_sta(opt.print_sta), print_cmd(opt.print_cmd),
+        verified(opt.verified), sample(opt.sample), width(opt.width),
+        focus(opt.focus), max_size(opt.max_size), max_depth(opt.max_depth),
+        restart_base(opt.restart_base), restart_factor(opt.restart_factor),
+        filter(opt.filter) {}
+
+  ostream &display(ostream &os);
+};
+
+DTOptions parse_dt(int argc, char *argv[]);
 // }
 
 #endif // __CMDLINE_HPP
