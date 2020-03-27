@@ -111,6 +111,10 @@ private:
   int solution_root;
 	
 	int checking_period;
+	
+	bool interrupted;
+	
+	void cleaning();
 
   void store_new_best();
 

@@ -106,6 +106,8 @@ int main(int argc, char *argv[]) {
 
   if (opt.verified) {
     assert(sol.predict(base) == A.error());
+		
+		cout << "p solution verified (" << A.error() << ")" << endl;
   }
 }
 

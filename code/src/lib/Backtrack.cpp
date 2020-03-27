@@ -47,18 +47,22 @@ BacktrackingAlgorithm::BacktrackingAlgorithm(DataSet &d, Wood &w,
 	
 	checking_period = 10000;
 
-  // tree must have at least one node (0)
-  resize(1);
+        interrupted = false;
+
+        // tree must have at least one node (0)
+        resize(1);
 }
 
 int BacktrackingAlgorithm::error() const { return ub_error; }
 
 bool BacktrackingAlgorithm::limit_out() {
 	++search_size;
+
   if (time_limit > 0 and (search_size % checking_period) == 0)
     if (cpu_time() >= time_limit)
-      return true;
-  return search_limit and search_size > search_limit;
+      interrupted = true;
+  interrupted = interrupted or (search_limit and search_size > search_limit);
+  return interrupted;
 }
 
 int BacktrackingAlgorithm::get_feature_count(const int y, const int n,
@@ -277,7 +281,23 @@ void BacktrackingAlgorithm::deduce_from_sibling(const int parent,
         pos_feature_count[y][parent][f] - pos_feature_count[y][sibling][f];
 }
 
-TreeNode BacktrackingAlgorithm::getSolution() { return wood[solution_root]; }
+void BacktrackingAlgorithm::cleaning() {
+  if (solution_root < 0) {
+    solution_root = wood.grow();
+    wood[solution_root].feature = *feature[0];
+    int f[2] = {*feature[0] + static_cast<int>(data.count()), *feature[0]};
+
+    for (auto i{0}; i < 2; ++i)
+      wood[solution_root].setChild(i, get_feature_count(1, 0, f[i]) >
+                                          get_feature_count(0, 0, f[i]));
+    ub_error = get_feature_error(0, *feature[0]);
+		ub_node = 1;
+  }
+}
+
+TreeNode BacktrackingAlgorithm::getSolution() {
+  return wood[solution_root];
+}
 
 bool BacktrackingAlgorithm::notify_solution() {
 
@@ -617,9 +637,15 @@ void BacktrackingAlgorithm::search() {
       expend();
     }
   }
+	
+	cleaning();
 
-  if (options.verbosity > DTOptions::QUIET)
-    separator("optimal");
+  if (options.verbosity > DTOptions::QUIET) {
+    if (interrupted)
+      separator("interrupted");
+    else
+      separator("optimal");
+	}
 
   if (options.verbosity > DTOptions::SILENT)
     print_new_best();
