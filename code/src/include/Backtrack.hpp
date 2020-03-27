@@ -92,6 +92,7 @@ private:
   size_t ub_error;
 
   size_t search_size;
+  size_t search_limit;
 
   size_t num_backtracks;
 
@@ -99,11 +100,21 @@ private:
 
   size_t current_error;
 
+  double time_limit;
+
+  double restart_base;
+
+  int restart_limit;
+
   int backtrack_node;
+
+  int solution_root;
+	
+	int checking_period;
 
   void store_new_best();
 
-  void store_solution();
+  int copy_solution(const int node);
   //@}
 
 #ifdef PRINTTRACE
@@ -193,6 +204,8 @@ private:
 
   void restart();
 
+  bool limit_out();
+
 public:
   /*!@name Constructors*/
   //@{
@@ -200,7 +213,7 @@ public:
   void seed(const int s);
   //@}
 
-	void separator() const;
+  void separator(const string &msg) const;
   void print_new_best() const;
 
   void setUbDepth(const size_t u);
@@ -209,7 +222,15 @@ public:
 
   void setUbError(const size_t u);
 
+  void setTimeLimit(const double t);
+
+  void setSearchLimit(const size_t t);
+
   void search();
+
+  TreeNode getSolution();
+
+  int error() const;
 
   /*!@name Printing*/
   //@{
