@@ -370,6 +370,12 @@ DTOptions parse_dt(int argc, char *argv[]) {
   cmd.add<ValueArg<double>>(opt.restart_factor, "", "restart_factor",
                             "geometric factor", false, 1.1, "double");
 
+  cmd.add<ValueArg<double>>(opt.time, "", "time", "time limit", false, 0,
+                            "double");
+
+  cmd.add<ValueArg<int>>(opt.search, "", "search", "search limit", false, 0,
+                         "int");
+
   cmd.parse(argc, argv);
   return opt;
 }
@@ -406,7 +412,7 @@ ostream &DTOptions::display(ostream &os) {
     os << "no" << endl;
   else {
     stringstream ss;
-    ss << "base " << restart_base << " factor. " << restart_factor;
+    ss << "base " << restart_base << " factor " << restart_factor;
     os << ss.str() << endl;
   }
 

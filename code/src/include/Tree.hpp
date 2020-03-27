@@ -27,6 +27,8 @@ public:
   TreeNode(Wood &w);
   void free();
 
+  int copy();
+
   int feature;
   const TreeNode &child(const bool t) const;
   const TreeNode &next(const instance x) const;

@@ -145,6 +145,10 @@ public:
 
   bool filter;
 
+  double time;
+
+  int search;
+
   DTOptions(){};
   DTOptions(const DTOptions &opt)
       : cmdline(opt.cmdline), instance_file(opt.instance_file),
@@ -155,7 +159,7 @@ public:
         verified(opt.verified), sample(opt.sample), width(opt.width),
         focus(opt.focus), max_size(opt.max_size), max_depth(opt.max_depth),
         restart_base(opt.restart_base), restart_factor(opt.restart_factor),
-        filter(opt.filter) {}
+        filter(opt.filter), time(opt.time), search(opt.search) {}
 
   ostream &display(ostream &os);
 };

@@ -80,18 +80,17 @@ int main(int argc, char *argv[]) {
   auto count{base.count()};
 
   if (opt.filter) {
-    if (opt.verbosity >= DTOptions::QUIET)
-      cout << "c filter base\n";
 
     base.filter();
+
+    if (opt.verbosity >= DTOptions::QUIET)
+      cout << "c filter base: " << (count - base.count())
+           << "examples suppressed\n";
   }
 
-  // base.computeBounds();
-
-  if (opt.verbosity >= DTOptions::QUIET)
-    if (base.count() < count)
-      cout << "c filtered " << (count - base.count()) / 2
-           << " noisy example(s)\n";
+  if (opt.print_ins)
+    cout << "d examples=" << base.count() << " features=" << base.numFeature()
+         << endl;
 
   Wood yallen;
 
@@ -99,6 +98,17 @@ int main(int argc, char *argv[]) {
 
   A.search();
 
+  TreeNode sol = A.getSolution();
+
+  if (opt.print_sol) {
+    cout << sol << endl;
+  }
+
+  if (opt.verified) {
+    assert(sol.predict(base) == A.error());
+		
+		cout << "p solution verified (" << A.error() << ")" << endl;
+  }
 }
 
 

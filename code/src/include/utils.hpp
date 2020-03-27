@@ -6,7 +6,7 @@
 
 #define INFTY static_cast<size_t>(numeric_limits<int>::max())
 
-#define DEBUG_MODE
+// #define DEBUG_MODE
 
 // #define PRINTTRACE (options.verbosity >= Options::YACKING) // and search_size
 // >= 22199)

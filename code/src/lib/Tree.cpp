@@ -24,6 +24,17 @@ void TreeNode::free() {
   }
 }
 
+int TreeNode::copy() {
+  if (idx > 1) {
+    int root{wood.grow()};
+    wood[root].feature = feature;
+    for (auto i{0}; i < 2; ++i)
+      wood[root].setChild(i, wood[child_[i]].copy());
+    return root;
+  }
+  return idx;
+}
+
 // void TreeNode::setLeaf(const bool y) {
 // 	feature = y;
 // }
@@ -82,8 +93,9 @@ std::ostream &TreeNode::display(std::ostream &os, const int depth) const {
   if (isLeaf())
     os << "class-" << feature << endl;
   else {
-    os << " [" << idx << ":" << child_[0] << "|" << child_[1] << "] " << feature
-       << endl;
+    os
+        //<< " [" << idx << ":" << child_[0] << "|" << child_[1] << "] "
+        << feature << endl;
 
     assert(child_[0] >= 0 and child_[1] >= 0);
 
