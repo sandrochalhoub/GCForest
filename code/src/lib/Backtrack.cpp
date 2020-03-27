@@ -44,19 +44,19 @@ BacktrackingAlgorithm::BacktrackingAlgorithm(DataSet &d, Wood &w,
   search_limit = static_cast<size_t>(options.search);
 
   time_limit = options.time;
-	
-	checking_period = 10000;
 
-        interrupted = false;
+  checking_period = 10000;
 
-        // tree must have at least one node (0)
-        resize(1);
+  interrupted = false;
+
+  // tree must have at least one node (0)
+  resize(1);
 }
 
 int BacktrackingAlgorithm::error() const { return ub_error; }
 
 bool BacktrackingAlgorithm::limit_out() {
-	++search_size;
+  ++search_size;
 
   if (time_limit > 0 and (search_size % checking_period) == 0)
     if (cpu_time() >= time_limit)
@@ -291,17 +291,16 @@ void BacktrackingAlgorithm::cleaning() {
       wood[solution_root].setChild(i, get_feature_count(1, 0, f[i]) >
                                           get_feature_count(0, 0, f[i]));
     ub_error = get_feature_error(0, *feature[0]);
-		ub_node = 1;
+    ub_node = 1;
   }
 }
 
-TreeNode BacktrackingAlgorithm::getSolution() {
-  return wood[solution_root];
-}
+TreeNode BacktrackingAlgorithm::getSolution() { return wood[solution_root]; }
 
 bool BacktrackingAlgorithm::notify_solution() {
 
-  if (current_error < ub_error or (current_error == ub_error and blossom.size() < ub_node)) {
+  if (current_error < ub_error or
+      (current_error == ub_error and blossom.size() < ub_node)) {
     ub_error = current_error;
     ub_node = blossom.size();
 
@@ -372,7 +371,7 @@ bool BacktrackingAlgorithm::backtrack() {
     ++num_backtracks;
 
     // cout << "backtrack\n";
-    if (backtrack_node == 0)
+    if (decision.empty())
       return false;
 
     backtrack_node = decision.back();
@@ -416,9 +415,9 @@ bool BacktrackingAlgorithm::backtrack() {
 #endif
 
       for (auto i{0}; i < 2; ++i)
-        if (child[i][backtrack_node] >= 0 and best_tree[child[i][backtrack_node]] > 1)
+        if (child[i][backtrack_node] >= 0 and
+            best_tree[child[i][backtrack_node]] > 1)
           wood[best_tree[child[i][backtrack_node]]].free();
-			
     }
 
     ++feature[backtrack_node];
@@ -449,11 +448,11 @@ bool BacktrackingAlgorithm::backtrack() {
              << best_error[backtrack_node] << endl;
       }
 #endif
-			
-        if (backtrack_node == 0) {
-          auto err{wood[best_tree[backtrack_node]].predict(data)};
-          assert(err == ub_error);
-        }
+
+      if (backtrack_node == 0) {
+        auto err{wood[best_tree[backtrack_node]].predict(data)};
+        assert(err == ub_error);
+      }
 
       current_error += best_error[backtrack_node];
     }
@@ -591,7 +590,7 @@ void BacktrackingAlgorithm::expend() {
     // selected_node = blossom[0];
     random_perturbation(selected_node, options.width,
                         static_cast<int>(options.focus * 1000.0));
-  } 
+  }
 
   assert(feature[selected_node] >= ranked_feature[selected_node].begin() and
          feature[selected_node] < ranked_feature[selected_node].end());
@@ -637,15 +636,15 @@ void BacktrackingAlgorithm::search() {
       expend();
     }
   }
-	
-	cleaning();
+
+  cleaning();
 
   if (options.verbosity > DTOptions::QUIET) {
     if (interrupted)
       separator("interrupted");
     else
       separator("optimal");
-	}
+  }
 
   if (options.verbosity > DTOptions::SILENT)
     print_new_best();
@@ -655,8 +654,8 @@ void BacktrackingAlgorithm::search() {
 //// GARBAGE /////
 
 bool BacktrackingAlgorithm::fail() {
-	return false;
-	
+  return false;
+
   auto lb{current_error};
 
   for (auto b : blossom)
