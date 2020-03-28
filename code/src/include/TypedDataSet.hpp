@@ -54,6 +54,8 @@ word concatenate(const word &w1, const word &w2) {
 template <typename T> class Encoding {
 
 public:
+	virtual ~Encoding() {}
+	
   // encode the values of the iterator
   virtual void encode(typename std::vector<T>::iterator beg,
                       typename std::vector<T>::iterator end) = 0;
@@ -83,6 +85,8 @@ protected:
   vector<word> lit;
 
 public:
+	// virtual ~TrivialEncoding() {}
+	
   virtual size_t size() const { return 1; }
 
   // encode the values of the iterator
@@ -128,6 +132,9 @@ protected:
   vector<T> value_set;
 
 public:
+	
+	// virtual ~ClassicEncoding() {}
+	
   // encode the values of the iterator
   // template <typename RandomIt>
   virtual void encode(typename std::vector<T>::iterator beg,
@@ -353,6 +360,20 @@ public:
   /*!@name Constructors*/
   //@{
   explicit TypedDataSet() {}
+	~TypedDataSet() {
+		while(not int_encoder.empty()) {
+			delete int_encoder.back();
+			int_encoder.pop_back();
+		}
+		while(not float_encoder.empty()) {
+			delete float_encoder.back();
+			float_encoder.pop_back();
+		}
+		while(not symb_encoder.empty()) {
+			delete symb_encoder.back();
+			symb_encoder.pop_back();
+		}
+	}
   //@}
 
   /*!@name Accessors*/
