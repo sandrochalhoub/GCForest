@@ -64,6 +64,7 @@ private:
 
   /// the list of features in the order they will be tried
   vector<vector<int>> ranked_feature;
+	vector<vector<int>::iterator> end_feature;
 
   /// store the feature tested at node i (in ranked features)
   vector<vector<int>::iterator> feature;
@@ -77,7 +78,7 @@ private:
   vector<int> best_tree;
 
   vector<size_t> best_error;
-  // vector<size_t> best_size;
+  vector<size_t> best_size;
 
   vector<int> f_error;
 
@@ -151,9 +152,11 @@ private:
   void random_perturbation(const int i, const int k, const int p);
 
 	// sort the features by minimum projected error (leave 1-entropy node at the)
-  void sort_features(const int selected_node);
+  void sort_features(const int node);
 
-	// compute the conditional entropy of feature at node
+  void filter_features(const int node);
+
+  // compute the conditional entropy of feature at node
   double entropy(const int node, const int feature);
 
 	// count, for every feature, the number of examples of class y at node with that feature
