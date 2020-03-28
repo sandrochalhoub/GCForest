@@ -207,7 +207,7 @@ private:
   void expend();
 
   //
-  void grow(const int node);
+  bool grow(const int node);
 
   void restart();
 
