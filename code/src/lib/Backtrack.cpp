@@ -453,7 +453,7 @@ bool BacktrackingAlgorithm::backtrack() {
 
     dead_end = (
         // current_error >= ub_error or
-        best_error[backtrack_node] == 0 or no_feature(backtrack_node) or
+        (ub_error > 0 and best_error[backtrack_node] == 0) or no_feature(backtrack_node) or
         max_entropy(backtrack_node, *feature[backtrack_node]));
 
     if (dead_end) {
@@ -559,29 +559,36 @@ void BacktrackingAlgorithm::branch(const int node, const int f) {
 
   current_error -= node_error(node);
   for (auto i{0}; i < 2; ++i) {
-    auto c{child[i][node]};
-    if (c >= 0) {
-      grow(c);
+    auto s{child[i][node]};
+    if (s >= 0) {
+			grow(s);
+				//       if(not grow(s))
+				// child[i][node] = -1 - (P[1][s].count() < P[0][s].count());
+				
 
 #ifdef PRINTTRACE
       if (options.verbosity >= DTOptions::SOLVERINFO)
-        cout << "ERROR = " << current_error << " + " << best_error[c] << endl;
+        cout << "ERROR = " << current_error << " + " << best_error[s] << endl;
 #endif
 
-      current_error += best_error[c];
+      current_error += best_error[s];
     }
   }
 }
 
-void BacktrackingAlgorithm::grow(const int node) {
-  blossom.add(node);
-  feature[node] = ranked_feature[node].begin();
-  best_tree[node] = (P[0][node].count() < P[1][node].count());
-  optimal[node] = false;
+bool BacktrackingAlgorithm::grow(const int node) {
+	feature[node] = ranked_feature[node].begin();
   sort_features(node);
-
   end_feature[node] = ranked_feature[node].end();
   filter_features(node);
+	// if (feature[node] == end_feature[node])
+	// 	return false;
+	
+	
+  blossom.add(node);  
+  best_tree[node] = (P[0][node].count() < P[1][node].count());
+  optimal[node] = false;
+
   // assert(not ranked_feature[node].empty());
 
   if (feature[node] == end_feature[node]) {
@@ -620,6 +627,7 @@ void BacktrackingAlgorithm::grow(const int node) {
       best_size[node] = numeric_limits<int>::max();
     }
   }
+	return true;
 }
 
 void BacktrackingAlgorithm::expend() {
