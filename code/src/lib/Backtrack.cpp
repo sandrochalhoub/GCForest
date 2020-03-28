@@ -453,7 +453,7 @@ bool BacktrackingAlgorithm::backtrack() {
 
     dead_end = (
         // current_error >= ub_error or
-        best_error[backtrack_node] == 0 or no_feature(backtrack_node) or
+        (ub_error > 0 and best_error[backtrack_node] == 0) or no_feature(backtrack_node) or
         max_entropy(backtrack_node, *feature[backtrack_node]));
 
     if (dead_end) {
