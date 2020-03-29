@@ -365,8 +365,8 @@ void BacktrackingAlgorithm::restart() {
   prune(child[0][0]);
   prune(child[1][0]);
 
-  for (auto i{blossom.frbegin()}; i != blossom.frend(); ++i)
-    wood.freeNode(best_tree[*i]);
+  // for (auto i{blossom.frbegin()}; i != blossom.frend(); ++i)
+  //   wood.freeNode(best_tree[*i]);
 
   current_error = node_error(0);
 

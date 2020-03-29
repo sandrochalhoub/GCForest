@@ -240,6 +240,9 @@ void SparseSet::safe_add(const int elt) {
 }
 
 void SparseSet::add(const int elt) {
+	
+	// std::cout << "add " << elt << " to " << *this << std::endl;
+	
   if (index_[elt] >= size_)
     push_back(elt);
 	else if(index_[elt] < start_)
