@@ -65,17 +65,17 @@ bool BacktrackingAlgorithm::limit_out() {
   return interrupted;
 }
 
-int BacktrackingAlgorithm::get_feature_count(const int y, const int n,
+int BacktrackingAlgorithm::get_feature_frequency(const int y, const int n,
                                              const int f) const {
   return (f >= data.numFeature()
-              ? P[y][n].count() - pos_feature_count[y][n][f - data.numFeature()]
-              : pos_feature_count[y][n][f]);
+              ? P[y][n].count() - pos_feature_frequency[y][n][f - data.numFeature()]
+              : pos_feature_frequency[y][n][f]);
 }
 
 int BacktrackingAlgorithm::get_feature_error(const int n, const int f) const {
   auto not_f{f + data.numFeature()};
-  return min(get_feature_count(0, n, f), get_feature_count(1, n, f)) +
-         min(get_feature_count(0, n, not_f), get_feature_count(1, n, not_f));
+  return min(get_feature_frequency(0, n, f), get_feature_frequency(1, n, f)) +
+         min(get_feature_frequency(0, n, not_f), get_feature_frequency(1, n, not_f));
 }
 
 void BacktrackingAlgorithm::seed(const int s) { random_generator.seed(s); }
@@ -106,10 +106,10 @@ bool BacktrackingAlgorithm::max_entropy(const int node, const int f) const {
   auto numNeg{P[0][node].count()};
   auto numPos{P[1][node].count()};
 
-  auto me{(pos_feature_count[0][node][f] == numNeg and
-           pos_feature_count[1][node][f] == numPos) or
-          (pos_feature_count[1][node][f] == 0 and
-           pos_feature_count[0][node][f] == 0)};
+  auto me{(pos_feature_frequency[0][node][f] == numNeg and
+           pos_feature_frequency[1][node][f] == numPos) or
+          (pos_feature_frequency[1][node][f] == 0 and
+           pos_feature_frequency[0][node][f] == 0)};
 
   return me;
 }
@@ -128,10 +128,10 @@ bool BacktrackingAlgorithm::null_entropy(const int node, const int f) const {
   auto numNeg{P[0][node].count()};
   auto numPos{P[1][node].count()};
 
-  return (pos_feature_count[0][node][f] == numNeg and
-          pos_feature_count[1][node][f] == 0) or
-         (pos_feature_count[1][node][f] == numPos and
-          pos_feature_count[0][node][f] == 0);
+  return (pos_feature_frequency[0][node][f] == numNeg and
+          pos_feature_frequency[1][node][f] == 0) or
+         (pos_feature_frequency[1][node][f] == numPos and
+          pos_feature_frequency[0][node][f] == 0);
 }
 
 void BacktrackingAlgorithm::separator(const string &msg) const {
@@ -180,10 +180,10 @@ void BacktrackingAlgorithm::resize(const int k) {
   }
 
   for (int y{0}; y < 2; ++y) {
-    auto i = pos_feature_count[y].size();
-    pos_feature_count[y].resize(k);
-    while (i < pos_feature_count[y].size()) {
-      pos_feature_count[y][i++].resize(data.numFeature());
+    auto i = pos_feature_frequency[y].size();
+    pos_feature_frequency[y].resize(k);
+    while (i < pos_feature_frequency[y].size()) {
+      pos_feature_frequency[y][i++].resize(data.numFeature());
     }
   }
 
@@ -267,13 +267,13 @@ void BacktrackingAlgorithm::count_by_example(const int node, const int y) {
 
   auto n{data.numFeature()};
 
-  pos_feature_count[y][node].clear();
-  pos_feature_count[y][node].resize(n, 0);
+  pos_feature_frequency[y][node].clear();
+  pos_feature_frequency[y][node].resize(n, 0);
 
   auto stop = P[y][node].end();
   for (auto i{P[y][node].begin()}; i != stop; ++i)
     for (auto f : example[y][*i])
-      ++pos_feature_count[y][node][f];
+      ++pos_feature_frequency[y][node][f];
 }
 
 void BacktrackingAlgorithm::deduce_from_sibling(const int parent,
@@ -281,8 +281,8 @@ void BacktrackingAlgorithm::deduce_from_sibling(const int parent,
                                                 const int sibling,
                                                 const int y) {
   for (auto f{0}; f < data.numFeature(); ++f)
-    pos_feature_count[y][node][f] =
-        pos_feature_count[y][parent][f] - pos_feature_count[y][sibling][f];
+    pos_feature_frequency[y][node][f] =
+        pos_feature_frequency[y][parent][f] - pos_feature_frequency[y][sibling][f];
 }
 
 void BacktrackingAlgorithm::cleaning() {
@@ -292,8 +292,8 @@ void BacktrackingAlgorithm::cleaning() {
     int f[2] = {*feature[0] + static_cast<int>(data.count()), *feature[0]};
 
     for (auto i{0}; i < 2; ++i)
-      wood[solution_root].setChild(i, get_feature_count(1, 0, f[i]) >
-                                          get_feature_count(0, 0, f[i]));
+      wood[solution_root].setChild(i, get_feature_frequency(1, 0, f[i]) >
+                                          get_feature_frequency(0, 0, f[i]));
     ub_error = get_feature_error(0, *feature[0]);
     ub_node = 1;
   }
@@ -562,8 +562,8 @@ void BacktrackingAlgorithm::branch(const int node, const int f) {
     auto s{child[i][node]};
     if (s >= 0) {
 			grow(s);
-				//       if(not grow(s))
-				// child[i][node] = -1 - (P[1][s].count() < P[0][s].count());
+			// if(not grow(s))
+			// 	child[i][node] = -1 - (P[1][s].count() < P[0][s].count());
 				
 
 #ifdef PRINTTRACE
@@ -574,6 +574,15 @@ void BacktrackingAlgorithm::branch(const int node, const int f) {
       current_error += best_error[s];
     }
   }
+	// if(child[0][node] < 0 and child[1][node] < 0)
+	// {
+	//     best_error[node] = node_error(node);
+	//     best_size[node] = 1;
+	// 	best_tree[node] = (P[0][node].count() < P[1][node].count());
+	//     optimal[node] = true;
+	// }
+	
+	// assert(child[0][node] >= 0 or child[1][node] >= 0);
 }
 
 bool BacktrackingAlgorithm::grow(const int node) {
@@ -604,9 +613,9 @@ bool BacktrackingAlgorithm::grow(const int node) {
     int f[2] = {*feature[node] + static_cast<int>(data.numFeature()),
                 *feature[node]};
     int err[2] = {
-        min(get_feature_count(0, node, f[1]), get_feature_count(1, node, f[1])),
-        min(get_feature_count(0, node, f[0]),
-            get_feature_count(1, node, f[0]))};
+        min(get_feature_frequency(0, node, f[1]), get_feature_frequency(1, node, f[1])),
+        min(get_feature_frequency(0, node, f[0]),
+            get_feature_frequency(1, node, f[0]))};
 
     if (depth[node] == ub_depth - 1 or err[0] + err[1] == 0) {
       blossom.remove_front(node);
@@ -614,8 +623,8 @@ bool BacktrackingAlgorithm::grow(const int node) {
       best_size[node] = 1;
 
       for (auto branch{0}; branch < 2; ++branch) {
-        child[branch][node] = -1 - (get_feature_count(1, node, f[branch]) <
-                                    get_feature_count(0, node, f[branch]));
+        child[branch][node] = -1 - (get_feature_frequency(1, node, f[branch]) <
+                                    get_feature_frequency(0, node, f[branch]));
       }
 
       store_best_tree(node, false);
@@ -814,15 +823,15 @@ double BacktrackingAlgorithm::entropy(const int node, const int feature) {
 
   for (auto x{0}; x < 2; ++x) {
 
-    double val_size{static_cast<double>(get_feature_count(0, node, truef[x]) +
-                                        get_feature_count(1, node, truef[x]))};
+    double val_size{static_cast<double>(get_feature_frequency(0, node, truef[x]) +
+                                        get_feature_frequency(1, node, truef[x]))};
 
     double entropy_x{0};
     for (auto y{0}; y < 2; ++y) {
-      if (get_feature_count(y, node, truef[x]) != 0 and
-          get_feature_count(y, node, truef[x]) != val_size) {
-        entropy_x -= (get_feature_count(y, node, truef[x]) / val_size) *
-                     std::log2(get_feature_count(y, node, truef[x]) / val_size);
+      if (get_feature_frequency(y, node, truef[x]) != 0 and
+          get_feature_frequency(y, node, truef[x]) != val_size) {
+        entropy_x -= (get_feature_frequency(y, node, truef[x]) / val_size) *
+                     std::log2(get_feature_frequency(y, node, truef[x]) / val_size);
       }
     }
     // Pr(X=x) = val_size / total_size

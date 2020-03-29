@@ -60,7 +60,7 @@ private:
   vector<int> decision;
 
   /// buffers to compute the entropy, one copy per node, in order to backtrack
-  vector<vector<int>> pos_feature_count[2];
+  vector<vector<int>> pos_feature_frequency[2];
 
   /// the list of features in the order they will be tried
   vector<vector<int>> ranked_feature;
@@ -171,7 +171,7 @@ private:
   int get_feature_error(const int i, const int f) const;
 
 	// returns the number of examples of class y having feature f (f + m represents not-f)
-  int get_feature_count(const int y, const int i, const int f) const;
+  int get_feature_frequency(const int y, const int i, const int f) const;
 
 	// returns the error if we do not test any feature on node i
   size_t node_error(const int i) const;
