@@ -107,6 +107,28 @@ The latter algorithm is by far the most efficient, however, it is not \emph{anyt
 In this note we introduce what is essentially an anytime version of DL8.5, without cache.
 This algorithm therefore uses linear (in the size of the tree) memory and anytime, hence in principle strictly better than CART. Moreover, on instance where DL8.5 can find a solution, the algorithm described in this note is significantly faster (by about a factor 10).
 
+\medskip
+
+In a nutshell the algorithm we propose works as follows:
+
+
+
+We start from a singleton set \blossom\ of open nodes or \emph{blossoms} (open nodes can be expended, we say that a node is \emph{closed} if it has an assigned feature test or a label). % The set \nodes\ contains all the nodes of the current tree, open or closed, it is initially equal to \blossom. Finally,
+Moreover, we use an initially empty stack of decisions $\sequence$.
+
+\begin{itemize}
+	\item As long as there is a blossom ($\blossom \neq \emptyset$), we pick any one $\anode$, a feature $\afeat$ marked as \emph{available} for \anode, add the pair $(\anode,\afeat)$ to \sequence\ and expend the tree with two children nodes accordingly. 
+	%These new nodes are added to $\nodes$. 
+	They are added to $\blossom$ if their depth is strictly less than $k$ and if they are not label nodes.
+
+\item As long as there is no blossom ($\blossom = \emptyset$), we pop the last assignment $(\anode,\afeat)$ from sequence
+%undo the last assignment (say, $\anode=\afeat$), 
+%prune the two subtrees of node \anode (i.e. remove the corresponding nodes to \nodes) 
+and mark the feature $f$ not available for node $\anode$. If there is at least one available feature for node $\anode$, we add $\anode$ to $\blossom$. 
+Otherwise, we mark $\anode$ as \emph{optimal} and store the minimum error recorded for any of the possible features.
+
+\end{itemize}
+
 \clearpage
 
 \section*{Algorithm}

@@ -9,10 +9,10 @@
 #include "Tree.hpp"
 #include "utils.hpp"
 
-#define PRINT_TRACE print_trace();
-#define DO_ASSERTS do_asserts();
-// #define PRINT_TRACE
-// #define DO_ASSERTS
+// #define PRINT_TRACE print_trace();
+// #define DO_ASSERTS do_asserts();
+#define PRINT_TRACE
+#define DO_ASSERTS
 
 #ifndef _PRIMER_BACKTRACK_HPP
 #define _PRIMER_BACKTRACK_HPP
@@ -83,7 +83,7 @@ private:
   // best value for any possible feature, given the current branch (ancestors)
   // get updated when backtracking from the decision on the current feature
   vector<size_t> max_error;
-  vector<size_t> best_size;
+  vector<size_t> max_size;
 
   vector<int> f_error;
 
@@ -160,8 +160,8 @@ private:
   void sort_features(const int node);
 
   void filter_features(const int node);
-
-  // compute the conditional entropy of feature at node
+	
+	// compute the conditional entropy of feature at node
   double entropy(const int node, const int feature);
 
 	// count, for every feature, the number of examples of class y at node with that feature
