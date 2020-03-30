@@ -77,7 +77,12 @@ private:
   // however, they can be freed when replacing the current best.
   vector<int> best_tree;
 
-  vector<size_t> best_error;
+  // optimistic value. updated only when the node becomes optimal
+  vector<size_t> min_error;
+
+  // best value for any possible feature, given the current branch (ancestors)
+  // get updated when backtracking from the decision on the current feature
+  vector<size_t> max_error;
   vector<size_t> best_size;
 
   vector<int> f_error;

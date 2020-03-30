@@ -52,11 +52,18 @@ std::ostream &Wood::display(std::ostream &os, const int node,
 }
 
 Wood::Wood() {
+
+#ifdef DEBUG
+  today = 0;
+#endif
+
   for (auto i{0}; i < 2; ++i)
     grow();
 }
 
 size_t Wood::size() { return feature.size(); }
+
+size_t Wood::count() { return size() - available.count(); }
 
 TreeNode Wood::operator[](const int i) {
   TreeNode t(this, i);
@@ -70,6 +77,10 @@ void Wood::resize(const int k) {
   feature.resize(k, -1);
   child[0].resize(k, -1);
   child[1].resize(k, -1);
+
+#ifdef DEBUG
+  birthday.resize(k, today);
+#endif
 }
 
 //
@@ -84,6 +95,14 @@ int Wood::grow() {
   available.remove_front(node);
 
   // cout << "return " << node << endl;
+
+#ifdef DEBUG
+  birthday[node] = ++today;
+
+// for(auto i{available.fbegin()}; i!=available.fend(); ++i)
+// 	cout << " " << (today - birthday[*i]);
+// cout << endl;
+#endif
 
   return node;
 }
@@ -106,6 +125,11 @@ void Wood::freeNode(const int node) {
       if (child[i][node] >= 2)
         freeNode(child[i][node]);
   }
+
+  // #ifdef DEBUG
+  // 	++today;
+  // #endif
+
   // cout << "free (" << node << "): " << available << endl;
 }
 

@@ -7,6 +7,8 @@
 #ifndef __TREE_HPP
 #define __TREE_HPP
 
+// #define DEBUG
+
 /**********************************************
 * ListTree
 **********************************************/
@@ -52,6 +54,8 @@ public:
 
   size_t size();
 
+  size_t count();
+
   // allocate memory for a new node and returns its index
   int grow();
 
@@ -72,6 +76,11 @@ public:
 
   std::ostream &display(std::ostream &os, const int node,
                         const int depth) const;
+
+#ifdef DEBUG
+  vector<int> birthday;
+  int today;
+#endif
 };
 
 std::ostream &operator<<(std::ostream &os, const TreeNode &x);
