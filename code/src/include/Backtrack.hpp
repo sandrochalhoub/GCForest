@@ -9,10 +9,10 @@
 #include "Tree.hpp"
 #include "utils.hpp"
 
-// #define PRINT_TRACE print_trace();
-// #define DO_ASSERTS do_asserts();
-#define PRINT_TRACE
-#define DO_ASSERTS
+#define PRINT_TRACE print_trace();
+#define DO_ASSERTS do_asserts();
+// #define PRINT_TRACE
+// #define DO_ASSERTS
 
 #ifndef _PRIMER_BACKTRACK_HPP
 #define _PRIMER_BACKTRACK_HPP

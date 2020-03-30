@@ -75,6 +75,7 @@
 	\SetKwFunction{pop}{pop}
 	\SetKwFunction{push}{push}
 	\SetKwFunction{prune}{prune}
+	\SetKwFunction{error}{error}
 	\SetKwFunction{grow}{grow}
 	\SetKwFunction{branch}{branch}
 	\SetKwFunction{select}{select\&remove}
@@ -106,6 +107,8 @@ The latter algorithm is by far the most efficient, however, it is not \emph{anyt
 In this note we introduce what is essentially an anytime version of DL8.5, without cache.
 This algorithm therefore uses linear (in the size of the tree) memory and anytime, hence in principle strictly better than CART. Moreover, on instance where DL8.5 can find a solution, the algorithm described in this note is significantly faster (by about a factor 10).
 
+\clearpage
+
 \section*{Algorithm}
 
 For readability, we cut the algorithm into four blocks. The initialisation procedure (Algorithm~\ref{alg:init}) set up the data structures used in all other procedures:
@@ -119,6 +122,8 @@ For readability, we cut the algorithm into four blocks. The initialisation proce
 	\item \best\ stores the error of the best subtree rooted at a node 
 	\item \opt\ indicates whether the best subtree of a given node is optimal
 	\item \child\ stores the children of a node (children can be nodes or $\{\top, \bot\}$)
+	\item $\error{\anode}$ $\min(|\posex(\anode)|,|\negex(\anode)|)$
+	\item $\error{\anode,\afeat}$ $\min(|\posex(\anode=\afeat)|,|\negex(\anode=\afeat)|)$
 \end{itemize}
 
 Algorithm~\ref{alg:search} is a bactracking procedure which expends a current decision tree
@@ -154,9 +159,9 @@ Algorithm~\ref{alg:search} is a bactracking procedure which expends a current de
 		$\test[\anode] \gets \pop(\dom[\anode])$\;
 		
 	
-		\eIf{$depth$}
+		\eIf{$\depth[\anode]=k-1$ or $\error{\anode,\test[\anode]}$}
 		{
-			$\best[\anode] = \min(|\posex(\anode=\test[\anode])|,|\negex(\anode=\test[\anode])|)$\;
+			$\best[\anode] = \error{\anode,\test[\anode]}$\; %\min(|\posex(\anode=\test[\anode])|,|\negex(\anode=\test[\anode])|)$\;
 			$\opt[\anode] = \tru$\;
 			\ForEach{$branch \in \{\tru, \fal\}$}
 			{
@@ -223,7 +228,7 @@ Algorithm~\ref{alg:search} is a bactracking procedure which expends a current de
 				\If{$deadend$}
 				{
 				$\opt[\bnode] \gets \tru$\;
-				$\error \gets \error + \best[\bnode]$\;
+				$\error \gets \error + \error{\bnode}$\; %$\best[\bnode]$\;
 				}
 			}
 			$\blossom \gets \blossom \cup \{b\}$\;
