@@ -879,9 +879,6 @@ void BacktrackingAlgorithm::search() {
 //// GARBAGE /////
 
 bool BacktrackingAlgorithm::fail() {
-
-  auto afail{false};
-
   if (solution_root >= 0)
     for (auto b : blossom) {
 
