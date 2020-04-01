@@ -907,7 +907,6 @@ bool BacktrackingAlgorithm::fail() {
 #endif
 
         if (lb >= ub) {
-          afail = true;
 
 #ifdef PRINTTRACE
           if (PRINTTRACE)

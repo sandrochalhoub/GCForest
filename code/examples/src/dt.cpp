@@ -48,8 +48,13 @@ int main(int argc, char *argv[]) {
   random_generator.seed(opt.seed);
 
   TypedDataSet input;
+	
+	
+	string ext{opt.instance_file.substr(opt.instance_file.find_last_of(".") + 1)};
+	
 
-  if (opt.format == "csv")
+
+  if (opt.format == "csv" or (opt.format == "guess" and ext == "csv"))
     csv::read(
         opt.instance_file,
         [&](vector<string> &f) { input.setFeatures(f.begin(), f.end() - 1); },
@@ -58,12 +63,24 @@ int main(int argc, char *argv[]) {
           data.pop_back();
           input.addExample(data.begin(), data.end(), y);
         });
-  else
+  else {
+		if(opt.format != "txt" and ext != "txt")
+			cout << "p Warning, unrecognized format, trying txt\n";
+		
     txt::read(opt.instance_file, [&](vector<string> &data) {
+			
+			
       auto y = data.back();
       data.pop_back();
+			
+			for(auto d : data)
+				cout << " " << d;
+			cout << " -> " << y << endl;
+			
+			
       input.addExample(data.begin(), data.end(), y);
     });
+	}
 
   DataSet base;
 
