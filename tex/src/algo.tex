@@ -18,6 +18,8 @@
 \usepackage{xifthen}
 \usepackage{rotating}
 
+\newgeometry{bottom=2cm,top=2cm}
+
 
 \DeclareMathOperator*{\argmax}{arg\,max}
 \DeclareMathOperator*{\argmin}{arg\,min}
@@ -50,20 +52,26 @@
 
 
 \newcommand{\nodes}[0]{\ensuremath{{\cal N}}}
-\newcommand{\blossom}[0]{\ensuremath{{\cal B}}}
+\newcommand{\bud}[0]{\ensuremath{{\cal B}}}
 \newcommand{\sequence}[0]{\ensuremath{{\cal S}}}
 
+\newcommand{\maxd}[0]{\ensuremath{k}}
 \newcommand{\anode}[0]{\ensuremath{i}}
 \newcommand{\bnode}[0]{\ensuremath{b}}
 \newcommand{\afeat}[0]{\ensuremath{f}}
 \newcommand{\ub}[0]{\ensuremath{ub}}
-\newcommand{\error}[0]{\ensuremath{error}}
+% \newcommand{\error}[0]{\ensuremath{error}}
 \newcommand{\depth}[1][]{\ensuremath{\ifthenelse{\equal{#1}{}}{depth}{depth({#1})}}}
 \newcommand{\test}[1][]{\ensuremath{\ifthenelse{\equal{#1}{}}{test}{test({#1})}}}
 \newcommand{\dom}[1][]{\ensuremath{\ifthenelse{\equal{#1}{}}{dom}{dom({#1})}}}
 \newcommand{\best}[1][]{\ensuremath{\ifthenelse{\equal{#1}{}}{{best}}{{best({#1})}}}}
-\newcommand{\opt}[1][]{\ensuremath{\ifthenelse{\equal{#1}{}}{opt}{opt({#1})}}}
+\newcommand{\maxe}[1][]{\ensuremath{\ifthenelse{\equal{#1}{}}{{max}}{{max({#1})}}}}
+\newcommand{\opt}[1][]{\ensuremath{\ifthenelse{\equal{#1}{}}{terminal}{terminal({#1})}}}
 \newcommand{\child}[1][]{\ensuremath{\ifthenelse{\equal{#1}{}}{{child}}{{child({{#1}})}}}}
+\newcommand{\error}[1][]{\ensuremath{\ifthenelse{\equal{#1}{}}{{error}}{{error({{#1}})}}}}
+
+\newcommand{\abranch}[0]{\ensuremath{b}}
+
 
 
 	\SetKwFunction{storebest}{storeBest}
@@ -75,10 +83,11 @@
 	\SetKwFunction{pop}{pop}
 	\SetKwFunction{push}{push}
 	\SetKwFunction{prune}{prune}
-	\SetKwFunction{error}{error}
+	% \SetKwFunction{error}{error}
 	\SetKwFunction{grow}{grow}
 	\SetKwFunction{branch}{branch}
 	\SetKwFunction{select}{select\&remove}
+	\SetKwFunction{budalg}{Bud-first-search}
 	
 	
 
@@ -92,7 +101,7 @@
 % la Recherche'', project DEMOGRAPH, reference ANR-16-C40-0028.}}
 
 \begin{document}
-	% \newgeometry{bottom=3cm,top=3cm}
+
 
 \maketitle
 
@@ -109,180 +118,260 @@ This algorithm therefore uses linear (in the size of the tree) memory and anytim
 
 \medskip
 
+A \emph{branch} of a decision tree is a conjunction of (possibly negated) features. Moreover,
+if we also consider data points as conjunctions of features (where every feature appears either positively or negatively),
+%given a branch $\abranch \subseteq \features$ 
+we can associate a data set $\langle \negex(\abranch),\posex(\abranch) \rangle$ to a branch $\abranch$ where:
+\begin{eqnarray*}
+\negex(\abranch) = \{\ex \mid \ex \in \negex, \ex \models \abranch\}\\
+\posex(\abranch) = \{\ex \mid \ex \in \posex, \ex \models \abranch\}
+\end{eqnarray*}
+
+We write $\error[\abranch]$ for $\min(|\negex(\abranch)|, |\posex(\abranch)|)$, and $\error[\abranch,\afeat]$ for $\min(\error[\abranch \wedge \afeat], \error[\abranch \wedge \bar{\afeat}])$.
+A branch \abranch\ is said \emph{pure} iff $\error[\abranch]=0$.
+
+
+
 In a nutshell the algorithm we propose works as follows:
 
 
 
-We start from a singleton set \blossom\ of open nodes or \emph{blossoms} (open nodes can be expended, we say that a node is \emph{closed} if it has an assigned feature test or a label). % The set \nodes\ contains all the nodes of the current tree, open or closed, it is initially equal to \blossom. Finally,
+We start from a singleton set \bud\ of open branches or \emph{buds}.
+% (open branches are branches of length strictly less than $\maxd$ that are not pure). % The set \nodes\ contains all the nodes of the current tree, open or closed, it is initially equal to \bud. Finally,
 Moreover, we use an initially empty stack of decisions $\sequence$.
 
 \begin{itemize}
-	\item As long as there is a blossom ($\blossom \neq \emptyset$), we pick any one $\anode$, a feature $\afeat$ marked as \emph{available} for \anode, add the pair $(\anode,\afeat)$ to \sequence\ and expend the tree with two children nodes accordingly. 
+	\item As long as there is a bud ($\bud \neq \emptyset$), we pick any one $\abranch \in \bud$, a feature $\afeat$ marked as \emph{available} for \abranch, add the pair $(\abranch,\afeat)$ to \sequence\ and expend the tree with the two branches $\abranch \wedge \afeat$ and $\abranch \wedge \bar{\afeat}$. 
 	%These new nodes are added to $\nodes$. 
-	They are added to $\blossom$ if their depth is strictly less than $k$ and if they are not label nodes.
+	They are added to $\bud$ if their depth is strictly less than $\maxd$ and if they are not pure, otherwise they are marked as terminal.
 
-\item As long as there is no blossom ($\blossom = \emptyset$), we pop the last assignment $(\anode,\afeat)$ from sequence
-%undo the last assignment (say, $\anode=\afeat$), 
-%prune the two subtrees of node \anode (i.e. remove the corresponding nodes to \nodes) 
-and mark the feature $f$ not available for node $\anode$. If there is at least one available feature for node $\anode$, we add $\anode$ to $\blossom$. 
-Otherwise, we mark $\anode$ as \emph{optimal} and store the minimum error recorded for any of the possible features.
+\item As long as there is no bud ($\bud = \emptyset$), we pop the last assignment $(\abranch,\afeat)$ from sequence
+and mark the feature $\afeat$ not available for branch $\abranch$. If there is at least one available feature for branch $\abranch$, we add $\abranch$ to $\bud$. 
+Otherwise, we mark it as terminal and we 
+store the minimum error recorded for any of the possible features.
 
 \end{itemize}
+
+The classification error of a tree is equal to the sum of the error of its terminal banches, the algorithm returns the minimum value encountered when exploring the possible decision trees.
+
 
 \clearpage
 
 \section*{Algorithm}
 
-For readability, we cut the algorithm into four blocks. The initialisation procedure (Algorithm~\ref{alg:init}) set up the data structures used in all other procedures:
-\begin{itemize}
-	\item \sequence\ is simply the list of nodes in the current tree, ordered as they are explored.
-	\item \nodes\ is the set of integers used to index a node of the current tree
-	\item \blossom\ is the set of nodes which do no have an assigned test yet
-	\item \depth\ stores the depth of a node
-	\item \test\ stores the feature tested at a node
-	\item \dom\ stores the set of possible features which have no yet been tried for this node 
-	\item \best\ stores the error of the best subtree rooted at a node 
-	\item \opt\ indicates whether the best subtree of a given node is optimal
-	\item \child\ stores the children of a node (children can be nodes or $\{\top, \bot\}$)
-	\item $\error{\anode}$ $\min(|\posex(\anode)|,|\negex(\anode)|)$
-	\item $\error{\anode,\afeat}$ $\min(|\posex(\anode=\afeat)|,|\negex(\anode=\afeat)|)$
-\end{itemize}
 
-Algorithm~\ref{alg:search} is a bactracking procedure which expends a current decision tree
-	
+	% \begin{algorithm}
+	%
+	%
+	% \end{algorithm}
+
+
+
 	\begin{algorithm}
-		\caption{Data Structures\label{alg:init}}
-		\TitleOfAlgo{Initialise}
+		\caption{\label{alg:bud}}
+		\TitleOfAlgo{\budalg}
+		  \KwData{$\negex,\posex, \maxd$}
+		  \KwResult{The minimum error on $\negex,\posex$ for decision trees of depth at most $\maxd$}
 		$\sequence \gets []$\;
-		$\blossom \gets \emptyset$\;
-		$\nodes \gets \emptyset$\;
-		$\ub \gets \min(|\negex|,|\posex|)$\;
-		$\error \gets ub$\;
+		$\bud \gets \{\emptyset\}$\;
+		$\error \gets \best \gets \min(|\negex|,|\posex|)$\;
+		$\dom \gets (\lambda : {2^{\features}} \mapsto \features)$\;
+		$\maxe \gets (\lambda : {2^{\features}} \mapsto \infty)$\;
+		$\opt \gets (\lambda : {2^{\features}} \mapsto \fal)$\;
 		
-		$\child \gets (\lambda : \mathbb{N} \times \{\fal, \tru\} \mapsto \emptyset)$\;
-		$\depth \gets (\lambda : \mathbb{N} \mapsto 0)$\;
-		
-		$\test \gets (\lambda : \mathbb{N} \mapsto \emptyset)$\;
-		$\dom \gets (\lambda : \mathbb{N} \mapsto \features)$\;
-		
-		$\best \gets (\lambda : \mathbb{N} \mapsto \infty)$\;
-		$\opt \gets (\lambda : \mathbb{N} \mapsto \fal)$\;
-	\end{algorithm}
-	
-	
-	
-	\begin{algorithm}
-		\caption{Create a new node after branching\label{alg:alloc}}
-		\TitleOfAlgo{\grow} 
-	  \KwData{integer \anode}
-
-		$\nodes \gets \nodes \cup \{\anode\}$\;
-		$\dom[\anode] \gets \features$ sorted by decreasing conditional error $\min(|\posex(\anode=\afeat)|,|\negex(\anode=\afeat)|)$\;
-		$\test[\anode] \gets \pop(\dom[\anode])$\;
-		
-	
-		\eIf{$\depth[\anode]=k-1$ or $\error{\anode,\test[\anode]}$}
-		{
-			$\best[\anode] = \error{\anode,\test[\anode]}$\; %\min(|\posex(\anode=\test[\anode])|,|\negex(\anode=\test[\anode])|)$\;
-			$\opt[\anode] = \tru$\;
-			\ForEach{$branch \in \{\tru, \fal\}$}
-			{
-				% $\child[\anode,branch] \gets (|\posex(\anode=\test[\anode])| > |\negex(\anode=\test[\anode])|)$\;
-				\lIf{$|\posex(\anode=\test[\anode])| > |\negex(\anode=\test[\anode])|$}{$\child[\anode,branch] \gets \top$}
-				\lElse{$\child[\anode,branch] \gets \bot$}
+		\While{$|\sequence| + |\bud| > 0$}{
+		\eIf{$\bud \neq \emptyset$}{
+			$\abranch=\select{\bud}$\;
+			$\afeat = \argmin_{\afeat \in \dom[\abranch]}(\error[\abranch,\afeat])$\;
+			$\dom[\abranch] \gets \dom[\abranch] \setminus \{\afeat\}$\;
+			push $(\abranch,\afeat)$ on $\sequence$\; % $ \gets \sequence \oplus (\abranch,\afeat)$\;
+			\eIf{$\error[\abranch,\afeat] = 0$ or $|\abranch| = \maxd-1$} {
+				$\error \gets \error + \error[\abranch,\afeat]$\;
+				$\maxe[\abranch] \gets \error[\abranch,\afeat]$\;
+				$\opt[\abranch] \gets \tru$\;
+			}{
+			\ForEach{$v \in \{\afeat, \bar{\afeat}\}$}{
+					\lIf{$\error[\abranch,v] > 0$}{
+						$\bud \gets \bud \cup \{\abranch \wedge v\}$
+					}
 			}
-		}
-		{
-			$\blossom \gets \blossom \cup \{n\}$\;
-			$\best[\anode] = \min(|\posex(\anode)|, |\negex(\anode)|)$\;
-			$\opt[\anode] \gets \fal$\;
-		}
-
-
-	\end{algorithm}
-
-
-	\begin{algorithm}
-		\caption{Suppress a node and all its descendants\label{alg:free}}
-		\TitleOfAlgo{\prune}
-	  \KwData{integer \anode}
-
-		$\blossom \gets \blossom \setminus \{\anode\}$\;
-		$\nodes \gets \nodes \setminus \{\anode\}$\;
-
-		\ForEach{$branch \in \{\tru, \fal\}$}
-		{
-		\lIf{$\child[\anode,branch] \not\in \{\top, \bot\}$}
-		{
-			$\prune{\child[\anode,branch]}$
-		}
-		}
-
-		\lIf{$\depth[\anode] = k-1$ or $\opt[\anode]$}{$error \gets error - \best[\anode]$}
-
-	\end{algorithm}
-
-
-\begin{algorithm}
-	\caption{Search loop\label{alg:search}}
-  \TitleOfAlgo{\dt}
-  \KwData{$\negex,\posex, k$}
-  \KwResult{A decision tree}
-
-	$\bnode \gets 0$\;
-	$\posex(1),\negex(1) \gets \posex, \negex$\;
-	$\grow{\blossom, \sequence, 1}$\;
-
-	\While{\textbf{true}}{
-		\eIf{$\blossom = \emptyset$} {
-			$\ub \gets \min(\ub,\error)$\;
-			$deadend \gets \fal$\;
-			\Repeat{$deadend$}{
-				\lIf{$\bnode > 0$}{$\opt[\bnode] \gets \tru$}
-				\lIf{$\bnode = 1$}{\Return}
-				$\bnode \gets \pop{\sequence}$\;
-				$\best[\bnode] \gets \min(\best[\bnode], \best(\child[\bnode,\tru]) + \best(\child[\bnode,\fal]))$\;
-				$\test[\bnode] \gets \pop{\dom[\bnode]}$\;
-				$\prune(\child[\bnode,\tru])$\;
-				$\prune(\child[\bnode,\fal])$\;
-
-				$deadend \gets \best[\bnode] = 0 ~\vee~ \dom[\bnode] = \emptyset$\;
-				\If{$deadend$}
-				{
-				$\opt[\bnode] \gets \tru$\;
-				$\error \gets \error + \error{\bnode}$\; %$\best[\bnode]$\;
+			}
+		}{
+			$\best \gets \min(\best, \error)$\;
+			\Repeat{$\dom[\abranch] \neq \emptyset$}{
+				pop $(\abranch,\afeat)$ from $\sequence$\;
+				$\maxe[\abranch] \gets \min(\maxe[\abranch], \maxe[\abranch \wedge \afeat] +  \maxe[\abranch \wedge \bar{\afeat}])$\;
+				\eIf{$\dom[\abranch] \neq \emptyset$} {
+					$\bud \gets \bud \cup \{\abranch\}$\;
+					\lIf{$\opt[\abranch]$}{$\error \gets \error - \maxe[\abranch]$}
+				} {
+					$\opt[\abranch] \gets \tru$\;
 				}
 			}
-			$\blossom \gets \blossom \cup \{b\}$\;
-			$\error \gets \error + \min(|\posex(\bnode)|, |\negex(\bnode)|)$\;
 		}
-		{
-			\If{$b = 0$}{
-				$b=\select{\blossom}$\;
-				% $\blossom \gets \blossom \setminus \{b\}$\;
-				$\push(\bnode,\sequence)$\;
-			}
-			$c_{\tru}, c_{\fal} = \argmin_{x,y}(\mathbb{N} \setminus \nodes)$\;
-			$\posex(c_{\tru}),\negex(c_{\tru}),\posex(c_{\fal}),\negex(c_{\fal}) \gets \branch(\posex(\bnode),\negex(\bnode),\test[\bnode])$\;
-			\ForEach{$branch \in \{\tru, \fal\}$}{
-				\eIf{$\min(|\posex(c_{branch})|,|\negex(c_{branch})|) = 0$}
-				{
-					\lIf{$|\posex(c_{branch})|>|\negex(c_{branch})|$}{$\child[\bnode,branch] \gets \top$}
-					\lElse{$\child[\bnode,branch] \gets \bot$}
-				}{
-					$\child[\bnode,branch] \gets c_{branch}$\;
-					$\depth[c_{branch}] \gets \depth[\bnode]+1$\;
-					$\grow(\blossom, \sequence, c_{branch})$\;
-				}
-			}
-			$\bnode \gets 0$\;
 		}
-	}
+		\Return $\best$\;
+	\end{algorithm}
 
-\end{algorithm}
+
+% For readability, we cut the algorithm into four blocks. The initialisation procedure (Algorithm~\ref{alg:init}) set up the data structures used in all other procedures:
+% \begin{itemize}
+% 	\item \sequence\ is simply the list of nodes in the current tree, ordered as they are explored.
+% 	\item \nodes\ is the set of integers used to index a node of the current tree
+% 	\item \bud\ is the set of nodes which do no have an assigned test yet
+% 	\item \depth\ stores the depth of a node
+% 	\item \test\ stores the feature tested at a node
+% 	\item \dom\ stores the set of possible features which have no yet been tried for this node
+% 	\item \best\ stores the error of the best subtree rooted at a node
+% 	\item \opt\ indicates whether the best subtree of a given node is optimal
+% 	\item \child\ stores the children of a node (children can be nodes or $\{\top, \bot\}$)
+% 	\item $\error{\anode}$ $\min(|\posex(\anode)|,|\negex(\anode)|)$
+% 	\item $\error{\anode,\afeat}$ $\min(|\posex(\anode=\afeat)|,|\negex(\anode=\afeat)|)$
+% \end{itemize}
+%
+% Algorithm~\ref{alg:search} is a bactracking procedure which expends a current decision tree
+%
+% 	\begin{algorithm}
+% 		\caption{Data Structures\label{alg:init}}
+% 		\TitleOfAlgo{Initialise}
+% 		$\sequence \gets []$\;
+% 		$\bud \gets \emptyset$\;
+% 		$\nodes \gets \emptyset$\;
+% 		$\ub \gets \min(|\negex|,|\posex|)$\;
+% 		$\error \gets ub$\;
+%
+% 		$\child \gets (\lambda : \mathbb{N} \times \{\fal, \tru\} \mapsto \emptyset)$\;
+% 		$\depth \gets (\lambda : \mathbb{N} \mapsto 0)$\;
+%
+% 		$\test \gets (\lambda : \mathbb{N} \mapsto \emptyset)$\;
+% 		$\dom \gets (\lambda : \mathbb{N} \mapsto \features)$\;
+%
+% 		$\best \gets (\lambda : \mathbb{N} \mapsto \infty)$\;
+% 		$\opt \gets (\lambda : \mathbb{N} \mapsto \fal)$\;
+% 	\end{algorithm}
+%
+%
+%
+% 	\begin{algorithm}
+% 		\caption{Create a new node after branching\label{alg:alloc}}
+% 		\TitleOfAlgo{\grow}
+% 	  \KwData{integer \anode}
+%
+% 		$\nodes \gets \nodes \cup \{\anode\}$\;
+% 		$\dom[\anode] \gets \features$ sorted by decreasing conditional error $\min(|\posex(\anode=\afeat)|,|\negex(\anode=\afeat)|)$\;
+% 		$\test[\anode] \gets \pop(\dom[\anode])$\;
+%
+%
+% 		\eIf{$\depth[\anode]=k-1$ or $\error{\anode,\test[\anode]}$}
+% 		{
+% 			$\best[\anode] = \error{\anode,\test[\anode]}$\; %\min(|\posex(\anode=\test[\anode])|,|\negex(\anode=\test[\anode])|)$\;
+% 			$\opt[\anode] = \tru$\;
+% 			\ForEach{$branch \in \{\tru, \fal\}$}
+% 			{
+% 				% $\child[\anode,branch] \gets (|\posex(\anode=\test[\anode])| > |\negex(\anode=\test[\anode])|)$\;
+% 				\lIf{$|\posex(\anode=\test[\anode])| > |\negex(\anode=\test[\anode])|$}{$\child[\anode,branch] \gets \top$}
+% 				\lElse{$\child[\anode,branch] \gets \bot$}
+% 			}
+% 		}
+% 		{
+% 			$\bud \gets \bud \cup \{n\}$\;
+% 			$\best[\anode] = \min(|\posex(\anode)|, |\negex(\anode)|)$\;
+% 			$\opt[\anode] \gets \fal$\;
+% 		}
+%
+%
+% 	\end{algorithm}
+%
+%
+% 	\begin{algorithm}
+% 		\caption{Suppress a node and all its descendants\label{alg:free}}
+% 		\TitleOfAlgo{\prune}
+% 	  \KwData{integer \anode}
+%
+% 		$\bud \gets \bud \setminus \{\anode\}$\;
+% 		$\nodes \gets \nodes \setminus \{\anode\}$\;
+%
+% 		\ForEach{$branch \in \{\tru, \fal\}$}
+% 		{
+% 		\lIf{$\child[\anode,branch] \not\in \{\top, \bot\}$}
+% 		{
+% 			$\prune{\child[\anode,branch]}$
+% 		}
+% 		}
+%
+% 		\lIf{$\depth[\anode] = k-1$ or $\opt[\anode]$}{$error \gets error - \best[\anode]$}
+%
+% 	\end{algorithm}
+%
+%
+% \begin{algorithm}
+% 	\caption{Search loop\label{alg:search}}
+%   \TitleOfAlgo{\dt}
+%   \KwData{$\negex,\posex, k$}
+%   \KwResult{A decision tree}
+%
+% 	$\bnode \gets 0$\;
+% 	$\posex(1),\negex(1) \gets \posex, \negex$\;
+% 	$\grow{\bud, \sequence, 1}$\;
+%
+% 	\While{\textbf{true}}{
+% 		\eIf{$\bud = \emptyset$} {
+% 			$\ub \gets \min(\ub,\error)$\;
+% 			$deadend \gets \fal$\;
+% 			\Repeat{$deadend$}{
+% 				\lIf{$\bnode > 0$}{$\opt[\bnode] \gets \tru$}
+% 				\lIf{$\bnode = 1$}{\Return}
+% 				$\bnode \gets \pop{\sequence}$\;
+% 				$\best[\bnode] \gets \min(\best[\bnode], \best(\child[\bnode,\tru]) + \best(\child[\bnode,\fal]))$\;
+% 				$\test[\bnode] \gets \pop{\dom[\bnode]}$\;
+% 				$\prune(\child[\bnode,\tru])$\;
+% 				$\prune(\child[\bnode,\fal])$\;
+%
+% 				$deadend \gets \best[\bnode] = 0 ~\vee~ \dom[\bnode] = \emptyset$\;
+% 				\If{$deadend$}
+% 				{
+% 				$\opt[\bnode] \gets \tru$\;
+% 				$\error \gets \error + \error{\bnode}$\; %$\best[\bnode]$\;
+% 				}
+% 			}
+% 			$\bud \gets \bud \cup \{b\}$\;
+% 			$\error \gets \error + \min(|\posex(\bnode)|, |\negex(\bnode)|)$\;
+% 		}
+% 		{
+% 			\If{$b = 0$}{
+% 				$b=\select{\bud}$\;
+% 				% $\bud \gets \bud \setminus \{b\}$\;
+% 				$\push(\bnode,\sequence)$\;
+% 			}
+% 			$c_{\tru}, c_{\fal} = \argmin_{x,y}(\mathbb{N} \setminus \nodes)$\;
+% 			$\posex(c_{\tru}),\negex(c_{\tru}),\posex(c_{\fal}),\negex(c_{\fal}) \gets \branch(\posex(\bnode),\negex(\bnode),\test[\bnode])$\;
+% 			\ForEach{$branch \in \{\tru, \fal\}$}{
+% 				\eIf{$\min(|\posex(c_{branch})|,|\negex(c_{branch})|) = 0$}
+% 				{
+% 					\lIf{$|\posex(c_{branch})|>|\negex(c_{branch})|$}{$\child[\bnode,branch] \gets \top$}
+% 					\lElse{$\child[\bnode,branch] \gets \bot$}
+% 				}{
+% 					$\child[\bnode,branch] \gets c_{branch}$\;
+% 					$\depth[c_{branch}] \gets \depth[\bnode]+1$\;
+% 					$\grow(\bud, \sequence, c_{branch})$\;
+% 				}
+% 			}
+% 			$\bnode \gets 0$\;
+% 		}
+% 	}
+%
+% \end{algorithm}
+
+\clearpage
+
+\section*{Improvements}
+
+There are a number of implementation details (among them how to return the actual tree rather than simply its classification error) and other improvements, which we will list later.
+
+
+% \clearpage
 
 \section*{Experiments}
-
 
 \begin{table}[htbp]
 \begin{center}
@@ -294,7 +383,7 @@ Algorithm~\ref{alg:search} is a bactracking procedure which expends a current de
 \caption{\label{tab:thetable} Some results (max depth=4)}
 \end{table}
 
-\clearpage
+% \clearpage
 
 \begin{table}[htbp]
 \begin{center}
@@ -316,7 +405,7 @@ Algorithm~\ref{alg:search} is a bactracking procedure which expends a current de
 % \caption{\label{tab:thetable} Restarts (max depth=5)}
 % \end{table}
 
-\clearpage
+% \clearpage
 
 \begin{table}[htbp]
 \begin{center}

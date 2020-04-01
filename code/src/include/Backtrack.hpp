@@ -42,6 +42,9 @@ private:
   vector<int> child[2];
 
   /// store the parent of node i
+  vector<int> parent;
+
+  /// store the depth of node i
   vector<int> depth;
 
   /// store the maximum depth at each level of the search tree
@@ -76,6 +79,9 @@ private:
   // therefore, *optimal* best trees should not be freed when pruning the node
   // however, they can be freed when replacing the current best.
   vector<int> best_tree;
+
+  // this is because I'm stupid
+  vector<size_t> tree_error;
 
   // optimistic value. updated only when the node becomes optimal
   vector<size_t> min_error;
@@ -182,7 +188,8 @@ private:
   size_t node_error(const int i) const;
 
 	// select the most promising node to branch on
-  int choose() const;
+  int highest_error() const;
+	int highest_error_reduction() const;
 
 	// whether node is a leaf (deepest test)
   bool isLeaf(const int node) const;
@@ -198,8 +205,10 @@ private:
 	
 	// remove the node and its descendants from the tree
   void prune(const int node);
-	
-	// undo the last decision and remove the previous feature as possible choice
+
+  bool update_upperbound(const int node);
+
+  // undo the last decision and remove the previous feature as possible choice
   bool backtrack();
 	
 	// set c as the branch-child of node (branch is 0/1 i.e. left/right)

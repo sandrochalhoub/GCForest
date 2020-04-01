@@ -339,6 +339,9 @@ DTOptions parse_dt(int argc, char *argv[]) {
   cmd.add<SwitchArg>(opt.filter, "", "filter", "remove contradictory examples",
                      false);
 
+  cmd.add<SwitchArg>(opt.bounding, "", "bounding", "use bound reasoning",
+                     false);
+
   // ValueArg (const std::string &flag, const std::string &name, const
   // std::string &desc, bool req, T value, Constraint< T > *constraint, Visitor
   // *v=NULL)
@@ -375,6 +378,11 @@ DTOptions parse_dt(int argc, char *argv[]) {
 
   cmd.add<ValueArg<int>>(opt.search, "", "search", "search limit", false, 0,
                          "int");
+
+  cmd.add<ValueArg<int>>(opt.node_strategy, "", "node_strategy",
+                         "node selection strategy 0:first, 1:random, 2:max. "
+                         "error 3:max. reduction",
+                         false, 2, "int");
 
   cmd.parse(argc, argv);
   return opt;
