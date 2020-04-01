@@ -307,7 +307,7 @@ DTOptions parse_dt(int argc, char *argv[]) {
                             "string");
 
   cmd.add<ValueArg<string>>(opt.format, "", "format",
-                            "input format (csv or txt)", false, "csv",
+                            "input format (csv or txt, default:guess)", false, "guess",
                             "string");
 
   cmd.add<ValueArg<int>>(

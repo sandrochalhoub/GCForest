@@ -67,17 +67,9 @@ int main(int argc, char *argv[]) {
 		if(opt.format != "txt" and ext != "txt")
 			cout << "p Warning, unrecognized format, trying txt\n";
 		
-    txt::read(opt.instance_file, [&](vector<string> &data) {
-			
-			
+    txt::read(opt.instance_file, [&](vector<string> &data) {		
       auto y = data.back();
-      data.pop_back();
-			
-			for(auto d : data)
-				cout << " " << d;
-			cout << " -> " << y << endl;
-			
-			
+      data.pop_back();			
       input.addExample(data.begin(), data.end(), y);
     });
 	}
