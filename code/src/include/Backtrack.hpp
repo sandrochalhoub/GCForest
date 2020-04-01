@@ -126,6 +126,8 @@ private:
 	
 	bool interrupted;
 	
+	double start_time;
+	
 	void cleaning();
 
   void store_new_best();

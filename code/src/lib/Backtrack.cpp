@@ -6,6 +6,8 @@ namespace primer {
 BacktrackingAlgorithm::BacktrackingAlgorithm(DataSet &d, Wood &w,
                                              DTOptions &opt)
     : wood(w), data(d), options(opt) {
+			
+			start_time = cpu_time();
 
   // statistics and options
   ub_error = static_cast<size_t>(data.count());
@@ -152,7 +154,7 @@ void BacktrackingAlgorithm::print_new_best() const {
        // << " backtracks=" << setw(9) << num_backtracks
        << " choices=" << setw(9) << search_size << " restarts=" << setw(5)
        << num_restarts << " mem=" << left << setw(4) << wood.size() << right
-       << " time=" << setprecision(3) << cpu_time() << right << endl;
+       << " time=" << setprecision(3) << cpu_time()-start_time << right << endl;
 }
 
 bool BacktrackingAlgorithm::isLeaf(const int node) const {
