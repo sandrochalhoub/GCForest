@@ -63,20 +63,31 @@ int main(int argc, char *argv[]) {
           data.pop_back();
           input.addExample(data.begin(), data.end(), y);
         });
-  else {
+  else if (opt.format == "dl8" or (opt.format == "guess" and ext == "dl8")) {
+    txt::read(opt.instance_file, [&](vector<string> &data) {		
+			auto y = *data.begin();
+			input.addExample(data.begin()+1, data.end(), y);
+    });
+	} else {
 		if(opt.format != "txt" and ext != "txt")
 			cout << "p Warning, unrecognized format, trying txt\n";
 		
     txt::read(opt.instance_file, [&](vector<string> &data) {		
       auto y = data.back();
-      data.pop_back();			
+      data.pop_back();
       input.addExample(data.begin(), data.end(), y);
-    });
+    });	
 	}
 
   DataSet base;
 
+	// cout << input << endl;
+
+
   input.binarize(base);
+	
+	
+	// cout << endl << base << endl;
 
   if (opt.sample != 1) {
 
