@@ -96,6 +96,8 @@
 	\SetKwFunction{budalg}{Bud-first-search}
 	\SetKwFunction{dynprog}{DynProg}
 	\SetKwFunction{dleight}{DL8.5}
+	\SetKwFunction{cart}{CART}
+	\SetKwFunction{greedy}{Greedy-Buddy}
 	
 	
 
@@ -157,7 +159,7 @@ there exists a binary tree of depth at most $\maxd$ such that the sum of the err
 
 \section*{Dynamic Programming Algorithm}
 
-The solver DL8.5 is a dynamic programming algorithm. It relies on the observtion that given a feature test, the two resulting branches are independent subproblems. Algorithm~\ref{alg:dynprog} gives a high level view of DL8.5.
+The solver DL8.5 is a dynamic programming algorithm. It relies on the observation that given a feature test, the two resulting branches are independent subproblems. Algorithm~\ref{alg:dynprog} gives a high level view of DL8.5.
 
 
 	% \begin{algorithm}
@@ -178,7 +180,7 @@ The solver DL8.5 is a dynamic programming algorithm. It relies on the observtion
 	\begin{algorithm}
 		\caption{Dynamic Programming Algorithm\label{alg:dynprog}}
 		\TitleOfAlgo{\dynprog}
-		  \KwData{$\negex,\posex,\maxd]$}
+		  \KwData{$\negex,\posex,\maxd$}
 		  \KwResult{The minimum error on $\negex,\posex$ for decision trees of depth at most $\maxd$}
 			$\error \gets \min(|\negex|,|\posex|)$\;
 			
@@ -207,19 +209,38 @@ Moreover, we use an initially empty stack of decisions $\sequence$.
 \begin{itemize}
 	\item As long as there is a bud ($\bud \neq \emptyset$), we pick any one $\abranch \in \bud$, a feature $\afeat$ marked as \emph{available} for \abranch, add the pair $(\abranch,\afeat)$ to \sequence\ and expend the tree with the two branches $\abranch \wedge \afeat$ and $\abranch \wedge \bar{\afeat}$. 
 	%These new nodes are added to $\nodes$. 
-	They are added to $\bud$ if their depth is strictly less than $\maxd$ and if they are not pure, otherwise they are marked as terminal.
+	They are added to $\bud$ if their depth is strictly less than $\maxd$ and if they are not pure, otherwise they are terminal tests and we record the corresponding error.
 
 \item As long as there is no bud ($\bud = \emptyset$), we pop the last assignment $(\abranch,\afeat)$ from sequence
-and mark the feature $\afeat$ not available for branch $\abranch$. If there is at least one available feature for branch $\abranch$, we add $\abranch$ to $\bud$. 
-Otherwise, we mark it as terminal and we 
-store the minimum error recorded for any of the possible features.
+and mark the feature $\afeat$ not available for branch $\abranch$ and update the recorded best error of its subtrees. If there is at least one available feature for branch $\abranch$, we add $\abranch$ to $\bud$. 
+Otherwise, we consider it terminal and its error is the sum of the error of its best subtrees.
+% and we 
+%store the minimum error recorded for any of the possible features.
 
 \end{itemize}
 
 The classification error of a tree is equal to the sum of the error of its terminal banches, the algorithm returns the minimum value encountered when exploring the possible decision trees.
 
+\medskip
+		
+		Let $n = |\posex| + |\negex|$, $m = |\features|$, with the maximum depth $k \leq m$. 
+		The number of recursive calls for Algorithm~\ref{alg:dynprog} is $\Theta(2^km^k)$. At each call, the data set must be split into two subsets. This splitting procedure can be done in time $\Theta(n)$ amortised over a given level of a given decision tree. Since every branch of the tree is independent, Algorithm~\ref{alg:dynprog} explores $O(m^d)$ trees of depth $d$. Therefore Algorithm~\ref{alg:dynprog} runs in $\Theta((n+2^k)m^k)$ time.
+		
+		\begin{theorem}
+			The time complexities of Algorithms~\ref{alg:dynprog} and Algorithm~\ref{alg:bud} are equal.
+			\end{theorem}
+			
+			No proof is given, but independent subtrees are not explored in Algorithm~\ref{alg:bud} either hence both algorithms do the same computation, except not in the same order. The big difference is that whereas the cost of finding a first solution is $\Theta((n + 2^{k-1})m^{k-1})$ for Algorithm~\ref{alg:dynprog}, it is equal to $\Theta(kn + 2^k)$ for Algorithm~\ref{alg:bud}.
+		
+	%T(m,k) = 2mT(m-1, k-1)	
+		
+		
+
 
 % \clearpage
+
+
+
 
 
 	\begin{algorithm}
@@ -229,22 +250,22 @@ The classification error of a tree is equal to the sum of the error of its termi
 		  \KwResult{The minimum error on $\negex,\posex$ for decision trees of depth at most $\maxd$}
 		$\sequence \gets []$\;
 		$\bud \gets \{\emptyset\}$\;
-		$\error \gets \best \gets \min(|\negex|,|\posex|)$\;
+		$\error \gets \min(|\negex|,|\posex|)$\;
 		$\dom \gets (\lambda : {2^{\features}} \mapsto \features)$\;
-		$\maxe \gets (\lambda : {2^{\features}} \mapsto \infty)$\;
-		$\opt \gets (\lambda : {2^{\features}} \mapsto \fal)$\;
+		$\best \gets (\lambda : {2^{\features}} \mapsto \infty)$\;
+		% $\opt \gets (\lambda : {2^{\features}} \mapsto \fal)$\;
 		
 		\While{$|\sequence| + |\bud| > 0$}{
 		\eIf{$\bud \neq \emptyset$}{
-			$\abranch=\select{\bud}$\;
-			$\afeat = \argmin_{\afeat \in \dom[\abranch]}(\error[\abranch,\afeat])$\;
-			$\dom[\abranch] \gets \dom[\abranch] \setminus \{\afeat\}$\;
-			push $(\abranch,\afeat)$ on $\sequence$\; % $ \gets \sequence \oplus (\abranch,\afeat)$\;
+			$\abranch \gets \select{\bud}$\;
+			$\afeat \gets \argmin_{\afeat \in \dom[\abranch]}(\error[\abranch,\afeat])$\;
 			\eIf{$\error[\abranch,\afeat] = 0$ or $|\abranch| = \maxd-1$} {
 				$\error \gets \error + \error[\abranch,\afeat]$\;
-				$\maxe[\abranch] \gets \error[\abranch,\afeat]$\;
-				$\opt[\abranch] \gets \tru$\;
+				$\best[\abranch] \gets \error[\abranch,\afeat]$\;
+				% $\opt[\abranch] \gets \tru$\;
 			}{
+			$\dom[\abranch] \gets \dom[\abranch] \setminus \{\afeat\}$\;
+			push $(\abranch,\afeat)$ on $\sequence$\; % $ \gets \sequence \oplus (\abranch,\afeat)$\;
 			\ForEach{$v \in \{\afeat, \bar{\afeat}\}$}{
 					\lIf{$\error[\abranch,v] > 0$}{
 						$\bud \gets \bud \cup \{\abranch \wedge v\}$
@@ -252,26 +273,29 @@ The classification error of a tree is equal to the sum of the error of its termi
 			}
 			}
 		}{
-			$\best \gets \min(\best, \error)$\;
-			\Repeat{$\dom[\abranch] \neq \emptyset$}{
+			$\best[\emptyset] \gets \min(\best[\emptyset], \error)$\;
+			\Repeat{$\dom[\abranch] = \emptyset$ and $|\sequence|>0$}{
 				pop $(\abranch,\afeat)$ from $\sequence$\;
-				$\maxe[\abranch] \gets \min(\maxe[\abranch], \maxe[\abranch \wedge \afeat] +  \maxe[\abranch \wedge \bar{\afeat}])$\;
-				\eIf{$\dom[\abranch] \neq \emptyset$} {
-					$\bud \gets \bud \cup \{\abranch\}$\;
-					\lIf{$\opt[\abranch]$}{$\error \gets \error - \maxe[\abranch]$}
-				} {
-					$\opt[\abranch] \gets \tru$\;
+				$\best[\abranch] \gets \min(\best[\abranch], \best[\abranch \wedge \afeat] +  \best[\abranch \wedge \bar{\afeat}])$\;
+				$\error \gets \error - \best[\abranch \wedge \afeat] -  \best[\abranch \wedge \bar{\afeat}]$\;
+				\lIf{$\dom[\abranch] \neq \emptyset$} {
+					$\bud \gets \bud \cup \{\abranch\}$
+					% \lIf{$\opt[\abranch]$}{$\error \gets \error - \best[\abranch]$}
+				} 
+				\lElse {	
+					$\error \gets \error + \error[\abranch,\afeat]$
 				}
+				% {
+				% 	$\opt[\abranch] \gets \tru$\;
+				% }
 			}
 		}
 		}
-		\Return $\best$\;
+		\Return $\best[\emptyset]$\;
 	\end{algorithm}
 	
 	
-	\begin{theorem}
-		The time complexities of Algorithms~\ref{alg:dynprog} and Algorithm~\ref{alg:bud} are equal.
-		\end{theorem}
+
 
 
 % For readability, we cut the algorithm into four blocks. The initialisation procedure (Algorithm~\ref{alg:init}) set up the data structures used in all other procedures:
@@ -452,7 +476,7 @@ There are a number of implementation details (among them how to return the actua
 \input{src/tables/depth3.tex}
 \end{normalsize}
 \end{center}
-\caption{\label{tab:d3} Restarts (max depth=3)}
+\caption{\label{tab:d3} Comparison with state of the art for optimal small trees (max depth=3)}
 \end{table}
 
 \begin{table}[htbp]
@@ -462,7 +486,7 @@ There are a number of implementation details (among them how to return the actua
 \input{src/tables/depth4.tex}
 \end{normalsize}
 \end{center}
-\caption{\label{tab:d4} Restarts (max depth=4)}
+\caption{\label{tab:d4} Comparison with state of the art for optimal small trees (max depth=4)}
 \end{table}
 
 \begin{table}[htbp]
@@ -472,8 +496,44 @@ There are a number of implementation details (among them how to return the actua
 \input{src/tables/depth5.tex}
 \end{normalsize}
 \end{center}
-\caption{\label{tab:d5} Restarts (max depth=5)}
+\caption{\label{tab:d5} Comparison with state of the art for optimal small trees (max depth=5)}
 \end{table}
+
+
+
+
+
+
+\begin{table}[htbp]
+\begin{center}
+\begin{normalsize}
+\tabcolsep=5pt
+\input{src/tables/first4.tex}
+\end{normalsize}
+\end{center}
+\caption{\label{tab:f4} Comparison with state of the art heuristics (max depth=4)}
+\end{table}
+
+\begin{table}[htbp]
+\begin{center}
+\begin{normalsize}
+\tabcolsep=5pt
+\input{src/tables/first7.tex}
+\end{normalsize}
+\end{center}
+\caption{\label{tab:f7} Comparison with state of the art heuristics (max depth=7)}
+\end{table}
+
+\begin{table}[htbp]
+\begin{center}
+\begin{normalsize}
+\tabcolsep=5pt
+\input{src/tables/first10.tex}
+\end{normalsize}
+\end{center}
+\caption{\label{tab:f10} Comparison with state of the art heuristics (max depth=10)}
+\end{table}
+
 
 
 % \begin{table}[htbp]

@@ -60,7 +60,7 @@ bool BacktrackingAlgorithm::limit_out() {
   ++search_size;
 
   if (time_limit > 0 and (num_backtracks % checking_period) == 0)
-    if (cpu_time() >= time_limit)
+    if (cpu_time() >= (time_limit + start_time))
       interrupted = true;
   interrupted = interrupted or (search_limit and num_backtracks > search_limit);
   return interrupted;
