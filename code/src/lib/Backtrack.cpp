@@ -59,10 +59,10 @@ int BacktrackingAlgorithm::error() const { return ub_error; }
 bool BacktrackingAlgorithm::limit_out() {
   ++search_size;
 
-  if (time_limit > 0 and (search_size % checking_period) == 0)
+  if (time_limit > 0 and (num_backtracks % checking_period) == 0)
     if (cpu_time() >= time_limit)
       interrupted = true;
-  interrupted = interrupted or (search_limit and search_size > search_limit);
+  interrupted = interrupted or (search_limit and num_backtracks > search_limit);
   return interrupted;
 }
 
