@@ -154,6 +154,9 @@ public:
   enum node_strategy { FIRST = 0, RANDOM = 1, ERROR = 2, ERROR_REDUCTION = 3 };
   int node_strategy;
 
+  enum feature_strategy { MINERROR = 0, ENTROPY = 1 };
+  int feature_strategy;
+
   DTOptions(){};
   DTOptions(const DTOptions &opt)
       : cmdline(opt.cmdline), instance_file(opt.instance_file),
@@ -165,7 +168,8 @@ public:
         focus(opt.focus), max_size(opt.max_size), max_depth(opt.max_depth),
         restart_base(opt.restart_base), restart_factor(opt.restart_factor),
         filter(opt.filter), time(opt.time), search(opt.search),
-        bounding(opt.bounding), node_strategy(opt.node_strategy) {}
+        bounding(opt.bounding), node_strategy(opt.node_strategy),
+        feature_strategy(opt.feature_strategy) {}
 
   ostream &display(ostream &os);
 };

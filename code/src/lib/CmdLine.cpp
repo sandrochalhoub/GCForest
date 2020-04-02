@@ -307,8 +307,8 @@ DTOptions parse_dt(int argc, char *argv[]) {
                             "string");
 
   cmd.add<ValueArg<string>>(opt.format, "", "format",
-                            "input format (csv or txt, default:guess)", false, "guess",
-                            "string");
+                            "input format (csv or txt, default:guess)", false,
+                            "guess", "string");
 
   cmd.add<ValueArg<int>>(
       opt.verbosity, "v", "verbosity",
@@ -384,6 +384,10 @@ DTOptions parse_dt(int argc, char *argv[]) {
                          "error 3:max. reduction",
                          false, 2, "int");
 
+  cmd.add<ValueArg<int>>(
+      opt.feature_strategy, "", "feature_strategy",
+      "feature selection strategy 0:min error, 1:min entropy", false, 1, "int");
+
   cmd.parse(argc, argv);
   return opt;
 }
@@ -392,7 +396,8 @@ ostream &DTOptions::display(ostream &os) {
   os << setw(20) << left << "p data file:" << setw(30) << right << instance_file
      << endl
      << setw(20) << left << "p seed:" << setw(30) << right << seed << endl
-     << setw(20) << left << "p sampling ratio:" << setw(30) << right << sample << endl
+     << setw(20) << left << "p sampling ratio:" << setw(30) << right << sample
+     << endl
      << setw(20) << left << "p verbosity:" << setw(30) << right
      << (verbosity == SILENT
              ? "silent"
@@ -424,7 +429,17 @@ ostream &DTOptions::display(ostream &os) {
     os << ss.str() << endl;
   }
 
-  os << setw(20) << left << "p maximum depth:" << setw(30) << right << max_depth
+  os << setw(20) << left << "p node strategy:" << setw(30) << right
+     << (node_strategy == FIRST
+             ? "first"
+             : (node_strategy == RANDOM
+                    ? "random"
+                    : (node_strategy == ERROR ? "max error"
+                                              : "max error reduction")))
+     << endl
+     << setw(20) << left << "p feature strategy:" << setw(30) << right
+     << (node_strategy == MINERROR ? "min error" : "min entropy") << endl
+     << setw(20) << left << "p maximum depth:" << setw(30) << right << max_depth
      << endl
      << setw(20) << left << "p maximum size:" << setw(30) << right << max_size
      << endl;

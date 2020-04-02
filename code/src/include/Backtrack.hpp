@@ -92,6 +92,7 @@ private:
   vector<size_t> max_size;
 
   vector<int> f_error;
+  vector<double> f_entropy;
 
   mt19937 random_generator;
 

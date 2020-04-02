@@ -6,8 +6,8 @@ namespace primer {
 BacktrackingAlgorithm::BacktrackingAlgorithm(DataSet &d, Wood &w,
                                              DTOptions &opt)
     : wood(w), data(d), options(opt) {
-			
-			start_time = cpu_time();
+
+  start_time = cpu_time();
 
   // statistics and options
   ub_error = static_cast<size_t>(data.count());
@@ -23,6 +23,7 @@ BacktrackingAlgorithm::BacktrackingAlgorithm(DataSet &d, Wood &w,
   //
   auto m{data.numFeature()};
   f_error.resize(m, 1);
+  f_entropy.resize(m, 1);
 
   // initialize the data structure to store the examples (vectors of positive
   // feature indices)
@@ -46,7 +47,7 @@ BacktrackingAlgorithm::BacktrackingAlgorithm(DataSet &d, Wood &w,
 
   time_limit = options.time;
 
-  checking_period = 10000;
+  checking_period = 5000;
 
   interrupted = false;
 
@@ -328,15 +329,53 @@ void BacktrackingAlgorithm::filter_features(const int node) {
 }
 
 void BacktrackingAlgorithm::sort_features(const int node) {
+
+  assert(feature[node] < end_feature[node]);
+
   for (auto f{feature[node]}; f != end_feature[node]; ++f) {
-    // f_entropy[*f] = entropy(node, *f);
+    if (solution_root < 0 or options.feature_strategy == DTOptions::ENTROPY)
+      f_entropy[*f] = entropy(node, *f);
     f_error[*f] = get_feature_error(node, *f);
   }
 
-  sort(
-      feature[node], end_feature[node],
-      // [&](const int a, const int b) { return f_entropy[a] < f_entropy[b]; });
-      [&](const int a, const int b) { return f_error[a] < f_error[b]; });
+  if (solution_root >= 0 and options.feature_strategy != DTOptions::ENTROPY)
+    sort(feature[node], end_feature[node],
+         [&](const int a, const int b) { return f_error[a] < f_error[b]; });
+  else {
+    sort(feature[node], end_feature[node],
+         [&](const int a, const int b) { return f_entropy[a] < f_entropy[b]; });
+    auto min_error_f{min_element(
+        feature[node], end_feature[node],
+        [&](const int a, const int b) { return f_error[a] < f_error[b]; })};
+    if (f_error[*min_error_f] < f_error[*feature[node]]) {
+
+      //
+      //
+      // cout << endl << *min_error_f << ": " << get_feature_frequency(0, node,
+      // *min_error_f)
+      //      << "/" << get_feature_frequency(1, node, *min_error_f) << " -- "
+      //      << get_feature_frequency(0, node, *min_error_f +
+      //      data.numFeature()) << "/"
+      //      << get_feature_frequency(1, node, *min_error_f +
+      //      data.numFeature()) << " -> "
+      //      << f_error[*min_error_f] << " ~ " << f_entropy[*min_error_f] <<
+      //      endl
+      //      << *feature[node] << ": " << get_feature_frequency(0, node,
+      //      *feature[node])
+      //      << "/" << get_feature_frequency(1, node, *feature[node]) << " -- "
+      //      << get_feature_frequency(0, node, *feature[node] +
+      //      data.numFeature()) << "/"
+      //      << get_feature_frequency(1, node, *feature[node] +
+      //      data.numFeature()) << " -> "
+      //      << f_error[*feature[node]] << " ~ " << f_entropy[*feature[node]]
+      //      << endl;
+      //
+
+      if (depth[node] == ub_depth - 1)
+        swap(*feature[node], *min_error_f);
+      // cout << "swap\n" ;
+    }
+  }
 }
 
 void BacktrackingAlgorithm::count_by_example(const int node, const int y) {
