@@ -384,9 +384,10 @@ DTOptions parse_dt(int argc, char *argv[]) {
                          "error 3:max. reduction",
                          false, 2, "int");
 
-  cmd.add<ValueArg<int>>(
-      opt.feature_strategy, "", "feature_strategy",
-      "feature selection strategy 0:min error, 1:min entropy", false, 1, "int");
+  cmd.add<ValueArg<int>>(opt.feature_strategy, "", "feature_strategy",
+                         "feature selection strategy 0:min error, 1:min "
+                         "entropy, 2:min gini impurity ",
+                         false, 2, "int");
 
   cmd.parse(argc, argv);
   return opt;
@@ -437,8 +438,21 @@ ostream &DTOptions::display(ostream &os) {
                     : (node_strategy == ERROR ? "max error"
                                               : "max error reduction")))
      << endl
-     << setw(20) << left << "p feature strategy:" << setw(30) << right
-     << (node_strategy == MINERROR ? "min error" : "min entropy") << endl
+     << setw(20) << left << "p feature strategy:" << setw(30) << right;
+
+  // if (feature_strategy > 2) {
+  //   stringstream ss;
+  //   ss << "E -> min err. @" << feature_strategy << "-th solution";
+  //   os << ss.str();
+  // } else
+	if (feature_strategy == MINERROR) {
+    os << "min error";
+  } else if (feature_strategy == ENTROPY) {
+    os << "min entropy";
+  } else {
+    os << "min gini impurity";
+  }
+  os << endl
      << setw(20) << left << "p maximum depth:" << setw(30) << right << max_depth
      << endl
      << setw(20) << left << "p maximum size:" << setw(30) << right << max_size

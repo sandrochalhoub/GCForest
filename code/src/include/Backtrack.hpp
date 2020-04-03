@@ -67,7 +67,7 @@ private:
 
   /// the list of features in the order they will be tried
   vector<vector<int>> ranked_feature;
-	vector<vector<int>::iterator> end_feature;
+  vector<vector<int>::iterator> end_feature;
 
   /// store the feature tested at node i (in ranked features)
   vector<vector<int>::iterator> feature;
@@ -93,6 +93,8 @@ private:
 
   vector<int> f_error;
   vector<double> f_entropy;
+  vector<size_t> f_gini_n;
+  vector<size_t> f_gini_d;
 
   mt19937 random_generator;
 
@@ -106,6 +108,8 @@ private:
 
   size_t search_size;
   size_t search_limit;
+
+  size_t num_solutions;
 
   size_t num_backtracks;
 
@@ -122,19 +126,22 @@ private:
   int backtrack_node;
 
   int solution_root;
-	
-	int checking_period;
-	
-	bool interrupted;
-	
-	double start_time;
-	
-	void cleaning();
+
+  int checking_period;
+
+  bool interrupted;
+
+  double start_time;
+
+  // bool use_entropy;
+  int feature_criterion;
+
+  void cleaning();
 
   void store_new_best();
 
   int copy_solution(const int node);
-  //@}
+//@}
 
 #ifdef PRINTTRACE
   void print_trace();
@@ -165,18 +172,22 @@ private:
   // swap a random feature among the k best for node i with probability p/1000
   void random_perturbation(const int i, const int k, const int p);
 
-	// sort the features by minimum projected error (leave 1-entropy node at the)
+  // sort the features by minimum projected error (leave 1-entropy node at the)
   void sort_features(const int node);
 
   void filter_features(const int node);
-	
-	// compute the conditional entropy of feature at node
+
+  // compute the conditional entropy of feature at node
   double entropy(const int node, const int feature);
 
-	// count, for every feature, the number of examples of class y at node with that feature
+  void gini(const int node, const int feature, size_t &num, size_t &den);
+
+  // count, for every feature, the number of examples of class y at node with
+  // that feature
   void count_by_example(const int node, const int y);
 
-	// deduce, for every feature, the number of examples of class y at node without that feature
+  // deduce, for every feature, the number of examples of class y at node
+  // without that feature
   void deduce_from_sibling(const int parent, const int node, const int sibling,
                            const int y);
 
@@ -184,43 +195,44 @@ private:
   // m=data.numFeature)
   int get_feature_error(const int i, const int f) const;
 
-	// returns the number of examples of class y having feature f (f + m represents not-f)
+  // returns the number of examples of class y having feature f (f + m
+  // represents not-f)
   int get_feature_frequency(const int y, const int i, const int f) const;
 
-	// returns the error if we do not test any feature on node i
+  // returns the error if we do not test any feature on node i
   size_t node_error(const int i) const;
 
-	// select the most promising node to branch on
+  // select the most promising node to branch on
   int highest_error() const;
-	int highest_error_reduction() const;
+  int highest_error_reduction() const;
 
-	// whether node is a leaf (deepest test)
+  // whether node is a leaf (deepest test)
   bool isLeaf(const int node) const;
 
-	// save the current subtree of node as best tree
+  // save the current subtree of node as best tree
   void store_best_tree(const int node, const bool global);
 
   // lower bound, maybe?
   bool fail();
-	
-	// as name suggests
+
+  // as name suggests
   bool notify_solution();
-	
-	// remove the node and its descendants from the tree
+
+  // remove the node and its descendants from the tree
   void prune(const int node);
 
   bool update_upperbound(const int node);
 
   // undo the last decision and remove the previous feature as possible choice
   bool backtrack();
-	
-	// set c as the branch-child of node (branch is 0/1 i.e. left/right)
+
+  // set c as the branch-child of node (branch is 0/1 i.e. left/right)
   void setChild(const int node, const bool branch, const int c);
-	
-	// branch on node by testing f
+
+  // branch on node by testing f
   void branch(const int node, const int f);
-	
-	// select a node to branch on, the feature to test and create the children
+
+  // select a node to branch on, the feature to test and create the children
   void expend();
 
   //
