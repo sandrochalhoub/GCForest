@@ -108,11 +108,32 @@ int Wood::grow() {
 }
 
 int Wood::copyNode(const int node) {
+
+  // cout << "copy " << node << endl;
+
   if (node > 1) {
     int root{grow()};
     feature[root] = feature[node];
-    for (auto i{0}; i < 2; ++i)
-      child[i][root] = copyNode(child[i][node]);
+
+    // cout << "root: " << root << endl;
+
+    // for (auto i{0}; i < 2; ++i) {
+    //
+    //
+    // 	cout << "child[i][root]: " << child[i][root] << endl;
+    //
+    // 	cout << "  - " << child[i][node] << endl
+    // 		<< "  - " << child[i][node] << endl ;
+    //
+    // }
+
+    for (auto i{0}; i < 2; ++i) {
+      auto aux{copyNode(child[i][node])};
+
+      // cout << " -> " << aux << endl;
+
+      child[i][root] = aux;
+    }
     return root;
   }
   return node;

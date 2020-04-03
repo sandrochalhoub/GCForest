@@ -154,7 +154,7 @@ public:
   enum node_strategy { FIRST = 0, RANDOM = 1, ERROR = 2, ERROR_REDUCTION = 3 };
   int node_strategy;
 
-  enum feature_strategy { MINERROR = 0, ENTROPY = 1 };
+  enum feature_strategy { MINERROR = 0, ENTROPY = 1, GINI = 2, HYBRID = 3 };
   int feature_strategy;
 
   DTOptions(){};

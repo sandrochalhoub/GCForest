@@ -1,6 +1,8 @@
 
 #include "Backtrack.hpp"
 
+// #define DEBUG_GINI
+
 namespace primer {
 
 BacktrackingAlgorithm::BacktrackingAlgorithm(DataSet &d, Wood &w,
@@ -17,6 +19,7 @@ BacktrackingAlgorithm::BacktrackingAlgorithm(DataSet &d, Wood &w,
   search_size = 0;
   num_backtracks = 0;
   num_restarts = 0;
+  num_solutions = 0;
 
   seed(options.seed);
 
@@ -24,6 +27,8 @@ BacktrackingAlgorithm::BacktrackingAlgorithm(DataSet &d, Wood &w,
   auto m{data.numFeature()};
   f_error.resize(m, 1);
   f_entropy.resize(m, 1);
+  f_gini_n.resize(m, 1);
+  f_gini_d.resize(m, 1);
 
   // initialize the data structure to store the examples (vectors of positive
   // feature indices)
@@ -50,6 +55,9 @@ BacktrackingAlgorithm::BacktrackingAlgorithm(DataSet &d, Wood &w,
   checking_period = 5000;
 
   interrupted = false;
+
+  // use_entropy = options.feature_strategy != DTOptions::MINERROR;
+  feature_criterion = options.feature_strategy;
 
   // tree must have at least one node (0)
   resize(1);
@@ -330,52 +338,65 @@ void BacktrackingAlgorithm::filter_features(const int node) {
 
 void BacktrackingAlgorithm::sort_features(const int node) {
 
-  assert(feature[node] < end_feature[node]);
-
-  for (auto f{feature[node]}; f != end_feature[node]; ++f) {
-    if (solution_root < 0 or options.feature_strategy == DTOptions::ENTROPY)
-      f_entropy[*f] = entropy(node, *f);
-    f_error[*f] = get_feature_error(node, *f);
-  }
-
-  if (solution_root >= 0 and options.feature_strategy != DTOptions::ENTROPY)
+  switch (feature_criterion) {
+  case DTOptions::MINERROR:
+    for (auto f{feature[node]}; f != end_feature[node]; ++f)
+      f_error[*f] = get_feature_error(node, *f);
     sort(feature[node], end_feature[node],
          [&](const int a, const int b) { return f_error[a] < f_error[b]; });
-  else {
+    break;
+  case DTOptions::ENTROPY:
+    for (auto f{feature[node]}; f != end_feature[node]; ++f)
+      f_entropy[*f] = entropy(node, *f);
     sort(feature[node], end_feature[node],
          [&](const int a, const int b) { return f_entropy[a] < f_entropy[b]; });
+    break;
+  case DTOptions::GINI:
+    for (auto f{feature[node]}; f != end_feature[node]; ++f)
+      gini(node, *f, f_gini_n[*f], f_gini_d[*f]);
+    sort(feature[node], end_feature[node], [&](const int a, const int b) {
+      return (f_gini_n[a] * f_gini_d[b]) < (f_gini_n[b] * f_gini_d[a]);
+    });
+    break;
+  }
+
+  if (depth[node] == ub_depth - 1) {
+    for (auto f{feature[node]}; f != end_feature[node]; ++f)
+      f_error[*f] = get_feature_error(node, *f);
     auto min_error_f{min_element(
         feature[node], end_feature[node],
         [&](const int a, const int b) { return f_error[a] < f_error[b]; })};
     if (f_error[*min_error_f] < f_error[*feature[node]]) {
-
-      //
-      //
-      // cout << endl << *min_error_f << ": " << get_feature_frequency(0, node,
-      // *min_error_f)
-      //      << "/" << get_feature_frequency(1, node, *min_error_f) << " -- "
-      //      << get_feature_frequency(0, node, *min_error_f +
-      //      data.numFeature()) << "/"
-      //      << get_feature_frequency(1, node, *min_error_f +
-      //      data.numFeature()) << " -> "
-      //      << f_error[*min_error_f] << " ~ " << f_entropy[*min_error_f] <<
-      //      endl
-      //      << *feature[node] << ": " << get_feature_frequency(0, node,
-      //      *feature[node])
-      //      << "/" << get_feature_frequency(1, node, *feature[node]) << " -- "
-      //      << get_feature_frequency(0, node, *feature[node] +
-      //      data.numFeature()) << "/"
-      //      << get_feature_frequency(1, node, *feature[node] +
-      //      data.numFeature()) << " -> "
-      //      << f_error[*feature[node]] << " ~ " << f_entropy[*feature[node]]
-      //      << endl;
-      //
-
-      if (depth[node] == ub_depth - 1)
-        swap(*feature[node], *min_error_f);
-      // cout << "swap\n" ;
+      swap(*feature[node], *min_error_f);
     }
   }
+
+  // if (use_entropy)
+  //   for (auto f{feature[node]}; f != end_feature[node]; ++f)
+  //     f_entropy[*f] = entropy(node, *f);
+  //
+  // if (use_entropy) {
+  //   sort(feature[node], end_feature[node],
+  //        [&](const int a, const int b) { return f_entropy[a] < f_entropy[b];
+  //        });
+  //
+  //   if (depth[node] == ub_depth - 1) {
+  //     for (auto f{feature[node]}; f != end_feature[node]; ++f)
+  //       f_error[*f] = get_feature_error(node, *f);
+  //     auto min_error_f{min_element(
+  //         feature[node], end_feature[node],
+  //         [&](const int a, const int b) { return f_error[a] < f_error[b];
+  //         })};
+  //     if (f_error[*min_error_f] < f_error[*feature[node]]) {
+  //       swap(*feature[node], *min_error_f);
+  //     }
+  //   }
+  // } else {
+  //     for (auto f{feature[node]}; f != end_feature[node]; ++f)
+  //       f_error[*f] = get_feature_error(node, *f);
+  //   sort(feature[node], end_feature[node],
+  //        [&](const int a, const int b) { return f_error[a] < f_error[b]; });
+  // }
 }
 
 void BacktrackingAlgorithm::count_by_example(const int node, const int y) {
@@ -421,6 +442,11 @@ bool BacktrackingAlgorithm::notify_solution() {
 
   if (current_error < ub_error or
       (current_error == ub_error and blossom.size() < ub_node)) {
+
+    // if (++num_solutions + 1 == options.feature_strategy)
+    //   use_entropy = false;
+				++num_solutions;
+
     ub_error = current_error;
     ub_node = blossom.size();
 
@@ -874,6 +900,12 @@ void BacktrackingAlgorithm::search() {
 
   grow(0);
 
+  // size_t n, d;
+  // for (auto f{feature[0]}; f != end_feature[0]; ++f)
+  //   gini(0, *f, n, d);
+  //
+  // exit(1);
+
   current_error = max_error[0];
 
   backtrack_node = -1;
@@ -1089,6 +1121,70 @@ double BacktrackingAlgorithm::entropy(const int node, const int feature) {
   }
 
   return feature_entropy;
+}
+
+void BacktrackingAlgorithm::gini(const int node, const int feature, size_t &num,
+                                 size_t &den) {
+  int not_feature = (feature + data.numFeature());
+  int truef[2] = {not_feature, feature};
+
+  size_t branch_size[2]; // = {0,0};
+  size_t p[2];           // = {0,0};
+  size_t gini[2];        // = {0,0};
+
+  // conditional to value x for feature
+  for (auto x{0}; x < 2; ++x) {
+
+    for (auto y{0}; y < 2; ++y)
+      p[y] = get_feature_frequency(y, node,
+                                   truef[x]); // how many class-i samples if f=x
+
+    // number of samples falling on this side
+    branch_size[x] = p[0] + p[1];
+
+    // we compute on integers, normalized by n^2
+    gini[x] = (branch_size[x] * branch_size[x]);
+
+    for (auto y{0}; y < 2; ++y)
+      gini[x] -= p[y] * p[y];
+  }
+
+  num = (branch_size[0] * gini[1] + branch_size[1] * gini[0]);
+  den = (branch_size[0] * branch_size[1]);
+
+#ifdef DEBUG_GINI
+  // total number of samples
+  size_t total_size{P[0][node].count() + P[1][node].count()};
+
+  for (auto x{0}; x < 2; ++x) {
+    cout << "gini[" << (x ? feature : -feature)
+         << "] = " << (static_cast<double>(gini[x]) /
+                       static_cast<double>(branch_size[x] * branch_size[x]))
+         << endl;
+  }
+
+  double G[2] = {static_cast<double>(gini[0]) /
+                     static_cast<double>(branch_size[0] * branch_size[0]),
+                 static_cast<double>(gini[1]) /
+                     static_cast<double>(branch_size[1] * branch_size[1])};
+
+  double w[2] = {
+      static_cast<double>(branch_size[0]) / static_cast<double>(total_size),
+      static_cast<double>(branch_size[1]) / static_cast<double>(total_size)};
+
+  double real = (w[0] * G[0] + w[1] * G[1]);
+
+  cout << "weighted average = " << w[0] << " * " << G[0] << " + " << w[1]
+       << " * " << G[1] << " = " << real << endl;
+
+  double guessed =
+      static_cast<double>(num) / static_cast<double>(den * total_size);
+
+  cout << " => " << guessed << " / " << real << endl;
+
+  assert(abs(guessed - real) < .000001);
+
+#endif
 }
 
 #ifdef PRINTTRACE
