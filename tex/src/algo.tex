@@ -97,7 +97,7 @@
 	\SetKwFunction{dynprog}{DynProg}
 	\SetKwFunction{dleight}{DL8.5}
 	\SetKwFunction{cart}{CART}
-	\SetKwFunction{greedy}{Greedy-Buddy}
+	\SetKwFunction{greedy}{BudFS (first sol.)}
 	
 	
 
@@ -209,10 +209,9 @@ Moreover, we use an initially empty stack of decisions $\sequence$.
 \begin{itemize}
 	\item As long as there is a bud ($\bud \neq \emptyset$), we pick any one $\abranch \in \bud$, a feature $\afeat$ marked as \emph{available} for \abranch, add the pair $(\abranch,\afeat)$ to \sequence\ and expend the tree with the two branches $\abranch \wedge \afeat$ and $\abranch \wedge \bar{\afeat}$. 
 	%These new nodes are added to $\nodes$. 
-	They are added to $\bud$ if their depth is strictly less than $\maxd$ and if they are not pure, otherwise they are terminal tests and we record the corresponding error.
+	They are added to $\bud$ if their depth is strictly less than $\maxd-1$ (the last feature test is chosen according to minimum error) and if they are not pure, otherwise they are terminal tests and we record the corresponding error.
 
-\item As long as there is no bud ($\bud = \emptyset$), we pop the last assignment $(\abranch,\afeat)$ from sequence
-and mark the feature $\afeat$ not available for branch $\abranch$ and update the recorded best error of its subtrees. If there is at least one available feature for branch $\abranch$, we add $\abranch$ to $\bud$. 
+\item As long as there is no bud ($\bud = \emptyset$), we pop the last assignment $(\abranch,\afeat)$ from \sequence, mark the feature $\afeat$ not available for branch $\abranch$ and update the recorded best error of its subtrees. If there is at least one available feature for branch $\abranch$, we add $\abranch$ to $\bud$. 
 Otherwise, we consider it terminal and its error is the sum of the error of its best subtrees.
 % and we 
 %store the minimum error recorded for any of the possible features.
@@ -230,7 +229,9 @@ The classification error of a tree is equal to the sum of the error of its termi
 			The time complexities of Algorithms~\ref{alg:dynprog} and Algorithm~\ref{alg:bud} are equal.
 			\end{theorem}
 			
-			No proof is given, but independent subtrees are not explored in Algorithm~\ref{alg:bud} either hence both algorithms do the same computation, except not in the same order. The big difference is that whereas the cost of finding a first solution is $\Theta((n + 2^{k-1})m^{k-1})$ for Algorithm~\ref{alg:dynprog}, it is equal to $\Theta(kn + 2^k)$ for Algorithm~\ref{alg:bud}.
+			No proof is given, but independent subtrees are not explored in Algorithm~\ref{alg:bud} hence both algorithms do the same computation, except not in the same order. Notice that Algorithm~\ref{alg:bud} eagerly compute the conditional error $\error[\abranch,\afeat]$ for every feature $\afeat \in \features$, which incurs an extra factor $m$ for the data set partitionning task. However, in return the last test of each branch is chosen in $O(1)$ so we gain the same factor $m$.
+			
+			The big difference is that whereas the cost of finding a first solution is $\Theta((n + 2^{k-1})m^{k-1})$ for Algorithm~\ref{alg:dynprog}, it is equal to $\Theta(kn + 2^k)$ for Algorithm~\ref{alg:bud}, which in practice is very important, as shown in the experimental section.
 		
 	%T(m,k) = 2mT(m-1, k-1)	
 		
@@ -446,7 +447,7 @@ The classification error of a tree is equal to the sum of the error of its termi
 %
 % \end{algorithm}
 
-\clearpage
+%\clearpage
 
 \section*{Improvements}
 
@@ -457,17 +458,16 @@ There are a number of implementation details (among them how to return the actua
 
 \section*{Experiments}
 
-% \begin{table}[htbp]
-% \begin{center}
-% \begin{footnotesize}
-% \tabcolsep=5pt
-% \input{src/tables/thetable.tex}
-% \end{footnotesize}
-% \end{center}
-% \caption{\label{tab:thetable} Some results (max depth=4)}
-% \end{table}
-%
-% % \clearpage
+\subsection*{Comparison with \dleight}
+
+We first compare our algorithm (\budalg) against \dleight on relatively shallow trees (3,4 and 5) in tables~\ref{tab:d3}, \ref{tab:d4} and \ref{tab:d5}, respectively. 
+We give the minimum \emph{error}, maximum \emph{accuracy} (acc.), the cpu \emph{time} and size of the search space (\emph{choices}) required to prove optimality (when a proof is given, as markes by a 1 in the column \emph{opt}) or to find the best solution (otherwise).
+
+\medskip
+
+When the maximum depth and number of feature is not too large, both algorithms are comparable, although \budalg is systematically faster. However, when the depth or the number of features grows, the best solution found by \dleight is often of much lower quality. In fact, in most cases, it reaches the time or memory limit without outputing a solution (the missing entries corresponds to \dleight reaching the 50GB memory limit). Notice that \budalg uses a tiny memory space (much lower than the size of the data set).
+
+
 
 \begin{table}[htbp]
 \begin{center}
@@ -499,6 +499,17 @@ There are a number of implementation details (among them how to return the actua
 \caption{\label{tab:d5} Comparison with state of the art for optimal small trees (max depth=5)}
 \end{table}
 
+
+
+\subsection*{Comparison with \cart}
+
+Next, we compare our algorithm (\budalg) against \cart (its implemention in scikit-learn) on deeper trees (4 and 7 and 10). Here we give the accuracy of the first solution found by \budalg (\greedy) and the best solution found given a 3 seconds time limit (\budalg) in tables \ref{tab:d3}, \ref{tab:d4} and \ref{tab:d5}.
+
+\medskip
+
+We can see that the first solution found by our algorithm has comparable accuracy (although slightly worse in average) to the one found by \cart. Moreover, although we would need larger data sets to be confident about that, it seems that our algorithm is faster than \cart to find the first tree. One cn conjecture that \cart uses more sophisticated heuristic choices to explain these two observations.
+
+Then, in most cases, it is possible to improve significantly within a few seconds. Notice that for larger depth, improving the initil solution is harder and the 3s time limit is comparatively tighter than for smaller trees, so the gain of \budalg over \cart is more sensible for small trees.
 
 
 
