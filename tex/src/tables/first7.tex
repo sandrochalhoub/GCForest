@@ -1,40 +1,40 @@
-\begin{tabular}{lccrrrrrrrrr}
+\begin{tabular}{lccrrrrrr}
 \toprule
-& && \multicolumn{3}{c}{\cart} & \multicolumn{3}{c}{\greedy} & \multicolumn{3}{c}{\budalg}\\
-\cmidrule(rr){4-6}\cmidrule(rr){7-9}\cmidrule(rr){10-12}
-&\multirow{1}{*}{$\#ex.$} & \multirow{1}{*}{\#feat.} &  \multicolumn{1}{c}{acc.} & \multicolumn{1}{c}{error} & \multicolumn{1}{c}{time} & \multicolumn{1}{c}{acc.} & \multicolumn{1}{c}{error} & \multicolumn{1}{c}{time} & \multicolumn{1}{c}{acc.} & \multicolumn{1}{c}{error} & \multicolumn{1}{c}{time} \\
+& && \multicolumn{2}{c}{\cart} & \multicolumn{2}{c}{first sol.} & \multicolumn{2}{c}{$\leq 3$s}\\
+\cmidrule(rr){4-5}\cmidrule(rr){6-7}\cmidrule(rr){8-9}
+&\multirow{1}{*}{$\#ex.$} & \multirow{1}{*}{\#feat.} &  \multicolumn{1}{c}{error} & \multicolumn{1}{c}{time} & \multicolumn{1}{c}{error} & \multicolumn{1}{c}{time} & \multicolumn{1}{c}{error} & \multicolumn{1}{c}{time} \\
 \midrule
 
-\texttt{anneal} & \multicolumn{1}{r}{812} & \multicolumn{1}{r}{47}  & \cellcolor{TealBlue!30}{\textbf{0.882}} & \cellcolor{TealBlue!30}{\textbf{96}} & 0.0 & 0.872 & 104 & \cellcolor{TealBlue!30}{\textbf{0.0}} & 0.878 & 99 & 3.0\\
-\texttt{audiology} & \multicolumn{1}{r}{216} & \multicolumn{1}{r}{79}  & \cellcolor{TealBlue!30}{1.000} & \cellcolor{TealBlue!30}{0} & 0.0 & \cellcolor{TealBlue!30}{1.000} & \cellcolor{TealBlue!30}{0} & \cellcolor{TealBlue!30}{\textbf{0.0}} & \cellcolor{TealBlue!30}{1.000} & \cellcolor{TealBlue!30}{0} & 0.0\\
-\texttt{australian-credit} & \multicolumn{1}{r}{653} & \multicolumn{1}{r}{73}  & 0.934 & 43 & 0.0 & 0.934 & 43 & \cellcolor{TealBlue!30}{\textbf{0.0}} & \cellcolor{TealBlue!30}{\textbf{0.951}} & \cellcolor{TealBlue!30}{\textbf{32}} & 3.0\\
-\texttt{breast-cancer-un} & \multicolumn{1}{r}{683} & \multicolumn{1}{r}{89}  & 0.988 & 8 & 0.0 & 0.982 & 12 & \cellcolor{TealBlue!30}{\textbf{0.0}} & \cellcolor{TealBlue!30}{\textbf{0.996}} & \cellcolor{TealBlue!30}{\textbf{3}} & 3.0\\
-\texttt{breast-wisconsin} & \multicolumn{1}{r}{683} & \multicolumn{1}{r}{120}  & 0.994 & 4 & 0.0 & 0.994 & 4 & \cellcolor{TealBlue!30}{\textbf{0.0}} & \cellcolor{TealBlue!30}{\textbf{1.000}} & \cellcolor{TealBlue!30}{\textbf{0}} & 0.1\\
-\texttt{car-un} & \multicolumn{1}{r}{1728} & \multicolumn{1}{r}{21}  & 0.971 & 50 & 0.0 & 0.971 & 50 & \cellcolor{TealBlue!30}{\textbf{0.0}} & \cellcolor{TealBlue!30}{\textbf{0.980}} & \cellcolor{TealBlue!30}{\textbf{34}} & 3.0\\
-\texttt{diabetes} & \multicolumn{1}{r}{768} & \multicolumn{1}{r}{112}  & 0.870 & 100 & 0.0 & 0.868 & 101 & \cellcolor{TealBlue!30}{\textbf{0.0}} & \cellcolor{TealBlue!30}{\textbf{0.900}} & \cellcolor{TealBlue!30}{\textbf{77}} & 3.0\\
-\texttt{forest-fires-un} & \multicolumn{1}{r}{517} & \multicolumn{1}{r}{989}  & \cellcolor{TealBlue!30}{\textbf{0.687}} & \cellcolor{TealBlue!30}{\textbf{162}} & 0.0 & 0.675 & 168 & \cellcolor{TealBlue!30}{\textbf{0.0}} & 0.681 & 165 & 3.0\\
-\texttt{german-credit} & \multicolumn{1}{r}{1000} & \multicolumn{1}{r}{110}  & 0.851 & 149 & 0.0 & 0.848 & 152 & \cellcolor{TealBlue!30}{\textbf{0.0}} & \cellcolor{TealBlue!30}{\textbf{0.872}} & \cellcolor{TealBlue!30}{\textbf{128}} & 3.0\\
-\texttt{heart-cleveland} & \multicolumn{1}{r}{296} & \multicolumn{1}{r}{50}  & 0.980 & 6 & 0.0 & 0.963 & 11 & \cellcolor{TealBlue!30}{\textbf{0.0}} & \cellcolor{TealBlue!30}{\textbf{1.000}} & \cellcolor{TealBlue!30}{\textbf{0}} & 0.4\\
-\texttt{hepatitis} & \multicolumn{1}{r}{137} & \multicolumn{1}{r}{68}  & \cellcolor{TealBlue!30}{1.000} & \cellcolor{TealBlue!30}{0} & 0.0 & \cellcolor{TealBlue!30}{1.000} & \cellcolor{TealBlue!30}{0} & \cellcolor{TealBlue!30}{\textbf{0.0}} & \cellcolor{TealBlue!30}{1.000} & \cellcolor{TealBlue!30}{0} & 0.0\\
-\texttt{hypothyroid} & \multicolumn{1}{r}{3247} & \multicolumn{1}{r}{43}  & \cellcolor{TealBlue!30}{\textbf{0.987}} & \cellcolor{TealBlue!30}{\textbf{42}} & 0.0 & 0.986 & 45 & \cellcolor{TealBlue!30}{\textbf{0.0}} & 0.986 & 45 & 3.0\\
-\texttt{ionosphere} & \multicolumn{1}{r}{351} & \multicolumn{1}{r}{444}  & 0.980 & 7 & 0.0 & 0.983 & 6 & \cellcolor{TealBlue!30}{\textbf{0.0}} & \cellcolor{TealBlue!30}{\textbf{1.000}} & \cellcolor{TealBlue!30}{\textbf{0}} & 0.0\\
-\texttt{kr-vs-kp} & \multicolumn{1}{r}{3196} & \multicolumn{1}{r}{37}  & 0.968 & 103 & 0.0 & 0.968 & 101 & \cellcolor{TealBlue!30}{\textbf{0.0}} & \cellcolor{TealBlue!30}{\textbf{0.986}} & \cellcolor{TealBlue!30}{\textbf{46}} & 3.0\\
-\texttt{letter} & \multicolumn{1}{r}{20000} & \multicolumn{1}{r}{224}  & \cellcolor{TealBlue!30}{\textbf{0.992}} & \cellcolor{TealBlue!30}{\textbf{153}} & 0.6 & 0.989 & 211 & \cellcolor{TealBlue!30}{\textbf{0.0}} & 0.989 & 211 & 3.3\\
-\texttt{lymph} & \multicolumn{1}{r}{148} & \multicolumn{1}{r}{41}  & \cellcolor{TealBlue!30}{1.000} & \cellcolor{TealBlue!30}{0} & 0.0 & \cellcolor{TealBlue!30}{1.000} & \cellcolor{TealBlue!30}{0} & \cellcolor{TealBlue!30}{\textbf{0.0}} & \cellcolor{TealBlue!30}{1.000} & \cellcolor{TealBlue!30}{0} & 0.0\\
-\texttt{mushroom} & \multicolumn{1}{r}{8124} & \multicolumn{1}{r}{91}  & \cellcolor{TealBlue!30}{1.000} & \cellcolor{TealBlue!30}{0} & 0.0 & \cellcolor{TealBlue!30}{1.000} & \cellcolor{TealBlue!30}{0} & \cellcolor{TealBlue!30}{\textbf{0.0}} & \cellcolor{TealBlue!30}{1.000} & \cellcolor{TealBlue!30}{0} & 0.0\\
-\texttt{pendigits} & \multicolumn{1}{r}{7494} & \multicolumn{1}{r}{216}  & 1.000 & 1 & 0.1 & 1.000 & 1 & \cellcolor{TealBlue!30}{\textbf{0.0}} & \cellcolor{TealBlue!30}{\textbf{1.000}} & \cellcolor{TealBlue!30}{\textbf{0}} & 0.1\\
-\texttt{primary-tumor} & \multicolumn{1}{r}{336} & \multicolumn{1}{r}{16}  & 0.923 & 26 & 0.0 & 0.917 & 28 & \cellcolor{TealBlue!30}{\textbf{0.0}} & \cellcolor{TealBlue!30}{\textbf{0.946}} & \cellcolor{TealBlue!30}{\textbf{18}} & 3.0\\
-\texttt{segment} & \multicolumn{1}{r}{2310} & \multicolumn{1}{r}{234}  & \cellcolor{TealBlue!30}{1.000} & \cellcolor{TealBlue!30}{0} & 0.0 & \cellcolor{TealBlue!30}{1.000} & \cellcolor{TealBlue!30}{0} & \cellcolor{TealBlue!30}{\textbf{0.0}} & \cellcolor{TealBlue!30}{1.000} & \cellcolor{TealBlue!30}{0} & 0.0\\
-\texttt{soybean} & \multicolumn{1}{r}{630} & \multicolumn{1}{r}{34}  & 0.983 & 11 & 0.0 & 0.948 & 33 & \cellcolor{TealBlue!30}{\textbf{0.0}} & \cellcolor{TealBlue!30}{\textbf{0.994}} & \cellcolor{TealBlue!30}{\textbf{4}} & 3.0\\
-\texttt{splice-1} & \multicolumn{1}{r}{3190} & \multicolumn{1}{r}{227}  & \cellcolor{TealBlue!30}{0.982} & \cellcolor{TealBlue!30}{58} & 0.0 & 0.981 & 60 & \cellcolor{TealBlue!30}{\textbf{0.0}} & \cellcolor{TealBlue!30}{0.982} & \cellcolor{TealBlue!30}{58} & 3.0\\
-\texttt{taiwan\_binarised} & \multicolumn{1}{r}{30000} & \multicolumn{1}{r}{198}  & 0.828 & 5161 & 0.7 & 0.828 & 5160 & \cellcolor{TealBlue!30}{\textbf{0.0}} & \cellcolor{TealBlue!30}{\textbf{0.829}} & \cellcolor{TealBlue!30}{\textbf{5135}} & 3.0\\
-\texttt{tic-tac-toe} & \multicolumn{1}{r}{958} & \multicolumn{1}{r}{18}  & 0.977 & 22 & 0.0 & 0.978 & 21 & \cellcolor{TealBlue!30}{\textbf{0.0}} & \cellcolor{TealBlue!30}{\textbf{0.993}} & \cellcolor{TealBlue!30}{\textbf{7}} & 3.0\\
-\texttt{vehicle} & \multicolumn{1}{r}{846} & \multicolumn{1}{r}{252}  & 0.995 & 4 & 0.0 & 0.992 & 7 & \cellcolor{TealBlue!30}{\textbf{0.0}} & \cellcolor{TealBlue!30}{\textbf{1.000}} & \cellcolor{TealBlue!30}{\textbf{0}} & 0.6\\
-\texttt{vote} & \multicolumn{1}{r}{435} & \multicolumn{1}{r}{32}  & 0.995 & 2 & 0.0 & 0.995 & 2 & \cellcolor{TealBlue!30}{\textbf{0.0}} & \cellcolor{TealBlue!30}{\textbf{1.000}} & \cellcolor{TealBlue!30}{\textbf{0}} & 0.0\\
-\texttt{wine1-un} & \multicolumn{1}{r}{178} & \multicolumn{1}{r}{1276}  & \cellcolor{TealBlue!30}{\textbf{0.815}} & \cellcolor{TealBlue!30}{\textbf{33}} & 0.0 & 0.781 & 39 & \cellcolor{TealBlue!30}{\textbf{0.0}} & 0.803 & 35 & 3.1\\
-\texttt{wine2-un} & \multicolumn{1}{r}{178} & \multicolumn{1}{r}{1276}  & 0.787 & 38 & 0.0 & 0.787 & 38 & \cellcolor{TealBlue!30}{\textbf{0.0}} & \cellcolor{TealBlue!30}{\textbf{0.803}} & \cellcolor{TealBlue!30}{\textbf{35}} & 3.1\\
-\texttt{wine3-un} & \multicolumn{1}{r}{178} & \multicolumn{1}{r}{1276}  & 0.854 & 26 & 0.0 & 0.865 & 24 & \cellcolor{TealBlue!30}{\textbf{0.0}} & \cellcolor{TealBlue!30}{\textbf{0.871}} & \cellcolor{TealBlue!30}{\textbf{23}} & 3.1\\
-\texttt{yeast} & \multicolumn{1}{r}{1484} & \multicolumn{1}{r}{89}  & 0.794 & 306 & 0.0 & 0.792 & 309 & \cellcolor{TealBlue!30}{\textbf{0.0}} & \cellcolor{TealBlue!30}{\textbf{0.814}} & \cellcolor{TealBlue!30}{\textbf{276}} & 3.0\\
-\texttt{zoo-1} & \multicolumn{1}{r}{101} & \multicolumn{1}{r}{20}  & \cellcolor{TealBlue!30}{1.000} & \cellcolor{TealBlue!30}{0} & 0.0 & \cellcolor{TealBlue!30}{1.000} & \cellcolor{TealBlue!30}{0} & \cellcolor{TealBlue!30}{\textbf{0.0}} & \cellcolor{TealBlue!30}{1.000} & \cellcolor{TealBlue!30}{0} & 0.0\\
+\texttt{anneal} & \multicolumn{1}{r}{812} & \multicolumn{1}{r}{47}  & 96 & 0.00 & 94 & \cellcolor{TealBlue!30}{\textbf{0.00}} & \cellcolor{TealBlue!30}{\textbf{91}} & 2.87\\
+\texttt{audiology} & \multicolumn{1}{r}{216} & \multicolumn{1}{r}{79}  & \cellcolor{TealBlue!30}{0} & 0.00 & \cellcolor{TealBlue!30}{0} & \cellcolor{TealBlue!30}{\textbf{0.00}} & \cellcolor{TealBlue!30}{0} & 0.00\\
+\texttt{australian-credit} & \multicolumn{1}{r}{653} & \multicolumn{1}{r}{73}  & 43 & 0.01 & 43 & \cellcolor{TealBlue!30}{\textbf{0.00}} & \cellcolor{TealBlue!30}{\textbf{30}} & 0.55\\
+\texttt{breast-cancer-un} & \multicolumn{1}{r}{683} & \multicolumn{1}{r}{89}  & 8 & 0.00 & 8 & \cellcolor{TealBlue!30}{\textbf{0.00}} & \cellcolor{TealBlue!30}{\textbf{2}} & 0.39\\
+\texttt{breast-wisconsin} & \multicolumn{1}{r}{683} & \multicolumn{1}{r}{120}  & 4 & 0.00 & 4 & \cellcolor{TealBlue!30}{\textbf{0.00}} & \cellcolor{TealBlue!30}{\textbf{0}} & 0.33\\
+\texttt{car-un} & \multicolumn{1}{r}{1728} & \multicolumn{1}{r}{21}  & 50 & 0.00 & 50 & \cellcolor{TealBlue!30}{\textbf{0.00}} & \cellcolor{TealBlue!30}{\textbf{34}} & 0.27\\
+\texttt{diabetes} & \multicolumn{1}{r}{768} & \multicolumn{1}{r}{112}  & 100 & 0.01 & 99 & \cellcolor{TealBlue!30}{\textbf{0.00}} & \cellcolor{TealBlue!30}{\textbf{77}} & 2.05\\
+\texttt{forest-fires-un} & \multicolumn{1}{r}{517} & \multicolumn{1}{r}{989}  & 162 & 0.02 & 161 & \cellcolor{TealBlue!30}{\textbf{0.00}} & \cellcolor{TealBlue!30}{\textbf{159}} & 0.22\\
+\texttt{german-credit} & \multicolumn{1}{r}{1000} & \multicolumn{1}{r}{110}  & 149 & 0.03 & 141 & \cellcolor{TealBlue!30}{\textbf{0.00}} & \cellcolor{TealBlue!30}{\textbf{114}} & 0.63\\
+\texttt{heart-cleveland} & \multicolumn{1}{r}{296} & \multicolumn{1}{r}{50}  & 6 & 0.00 & 7 & \cellcolor{TealBlue!30}{\textbf{0.00}} & \cellcolor{TealBlue!30}{\textbf{0}} & 0.03\\
+\texttt{hepatitis} & \multicolumn{1}{r}{137} & \multicolumn{1}{r}{68}  & \cellcolor{TealBlue!30}{0} & 0.00 & \cellcolor{TealBlue!30}{0} & \cellcolor{TealBlue!30}{\textbf{0.00}} & \cellcolor{TealBlue!30}{0} & 0.00\\
+\texttt{hypothyroid} & \multicolumn{1}{r}{3247} & \multicolumn{1}{r}{43}  & \cellcolor{TealBlue!30}{\textbf{42}} & 0.01 & 43 & \cellcolor{TealBlue!30}{\textbf{0.00}} & 43 & 1.33\\
+\texttt{ionosphere} & \multicolumn{1}{r}{351} & \multicolumn{1}{r}{444}  & 7 & 0.01 & 7 & \cellcolor{TealBlue!30}{\textbf{0.00}} & \cellcolor{TealBlue!30}{\textbf{0}} & 0.52\\
+\texttt{kr-vs-kp} & \multicolumn{1}{r}{3196} & \multicolumn{1}{r}{37}  & 103 & 0.01 & 102 & \cellcolor{TealBlue!30}{\textbf{0.00}} & \cellcolor{TealBlue!30}{\textbf{101}} & 2.17\\
+\texttt{letter} & \multicolumn{1}{r}{20000} & \multicolumn{1}{r}{224}  & 153 & 0.62 & 143 & \cellcolor{TealBlue!30}{\textbf{0.04}} & \cellcolor{TealBlue!30}{\textbf{142}} & 0.50\\
+\texttt{lymph} & \multicolumn{1}{r}{148} & \multicolumn{1}{r}{41}  & \cellcolor{TealBlue!30}{0} & 0.00 & \cellcolor{TealBlue!30}{0} & \cellcolor{TealBlue!30}{\textbf{0.00}} & \cellcolor{TealBlue!30}{0} & 0.00\\
+\texttt{mushroom} & \multicolumn{1}{r}{8124} & \multicolumn{1}{r}{91}  & \cellcolor{TealBlue!30}{0} & 0.03 & \cellcolor{TealBlue!30}{0} & \cellcolor{TealBlue!30}{\textbf{0.00}} & \cellcolor{TealBlue!30}{0} & 0.02\\
+\texttt{pendigits} & \multicolumn{1}{r}{7494} & \multicolumn{1}{r}{216}  & 1 & 0.09 & 1 & \cellcolor{TealBlue!30}{\textbf{0.01}} & \cellcolor{TealBlue!30}{\textbf{0}} & 0.11\\
+\texttt{primary-tumor} & \multicolumn{1}{r}{336} & \multicolumn{1}{r}{16}  & 26 & 0.00 & 26 & \cellcolor{TealBlue!30}{\textbf{0.00}} & \cellcolor{TealBlue!30}{\textbf{17}} & 1.86\\
+\texttt{segment} & \multicolumn{1}{r}{2310} & \multicolumn{1}{r}{234}  & \cellcolor{TealBlue!30}{0} & 0.01 & \cellcolor{TealBlue!30}{0} & \cellcolor{TealBlue!30}{\textbf{0.00}} & \cellcolor{TealBlue!30}{0} & 0.03\\
+\texttt{soybean} & \multicolumn{1}{r}{630} & \multicolumn{1}{r}{34}  & 11 & 0.00 & 11 & \cellcolor{TealBlue!30}{\textbf{0.00}} & \cellcolor{TealBlue!30}{\textbf{4}} & 0.70\\
+\texttt{splice-1} & \multicolumn{1}{r}{3190} & \multicolumn{1}{r}{227}  & 58 & 0.05 & 58 & \cellcolor{TealBlue!30}{\textbf{0.00}} & \cellcolor{TealBlue!30}{\textbf{55}} & 2.24\\
+\texttt{taiwan\_binarised} & \multicolumn{1}{r}{30000} & \multicolumn{1}{r}{198}  & 5161 & 0.66 & 5121 & \cellcolor{TealBlue!30}{\textbf{0.04}} & \cellcolor{TealBlue!30}{\textbf{5087}} & 2.06\\
+\texttt{tic-tac-toe} & \multicolumn{1}{r}{958} & \multicolumn{1}{r}{18}  & 22 & 0.00 & 21 & \cellcolor{TealBlue!30}{\textbf{0.00}} & \cellcolor{TealBlue!30}{\textbf{1}} & 1.14\\
+\texttt{vehicle} & \multicolumn{1}{r}{846} & \multicolumn{1}{r}{252}  & 4 & 0.01 & 4 & \cellcolor{TealBlue!30}{\textbf{0.00}} & \cellcolor{TealBlue!30}{\textbf{0}} & 0.59\\
+\texttt{vote} & \multicolumn{1}{r}{435} & \multicolumn{1}{r}{32}  & 2 & 0.00 & 2 & \cellcolor{TealBlue!30}{\textbf{0.00}} & \cellcolor{TealBlue!30}{\textbf{0}} & 0.00\\
+\texttt{wine1-un} & \multicolumn{1}{r}{178} & \multicolumn{1}{r}{1276}  & 33 & 0.01 & 33 & \cellcolor{TealBlue!30}{\textbf{0.00}} & \cellcolor{TealBlue!30}{\textbf{30}} & 0.17\\
+\texttt{wine2-un} & \multicolumn{1}{r}{178} & \multicolumn{1}{r}{1276}  & 38 & 0.01 & 38 & \cellcolor{TealBlue!30}{\textbf{0.00}} & \cellcolor{TealBlue!30}{\textbf{35}} & 0.49\\
+\texttt{wine3-un} & \multicolumn{1}{r}{178} & \multicolumn{1}{r}{1276}  & 26 & 0.01 & 26 & \cellcolor{TealBlue!30}{\textbf{0.00}} & \cellcolor{TealBlue!30}{\textbf{24}} & 2.12\\
+\texttt{yeast} & \multicolumn{1}{r}{1484} & \multicolumn{1}{r}{89}  & 306 & 0.01 & 305 & \cellcolor{TealBlue!30}{\textbf{0.00}} & \cellcolor{TealBlue!30}{\textbf{278}} & 1.30\\
+\texttt{zoo-1} & \multicolumn{1}{r}{101} & \multicolumn{1}{r}{20}  & \cellcolor{TealBlue!30}{0} & 0.00 & \cellcolor{TealBlue!30}{0} & \cellcolor{TealBlue!30}{\textbf{0.00}} & \cellcolor{TealBlue!30}{0} & 0.00\\
 \bottomrule
 \end{tabular}

@@ -507,9 +507,9 @@ Next, we compare our algorithm (\budalg) against \cart (its implemention in scik
 
 \medskip
 
-We can see that the first solution found by our algorithm has comparable accuracy (although slightly worse in average) to the one found by \cart. Moreover, although we would need larger data sets to be confident about that, it seems that our algorithm is faster than \cart to find the first tree. One cn conjecture that \cart uses more sophisticated heuristic choices to explain these two observations.
+We can see that the first solution found by our algorithm has comparable accuracy (actually, often slightly better) to the one found by \cart. Moreover, although we would need larger data sets to be confident about that, it seems that our algorithm is faster than \cart to find this first decision tree. %One can conjecture that \cart uses more sophisticated heuristic choices to explain these two observations.
 
-Then, in most cases, it is possible to improve significantly within a few seconds. Notice that for larger depth, improving the initil solution is harder and the 3s time limit is comparatively tighter than for smaller trees, so the gain of \budalg over \cart is more sensible for small trees.
+Then, in most cases, it is possible to improve the first solution significantly within a few seconds. Notice that for larger depth, improving the initial solution is harder and the 3s time limit is comparatively tighter than for smaller trees, so the gain of \budalg over \cart is more sensible for small trees.
 
 
 
@@ -546,58 +546,112 @@ Then, in most cases, it is possible to improve significantly within a few second
 \end{table}
 
 
-\subsection*{Comparison of heuristics}
-
-
-\begin{table}[htbp]
-\begin{center}
-\begin{normalsize}
-\tabcolsep=5pt
-\input{src/tables/heuristicall3.tex}
-\end{normalsize}
-\end{center}
-\caption{\label{tab:ha3} Comparison of heuristics (max depth=3)}
-\end{table}
-
-\begin{table}[htbp]
-\begin{center}
-\begin{normalsize}
-\tabcolsep=5pt
-\input{src/tables/heuristicall4.tex}
-\end{normalsize}
-\end{center}
-\caption{\label{tab:ha4} Comparison of heuristics (max depth=4)}
-\end{table}
-
-\begin{table}[htbp]
-\begin{center}
-\begin{normalsize}
-\tabcolsep=5pt
-\input{src/tables/heuristicall5.tex}
-\end{normalsize}
-\end{center}
-\caption{\label{tab:ha5} Comparison of heuristics (max depth=5)}
-\end{table}
-
-\begin{table}[htbp]
-\begin{center}
-\begin{normalsize}
-\tabcolsep=5pt
-\input{src/tables/heuristicall7.tex}
-\end{normalsize}
-\end{center}
-\caption{\label{tab:ha7} Comparison of heuristics (max depth=7)}
-\end{table}
-
-\begin{table}[htbp]
-\begin{center}
-\begin{normalsize}
-\tabcolsep=5pt
-\input{src/tables/heuristicall10.tex}
-\end{normalsize}
-\end{center}
-\caption{\label{tab:ha10} Comparison of heuristics (max depth=10)}
-\end{table}
+% \subsection*{Comparison of heuristics}
+%
+%
+% \begin{table}[htbp]
+% \begin{center}
+% \begin{normalsize}
+% \tabcolsep=5pt
+% \input{src/tables/heuristicall3.tex}
+% \end{normalsize}
+% \end{center}
+% \caption{\label{tab:ha3} Comparison of heuristics (max depth=3)}
+% \end{table}
+%
+% \begin{table}[htbp]
+% \begin{center}
+% \begin{normalsize}
+% \tabcolsep=5pt
+% \input{src/tables/heuristicall4.tex}
+% \end{normalsize}
+% \end{center}
+% \caption{\label{tab:ha4} Comparison of heuristics (max depth=4)}
+% \end{table}
+%
+% \begin{table}[htbp]
+% \begin{center}
+% \begin{normalsize}
+% \tabcolsep=5pt
+% \input{src/tables/heuristicall5.tex}
+% \end{normalsize}
+% \end{center}
+% \caption{\label{tab:ha5} Comparison of heuristics (max depth=5)}
+% \end{table}
+%
+% \begin{table}[htbp]
+% \begin{center}
+% \begin{normalsize}
+% \tabcolsep=5pt
+% \input{src/tables/heuristicall7.tex}
+% \end{normalsize}
+% \end{center}
+% \caption{\label{tab:ha7} Comparison of heuristics (max depth=7)}
+% \end{table}
+%
+% \begin{table}[htbp]
+% \begin{center}
+% \begin{normalsize}
+% \tabcolsep=5pt
+% \input{src/tables/heuristicall10.tex}
+% \end{normalsize}
+% \end{center}
+% \caption{\label{tab:ha10} Comparison of heuristics (max depth=10)}
+% \end{table}
+%
+%
+%
+%
+%
+% \begin{table}[htbp]
+% \begin{center}
+% \begin{normalsize}
+% \tabcolsep=5pt
+% \input{src/tables/heuristicfirst3.tex}
+% \end{normalsize}
+% \end{center}
+% \caption{\label{tab:ha3} Comparison of heuristics (max depth=3)}
+% \end{table}
+%
+% \begin{table}[htbp]
+% \begin{center}
+% \begin{normalsize}
+% \tabcolsep=5pt
+% \input{src/tables/heuristicfirst4.tex}
+% \end{normalsize}
+% \end{center}
+% \caption{\label{tab:ha4} Comparison of heuristics (max depth=4)}
+% \end{table}
+%
+% \begin{table}[htbp]
+% \begin{center}
+% \begin{normalsize}
+% \tabcolsep=5pt
+% \input{src/tables/heuristicfirst5.tex}
+% \end{normalsize}
+% \end{center}
+% \caption{\label{tab:ha5} Comparison of heuristics (max depth=5)}
+% \end{table}
+%
+% \begin{table}[htbp]
+% \begin{center}
+% \begin{normalsize}
+% \tabcolsep=5pt
+% \input{src/tables/heuristicfirst7.tex}
+% \end{normalsize}
+% \end{center}
+% \caption{\label{tab:ha7} Comparison of heuristics (max depth=7)}
+% \end{table}
+%
+% \begin{table}[htbp]
+% \begin{center}
+% \begin{normalsize}
+% \tabcolsep=5pt
+% \input{src/tables/heuristicfirst10.tex}
+% \end{normalsize}
+% \end{center}
+% \caption{\label{tab:ha10} Comparison of heuristics (max depth=10)}
+% \end{table}
 
 
 % \begin{table}[htbp]
