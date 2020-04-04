@@ -93,8 +93,8 @@ private:
 
   vector<int> f_error;
   vector<double> f_entropy;
-  vector<size_t> f_gini_n;
-  vector<size_t> f_gini_d;
+  vector<double> f_gini_n;
+  vector<double> f_gini_d;
 
   mt19937 random_generator;
 
@@ -180,7 +180,7 @@ private:
   // compute the conditional entropy of feature at node
   double entropy(const int node, const int feature);
 
-  void gini(const int node, const int feature, size_t &num, size_t &den);
+  void gini(const int node, const int feature, double &num, double &den);
 
   // count, for every feature, the number of examples of class y at node with
   // that feature
