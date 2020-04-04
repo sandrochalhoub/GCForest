@@ -163,7 +163,9 @@ void BacktrackingAlgorithm::print_new_best() const {
        // << " backtracks=" << setw(9) << num_backtracks
        << " choices=" << setw(9) << search_size << " restarts=" << setw(5)
        << num_restarts << " mem=" << left << setw(4) << wood.size() << right
-       << " time=" << setprecision(3) << cpu_time()-start_time << right << endl;
+       // << endl;
+       << " time=" << setprecision(3) << cpu_time() - start_time << right
+       << endl;
 }
 
 bool BacktrackingAlgorithm::isLeaf(const int node) const {
@@ -276,7 +278,7 @@ int BacktrackingAlgorithm::highest_error() const {
 
 #ifdef PRINTTRACE
     if (PRINTTRACE and options.verbosity >= DTOptions::SOLVERINFO)
-      cout << " " << i << ": (" << err << " - " << (err - reduction) << ")";
+      cout << " " << i << ": (" << err << ")";
 #endif
 
     if (err > highest_error) {
@@ -900,11 +902,23 @@ void BacktrackingAlgorithm::search() {
 
   grow(0);
 
-  // size_t n, d;
-  // for (auto f{feature[0]}; f != end_feature[0]; ++f)
-  //   gini(0, *f, n, d);
+  // cout << numeric_limits<size_t>::max() << endl;
   //
-  // exit(1);
+  //   // size_t n, d;
+  //   for (auto f{feature[0]}; f != end_feature[0]; ++f)
+  //     cout << setw(5) << *f << " "  << setw(20) << f_gini_n[*f] << " " <<
+  //     setw(15) << f_gini_d[*f] << " "
+  //          << setw(10) << static_cast<double>(f_gini_n[*f]) /
+  //                 static_cast<double>(f_gini_d[*f])
+  // 								<< " " << setw(30)
+  // <<
+  // 								(f_gini_n[*f] *
+  // f_gini_d[*f])
+  //          << endl;
+  //
+  //   //   gini(0, *f, n, d);
+  //   //
+  //   exit(1);
 
   current_error = max_error[0];
 
@@ -914,8 +928,6 @@ void BacktrackingAlgorithm::search() {
     separator("search");
 
   while (not limit_out()) {
-
-    // ++search_size;
 
     if (num_backtracks > restart_limit)
       restart();
@@ -1123,8 +1135,8 @@ double BacktrackingAlgorithm::entropy(const int node, const int feature) {
   return feature_entropy;
 }
 
-void BacktrackingAlgorithm::gini(const int node, const int feature, size_t &num,
-                                 size_t &den) {
+void BacktrackingAlgorithm::gini(const int node, const int feature, double &num,
+                                 double &den) {
   int not_feature = (feature + data.numFeature());
   int truef[2] = {not_feature, feature};
 
@@ -1149,8 +1161,9 @@ void BacktrackingAlgorithm::gini(const int node, const int feature, size_t &num,
       gini[x] -= p[y] * p[y];
   }
 
-  num = (branch_size[0] * gini[1] + branch_size[1] * gini[0]);
-  den = (branch_size[0] * branch_size[1]);
+  num =
+      static_cast<double>(branch_size[0] * gini[1] + branch_size[1] * gini[0]);
+  den = static_cast<double>(branch_size[0] * branch_size[1]);
 
 #ifdef DEBUG_GINI
   // total number of samples

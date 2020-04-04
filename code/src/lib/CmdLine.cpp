@@ -408,8 +408,10 @@ ostream &DTOptions::display(ostream &os) {
      << endl
      << setw(20) << left << "p verified:" << setw(30) << right
      << (verified ? "yes" : "no") << endl
-     << setw(20) << left << "p filter:" << setw(30) << right
+     << setw(20) << left << "p filter data set:" << setw(30) << right
      << (filter ? "yes" : "no") << endl
+     << setw(20) << left << "p bound cuts:" << setw(30) << right
+     << (bounding ? "yes" : "no") << endl
      << setw(20) << left << "p randomization:" << setw(30) << right;
 
   if (width == 1 or focus == 1)
