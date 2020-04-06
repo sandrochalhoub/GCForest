@@ -52,7 +52,7 @@ void read(const std::string &fn,
 
 template <typename data_declaration>
 void read_binary(const std::string &fn, data_declaration notify_data,
-                 std::string delimeter = " ") {
+                 std::string delimeter = " \n") {
   using std::cerr;
   try {
     std::ifstream ifs(fn);
@@ -75,34 +75,15 @@ void read_binary(const std::string &fn, data_declaration notify_data,
 
       if (emptyline)
         continue;
-
-      row.clear();
-      boost::algorithm::split(string_row, line, boost::is_any_of(delimeter));
-
-      for (auto r : string_row) {
-        if (r == "1")
-          row.push_back(1);
-        else
-          row.push_back(0);
-        // cout << row.back() << " ";
-      }
-
-      // notify_data(row);
-      break;
-    }
-
-    // cout << row.size() << endl;
-
-    auto ok{true};
-    while (ok) {
+			
+			row.clear();
+			for(auto c : line) {
+				if(c == '0')
+					row.push_back(0);
+				else if(c == '1')
+					row.push_back(1);
+			}
       notify_data(row);
-      for (auto i{0}; i < row.size() and ok; ++i) {
-        ifs >> row[i];
-        if (not ifs.good()) {
-          ok = false;
-          // cout << "stop!\n";
-        }
-      }
     }
 
   } catch (std::exception &e) {

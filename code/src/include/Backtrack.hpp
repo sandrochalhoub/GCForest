@@ -41,9 +41,9 @@ private:
 
   DTOptions &options;
   vector<vector<int>> example[2];
-	
-	vector<int> relevant_features;
-	dynamic_bitset<> feature_set;
+
+  vector<int> relevant_features;
+  dynamic_bitset<> feature_set;
 
   /// store the children of node i
   vector<int> child[2];
@@ -186,8 +186,7 @@ private:
   // sort the features by minimum projected error (leave 1-entropy node at the)
   void sort_features(const int node);
 
-	template<class property>
-  void filter_features(const int node, property cond);
+  template <class property> void filter_features(const int node, property cond);
 
   // compute the conditional entropy of feature at node
   double entropy(const int node, const int feature);
@@ -257,45 +256,44 @@ private:
   void initialise_search();
 
 public:
-	
-	vector<instance> dataset[2];
-        vector<dynamic_bitset<>> reverse_dataset[2];
+  vector<instance> dataset[2];
+  vector<dynamic_bitset<>> reverse_dataset[2];
 
-        /*!@name Constructors*/
-        //@{
-        explicit BacktrackingAlgorithm(Wood &w, DTOptions &o);
-        void setData(const DataSet &data);
-        void setReverse();
-        void seed(const int s);
-        //@}
+  /*!@name Constructors*/
+  //@{
+  explicit BacktrackingAlgorithm(Wood &w, DTOptions &o);
+  void setData(const DataSet &data);
+  void setReverse();
+  void seed(const int s);
+  //@}
 
-        size_t numExample() const;
-        size_t numFeature() const;
+  size_t numExample() const;
+  size_t numFeature() const;
 
-        // whether
-        bool equal(const int f_a, const int f_b) ;
+  // whether
+  bool equal(const int f_a, const int f_b);
 
-        void separator(const string &msg) const;
-        void print_new_best() const;
+  void separator(const string &msg) const;
+  void print_new_best() const;
 
-        void setUbDepth(const size_t u);
+  void setUbDepth(const size_t u);
 
-        void setUbNode(const size_t u);
+  void setUbNode(const size_t u);
 
-        void setUbError(const size_t u);
+  void setUbError(const size_t u);
 
-        void setTimeLimit(const double t);
+  void setTimeLimit(const double t);
 
-        void setSearchLimit(const size_t t);
+  void setSearchLimit(const size_t t);
 
-        void search();
+  void search();
 
-        TreeNode getSolution();
+  TreeNode getSolution();
 
-        int error() const;
+  int error() const;
 
-	      template <class rIter>
-	      void addExample(rIter beg_sample, rIter end_sample, const bool y);
+  template <class rIter>
+  void addExample(rIter beg_sample, rIter end_sample, const bool y);
 
   /*!@name Printing*/
   //@{
@@ -304,46 +302,46 @@ public:
   //@}
 };
 
+template <class rIter>
+void BacktrackingAlgorithm::addExample(rIter beg_sample, rIter end_sample,
+                                       const bool y) {
+  int n{static_cast<int>(end_sample - beg_sample)};
+  // for(auto i{0}; i<2; ++i)
+  // 	numExample[i] = data.example[i].count();
 
-      template <class rIter>
-      void BacktrackingAlgorithm::addExample(rIter beg_sample, rIter end_sample, const bool y) {
-        int n{static_cast<int>(end_sample - beg_sample)};
-        // for(auto i{0}; i<2; ++i)
-        // 	numExample[i] = data.example[i].count();
+  if (n > num_feature) {
+    num_feature = n;
+    //
+    // auto m{num_feature};
+    f_error.resize(num_feature, 1);
+    f_entropy.resize(num_feature, 1);
+    f_gini.resize(num_feature, 1);
+    // f_gini_d.resize(m, 1);
+  }
 
-        if (n > num_feature) {
-          num_feature = n;
-          //
-          // auto m{num_feature};
-          f_error.resize(num_feature, 1);
-          f_entropy.resize(num_feature, 1);
-          f_gini.resize(num_feature, 1);
-          // f_gini_d.resize(m, 1);
-        }
+  // cout << dataset[y].size() << ":";
 
-        // cout << dataset[y].size() << ":";
+  dataset[y].resize(dataset[y].size() + 1);
+  example[y].resize(example[y].size() + 1);
+  dataset[y].back().resize(num_feature, false);
 
-        dataset[y].resize(dataset[y].size() + 1);
-        example[y].resize(example[y].size() + 1);
-        dataset[y].back().resize(num_feature, false);
+  int k{0};
+  for (auto x{beg_sample}; x != end_sample; ++x) {
+    if (*x) {
 
-        int k{0};
-        for (auto x{beg_sample}; x != end_sample; ++x) {
-          if (*x) {
+      if (*x != 1) {
+        cout << "e the dataset is not binary, rerun with --binarize\n";
+        exit(1);
+      }
 
-            if (*x != 1) {
-              cout << "e the dataset is not binary, rerun with --binarize\n";
-              exit(1);
-            }
+      dataset[y].back().set(k);
+      example[y].back().push_back(k);
 
-            dataset[y].back().set(k);
-            example[y].back().push_back(k);
-
-            // cout << " " << k;
-          }
-          ++k;
-        }
-        // cout << endl;
+      // cout << " " << k;
+    }
+    ++k;
+  }
+  // cout << endl;
 }
 
 template<class property>

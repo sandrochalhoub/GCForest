@@ -122,13 +122,13 @@ int main(int argc, char *argv[]) {
   if (opt.print_ins) {
     cout << "d examples=" << A.numExample() << " features=" << A.numFeature()
          << endl;
-		// for(auto y{0}; y<2; ++y)
-		// 	for(auto i{0}; i<A.dataset[y].size(); ++i) {
-		// 		for(auto j{0}; j<A.numFeature(); ++j)
-		// 			cout << " " << A.dataset[y][i][j];
-		// 		cout << endl;
-		// 	}
-	}
+    // for (auto y{0}; y < 2; ++y)
+    //   for (auto i{0}; i < A.dataset[y].size(); ++i) {
+    //     for (auto j{0}; j < A.numFeature(); ++j)
+    //       cout << " " << A.dataset[y][i][j];
+    //     cout << endl;
+    //   }
+  }
 
   if (opt.verbosity >= DTOptions::NORMAL)
     cout << "d readtime=" << cpu_time() << endl;
@@ -142,8 +142,9 @@ int main(int argc, char *argv[]) {
   }
 
   if (opt.verified) {
-    assert(sol.predict(A.dataset[0].begin(), A.dataset[0].end(), A.dataset[1].begin(), A.dataset[1].end()) == A.error());
+    assert(sol.predict(A.dataset[0].begin(), A.dataset[0].end(),
+                       A.dataset[1].begin(), A.dataset[1].end()) == A.error());
 
-  		cout << "p solution verified (" << A.error() << ")" << endl;
+    cout << "p solution verified (" << A.error() << ")" << endl;
   }
 }
