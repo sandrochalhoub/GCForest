@@ -41,6 +41,9 @@ private:
 
   DTOptions &options;
   vector<vector<int>> example[2];
+	
+	vector<int> relevant_features;
+	dynamic_bitset<> feature_set;
 
   /// store the children of node i
   vector<int> child[2];
@@ -183,7 +186,8 @@ private:
   // sort the features by minimum projected error (leave 1-entropy node at the)
   void sort_features(const int node);
 
-  void filter_features(const int node);
+	template<class property>
+  void filter_features(const int node, property cond);
 
   // compute the conditional entropy of feature at node
   double entropy(const int node, const int feature);
@@ -269,7 +273,7 @@ public:
         size_t numFeature() const;
 
         // whether
-        bool dominate(const int f_a, const int f_b) const;
+        bool equal(const int f_a, const int f_b) ;
 
         void separator(const string &msg) const;
         void print_new_best() const;
@@ -290,46 +294,8 @@ public:
 
         int error() const;
 
-        template <class rIter>
-        void addExample(rIter beg_sample, rIter end_sample, const bool y) {
-          int n{static_cast<int>(end_sample - beg_sample)};
-          // for(auto i{0}; i<2; ++i)
-          // 	numExample[i] = data.example[i].count();
-
-          if (n > num_feature) {
-            num_feature = n;
-            //
-            // auto m{num_feature};
-            f_error.resize(num_feature, 1);
-            f_entropy.resize(num_feature, 1);
-            f_gini.resize(num_feature, 1);
-            // f_gini_d.resize(m, 1);
-          }
-
-          // cout << dataset[y].size() << ":";
-
-          dataset[y].resize(dataset[y].size() + 1);
-          example[y].resize(example[y].size() + 1);
-          dataset[y].back().resize(num_feature, false);
-
-          int k{0};
-          for (auto x{beg_sample}; x != end_sample; ++x) {
-            if (*x) {
-
-              if (*x != 1) {
-                cout << "e the dataset is not binary, rerun with --binarize\n";
-                exit(1);
-              }
-
-              dataset[y].back().set(k);
-              example[y].back().push_back(k);
-
-              // cout << " " << k;
-            }
-            ++k;
-          }
-          // cout << endl;
-  }
+	      template <class rIter>
+	      void addExample(rIter beg_sample, rIter end_sample, const bool y);
 
   /*!@name Printing*/
   //@{
@@ -337,6 +303,55 @@ public:
   std::ostream &display(std::ostream &os) const;
   //@}
 };
+
+
+      template <class rIter>
+      void BacktrackingAlgorithm::addExample(rIter beg_sample, rIter end_sample, const bool y) {
+        int n{static_cast<int>(end_sample - beg_sample)};
+        // for(auto i{0}; i<2; ++i)
+        // 	numExample[i] = data.example[i].count();
+
+        if (n > num_feature) {
+          num_feature = n;
+          //
+          // auto m{num_feature};
+          f_error.resize(num_feature, 1);
+          f_entropy.resize(num_feature, 1);
+          f_gini.resize(num_feature, 1);
+          // f_gini_d.resize(m, 1);
+        }
+
+        // cout << dataset[y].size() << ":";
+
+        dataset[y].resize(dataset[y].size() + 1);
+        example[y].resize(example[y].size() + 1);
+        dataset[y].back().resize(num_feature, false);
+
+        int k{0};
+        for (auto x{beg_sample}; x != end_sample; ++x) {
+          if (*x) {
+
+            if (*x != 1) {
+              cout << "e the dataset is not binary, rerun with --binarize\n";
+              exit(1);
+            }
+
+            dataset[y].back().set(k);
+            example[y].back().push_back(k);
+
+            // cout << " " << k;
+          }
+          ++k;
+        }
+        // cout << endl;
+}
+
+template<class property>
+void BacktrackingAlgorithm::filter_features(const int node, property cond) {
+  for (auto f{end_feature[node] - 1}; f >= feature[node]; --f)
+    if (cond(*f))
+      swap(*f, *(--end_feature[node]));
+}
 
 std::ostream &operator<<(std::ostream &os, const BacktrackingAlgorithm &x);
 }

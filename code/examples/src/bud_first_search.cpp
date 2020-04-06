@@ -119,9 +119,16 @@ int main(int argc, char *argv[]) {
     read_binary(A, opt);
   }
 
-  if (opt.print_ins)
+  if (opt.print_ins) {
     cout << "d examples=" << A.numExample() << " features=" << A.numFeature()
          << endl;
+		// for(auto y{0}; y<2; ++y)
+		// 	for(auto i{0}; i<A.dataset[y].size(); ++i) {
+		// 		for(auto j{0}; j<A.numFeature(); ++j)
+		// 			cout << " " << A.dataset[y][i][j];
+		// 		cout << endl;
+		// 	}
+	}
 
   if (opt.verbosity >= DTOptions::NORMAL)
     cout << "d readtime=" << cpu_time() << endl;

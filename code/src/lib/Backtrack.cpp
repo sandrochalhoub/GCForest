@@ -203,7 +203,8 @@ void BacktrackingAlgorithm::resize(const int k) {
   auto i{ranked_feature.size()};
   ranked_feature.resize(k);
   for (; i < ranked_feature.size(); ++i) {
-    for (auto f{0}; f < num_feature; ++f)
+    // for (auto f{0}; f < num_feature; ++f)
+		for(auto f : relevant_features)
       ranked_feature[i].push_back(f);
     feature[i] = ranked_feature[i].begin();
   }
@@ -343,11 +344,11 @@ void BacktrackingAlgorithm::random_perturbation(const int node, const int kbest,
   }
 }
 
-void BacktrackingAlgorithm::filter_features(const int node) {
-  for (auto f{end_feature[node] - 1}; f >= feature[node]; --f)
-    if (max_entropy(node, *f))
-      swap(*f, *(--end_feature[node]));
-}
+// void BacktrackingAlgorithm::filter_features(const int node) {
+//   for (auto f{end_feature[node] - 1}; f >= feature[node]; --f)
+//     if (max_entropy(node, *f))
+//       swap(*f, *(--end_feature[node]));
+// }
 
 void BacktrackingAlgorithm::sort_features(const int node) {
 
@@ -795,7 +796,7 @@ bool BacktrackingAlgorithm::grow(const int node) {
 
   feature[node] = ranked_feature[node].begin();
   end_feature[node] = ranked_feature[node].end();
-  filter_features(node);
+  filter_features(node, [&](const int f) {return max_entropy(node, f);});
 
   // if (feature[node] == end_feature[node])
   // 	return false;
@@ -915,6 +916,9 @@ void BacktrackingAlgorithm::initialise_search() {
 
   for (int y{0}; y < 2; ++y)
     P[y].init(example[y].size());
+	
+	for(auto f{0}; f<num_feature; ++f)
+		relevant_features.push_back(f);
 
   // tree must have at least one node (0)
   resize(1);
@@ -929,11 +933,30 @@ void BacktrackingAlgorithm::initialise_search() {
 
   backtrack_node = -1;
 
-  // for (int i{0}; i < num_feature; ++i) {
-  //   for (int j{i + 1}; j < num_feature; ++j) {
-  //     dominate(i, j);
-  //   }
-  // }
+	relevant_features.clear();
+	feature_set.resize(num_feature, true);
+  for (int fi{0}; fi < num_feature; ++fi) {
+		if(feature_set[fi] and not null_entropy(0, fi)) {
+			relevant_features.push_back(fi);
+			
+			for (int fj{fi + 1}; fj < num_feature; ++fj) {
+      	if(equal(fi, fj))
+					feature_set.reset(fj);
+    	}
+		}
+  }
+	
+	if(options.verbosity >= DTOptions::NORMAL)
+		cout << "d feature_reduction=" << (num_feature - relevant_features.size()) << endl;
+	
+	filter_features(0, [&](const int f) {return not feature_set[f];});
+
+	sort_features(0);
+	
+	// for(auto f : relevant_features)
+	// 	cout << " " << f ;
+	// cout << endl;
+	
 }
 
 void BacktrackingAlgorithm::search() {
@@ -1165,7 +1188,7 @@ double BacktrackingAlgorithm::gini(const int node, const int feature) {
   return ((gini[1] / branch_size[1]) + (gini[0] / branch_size[0]));
 }
 
-bool BacktrackingAlgorithm::dominate(const int f_a, const int f_b) const {
+bool BacktrackingAlgorithm::equal(const int f_a, const int f_b) {
   // if f <=> true -> error = count(true, not_f) + count(false, f)
   // if f <=> false -> error = count(false, not_f) + count(true, f)
 
@@ -1215,30 +1238,52 @@ bool BacktrackingAlgorithm::dominate(const int f_a, const int f_b) const {
 	
 		if(
 			(get_feature_frequency(1, 0, lit_a[0]) == get_feature_frequency(1, 0, lit_b[0]) and
-				get_feature_frequency(0, 0, lit_a[0]) == get_feature_frequency(0, 0, lit_b[0]))
-				or 
-			(get_feature_frequency(1, 0, lit_a[0]) == get_feature_frequency(1, 0, lit_b[1]) and
-			get_feature_frequency(0, 0, lit_a[0]) == get_feature_frequency(0, 0, lit_b[0]))		
-			) {
-				
-		cout << "0 : " << reverse_dataset[0][f_a] << endl;
-		cout << "0 : " << reverse_dataset[0][f_b] << endl << endl;
+				get_feature_frequency(0, 0, lit_a[0]) == get_feature_frequency(0, 0, lit_b[0])))
+		{
+			if(reverse_dataset[0][f_a] == reverse_dataset[0][f_b] and reverse_dataset[1][f_a] == reverse_dataset[1][f_b])
+				return true;
 
-		cout << "1 : " << reverse_dataset[1][f_a] << endl;
-		cout << "1 : " << reverse_dataset[1][f_b] << endl << endl;
-				
-	} else if(	
-	(get_feature_frequency(1, 0, lit_a[0]) == example[1].size() and
-	get_feature_frequency(0, 0, lit_a[0]) == example[0].size()) or
-		(get_feature_frequency(1, 0, lit_a[0]) == 0 and
-		get_feature_frequency(0, 0, lit_a[0]) == 0)) {
-		
-			cout << "0 : " << reverse_dataset[0][f_a] << endl;
-			cout << "0 : " << reverse_dataset[0][f_b] << endl << endl;
-		
-	}
-	// if(reverse_dataset[1][f_a] == reverse_dataset[1][f_b])
-	
+		}
+		else if(get_feature_frequency(1, 0, lit_a[0]) == get_feature_frequency(1, 0, lit_b[1]) and
+			get_feature_frequency(0, 0, lit_a[0]) == get_feature_frequency(0, 0, lit_b[1]))
+		{
+			auto eq{reverse_dataset[0][f_a].flip() == reverse_dataset[0][f_b]};
+			reverse_dataset[0][f_a].flip();
+			if(eq)
+			{
+			 eq = (reverse_dataset[1][f_a].flip() == reverse_dataset[1][f_b]);
+			 reverse_dataset[1][f_a].flip();
+		 	}
+			return eq;
+		}
+	//
+	//
+	// 			or
+	// 		()
+	// 		) {
+	//
+	// 			cout << "\nfeatures " << f_a << " and " << f_b << " might be equal:\n";
+	//
+	// 	cout << "0 : " << reverse_dataset[0][f_a] << endl;
+	// 	cout << "0 : " << reverse_dataset[0][f_b] << endl << endl;
+	//
+	// 	cout << "1 : " << reverse_dataset[1][f_a] << endl;
+	// 	cout << "1 : " << reverse_dataset[1][f_b] << endl << endl;
+	//
+	// } else if(
+	// (get_feature_frequency(1, 0, lit_a[0]) == example[1].size() and
+	// get_feature_frequency(0, 0, lit_a[0]) == example[0].size()) or
+	// 	(get_feature_frequency(1, 0, lit_a[0]) == 0 and
+	// 	get_feature_frequency(0, 0, lit_a[0]) == 0)) {
+	//
+	// 	cout << "\nfeature " << f_a << " is useless:\n";
+	//
+	// 		cout << "0 : " << reverse_dataset[0][f_a] << endl;
+	// 		cout << "0 : " << reverse_dataset[0][f_b] << endl << endl;
+	//
+	// }
+	// // if(reverse_dataset[1][f_a] == reverse_dataset[1][f_b])
+	//
 
   return false;
 }
