@@ -5,14 +5,17 @@
 
 namespace primer {
 
-BacktrackingAlgorithm::BacktrackingAlgorithm(DataSet &d, Wood &w,
-                                             DTOptions &opt)
-    : wood(w), data(d), options(opt) {
+BacktrackingAlgorithm::BacktrackingAlgorithm(Wood &w, DTOptions &opt)
+    : wood(w), options(opt) {
 
-  start_time = cpu_time();
+  // start_time = cpu_time();
+
+  num_feature = 0;
+  // numExample[0] = 0;
+  // numExample[1] = 0;
 
   // statistics and options
-  ub_error = static_cast<size_t>(data.count());
+  ub_error = numeric_limits<size_t>::max(); //(numExample());
   ub_node = options.max_size;
   ub_depth = options.max_depth;
 
@@ -22,29 +25,6 @@ BacktrackingAlgorithm::BacktrackingAlgorithm(DataSet &d, Wood &w,
   num_solutions = 0;
 
   seed(options.seed);
-
-  //
-  auto m{data.numFeature()};
-  f_error.resize(m, 1);
-  f_entropy.resize(m, 1);
-  f_gini_n.resize(m, 1);
-  f_gini_d.resize(m, 1);
-
-  // initialize the data structure to store the examples (vectors of positive
-  // feature indices)
-  for (int y{0}; y < 2; ++y) {
-    example[y].resize(data.example[y].count());
-    auto k{0};
-    for (auto i : data.example[y]) {
-      for (auto j{0}; j < data.numFeature(); ++j)
-        if (data.hasFeature(i, j))
-          example[y][k].push_back(j);
-      ++k;
-    }
-
-    // Partition of the examples
-    P[y].init(data.example[y].count());
-  }
 
   solution_root = -1;
 
@@ -59,8 +39,41 @@ BacktrackingAlgorithm::BacktrackingAlgorithm(DataSet &d, Wood &w,
   // use_entropy = options.feature_strategy != DTOptions::MINERROR;
   feature_criterion = options.feature_strategy;
 
-  // tree must have at least one node (0)
-  resize(1);
+  restart_limit = options.restart_base;
+
+  restart_base = static_cast<double>(restart_limit);
+}
+
+size_t BacktrackingAlgorithm::numExample() const {
+  return example[0].size() + example[1].size();
+}
+
+size_t BacktrackingAlgorithm::numFeature() const { return num_feature; }
+
+void BacktrackingAlgorithm::setData(const DataSet &data) {
+  num_feature = static_cast<int>(data.numFeature());
+
+  f_error.resize(num_feature, 1);
+  f_entropy.resize(num_feature, 1);
+  f_gini.resize(num_feature, 1);
+
+  for (int y{0}; y < 2; ++y) {
+    dataset[y].resize(data.example[y].count());
+    example[y].resize(data.example[y].count());
+    auto k{0};
+    for (auto i : data.example[y]) {
+      // cout << k << ":";
+      dataset[y][k].resize(num_feature);
+      dataset[y][k] = data[i];
+      for (auto j{0}; j < num_feature; ++j)
+        if (data.hasFeature(i, j)) {
+          example[y][k].push_back(j);
+          // cout << " " << j;
+        }
+      ++k;
+      // cout << endl;
+    }
+  }
 }
 
 int BacktrackingAlgorithm::error() const { return ub_error; }
@@ -77,14 +90,13 @@ bool BacktrackingAlgorithm::limit_out() {
 
 int BacktrackingAlgorithm::get_feature_frequency(const int y, const int n,
                                                  const int f) const {
-  return (f >= data.numFeature()
-              ? P[y][n].count() -
-                    pos_feature_frequency[y][n][f - data.numFeature()]
+  return (f >= num_feature
+              ? P[y][n].count() - pos_feature_frequency[y][n][f - num_feature]
               : pos_feature_frequency[y][n][f]);
 }
 
 int BacktrackingAlgorithm::get_feature_error(const int n, const int f) const {
-  auto not_f{f + data.numFeature()};
+  auto not_f{f + num_feature};
   return min(get_feature_frequency(0, n, f), get_feature_frequency(1, n, f)) +
          min(get_feature_frequency(0, n, not_f),
              get_feature_frequency(1, n, not_f));
@@ -110,11 +122,6 @@ bool BacktrackingAlgorithm::no_feature(const int node) const {
 
 // return true if the feature f is true/false in all examples
 bool BacktrackingAlgorithm::max_entropy(const int node, const int f) const {
-
-  // auto error_parent{node_error(node)};
-  // auto error_feature{get_feature_error(node, f)};
-
-  // auto f{*(feature[node])};
   auto numNeg{P[0][node].count()};
   auto numPos{P[1][node].count()};
 
@@ -128,10 +135,6 @@ bool BacktrackingAlgorithm::max_entropy(const int node, const int f) const {
 
 // return true if the feature f reduces the error
 bool BacktrackingAlgorithm::reduce_error(const int node, const int f) const {
-
-  // auto error_parent{node_error(node)};
-  // auto error_feature{get_feature_error(node,f)};
-
   return get_feature_error(node, f) < node_error(node);
 }
 
@@ -159,18 +162,13 @@ void BacktrackingAlgorithm::print_new_best() const {
        << " error=" << left << setw(4) << ub_error << " accuracy=" << setw(9)
        << setprecision(6)
        << (1.0 -
-           static_cast<double>(ub_error) / static_cast<double>(data.count()))
+           static_cast<double>(ub_error) / static_cast<double>(numExample()))
        // << " backtracks=" << setw(9) << num_backtracks
        << " choices=" << setw(9) << search_size << " restarts=" << setw(5)
        << num_restarts << " mem=" << left << setw(4) << wood.size() << right
        // << endl;
        << " time=" << setprecision(3) << cpu_time() - start_time << right
        << endl;
-}
-
-bool BacktrackingAlgorithm::isLeaf(const int node) const {
-  return not blossom.contain(node) and child[0][node] < 0 and
-         child[1][node] < 0;
 }
 
 void BacktrackingAlgorithm::resize(const int k) {
@@ -185,14 +183,14 @@ void BacktrackingAlgorithm::resize(const int k) {
   parent.resize(k, -1);
 
   min_error.resize(k, 0);
-  max_error.resize(k, data.count());
-  tree_error.resize(k, data.count());
+  max_error.resize(k, numExample());
+  tree_error.resize(k, numExample());
   max_size.resize(k, numeric_limits<int>::max());
 
   auto i{ranked_feature.size()};
   ranked_feature.resize(k);
   for (; i < ranked_feature.size(); ++i) {
-    for (auto f{0}; f < data.numFeature(); ++f)
+    for (auto f{0}; f < num_feature; ++f)
       ranked_feature[i].push_back(f);
     feature[i] = ranked_feature[i].begin();
   }
@@ -201,7 +199,7 @@ void BacktrackingAlgorithm::resize(const int k) {
     auto i = pos_feature_frequency[y].size();
     pos_feature_frequency[y].resize(k);
     while (i < pos_feature_frequency[y].size()) {
-      pos_feature_frequency[y][i++].resize(data.numFeature());
+      pos_feature_frequency[y][i++].resize(num_feature);
     }
   }
 
@@ -354,11 +352,17 @@ void BacktrackingAlgorithm::sort_features(const int node) {
          [&](const int a, const int b) { return f_entropy[a] < f_entropy[b]; });
     break;
   case DTOptions::GINI:
+    //   for (auto f{feature[node]}; f != end_feature[node]; ++f)
+    //     gini(node, *f, f_gini_n[*f], f_gini_d[*f]);
+    //   sort(feature[node], end_feature[node], [&](const int a, const int b) {
+    //     return (f_gini_n[a] * f_gini_d[b]) < (f_gini_n[b] * f_gini_d[a]);
+    //   });
+    //   break;
+    // default:
     for (auto f{feature[node]}; f != end_feature[node]; ++f)
-      gini(node, *f, f_gini_n[*f], f_gini_d[*f]);
-    sort(feature[node], end_feature[node], [&](const int a, const int b) {
-      return (f_gini_n[a] * f_gini_d[b]) < (f_gini_n[b] * f_gini_d[a]);
-    });
+      f_gini[*f] = gini(node, *f);
+    sort(feature[node], end_feature[node],
+         [&](const int a, const int b) { return (f_gini[a] < f_gini[b]); });
     break;
   }
 
@@ -403,7 +407,7 @@ void BacktrackingAlgorithm::sort_features(const int node) {
 
 void BacktrackingAlgorithm::count_by_example(const int node, const int y) {
 
-  auto n{data.numFeature()};
+  auto n{num_feature};
 
   pos_feature_frequency[y][node].clear();
   pos_feature_frequency[y][node].resize(n, 0);
@@ -418,7 +422,7 @@ void BacktrackingAlgorithm::deduce_from_sibling(const int parent,
                                                 const int node,
                                                 const int sibling,
                                                 const int y) {
-  for (auto f{0}; f < data.numFeature(); ++f)
+  for (auto f{0}; f < num_feature; ++f)
     pos_feature_frequency[y][node][f] = pos_feature_frequency[y][parent][f] -
                                         pos_feature_frequency[y][sibling][f];
 }
@@ -427,7 +431,7 @@ void BacktrackingAlgorithm::cleaning() {
   if (solution_root < 0) {
     solution_root = wood.grow();
     wood.setFeature(solution_root, *feature[0]);
-    int f[2] = {*feature[0] + static_cast<int>(data.count()), *feature[0]};
+    int f[2] = {*feature[0] + num_feature, *feature[0]};
 
     for (auto i{0}; i < 2; ++i)
       wood.setChild(solution_root, i, get_feature_frequency(1, 0, f[i]) >
@@ -708,8 +712,13 @@ void BacktrackingAlgorithm::branch(const int node, const int f) {
 
   // partition
   for (auto y{0}; y < 2; ++y) {
-    P[y].branch(node, c[1], c[0],
-                [&](const int x) { return data.ithHasFeature(y, x, f); });
+    P[y].branch(node, c[1], c[0], [&](const int x) {
+
+      // assert(dataset[y][x][f] == data.ithHasFeature(y, x, f));
+
+      return dataset[y][x][f];
+      // return data.ithHasFeature(y, x, f);
+    });
   }
 
 #ifdef PRINTTRACE
@@ -808,8 +817,7 @@ bool BacktrackingAlgorithm::grow(const int node) {
     sort_features(node);
     optimal[node] = false;
 
-    int f[2] = {*feature[node] + static_cast<int>(data.numFeature()),
-                *feature[node]};
+    int f[2] = {*feature[node] + static_cast<int>(num_feature), *feature[node]};
     int err[2] = {min(get_feature_frequency(0, node, f[1]),
                       get_feature_frequency(1, node, f[1])),
                   min(get_feature_frequency(0, node, f[0]),
@@ -891,10 +899,14 @@ void BacktrackingAlgorithm::expend() {
   backtrack_node = -1;
 }
 
-void BacktrackingAlgorithm::search() {
+void BacktrackingAlgorithm::initialise_search() {
+  start_time = cpu_time();
 
-  restart_limit = options.restart_base;
-  restart_base = static_cast<double>(restart_limit);
+  for (int y{0}; y < 2; ++y)
+    P[y].init(example[y].size());
+
+  // tree must have at least one node (0)
+  resize(1);
 
   // compute error and sort features for the root node
   for (auto y{0}; y < 2; ++y)
@@ -902,27 +914,14 @@ void BacktrackingAlgorithm::search() {
 
   grow(0);
 
-  // cout << numeric_limits<size_t>::max() << endl;
-  //
-  //   // size_t n, d;
-  //   for (auto f{feature[0]}; f != end_feature[0]; ++f)
-  //     cout << setw(5) << *f << " "  << setw(20) << f_gini_n[*f] << " " <<
-  //     setw(15) << f_gini_d[*f] << " "
-  //          << setw(10) << static_cast<double>(f_gini_n[*f]) /
-  //                 static_cast<double>(f_gini_d[*f])
-  // 								<< " " << setw(30)
-  // <<
-  // 								(f_gini_n[*f] *
-  // f_gini_d[*f])
-  //          << endl;
-  //
-  //   //   gini(0, *f, n, d);
-  //   //
-  //   exit(1);
-
   current_error = max_error[0];
 
   backtrack_node = -1;
+}
+
+void BacktrackingAlgorithm::search() {
+
+  initialise_search();
 
   if (options.verbosity > DTOptions::QUIET)
     separator("search");
@@ -960,8 +959,6 @@ void BacktrackingAlgorithm::search() {
     print_new_best();
   // cout << "error = " << ub_error << endl;
 }
-
-//// GARBAGE /////
 
 bool BacktrackingAlgorithm::fail() {
   if (solution_root >= 0)
@@ -1089,23 +1086,10 @@ void BacktrackingAlgorithm::store_best_tree(const int node, const bool global) {
   }
 }
 
-std::ostream &BacktrackingAlgorithm::display(std::ostream &os) const {
-
-  for (auto i : blossom) {
-    cout << i << ": " << P[0][i].count() << "/" << P[1][i].count() << endl;
-  }
-
-  return os;
-}
-
-std::ostream &operator<<(std::ostream &os, const BacktrackingAlgorithm &x) {
-  return x.display(os);
-}
-
 double BacktrackingAlgorithm::entropy(const int node, const int feature) {
   double feature_entropy{0};
 
-  int not_feature = (feature + data.numFeature());
+  int not_feature = (feature + num_feature);
   int truef[2] = {not_feature, feature};
 
   double total_size{
@@ -1135,21 +1119,21 @@ double BacktrackingAlgorithm::entropy(const int node, const int feature) {
   return feature_entropy;
 }
 
-void BacktrackingAlgorithm::gini(const int node, const int feature, double &num,
-                                 double &den) {
-  int not_feature = (feature + data.numFeature());
+double BacktrackingAlgorithm::gini(const int node, const int feature) {
+  int not_feature = (feature + num_feature);
   int truef[2] = {not_feature, feature};
 
-  size_t branch_size[2]; // = {0,0};
-  size_t p[2];           // = {0,0};
-  size_t gini[2];        // = {0,0};
+  double branch_size[2]; // = {0,0};
+  double p[2];           // = {0,0};
+  double gini[2];        // = {0,0};
 
   // conditional to value x for feature
   for (auto x{0}; x < 2; ++x) {
 
     for (auto y{0}; y < 2; ++y)
-      p[y] = get_feature_frequency(y, node,
-                                   truef[x]); // how many class-i samples if f=x
+      p[y] = static_cast<double>(
+          get_feature_frequency(y, node,
+                                truef[x])); // how many class-i samples if f=x
 
     // number of samples falling on this side
     branch_size[x] = p[0] + p[1];
@@ -1161,46 +1145,30 @@ void BacktrackingAlgorithm::gini(const int node, const int feature, double &num,
       gini[x] -= p[y] * p[y];
   }
 
-  num =
-      static_cast<double>(branch_size[0] * gini[1] + branch_size[1] * gini[0]);
-  den = static_cast<double>(branch_size[0] * branch_size[1]);
+  return ((gini[1] / branch_size[1]) + (gini[0] / branch_size[0]));
+}
 
-#ifdef DEBUG_GINI
-  // total number of samples
-  size_t total_size{P[0][node].count() + P[1][node].count()};
+//// GARBAGE /////
 
-  for (auto x{0}; x < 2; ++x) {
-    cout << "gini[" << (x ? feature : -feature)
-         << "] = " << (static_cast<double>(gini[x]) /
-                       static_cast<double>(branch_size[x] * branch_size[x]))
-         << endl;
+std::ostream &BacktrackingAlgorithm::display(std::ostream &os) const {
+
+  for (auto i : blossom) {
+    cout << i << ": " << P[0][i].count() << "/" << P[1][i].count() << endl;
   }
 
-  double G[2] = {static_cast<double>(gini[0]) /
-                     static_cast<double>(branch_size[0] * branch_size[0]),
-                 static_cast<double>(gini[1]) /
-                     static_cast<double>(branch_size[1] * branch_size[1])};
+  return os;
+}
 
-  double w[2] = {
-      static_cast<double>(branch_size[0]) / static_cast<double>(total_size),
-      static_cast<double>(branch_size[1]) / static_cast<double>(total_size)};
-
-  double real = (w[0] * G[0] + w[1] * G[1]);
-
-  cout << "weighted average = " << w[0] << " * " << G[0] << " + " << w[1]
-       << " * " << G[1] << " = " << real << endl;
-
-  double guessed =
-      static_cast<double>(num) / static_cast<double>(den * total_size);
-
-  cout << " => " << guessed << " / " << real << endl;
-
-  assert(abs(guessed - real) < .000001);
-
-#endif
+std::ostream &operator<<(std::ostream &os, const BacktrackingAlgorithm &x) {
+  return x.display(os);
 }
 
 #ifdef PRINTTRACE
+
+bool BacktrackingAlgorithm::isLeaf(const int node) const {
+  return not blossom.contain(node) and child[0][node] < 0 and
+         child[1][node] < 0;
+}
 
 size_t BacktrackingAlgorithm::leaf_error(const int node) const {
   if (isLeaf(node) or optimal[node]) {

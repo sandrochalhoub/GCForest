@@ -6,13 +6,13 @@
 
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/trim.hpp>
+#include <boost/lexical_cast.hpp>
 
 namespace csv
 {
 
 // template<  >
-template <typename header_declaration,
-          typename data_declaration>
+template <typename header_declaration, typename data_declaration>
 void read(const std::string &fn, header_declaration notify_header,
           data_declaration notify_data, std::string delimeter = ",") {
   using std::cerr;
@@ -35,6 +35,42 @@ void read(const std::string &fn, header_declaration notify_header,
       boost::algorithm::split(row, line, boost::is_any_of(delimeter));
       for (auto i{0}; i < row.size(); ++i)
         boost::algorithm::trim(row[i]);
+      notify_data(row);
+    }
+
+  } catch (std::exception &e) {
+    std::cout.flush();
+    cerr << "ERROR: " << e.what() << std::endl;
+    exit(1);
+  }
+}
+
+template <typename data_declaration>
+void read_binary(const std::string &fn, data_declaration notify_data,
+                 std::string delimeter = ",") {
+  using std::cerr;
+  try {
+    std::ifstream ifs(fn);
+
+    std::vector<int> row;
+    std::vector<std::string> liner;
+
+    std::string line = "";
+
+    // header
+    getline(ifs, line);
+    boost::algorithm::split(liner, line, boost::is_any_of(delimeter));
+
+    // row.resize(liner.size());
+
+    while (getline(ifs, line)) {
+
+      boost::algorithm::split(liner, line, boost::is_any_of(delimeter));
+
+      row.clear();
+      for (auto v : liner)
+        row.push_back(boost::lexical_cast<int>(v));
+
       notify_data(row);
     }
 

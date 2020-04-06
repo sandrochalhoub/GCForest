@@ -114,33 +114,9 @@ int main(int argc, char *argv[]) {
 
   Wood yallen;
 
-  // vector<int> nd;
-  // for (auto i{0}; i < 6; ++i) {
-  //   auto n{yallen.grow()};
-  //   yallen.setFeature(n, 100 + i);
-  //   nd.push_back(n);
-  //
-  //   cout << n << endl;
-  // }
-  //
-  // yallen.setChild(nd[0], 0, nd[1]);
-  // yallen.setChild(nd[0], 1, nd[2]);
-  // yallen.setChild(nd[1], 0, nd[3]);
-  // yallen.setChild(nd[1], 1, nd[4]);
-  // yallen.setChild(nd[2], 0, nd[5]);
-  // yallen.setChild(nd[2], 1, 0);
-  // yallen.setChild(nd[3], 0, 1);
-  // yallen.setChild(nd[3], 1, 0);
-  // yallen.setChild(nd[4], 0, 0);
-  // yallen.setChild(nd[4], 1, 1);
-  // yallen.setChild(nd[5], 0, 0);
-  // yallen.setChild(nd[5], 1, 1);
-  //
-  // cout << yallen[nd[0]] << endl;
-  //
-  // exit(1);
+  BacktrackingAlgorithm A(yallen, opt);
 
-  BacktrackingAlgorithm A(base, yallen, opt);
+  A.setData(base);
 
   A.search();
 

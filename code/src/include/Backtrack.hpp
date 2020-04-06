@@ -34,7 +34,11 @@ private:
   //@{
   /// Argument
   Wood &wood;
-  DataSet &data;
+  // DataSet &data;
+  int num_feature;
+  // size_t numExample() const;
+  // size_t numExample[2];
+
   DTOptions &options;
   vector<vector<int>> example[2];
 
@@ -93,8 +97,8 @@ private:
 
   vector<int> f_error;
   vector<double> f_entropy;
-  vector<double> f_gini_n;
-  vector<double> f_gini_d;
+  vector<double> f_gini;
+  // vector<double> f_gini_d;
 
   mt19937 random_generator;
 
@@ -180,7 +184,7 @@ private:
   // compute the conditional entropy of feature at node
   double entropy(const int node, const int feature);
 
-  void gini(const int node, const int feature, double &num, double &den);
+  double gini(const int node, const int feature);
 
   // count, for every feature, the number of examples of class y at node with
   // that feature
@@ -242,12 +246,21 @@ private:
 
   bool limit_out();
 
+  void initialise_search();
+
 public:
+	
+	vector<instance> dataset[2];
+	
   /*!@name Constructors*/
   //@{
-  explicit BacktrackingAlgorithm(DataSet &d, Wood &w, DTOptions &o);
+  explicit BacktrackingAlgorithm(Wood &w, DTOptions &o);
+  void setData(const DataSet &data);
   void seed(const int s);
   //@}
+
+  size_t numExample() const;
+  size_t numFeature() const;
 
   void separator(const string &msg) const;
   void print_new_best() const;
@@ -267,6 +280,41 @@ public:
   TreeNode getSolution();
 
   int error() const;
+
+  template <class rIter>
+  void addExample(rIter beg_sample, rIter end_sample, const bool y) {
+    int n{static_cast<int>(end_sample - beg_sample)};
+    // for(auto i{0}; i<2; ++i)
+    // 	numExample[i] = data.example[i].count();
+
+    if (n > num_feature) {
+      num_feature = n;
+      //
+      // auto m{num_feature};
+      f_error.resize(num_feature, 1);
+      f_entropy.resize(num_feature, 1);
+      f_gini.resize(num_feature, 1);
+      // f_gini_d.resize(m, 1);
+    }
+
+    // cout << dataset[y].size() << ":";
+
+    dataset[y].resize(dataset[y].size() + 1);
+    example[y].resize(example[y].size() + 1);
+    dataset[y].back().resize(num_feature, false);
+
+    int k{0};
+    for (auto x{beg_sample}; x != end_sample; ++x) {
+      if (*x) {
+        dataset[y].back().set(k);
+        example[y].back().push_back(k);
+
+        // cout << " " << k;
+      }
+      ++k;
+    }
+    // cout << endl;
+  }
 
   /*!@name Printing*/
   //@{

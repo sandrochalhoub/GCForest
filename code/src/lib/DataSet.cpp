@@ -88,18 +88,18 @@ bool DataSet::hasFeature(const int e, const int f) const {
 }
 
 bool DataSet::ithHasFeature(const int y, const int i, const int f) const {
-	
-	assert(y == 0 or y == 1);
-	assert(i < example[y].size());
-	assert(i >= 0);
-	assert(f >= 0);
-	assert(f < numFeature());
-	
-	assert(example[y][i] >= 0);
-	assert(example[y][i] < X.size());	
-	
-	assert(X[example[y][i]].size() == numFeature()*2);
-	
+  //
+  // assert(y == 0 or y == 1);
+  // assert(i < example[y].size());
+  // assert(i >= 0);
+  // assert(f >= 0);
+  // assert(f < numFeature());
+  //
+  // assert(example[y][i] >= 0);
+  // assert(example[y][i] < X.size());
+  //
+  // assert(X[example[y][i]].size() == numFeature()*2);
+
   return X[example[y][i]][f];
 }
 

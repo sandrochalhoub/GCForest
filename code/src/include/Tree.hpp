@@ -29,6 +29,9 @@ public:
 
   // bool predict(const instance &x) const;
   int predict(const DataSet &data) const;
+	
+	template<class rIter>
+	int predict(rIter beg_neg, rIter end_neg, rIter beg_pos, rIter end_pos) const;
 
   /*!@name Miscellaneous*/
   //@{
@@ -85,6 +88,17 @@ public:
 
 std::ostream &operator<<(std::ostream &os, const TreeNode &x);
 
+
+template<class rIter>
+int TreeNode::predict(rIter beg_neg, rIter end_neg, rIter beg_pos, rIter end_pos) const {
+  auto error{0};
+  // for (auto y{0}; y < 2; ++y)
+    for (auto i{beg_neg}; i!=end_neg; ++i)
+      error += (wood->predict(idx, *i) != 0);
+    for (auto i{beg_pos}; i!=end_pos; ++i)
+      error += (wood->predict(idx, *i) != 1);
+  return error;
+}
 
 }
 

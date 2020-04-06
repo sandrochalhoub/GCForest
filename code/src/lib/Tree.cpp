@@ -19,6 +19,15 @@ int TreeNode::predict(const DataSet &data) const {
   return error;
 }
 
+// template<class rIter>
+// int TreeNode::predict(rIter beg[2], rIter end[2]) const {
+//   auto error{0};
+//   for (auto y{0}; y < 2; ++y)
+//     for (auto i{beg[y]}; i!=end[y]; ++i)
+//       error += (wood->predict(idx, *i) != y);
+//   return error;
+// }
+
 std::ostream &TreeNode::display(std::ostream &os) const {
 
   return wood->display(os, idx, 0);

@@ -451,8 +451,10 @@ ostream &DTOptions::display(ostream &os) {
     os << "min error";
   } else if (feature_strategy == ENTROPY) {
     os << "min entropy";
-  } else {
+  } else if (feature_strategy == GINI) {
     os << "min gini impurity";
+  } else {
+    os << "also gini";
   }
   os << endl
      << setw(20) << left << "p maximum depth:" << setw(30) << right << max_depth
