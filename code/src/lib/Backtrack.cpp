@@ -50,6 +50,19 @@ size_t BacktrackingAlgorithm::numExample() const {
 
 size_t BacktrackingAlgorithm::numFeature() const { return num_feature; }
 
+void BacktrackingAlgorithm::setReverse() {
+  for (int y{0}; y < 2; ++y) {
+    reverse_dataset[y].resize(num_feature);
+    for (int f{0}; f < num_feature; ++f)
+      reverse_dataset[y][f].resize(example[y].size(), 0);
+    buffer[y].resize(example[y].size(), 0);
+  }
+  for (int y{0}; y < 2; ++y)
+    for (auto i{0}; i < example[y].size(); ++i)
+      for (auto f : example[y][i])
+        reverse_dataset[y][f].set(i);
+}
+
 void BacktrackingAlgorithm::setData(const DataSet &data) {
   num_feature = static_cast<int>(data.numFeature());
 
@@ -712,13 +725,8 @@ void BacktrackingAlgorithm::branch(const int node, const int f) {
 
   // partition
   for (auto y{0}; y < 2; ++y) {
-    P[y].branch(node, c[1], c[0], [&](const int x) {
-
-      // assert(dataset[y][x][f] == data.ithHasFeature(y, x, f));
-
-      return dataset[y][x][f];
-      // return data.ithHasFeature(y, x, f);
-    });
+    P[y].branch(node, c[1], c[0],
+                [&](const int x) { return reverse_dataset[y][f][x]; });
   }
 
 #ifdef PRINTTRACE
@@ -900,6 +908,9 @@ void BacktrackingAlgorithm::expend() {
 }
 
 void BacktrackingAlgorithm::initialise_search() {
+
+  setReverse();
+
   start_time = cpu_time();
 
   for (int y{0}; y < 2; ++y)
@@ -917,6 +928,12 @@ void BacktrackingAlgorithm::initialise_search() {
   current_error = max_error[0];
 
   backtrack_node = -1;
+
+  // for (int i{0}; i < num_feature; ++i) {
+  //   for (int j{i + 1}; j < num_feature; ++j) {
+  //     dominate(i, j);
+  //   }
+  // }
 }
 
 void BacktrackingAlgorithm::search() {
@@ -1146,6 +1163,84 @@ double BacktrackingAlgorithm::gini(const int node, const int feature) {
   }
 
   return ((gini[1] / branch_size[1]) + (gini[0] / branch_size[0]));
+}
+
+bool BacktrackingAlgorithm::dominate(const int f_a, const int f_b) const {
+  // if f <=> true -> error = count(true, not_f) + count(false, f)
+  // if f <=> false -> error = count(false, not_f) + count(true, f)
+
+	  int lit_a[2] = {f_a + num_feature, f_a};
+
+	  int lit_b[2] = {f_b + num_feature, f_b};
+	//
+	// cout << "\nget_feature_frequency(0, 0, lit_a[1]): " << get_feature_frequency(0, 0, lit_a[1]) << endl;
+	// cout << "get_feature_frequency(1, 0, lit_a[0]): " << get_feature_frequency(1, 0, lit_a[1]) << endl;
+	// cout << "get_feature_frequency(1, 0, lit_a[1]): " << get_feature_frequency(1, 0, lit_a[0]) << endl;
+	// cout << "get_feature_frequency(0, 0, lit_a[0]): " << get_feature_frequency(0, 0, lit_a[0]) << endl;
+	//
+	// cout << "\nget_feature_frequency(0, 0, lit_b[1]): " << get_feature_frequency(0, 0, lit_b[1]) << endl;
+	// cout << "get_feature_frequency(1, 0, lit_b[0]): " << get_feature_frequency(1, 0, lit_b[1]) << endl;
+	// cout << "get_feature_frequency(1, 0, lit_b[1]): " << get_feature_frequency(1, 0, lit_b[0]) << endl;
+	// cout << "get_feature_frequency(0, 0, lit_b[0]): " << get_feature_frequency(0, 0, lit_b[0]) << endl << endl;
+	//
+	//
+	//   // to minimize the error assign polarity_a to f_a and not_polarity_a to
+	//   // not_f_a
+	//   bool polarity_a{get_feature_frequency(0, 0, lit_a[1]) +
+	//                       get_feature_frequency(1, 0, lit_a[1]) >
+	//                   get_feature_frequency(1, 0, lit_a[0]) +
+	//                       get_feature_frequency(0, 0, lit_a[0])};
+	//
+	//   bool polarity_b{get_feature_frequency(0, 0, lit_b[1]) +
+	//                       get_feature_frequency(1, 0, lit_b[1]) >
+	//                   get_feature_frequency(1, 0, lit_b[0]) +
+	//                       get_feature_frequency(0, 0, lit_b[0])};
+	//
+	//   if (get_feature_frequency(0, 0, lit_a[1 - polarity_a]) >=
+	//           get_feature_frequency(0, 0, lit_b[1 - polarity_b]) and
+	//       get_feature_frequency(1, 0, lit_a[polarity_a]) >=
+	//           get_feature_frequency(1, 0, lit_b[polarity_b])) {
+	//
+	//     cout << f_a << " might dominate " << f_b << endl;
+	//
+	// 	cout << "0 [" << 1-polarity_a << "]: " << reverse_dataset[0][f_a] << endl;
+	// 	cout << "0 [" << 1-polarity_b << "]: " << reverse_dataset[0][f_b] << endl << endl;
+	//
+	// 	cout << "1 [" << polarity_a << "]: " << reverse_dataset[1][f_a] << endl;
+	// 	cout << "1 [" << polarity_b << "]: " << reverse_dataset[1][f_b] << endl << endl;
+	//
+	// 	exit(1);
+	//
+	//   }
+	
+		if(
+			(get_feature_frequency(1, 0, lit_a[0]) == get_feature_frequency(1, 0, lit_b[0]) and
+				get_feature_frequency(0, 0, lit_a[0]) == get_feature_frequency(0, 0, lit_b[0]))
+				or 
+			(get_feature_frequency(1, 0, lit_a[0]) == get_feature_frequency(1, 0, lit_b[1]) and
+			get_feature_frequency(0, 0, lit_a[0]) == get_feature_frequency(0, 0, lit_b[0]))		
+			) {
+				
+		cout << "0 : " << reverse_dataset[0][f_a] << endl;
+		cout << "0 : " << reverse_dataset[0][f_b] << endl << endl;
+
+		cout << "1 : " << reverse_dataset[1][f_a] << endl;
+		cout << "1 : " << reverse_dataset[1][f_b] << endl << endl;
+				
+	} else if(	
+	(get_feature_frequency(1, 0, lit_a[0]) == example[1].size() and
+	get_feature_frequency(0, 0, lit_a[0]) == example[0].size()) or
+		(get_feature_frequency(1, 0, lit_a[0]) == 0 and
+		get_feature_frequency(0, 0, lit_a[0]) == 0)) {
+		
+			cout << "0 : " << reverse_dataset[0][f_a] << endl;
+			cout << "0 : " << reverse_dataset[0][f_b] << endl << endl;
+		
+	}
+	// if(reverse_dataset[1][f_a] == reverse_dataset[1][f_b])
+	
+
+  return false;
 }
 
 //// GARBAGE /////

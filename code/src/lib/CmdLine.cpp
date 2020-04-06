@@ -342,6 +342,9 @@ DTOptions parse_dt(int argc, char *argv[]) {
   cmd.add<SwitchArg>(opt.bounding, "", "bounding", "use bound reasoning",
                      false);
 
+  cmd.add<SwitchArg>(opt.binarize, "", "binarize", "binarize the data set",
+                     false);
+
   // ValueArg (const std::string &flag, const std::string &name, const
   // std::string &desc, bool req, T value, Constraint< T > *constraint, Visitor
   // *v=NULL)
