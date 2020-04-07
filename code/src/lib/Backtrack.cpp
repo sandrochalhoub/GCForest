@@ -858,23 +858,9 @@ void BacktrackingAlgorithm::branch(const int node, const int f) {
   }
 
   update_upperbound(node);
-
-  // if(child[0][node] < 0 and child[1][node] < 0)
-  // {
-  //     max_error[node] = node_error(node);
-  //     max_size[node] = 1;
-  // 	best_tree[node] = (P[0][node].count() < P[1][node].count());
-  //     optimal[node] = true;
-  // }
-
-  // assert(child[0][node] >= 0 or child[1][node] >= 0);
 }
 
 bool BacktrackingAlgorithm::grow(const int node) {
-  // feature[node] = ranked_feature[node].begin();
-  // sort_features(node);
-  // end_feature[node] = ranked_feature[node].end();
-  // filter_features(node);
 
 #ifdef PRINTTRACE
   if (PRINTTRACE and options.verbosity >= DTOptions::SOLVERINFO) {
@@ -912,7 +898,7 @@ bool BacktrackingAlgorithm::grow(const int node) {
 		
 	}
 	
-	filter_features(node, [&](const int f) {return max_entropy(node, f);});
+	// filter_features(node, [&](const int f) {return max_entropy(node, f);});
 
   // if (feature[node] == end_feature[node])
   // 	return false;
