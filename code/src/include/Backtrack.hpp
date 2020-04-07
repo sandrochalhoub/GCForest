@@ -89,9 +89,11 @@ private:
 
   // this is because I'm stupid
   vector<size_t> tree_error;
+  vector<size_t> tree_size;
 
   // optimistic value. updated only when the node becomes optimal
   vector<size_t> min_error;
+  vector<size_t> min_size;
 
   // best value for any possible feature, given the current branch (ancestors)
   // get updated when backtracking from the decision on the current feature
@@ -123,6 +125,8 @@ private:
   size_t num_restarts;
 
   size_t current_error;
+
+  size_t current_size;
 
   double time_limit;
 
@@ -250,6 +254,10 @@ private:
 
   void initialise_search();
 
+  size_t computeSize(const int node) const;
+
+  size_t maxSize(const int depth) const;
+
 public:
   vector<instance> dataset[2];
   vector<dynamic_bitset<>> reverse_dataset[2];
@@ -301,20 +309,15 @@ template <class rIter>
 void BacktrackingAlgorithm::addExample(rIter beg_sample, rIter end_sample,
                                        const bool y) {
   int n{static_cast<int>(end_sample - beg_sample)};
-  // for(auto i{0}; i<2; ++i)
-  // 	numExample[i] = data.example[i].count();
 
   if (n > num_feature) {
     num_feature = n;
-    //
     // auto m{num_feature};
     f_error.resize(num_feature, 1);
     f_entropy.resize(num_feature, 1);
     f_gini.resize(num_feature, 1);
     // f_gini_d.resize(m, 1);
   }
-
-  // cout << dataset[y].size() << ":";
 
   dataset[y].resize(dataset[y].size() + 1);
   example[y].resize(example[y].size() + 1);
