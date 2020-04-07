@@ -1129,7 +1129,7 @@ bool BacktrackingAlgorithm::fail() {
 
             optimal[backtrack_node] = true;
             min_error[backtrack_node] = max_error[backtrack_node];
-            min_size[backtrack_node] = max_size[backtrack_node];
+            min_size[backtrack_node] = max_size[backtrack_node] = 1;
             blossom.remove_front(backtrack_node);
           }
           // else {
