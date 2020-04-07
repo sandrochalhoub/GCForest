@@ -128,7 +128,7 @@ This algorithm therefore uses linear (in the size of the tree) memory and anytim
 
 \section*{Notations}
 
-A binary data set is a pair $\langle \negex,\posex \rangle$ where $\negex$ (resp. $\posex$) is a subset of $2^{\features}$. It is associated label function $\classlabel : 2^{\features} \mapsto \{\top,\bot\}$ such that:
+A binary data set is a pair $\langle \negex,\posex \rangle$ where $\negex$ (resp. $\posex$) is a subset of $2^{\features}$. It is associated a label function $\classlabel : 2^{\features} \mapsto \{\top,\bot\}$ such that:
 $$
 \forall \aclass \in \{\top,\bot\}, \forall \ex \in \setex{\aclass}, \classlabel[\ex] = \aclass
 $$
@@ -147,14 +147,14 @@ Given a data set $\langle \negex,\posex \rangle$, we can associate a data set $\
 \posex(\abranch) = \{\ex \mid \ex \in \posex, \ex \models \abranch\}
 \end{eqnarray*}
 
-We write $\error[\abranch]$ for $\min(|\negex(\abranch)|, |\posex(\abranch)|)$, and $\error[\abranch,\afeat]$ for $\min(\error[\abranch \wedge \afeat], \error[\abranch \wedge \bar{\afeat}])$.
+We write $\error[\abranch]$ for $\min(|\negex(\abranch)|, |\posex(\abranch)|)$, and $\error[\abranch,\afeat]$ for $\error[\abranch \wedge \afeat] + \error[\abranch \wedge \bar{\afeat}]$.
 A branch \abranch\ is said \emph{pure} iff $\error[\abranch]=0$.
 
 \medskip
 
 Given a binary dataset $\langle \negex,\posex \rangle$ with label function $\classlabel$,
 the \emph{minimum error bounded depth decision tree problem} consists in finding the minimum value $\epsilon$ such
-there exists a binary tree of depth at most $\maxd$ such that the sum of the error $\error[\abranch]$ for all branches $\abranch$ from the root to the leaves is equal to $\epsilon$.
+there exists a binary tree of depth at most $\maxd$ whose sum of error $\error[\abranch]$ for all branches $\abranch$ from the root to the leaves is equal to $\epsilon$.
 
 
 \section*{Dynamic Programming Algorithm}

@@ -18,14 +18,14 @@ using namespace std;
 namespace primer {
 
 class Wood;
-class TreeNode {
+class Tree {
 private:
   Wood *wood;
 
 public:
   const int idx;
 
-  TreeNode(Wood *w, const int i);
+  Tree(Wood *w, const int i);
 
   // bool predict(const instance &x) const;
   int predict(const DataSet &data) const;
@@ -52,8 +52,8 @@ private:
 public:
   Wood();
 
-  TreeNode operator[](const int i);
-  // const TreeNode &operator[](const int i) const;
+  Tree operator[](const int i);
+  // const Tree &operator[](const int i) const;
 
   size_t size();
 
@@ -86,11 +86,11 @@ public:
 #endif
 };
 
-std::ostream &operator<<(std::ostream &os, const TreeNode &x);
+std::ostream &operator<<(std::ostream &os, const Tree &x);
 
 
 template<class rIter>
-int TreeNode::predict(rIter beg_neg, rIter end_neg, rIter beg_pos, rIter end_pos) const {
+int Tree::predict(rIter beg_neg, rIter end_neg, rIter beg_pos, rIter end_pos) const {
   auto error{0};
   // for (auto y{0}; y < 2; ++y)
     for (auto i{beg_neg}; i!=end_neg; ++i)

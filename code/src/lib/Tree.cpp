@@ -9,9 +9,9 @@ using namespace std;
 
 namespace primer {
 
-TreeNode::TreeNode(Wood *w, const int node) : wood(w), idx(node) {}
+Tree::Tree(Wood *w, const int node) : wood(w), idx(node) {}
 
-int TreeNode::predict(const DataSet &data) const {
+int Tree::predict(const DataSet &data) const {
   auto error{0};
   for (auto y{0}; y < 2; ++y)
     for (auto i : data.example[y])
@@ -20,7 +20,7 @@ int TreeNode::predict(const DataSet &data) const {
 }
 
 // template<class rIter>
-// int TreeNode::predict(rIter beg[2], rIter end[2]) const {
+// int Tree::predict(rIter beg[2], rIter end[2]) const {
 //   auto error{0};
 //   for (auto y{0}; y < 2; ++y)
 //     for (auto i{beg[y]}; i!=end[y]; ++i)
@@ -28,7 +28,7 @@ int TreeNode::predict(const DataSet &data) const {
 //   return error;
 // }
 
-std::ostream &TreeNode::display(std::ostream &os) const {
+std::ostream &Tree::display(std::ostream &os) const {
 
   return wood->display(os, idx, 0);
 }
@@ -74,8 +74,8 @@ size_t Wood::size() { return feature.size(); }
 
 size_t Wood::count() { return size() - available.count(); }
 
-TreeNode Wood::operator[](const int i) {
-  TreeNode t(this, i);
+Tree Wood::operator[](const int i) {
+  Tree t(this, i);
   return t;
 }
 
@@ -181,7 +181,7 @@ void Wood::setChild(const int node, const int branch, const int orphan) {
   // cout << "free (" << node << "): " << available << endl;
 }
 
-std::ostream &operator<<(std::ostream &os, const TreeNode &x) {
+std::ostream &operator<<(std::ostream &os, const Tree &x) {
   x.display(os);
   return os;
 }

@@ -55,7 +55,7 @@ void BacktrackingAlgorithm::setReverse() {
     reverse_dataset[y].resize(num_feature);
     for (int f{0}; f < num_feature; ++f)
       reverse_dataset[y][f].resize(example[y].size(), 0);
-    buffer[y].resize(example[y].size(), 0);
+    // buffer[y].resize(example[y].size(), 0);
   }
   for (int y{0}; y < 2; ++y)
     for (auto i{0}; i < example[y].size(); ++i)
@@ -351,6 +351,53 @@ void BacktrackingAlgorithm::random_perturbation(const int node, const int kbest,
 // }
 
 void BacktrackingAlgorithm::sort_features(const int node) {
+	
+	
+	// if(depth[node] == 0) { //and depth[node] < ub_depth - 1) {
+	//
+	// 	relevant_features.clear();
+	// 	feature_set.resize(num_feature, true);
+	// 	rfeatures.resize(num_feature, false);
+	//   for (int fi{0}; fi < num_feature; ++fi) {
+	// 		if(feature_set[fi] and not null_entropy(0, fi)) {
+	// 			relevant_features.push_back(fi);
+	//
+	// 			for (int fj{fi + 1}; fj < num_feature; ++fj) {
+	//       	if(equal(fi, fj))
+	// 					feature_set.reset(fj);
+	//     	}
+	// 		}
+	//   }
+	//
+	// 	if(options.verbosity >= DTOptions::NORMAL)
+	// 		cout << "d feature_reduction=" << (num_feature - relevant_features.size()) << endl;
+	//
+	// 	filter_features(0, [&](const int f) {return not feature_set[f];});
+	//
+	// }
+	
+	// else {
+	//
+	// 	rfeatures = feature_set;
+	//   for (int i{0}; i < relevant_features.size(); ++i) {
+	// 		auto fi{relevant_features[i]};
+	// 		if(rfeatures[fi]) {
+	// 			for (int j{i + 1}; j < relevant_features.size(); ++j) {
+	// 				auto fj{relevant_features[j]};
+	//       	if(equal(fi, fj))
+	// 					rfeatures.reset(fj);
+	//     	}
+	// 		}
+	//   }
+	//
+	// 	if(rfeatures.count() < feature_set.count())
+	// 	{
+	// 		cout << (feature_set.count() - rfeatures.count()) << endl;
+	// 	}
+	//
+	// }
+	
+	
 
   switch (feature_criterion) {
   case DTOptions::MINERROR:
@@ -456,7 +503,7 @@ void BacktrackingAlgorithm::cleaning() {
   }
 }
 
-TreeNode BacktrackingAlgorithm::getSolution() { return wood[solution_root]; }
+Tree BacktrackingAlgorithm::getSolution() { return wood[solution_root]; }
 
 bool BacktrackingAlgorithm::notify_solution() {
 
@@ -796,7 +843,33 @@ bool BacktrackingAlgorithm::grow(const int node) {
 
   feature[node] = ranked_feature[node].begin();
   end_feature[node] = ranked_feature[node].end();
-  filter_features(node, [&](const int f) {return max_entropy(node, f);});
+	
+	
+	
+	if(depth[node] == 0) { //and depth[node] < ub_depth - 1) {
+		
+		relevant_features.clear();
+		feature_set.resize(num_feature, true);
+	  for (int fi{0}; fi < num_feature; ++fi) {
+			if(feature_set[fi] and not null_entropy(0, fi)) {
+				relevant_features.push_back(fi);			
+				for (int fj{fi + 1}; fj < num_feature; ++fj) {
+	      	if(equal(fi, fj))
+						feature_set.reset(fj);
+	    	}
+			}
+	  }
+	
+		if(options.verbosity >= DTOptions::NORMAL)
+			cout << "d feature_reduction=" << (num_feature - relevant_features.size()) << endl;
+	
+		filter_features(node, [&](const int f) {return not feature_set[f] or max_entropy(node, f);});
+		
+	} else { 
+	
+		filter_features(node, [&](const int f) {return max_entropy(node, f);});
+		
+	}
 
   // if (feature[node] == end_feature[node])
   // 	return false;
@@ -933,25 +1006,26 @@ void BacktrackingAlgorithm::initialise_search() {
 
   backtrack_node = -1;
 
-	relevant_features.clear();
-	feature_set.resize(num_feature, true);
-  for (int fi{0}; fi < num_feature; ++fi) {
-		if(feature_set[fi] and not null_entropy(0, fi)) {
-			relevant_features.push_back(fi);
-			
-			for (int fj{fi + 1}; fj < num_feature; ++fj) {
-      	if(equal(fi, fj))
-					feature_set.reset(fj);
-    	}
-		}
-  }
-	
-	if(options.verbosity >= DTOptions::NORMAL)
-		cout << "d feature_reduction=" << (num_feature - relevant_features.size()) << endl;
-	
-	filter_features(0, [&](const int f) {return not feature_set[f];});
+	// relevant_features.clear();
+	// feature_set.resize(num_feature, true);
+	// rfeature.resize(num_feature, false);
+	//   for (int fi{0}; fi < num_feature; ++fi) {
+	// 	if(feature_set[fi] and not null_entropy(0, fi)) {
+	// 		relevant_features.push_back(fi);
+	//
+	// 		for (int fj{fi + 1}; fj < num_feature; ++fj) {
+	//       	if(equal(fi, fj))
+	// 				feature_set.reset(fj);
+	//     	}
+	// 	}
+	//   }
+	//
+	// if(options.verbosity >= DTOptions::NORMAL)
+	// 	cout << "d feature_reduction=" << (num_feature - relevant_features.size()) << endl;
+	//
+	// filter_features(0, [&](const int f) {return not feature_set[f];});
 
-	sort_features(0);
+	// sort_features(0);
 	
 	// for(auto f : relevant_features)
 	// 	cout << " " << f ;

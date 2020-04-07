@@ -140,12 +140,7 @@ private:
 
   double start_time;
 
-  // bool use_entropy;
   int feature_criterion;
-
-  dynamic_bitset<> buffer[2];
-
-  // dynamic_bitset<> neg_buffer;
 
   void cleaning();
 
@@ -288,7 +283,7 @@ public:
 
   void search();
 
-  TreeNode getSolution();
+  Tree getSolution();
 
   int error() const;
 

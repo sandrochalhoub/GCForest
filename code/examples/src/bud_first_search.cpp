@@ -135,7 +135,7 @@ int main(int argc, char *argv[]) {
 
   A.search();
 
-  TreeNode sol = A.getSolution();
+  Tree sol = A.getSolution();
 
   if (opt.print_sol) {
     cout << sol << endl;
