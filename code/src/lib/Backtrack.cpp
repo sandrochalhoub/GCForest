@@ -612,7 +612,6 @@ bool BacktrackingAlgorithm::update_upperbound(const int node) {
 bool BacktrackingAlgorithm::backtrack() {
   bool dead_end{false};
 
-  size_t subtree_size{0};
   do {
 
     ++num_backtracks;
