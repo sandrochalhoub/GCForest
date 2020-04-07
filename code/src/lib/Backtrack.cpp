@@ -624,11 +624,6 @@ bool BacktrackingAlgorithm::backtrack() {
     decision.pop_back();
 
 #ifdef PRINTTRACE
-    // if (PRINTTRACE and options.verbosity >= DTOptions::SOLVERINFO) {
-    //   cout << "SIZE = " << current_size << " - "
-    //        << (max_size[backtrack_node] ) << endl;
-    // }
-
     if (PRINTTRACE) {
       for (auto i{0}; i < decision.size(); ++i)
         cout << "   ";
@@ -669,25 +664,6 @@ bool BacktrackingAlgorithm::backtrack() {
             best_tree[child[i][backtrack_node]] > 1)
           wood.freeNode(best_tree[child[i][backtrack_node]]);
     }
-
-    // if (backtrack_node == 0) {
-    //   cout << wood[0] << endl;
-    // }
-
-    subtree_size = (computeSize(child[0][backtrack_node]) +
-                    computeSize(child[1][backtrack_node]));
-
-    // #ifdef PRINTTRACE
-    //     if (PRINTTRACE and options.verbosity >= DTOptions::SOLVERINFO) {
-    //       cout << "SIZE = " << current_size << " - "
-    //            << subtree_size << endl;
-    //     }
-    // #endif
-    //
-    // 		// assert(computeSize(child[0][backtrack_node] +
-    // computeSize(child[1][backtrack_node]) =)
-    //
-    // 		current_size -= subtree_size;
 
     ++feature[backtrack_node];
 
@@ -743,18 +719,6 @@ bool BacktrackingAlgorithm::backtrack() {
   }
 #endif
 
-// #ifdef PRINTTRACE
-//   if (PRINTTRACE and options.verbosity >= DTOptions::SOLVERINFO) {
-//     cout << "SIZE = " << current_size << " + 1\n";
-//   }
-// #endif
-  //
-  // 		// assert(computeSize(child[0][backtrack_node] +
-  // computeSize(child[1][backtrack_node]) =)
-  //
-  // 		current_size -= subtree_size;
-
-  // ++current_size;
   current_error += node_error(backtrack_node);
 
   return true;
