@@ -31,8 +31,10 @@ private:
   DTOptions &options;
   vector<vector<int>> example[2];
 
-	// 
-	size_t ub_depth;
+  // vector<int> decision;
+
+  //
+  size_t ub_depth;
 
   // internal nodes are popped front, potential nodes and leaves are back
   SparseSet branch;

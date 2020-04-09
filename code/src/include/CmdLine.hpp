@@ -77,7 +77,7 @@ public:
 
   int width;
   double focus;
-  int max_size;
+  // int max_size;
   int max_depth;
 
   int restart_base;
@@ -98,9 +98,10 @@ public:
         print_mod(opt.print_mod), print_ins(opt.print_ins),
         print_sta(opt.print_sta), print_cmd(opt.print_cmd),
         verified(opt.verified), sample(opt.sample), width(opt.width),
-        focus(opt.focus), max_size(opt.max_size), max_depth(opt.max_depth),
-        restart_base(opt.restart_base), restart_factor(opt.restart_factor),
-        filter(opt.filter) {}
+        focus(opt.focus) // , max_size(opt.max_size)
+        ,
+        max_depth(opt.max_depth), restart_base(opt.restart_base),
+        restart_factor(opt.restart_factor), filter(opt.filter) {}
 
   ostream &display(ostream &os);
 };

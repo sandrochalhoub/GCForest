@@ -193,8 +193,11 @@ PrimerOptions parse_primer(int argc, char *argv[]) {
   cmd.add<SwitchArg>(opt.print_cmd, "", "print_cmd", "print the command-line",
                      false);
 
-  cmd.add<SwitchArg>(opt.verified, "", "verified", "verify the explanations",
-                     false);
+  cmd.add<SwitchArg>(opt.verified, "", "noverification",
+                     "switch tree verification off", false);
+
+  cmd.add<SwitchArg>(opt.verified, "", "verified",
+                     "switch tree verification on", false);
 
   // ValueArg (const std::string &flag, const std::string &name, const
   // std::string &desc, bool req, T value, Constraint< T > *constraint, Visitor
@@ -212,9 +215,9 @@ PrimerOptions parse_primer(int argc, char *argv[]) {
                             "probability of choosing the best feature", false,
                             .9, "int");
 
-  cmd.add<ValueArg<int>>(opt.max_size, "", "max_size",
-                         "maximum number of nodes in the tree", false,
-                         numeric_limits<int>::max(), "int");
+  // cmd.add<ValueArg<int>>(opt.max_size, "", "max_size",
+  //                        "maximum number of nodes in the tree", false,
+  //                        numeric_limits<int>::max(), "int");
 
   cmd.add<ValueArg<int>>(opt.max_depth, "", "max_depth",
                          "maximum depth of the tree", false,
@@ -333,16 +336,19 @@ DTOptions parse_dt(int argc, char *argv[]) {
   cmd.add<SwitchArg>(opt.print_cmd, "", "print_cmd", "print the command-line",
                      false);
 
-  cmd.add<SwitchArg>(opt.verified, "", "verified", "verify the solution",
-                     false);
+  cmd.add<SwitchArg>(opt.verified, "", "verified",
+                     "switch tree verification on", false);
+
+  cmd.add<SwitchArg>(opt.verified, "", "noverification",
+                     "switch tree verification on", true);
 
   cmd.add<SwitchArg>(opt.filter, "", "filter", "remove contradictory examples",
                      false);
 
-  cmd.add<SwitchArg>(opt.bounding, "", "nolb", "switch bound reasoning off",
-                     true);
-
   cmd.add<SwitchArg>(opt.bounding, "", "bounding", "switch bound reasoning on",
+                     false);
+
+  cmd.add<SwitchArg>(opt.bounding, "", "nolb", "switch bound reasoning off",
                      true);
 
   cmd.add<SwitchArg>(opt.binarize, "", "binarize", "binarize the data set",
@@ -464,9 +470,9 @@ ostream &DTOptions::display(ostream &os) {
   }
   os << endl
      << setw(20) << left << "p maximum depth:" << setw(30) << right << max_depth
-     << endl
-     << setw(20) << left << "p maximum size:" << setw(30) << right << max_size
      << endl;
+  // << setw(20) << left << "p maximum size:" << setw(30) << right << max_size
+  // << endl;
 
   return os;
 }
