@@ -19,6 +19,7 @@ BacktrackingAlgorithm::BacktrackingAlgorithm(Wood &w, DTOptions &opt)
   ub_node = options.max_size;
   ub_depth = options.max_depth;
   size_matters = false;
+  actual_depth = 0;
 
   search_size = 0;
   num_backtracks = 0;
@@ -179,14 +180,14 @@ void BacktrackingAlgorithm::separator(const string &msg) const {
 
 void BacktrackingAlgorithm::print_new_best() const {
 
-  cout << setprecision(5) << left << "d accuracy=" << setw(7) 
+  cout << setprecision(5) << left << "d accuracy=" << setw(7)
        << (1.0 -
            static_cast<double>(ub_error) / static_cast<double>(numExample()))
-       << " error=" << setw(4) << ub_error << " depth=" 
-       << setw(3) << ub_depth << " size=" << setw(3) << ub_node
+       << " error=" << setw(4) << ub_error << " depth=" << setw(3)
+       << actual_depth << " size=" << setw(3) << ub_node
        // << " backtracks=" << setw(9) << num_backtracks
        << " choices=" << setw(9) << search_size << " restarts=" << setw(5)
-       << num_restarts << " mem=" << setw(4) << wood.size() 
+       << num_restarts << " mem=" << setw(4) << wood.size()
        << " time=" << setprecision(3) << cpu_time() - start_time << right
        << endl;
 }
@@ -496,9 +497,6 @@ bool BacktrackingAlgorithm::notify_solution(bool &improvement) {
     ub_error = current_error;
     ub_node = current_size;
 
-    if (options.verbosity > DTOptions::QUIET)
-      print_new_best();
-
     // cout << "solution " << wood.count() << " -> ";
 
     if (solution_root > 1)
@@ -509,6 +507,11 @@ bool BacktrackingAlgorithm::notify_solution(bool &improvement) {
     solution_root = copy_solution(0);
 
     improvement = true;
+
+    actual_depth = wood.depth(solution_root);
+
+    if (options.verbosity > DTOptions::QUIET)
+      print_new_best();
 
     // cout << blossom << endl << wood[solution_root] << endl;
 
@@ -1120,12 +1123,9 @@ void BacktrackingAlgorithm::minimize_error_depth() {
   auto perfect{false};
   while (search() and ub_error == 0) {
     perfect = true;
-
     ub_error = 1;
-    --ub_depth;
+    ub_depth = actual_depth - 1;
     restart(true);
-		
-		// cout << wood[solution_root] << endl;
   }
 
   if (perfect) {
@@ -1143,7 +1143,6 @@ void BacktrackingAlgorithm::minimize_error_depth() {
 
   if (options.verbosity > DTOptions::SILENT)
     print_new_best();
-  // cout << "error = " << ub_error << endl;
 }
 
 
@@ -1158,9 +1157,8 @@ void BacktrackingAlgorithm::minimize_error_depth_size() {
   auto perfect{false};
   while (search() and ub_error == 0) {
     perfect = true;
-
     ub_error = 1;
-    --ub_depth;
+    ub_depth = actual_depth - 1;
     restart(true);
   }
 
@@ -1188,7 +1186,6 @@ void BacktrackingAlgorithm::minimize_error_depth_size() {
 
   if (options.verbosity > DTOptions::SILENT)
     print_new_best();
-  // cout << "error = " << ub_error << endl;
 }
 
 bool BacktrackingAlgorithm::fail() {

@@ -339,7 +339,10 @@ DTOptions parse_dt(int argc, char *argv[]) {
   cmd.add<SwitchArg>(opt.filter, "", "filter", "remove contradictory examples",
                      false);
 
-  cmd.add<SwitchArg>(opt.nolb, "", "nolb", "switch bound reasoning off",
+  cmd.add<SwitchArg>(opt.bounding, "", "nolb", "switch bound reasoning off",
+                     true);
+
+  cmd.add<SwitchArg>(opt.bounding, "", "bounding", "switch bound reasoning on",
                      true);
 
   cmd.add<SwitchArg>(opt.binarize, "", "binarize", "binarize the data set",
@@ -414,7 +417,7 @@ ostream &DTOptions::display(ostream &os) {
      << setw(20) << left << "p filter data set:" << setw(30) << right
      << (filter ? "yes" : "no") << endl
      << setw(20) << left << "p bound cuts:" << setw(30) << right
-     << (nolb ? "no" : "yes") << endl
+     << (bounding ? "yes" : "no") << endl
      << setw(20) << left << "p randomization:" << setw(30) << right;
 
   if (width == 1 or focus == 1)

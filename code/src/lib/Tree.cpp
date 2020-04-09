@@ -19,14 +19,9 @@ int Tree::predict(const DataSet &data) const {
   return error;
 }
 
-// template<class rIter>
-// int Tree::predict(rIter beg[2], rIter end[2]) const {
-//   auto error{0};
-//   for (auto y{0}; y < 2; ++y)
-//     for (auto i{beg[y]}; i!=end[y]; ++i)
-//       error += (wood->predict(idx, *i) != y);
-//   return error;
-// }
+size_t Tree::size() const { return wood->size(idx); }
+
+size_t Tree::depth() const { return wood->depth(idx); }
 
 std::ostream &Tree::display(std::ostream &os) const {
 
@@ -167,6 +162,20 @@ bool Wood::predict(const int node, const instance &x) const {
   if (node <= 1)
     return node;
   return predict(child[x[feature[node]]][node], x);
+}
+
+size_t Wood::size(const int node) const {
+  if (node <= 1)
+    return 1;
+  else
+    return 1 + size(child[0][node]) + size(child[1][node]);
+}
+
+size_t Wood::depth(const int node) const {
+  if (node <= 1)
+    return 0;
+  else
+    return 1 + max(depth(child[0][node]), depth(child[1][node]));
 }
 
 void Wood::setFeature(const int node, const int f) {

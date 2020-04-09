@@ -33,10 +33,14 @@ public:
 	template<class rIter>
 	int predict(rIter beg_neg, rIter end_neg, rIter beg_pos, rIter end_pos) const;
 
-  /*!@name Miscellaneous*/
-  //@{
-  std::ostream &display(std::ostream &os) const;
-  //@}
+        size_t size() const;
+
+        size_t depth() const;
+
+        /*!@name Miscellaneous*/
+        //@{
+        std::ostream &display(std::ostream &os) const;
+        //@}
 };
 
 // M
@@ -76,6 +80,10 @@ public:
   // int getChild(const int node, const inr branch);
 
   bool predict(const int node, const instance &x) const;
+
+  size_t size(const int node) const;
+
+  size_t depth(const int node) const;
 
   std::ostream &display(std::ostream &os, const int node,
                         const int depth) const;

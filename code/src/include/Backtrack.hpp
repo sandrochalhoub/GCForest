@@ -148,6 +148,8 @@ private:
 
   bool size_matters;
 
+  size_t actual_depth;
+
   void cleaning();
 
   void store_new_best();
