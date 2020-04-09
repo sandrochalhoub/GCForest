@@ -16,7 +16,7 @@ BacktrackingAlgorithm::BacktrackingAlgorithm(Wood &w, DTOptions &opt)
 
   // statistics and options
   ub_error = numeric_limits<size_t>::max(); //(numExample());
-  ub_node = options.max_size;
+  ub_size = options.max_size;
   ub_depth = options.max_depth;
   size_matters = false;
   actual_depth = 0;
@@ -123,7 +123,7 @@ size_t BacktrackingAlgorithm::size() { return blossom.size(); }
 
 void BacktrackingAlgorithm::setUbDepth(const size_t u) { ub_depth = u; }
 
-// void BacktrackingAlgorithm::setUbNode(const size_t u) { ub_node = u; }
+// void BacktrackingAlgorithm::setUbNode(const size_t u) { ub_size = u; }
 
 void BacktrackingAlgorithm::setUbError(const size_t u) { ub_error = u; }
 
@@ -133,7 +133,7 @@ size_t BacktrackingAlgorithm::getUbError() const { return ub_error; }
 
 size_t BacktrackingAlgorithm::getUbDepth() const { return ub_depth; }
 
-size_t BacktrackingAlgorithm::getUbSize() const { return ub_node; }
+size_t BacktrackingAlgorithm::getUbSize() const { return ub_size; }
 
 size_t BacktrackingAlgorithm::node_error(const int i) const {
   return std::min(P[0][i].count(), P[1][i].count());
@@ -184,7 +184,7 @@ void BacktrackingAlgorithm::print_new_best() const {
        << (1.0 -
            static_cast<double>(ub_error) / static_cast<double>(numExample()))
        << " error=" << setw(4) << ub_error << " depth=" << setw(3)
-       << actual_depth << " size=" << setw(3) << ub_node
+       << actual_depth << " size=" << setw(3) << ub_size
        // << " backtracks=" << setw(9) << num_backtracks
        << " choices=" << setw(9) << search_size << " restarts=" << setw(5)
        << num_restarts << " mem=" << setw(4) << wood.size()
@@ -477,7 +477,7 @@ void BacktrackingAlgorithm::cleaning() {
                                           get_feature_frequency(0, 0, f[i]));
 
     ub_error = get_feature_error(0, *feature[0]);
-    ub_node = 3;
+    ub_size = 3;
   }
 }
 
@@ -488,14 +488,14 @@ bool BacktrackingAlgorithm::notify_solution(bool &improvement) {
   // bool perfect{ub_error > 0 and current_error == 0};
 
   if (current_error < ub_error or
-      (size_matters and current_error == ub_error and current_size < ub_node)) {
+      (size_matters and current_error == ub_error and current_size < ub_size)) {
 
     ++num_solutions;
 
     // perfect = (ub_error > 0 and current_error == 0);
 
     ub_error = current_error;
-    ub_node = current_size;
+    ub_size = current_size;
 
     // cout << "solution " << wood.count() << " -> ";
 
@@ -514,7 +514,7 @@ bool BacktrackingAlgorithm::notify_solution(bool &improvement) {
       print_new_best();
 
     if (options.verified) {
-      if (ub_node != wood.size(solution_root)) {
+      if (ub_size != wood.size(solution_root)) {
         cout << "c warning, wrong tree size!!\n";
       }
 

@@ -109,7 +109,7 @@ private:
 
   size_t num_node;
 
-  size_t ub_node;
+  size_t ub_size;
 
   size_t ub_depth;
 
