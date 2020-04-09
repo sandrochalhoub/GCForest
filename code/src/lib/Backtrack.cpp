@@ -1115,7 +1115,7 @@ void BacktrackingAlgorithm::minimize_error() {
 
   search();
 
-  cleaning();
+  // cleaning();
 
   if (options.verbosity > DTOptions::QUIET) {
     if (interrupted)
@@ -1137,7 +1137,7 @@ void BacktrackingAlgorithm::minimize_error_depth() {
     separator("search");
 
   auto perfect{false};
-  while (search() and ub_error == 0) {
+  while (ub_depth > 0 and search() and ub_error == 0) {
     perfect = true;
     ub_error = 1;
     ub_depth = actual_depth - 1;
@@ -1147,8 +1147,9 @@ void BacktrackingAlgorithm::minimize_error_depth() {
   if (perfect) {
 		++ub_depth;
     ub_error = 0;
-  } else
-    cleaning();
+  } 
+	// else
+	//     cleaning();
 
   if (options.verbosity > DTOptions::QUIET) {
     if (interrupted)
@@ -1171,18 +1172,17 @@ void BacktrackingAlgorithm::minimize_error_depth_size() {
 	
 
   auto perfect{false};
-  while (search() and ub_error == 0) {
+  while (ub_depth > 0 and search() and ub_error == 0) {
     perfect = true;
     ub_error = 1;
     ub_depth = actual_depth - 1;
-		// cout << "try with ub_depth"
-		
     restart(true);
   }
 
-  if (perfect) {
-		++ub_depth;
-    ub_error = 0;
+	++ub_depth;
+	ub_error = 0;
+
+  if (perfect and ub_depth > 1) {  
 		
 		size_matters = true;
 		optimal[0] = false;
@@ -1192,8 +1192,9 @@ void BacktrackingAlgorithm::minimize_error_depth_size() {
 		feature[0] = ranked_feature[0].begin();
 		search();
 		
-  } else
-    cleaning();
+  } 
+	// else
+	//     cleaning();
 
   if (options.verbosity > DTOptions::QUIET) {
     if (interrupted)
