@@ -18,6 +18,7 @@ BacktrackingAlgorithm::BacktrackingAlgorithm(Wood &w, DTOptions &opt)
   ub_error = numeric_limits<size_t>::max(); //(numExample());
   ub_node = options.max_size;
   ub_depth = options.max_depth;
+  size_matters = false;
 
   search_size = 0;
   num_backtracks = 0;
@@ -121,9 +122,17 @@ size_t BacktrackingAlgorithm::size() { return blossom.size(); }
 
 void BacktrackingAlgorithm::setUbDepth(const size_t u) { ub_depth = u; }
 
-void BacktrackingAlgorithm::setUbNode(const size_t u) { ub_node = u; }
+// void BacktrackingAlgorithm::setUbNode(const size_t u) { ub_node = u; }
 
 void BacktrackingAlgorithm::setUbError(const size_t u) { ub_error = u; }
+
+void BacktrackingAlgorithm::addSizeObjective() { size_matters = true; }
+
+size_t BacktrackingAlgorithm::getUbError() const { return ub_error; }
+
+size_t BacktrackingAlgorithm::getUbDepth() const { return ub_depth; }
+
+size_t BacktrackingAlgorithm::getUbSize() const { return ub_node; }
 
 size_t BacktrackingAlgorithm::node_error(const int i) const {
   return std::min(P[0][i].count(), P[1][i].count());
@@ -170,16 +179,14 @@ void BacktrackingAlgorithm::separator(const string &msg) const {
 
 void BacktrackingAlgorithm::print_new_best() const {
 
-  cout << "d size=" << left << setw(4) << ub_node
-       // << " depth=" << left << setw(3) << ub_depth
-       << " error=" << left << setw(4) << ub_error << " accuracy=" << setw(9)
-       << setprecision(6)
+  cout << setprecision(5) << left << "d accuracy=" << setw(7) 
        << (1.0 -
            static_cast<double>(ub_error) / static_cast<double>(numExample()))
+       << " error=" << setw(4) << ub_error << " depth=" 
+       << setw(3) << ub_depth << " size=" << setw(3) << ub_node
        // << " backtracks=" << setw(9) << num_backtracks
        << " choices=" << setw(9) << search_size << " restarts=" << setw(5)
-       << num_restarts << " mem=" << left << setw(4) << wood.size() << right
-       // << endl;
+       << num_restarts << " mem=" << setw(4) << wood.size() 
        << " time=" << setprecision(3) << cpu_time() - start_time << right
        << endl;
 }
@@ -469,18 +476,22 @@ void BacktrackingAlgorithm::cleaning() {
                                           get_feature_frequency(0, 0, f[i]));
 
     ub_error = get_feature_error(0, *feature[0]);
-    ub_node = 1;
+    ub_node = 3;
   }
 }
 
 Tree BacktrackingAlgorithm::getSolution() { return wood[solution_root]; }
 
-bool BacktrackingAlgorithm::notify_solution() {
+bool BacktrackingAlgorithm::notify_solution(bool &improvement) {
+
+  // bool perfect{ub_error > 0 and current_error == 0};
 
   if (current_error < ub_error or
-      (current_error == ub_error and current_size < ub_node)) {
+      (size_matters and current_error == ub_error and current_size < ub_node)) {
 
     ++num_solutions;
+
+    // perfect = (ub_error > 0 and current_error == 0);
 
     ub_error = current_error;
     ub_node = current_size;
@@ -497,10 +508,18 @@ bool BacktrackingAlgorithm::notify_solution() {
 
     solution_root = copy_solution(0);
 
+    improvement = true;
+
     // cout << blossom << endl << wood[solution_root] << endl;
 
     // cout << wood.count() << endl;
   }
+
+  // if(perfect) {
+  // 	--ub_depth;
+  // 	restart();
+  // 	return true;
+  // }
 
   return backtrack();
 }
@@ -545,7 +564,7 @@ void BacktrackingAlgorithm::prune(const int node) {
   }
 }
 
-void BacktrackingAlgorithm::restart() {
+void BacktrackingAlgorithm::restart(const bool full) {
   ++num_restarts;
 
   decision.clear();
@@ -572,6 +591,9 @@ void BacktrackingAlgorithm::restart() {
 
   restart_base *= options.restart_factor;
   restart_limit += static_cast<int>(restart_base);
+	
+	if(full)
+		feature[0] = ranked_feature[0].begin();
 
   assert(blossom.count() == blossom.size() and blossom.size() == 1);
 }
@@ -1038,24 +1060,21 @@ void BacktrackingAlgorithm::initialise_search() {
 	
 }
 
-void BacktrackingAlgorithm::search() {
+bool BacktrackingAlgorithm::search() {
 
-  initialise_search();
+  auto sat = false;
 
-  if (options.verbosity > DTOptions::QUIET)
-    separator("search");
-
-  while (not limit_out()) {
+  while (not limit_out() and (ub_error > 0 or size_matters)) {
 
     if (num_backtracks > restart_limit)
-      restart();
+      restart(false);
 
     PRINT_TRACE;
 
     DO_ASSERTS;
 
     if (blossom.empty()) {
-      if (not notify_solution())
+      if (not notify_solution(sat))
         break;
     } else if (options.bounding and fail()) {
       if (not backtrack())
@@ -1065,7 +1084,100 @@ void BacktrackingAlgorithm::search() {
     }
   }
 
+  return sat;
+}
+
+void BacktrackingAlgorithm::minimize_error() {
+
+  initialise_search();
+
+  if (options.verbosity > DTOptions::QUIET)
+    separator("search");
+
+  search();
+
   cleaning();
+
+  if (options.verbosity > DTOptions::QUIET) {
+    if (interrupted)
+      separator("interrupted");
+    else
+      separator("optimal");
+  }
+
+  if (options.verbosity > DTOptions::SILENT)
+    print_new_best();
+  // cout << "error = " << ub_error << endl;
+}
+
+void BacktrackingAlgorithm::minimize_error_depth() {
+
+  initialise_search();
+
+  if (options.verbosity > DTOptions::QUIET)
+    separator("search");
+
+  auto perfect{false};
+  while (search() and ub_error == 0) {
+    perfect = true;
+
+    ub_error = 1;
+    --ub_depth;
+    restart(true);
+		
+		// cout << wood[solution_root] << endl;
+  }
+
+  if (perfect) {
+		++ub_depth;
+    ub_error = 0;
+  } else
+    cleaning();
+
+  if (options.verbosity > DTOptions::QUIET) {
+    if (interrupted)
+      separator("interrupted");
+    else
+      separator("optimal");
+  }
+
+  if (options.verbosity > DTOptions::SILENT)
+    print_new_best();
+  // cout << "error = " << ub_error << endl;
+}
+
+
+void BacktrackingAlgorithm::minimize_error_depth_size() {
+
+  initialise_search();
+
+  if (options.verbosity > DTOptions::QUIET)
+    separator("search");
+	
+
+  auto perfect{false};
+  while (search() and ub_error == 0) {
+    perfect = true;
+
+    ub_error = 1;
+    --ub_depth;
+    restart(true);
+  }
+
+  if (perfect) {
+		++ub_depth;
+    ub_error = 0;
+		
+		size_matters = true;
+		optimal[0] = false;
+		
+		restart(true);
+		
+		feature[0] = ranked_feature[0].begin();
+		search();
+		
+  } else
+    cleaning();
 
   if (options.verbosity > DTOptions::QUIET) {
     if (interrupted)
@@ -1112,7 +1224,7 @@ bool BacktrackingAlgorithm::fail() {
                << "]\n";
 #endif
 
-        if (lbe > ube or (lbe == ube and lbs >= ubs)) {
+        if (lbe > ube or (size_matters and lbe == ube and lbs >= ubs)) {
 
 #ifdef PRINTTRACE
           if (PRINTTRACE)

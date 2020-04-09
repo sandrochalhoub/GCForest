@@ -146,6 +146,8 @@ private:
 
   int feature_criterion;
 
+  bool size_matters;
+
   void cleaning();
 
   void store_new_best();
@@ -226,7 +228,7 @@ private:
   bool fail();
 
   // as name suggests
-  bool notify_solution();
+  bool notify_solution(bool &improvement);
 
   // remove the node and its descendants from the tree
   void prune(const int node);
@@ -248,7 +250,7 @@ private:
   //
   bool grow(const int node);
 
-  void restart();
+  void restart(const bool full);
 
   bool limit_out();
 
@@ -281,15 +283,29 @@ public:
 
   void setUbDepth(const size_t u);
 
-  void setUbNode(const size_t u);
+  // void setUbNode(const size_t u);
 
   void setUbError(const size_t u);
+
+  void addSizeObjective();
+
+  size_t getUbError() const;
+
+  size_t getUbDepth() const;
+
+  size_t getUbSize() const;
 
   void setTimeLimit(const double t);
 
   void setSearchLimit(const size_t t);
 
-  void search();
+  bool search();
+
+  void minimize_error();
+
+  void minimize_error_depth();
+	
+	void minimize_error_depth_size();
 
   Tree getSolution();
 

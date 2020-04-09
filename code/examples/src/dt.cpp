@@ -118,7 +118,7 @@ int main(int argc, char *argv[]) {
 
   A.setData(base);
 
-  A.search();
+  A.minimize_error_depth();
 
   Tree sol = A.getSolution();
 

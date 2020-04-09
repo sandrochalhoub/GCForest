@@ -133,7 +133,7 @@ int main(int argc, char *argv[]) {
   if (opt.verbosity >= DTOptions::NORMAL)
     cout << "d readtime=" << cpu_time() << endl;
 
-  A.search();
+  A.minimize_error_depth_size();
 
   Tree sol = A.getSolution();
 
