@@ -133,7 +133,13 @@ int main(int argc, char *argv[]) {
   if (opt.verbosity >= DTOptions::NORMAL)
     cout << "d readtime=" << cpu_time() << endl;
 
-  A.minimize_error_depth_size();
+  if (opt.mindepth) {
+    if (opt.minsize)
+      A.minimize_error_depth_size();
+    else
+      A.minimize_error_depth();
+  } else
+    A.minimize_error();
 
   Tree sol = A.getSolution();
 

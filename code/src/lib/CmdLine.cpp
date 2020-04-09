@@ -354,6 +354,18 @@ DTOptions parse_dt(int argc, char *argv[]) {
   cmd.add<SwitchArg>(opt.binarize, "", "binarize", "binarize the data set",
                      false);
 
+  cmd.add<SwitchArg>(opt.mindepth, "", "depthobjective",
+                     "switch depth objective on", false);
+
+  cmd.add<SwitchArg>(opt.mindepth, "", "erroronly",
+                     "switch depth objective off", true);
+
+  cmd.add<SwitchArg>(opt.minsize, "", "sizeobjective",
+                     "switch size objective on", false);
+
+  cmd.add<SwitchArg>(opt.minsize, "", "depthonly", "switch size objective off",
+                     true);
+
   // ValueArg (const std::string &flag, const std::string &name, const
   // std::string &desc, bool req, T value, Constraint< T > *constraint, Visitor
   // *v=NULL)
@@ -370,9 +382,9 @@ DTOptions parse_dt(int argc, char *argv[]) {
                             "probability of choosing the best feature", false,
                             .9, "int");
 
-  cmd.add<ValueArg<int>>(opt.max_size, "", "max_size",
-                         "maximum number of nodes in the tree", false,
-                         numeric_limits<int>::max(), "int");
+  // cmd.add<ValueArg<int>>(opt.max_size, "", "max_size",
+  //                        "maximum number of nodes in the tree", false,
+  //                        numeric_limits<int>::max(), "int");
 
   cmd.add<ValueArg<int>>(opt.max_depth, "", "max_depth",
                          "maximum depth of the tree", false,
@@ -409,8 +421,13 @@ ostream &DTOptions::display(ostream &os) {
   os << setw(20) << left << "p data file:" << setw(30) << right << instance_file
      << endl
      << setw(20) << left << "p seed:" << setw(30) << right << seed << endl
-     << setw(20) << left << "p sampling ratio:" << setw(30) << right << sample
-     << endl
+     // << setw(20) << left << "p sampling ratio:" << setw(30) << right <<
+     // sample
+     // << endl
+     << setw(20) << left << "p minimize depth:" << setw(30) << right
+     << (mindepth ? "yes" : "no") << endl
+     << setw(20) << left << "p minimize size:" << setw(30) << right
+     << (mindepth and minsize ? "yes" : "no") << endl
      << setw(20) << left << "p verbosity:" << setw(30) << right
      << (verbosity == SILENT
              ? "silent"

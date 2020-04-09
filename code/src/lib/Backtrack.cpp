@@ -15,8 +15,8 @@ BacktrackingAlgorithm::BacktrackingAlgorithm(Wood &w, DTOptions &opt)
   // numExample[1] = 0;
 
   // statistics and options
-  ub_error = numeric_limits<size_t>::max(); //(numExample());
-  ub_size = options.max_size;
+  ub_error = INFTY; //(numExample());
+  ub_size = INFTY;
   ub_depth = options.max_depth;
   size_matters = false;
   actual_depth = 0;
@@ -1170,6 +1170,7 @@ void BacktrackingAlgorithm::minimize_error_depth_size() {
   if (options.verbosity > DTOptions::QUIET)
     separator("search");
 	
+	cout << "ub_depth " << ub_depth << endl;
 
   auto perfect{false};
   while (ub_depth > 0 and search() and ub_error == 0) {

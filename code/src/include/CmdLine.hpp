@@ -98,10 +98,9 @@ public:
         print_mod(opt.print_mod), print_ins(opt.print_ins),
         print_sta(opt.print_sta), print_cmd(opt.print_cmd),
         verified(opt.verified), sample(opt.sample), width(opt.width),
-        focus(opt.focus) // , max_size(opt.max_size)
-        ,
-        max_depth(opt.max_depth), restart_base(opt.restart_base),
-        restart_factor(opt.restart_factor), filter(opt.filter) {}
+        focus(opt.focus), max_depth(opt.max_depth),
+        restart_base(opt.restart_base), restart_factor(opt.restart_factor),
+        filter(opt.filter) {}
 
   ostream &display(ostream &os);
 };
@@ -138,7 +137,7 @@ public:
 
   int width;
   double focus;
-  int max_size;
+  // int max_size;
   int max_depth;
 
   int restart_base;
@@ -160,6 +159,9 @@ public:
 
   bool binarize;
 
+  bool mindepth;
+  bool minsize;
+
   DTOptions(){};
   DTOptions(const DTOptions &opt)
       : cmdline(opt.cmdline), instance_file(opt.instance_file),
@@ -168,11 +170,12 @@ public:
         print_par(opt.print_par), print_ins(opt.print_ins),
         print_sta(opt.print_sta), print_cmd(opt.print_cmd),
         verified(opt.verified), sample(opt.sample), width(opt.width),
-        focus(opt.focus), max_size(opt.max_size), max_depth(opt.max_depth),
+        focus(opt.focus), max_depth(opt.max_depth),
         restart_base(opt.restart_base), restart_factor(opt.restart_factor),
         filter(opt.filter), time(opt.time), search(opt.search),
         bounding(opt.bounding), node_strategy(opt.node_strategy),
-        feature_strategy(opt.feature_strategy), binarize(opt.binarize) {}
+        feature_strategy(opt.feature_strategy), binarize(opt.binarize),
+        mindepth(opt.mindepth), minsize(opt.minsize) {}
 
   ostream &display(ostream &os);
 };
