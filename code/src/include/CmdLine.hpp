@@ -149,7 +149,7 @@ public:
 
   int search;
 
-  bool bounding;
+  bool nolb;
 
   enum node_strategy { FIRST = 0, RANDOM = 1, ERROR = 2, ERROR_REDUCTION = 3 };
   int node_strategy;
@@ -170,7 +170,7 @@ public:
         focus(opt.focus), max_size(opt.max_size), max_depth(opt.max_depth),
         restart_base(opt.restart_base), restart_factor(opt.restart_factor),
         filter(opt.filter), time(opt.time), search(opt.search),
-        bounding(opt.bounding), node_strategy(opt.node_strategy),
+        nolb(opt.nolb), node_strategy(opt.node_strategy),
         feature_strategy(opt.feature_strategy), binarize(opt.binarize) {}
 
   ostream &display(ostream &os);
