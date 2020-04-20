@@ -27,6 +27,10 @@ public:
 
   Tree(Wood *w, const int i);
 
+  int getChild(const int node, const int branch) const;
+
+  int getFeature(const int node) const;
+
   // bool predict(const instance &x) const;
   int predict(const DataSet &data) const;
 	
@@ -73,7 +77,11 @@ public:
 
   void setFeature(const int node, const int f);
 
+  int getFeature(const int node) const;
+
   void setChild(const int node, const int branch, const int orphan);
+
+  int getChild(const int node, const int branch) const;
 
   // int getFeature(const int node) const;
   //

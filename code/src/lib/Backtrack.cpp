@@ -363,53 +363,6 @@ void BacktrackingAlgorithm::random_perturbation(const int node, const int kbest,
 
 void BacktrackingAlgorithm::sort_features(const int node) {
 	
-	
-	// if(depth[node] == 0) { //and depth[node] < ub_depth - 1) {
-	//
-	// 	relevant_features.clear();
-	// 	feature_set.resize(num_feature, true);
-	// 	rfeatures.resize(num_feature, false);
-	//   for (int fi{0}; fi < num_feature; ++fi) {
-	// 		if(feature_set[fi] and not null_entropy(0, fi)) {
-	// 			relevant_features.push_back(fi);
-	//
-	// 			for (int fj{fi + 1}; fj < num_feature; ++fj) {
-	//       	if(equal(fi, fj))
-	// 					feature_set.reset(fj);
-	//     	}
-	// 		}
-	//   }
-	//
-	// 	if(options.verbosity >= DTOptions::NORMAL)
-	// 		cout << "d feature_reduction=" << (num_feature - relevant_features.size()) << endl;
-	//
-	// 	filter_features(0, [&](const int f) {return not feature_set[f];});
-	//
-	// }
-	
-	// else {
-	//
-	// 	rfeatures = feature_set;
-	//   for (int i{0}; i < relevant_features.size(); ++i) {
-	// 		auto fi{relevant_features[i]};
-	// 		if(rfeatures[fi]) {
-	// 			for (int j{i + 1}; j < relevant_features.size(); ++j) {
-	// 				auto fj{relevant_features[j]};
-	//       	if(equal(fi, fj))
-	// 					rfeatures.reset(fj);
-	//     	}
-	// 		}
-	//   }
-	//
-	// 	if(rfeatures.count() < feature_set.count())
-	// 	{
-	// 		cout << (feature_set.count() - rfeatures.count()) << endl;
-	// 	}
-	//
-	// }
-	
-	
-
   switch (feature_criterion) {
   case DTOptions::MINERROR:
     for (auto f{feature[node]}; f != end_feature[node]; ++f)
@@ -483,10 +436,7 @@ void BacktrackingAlgorithm::cleaning() {
 
 Tree BacktrackingAlgorithm::getSolution() { return wood[solution_root]; }
 
-bool BacktrackingAlgorithm::notify_solution(bool &improvement) {
-
-  // bool perfect{ub_error > 0 and current_error == 0};
-
+bool BacktrackingAlgorithm::store_new_best() {
   if (current_error < ub_error or
       (size_matters and current_error == ub_error and current_size < ub_size)) {
 
@@ -506,7 +456,7 @@ bool BacktrackingAlgorithm::notify_solution(bool &improvement) {
 
     solution_root = copy_solution(0);
 
-    improvement = true;
+    // improvement = true;
 
     actual_depth = wood.depth(solution_root);
 
@@ -531,13 +481,15 @@ bool BacktrackingAlgorithm::notify_solution(bool &improvement) {
     // cout << blossom << endl << wood[solution_root] << endl;
 
     // cout << wood.count() << endl;
+		
+		return true;
   }
+	
+	return false;
+}
 
-  // if(perfect) {
-  // 	--ub_depth;
-  // 	restart();
-  // 	return true;
-  // }
+bool BacktrackingAlgorithm::notify_solution(bool &improvement) {
+  improvement = store_new_best();
 
   return backtrack();
 }
@@ -587,22 +539,17 @@ void BacktrackingAlgorithm::restart(const bool full) {
 
   decision.clear();
 
-  // cout << "restart " << wood.count() << " -> ";
-
   for (auto i{blossom.frbegin()}; i != blossom.frend(); ++i)
     if (*i != 0 and best_tree[*i] > 1) {
       wood.freeNode(best_tree[*i]);
       best_tree[*i] = -1;
     }
 
-  // cout << wood.count() << endl;
-
   prune(child[0][0]);
   prune(child[1][0]);
 
   current_error = node_error(0);
   current_size = 1;
-
   blossom.add(0);
 
   backtrack_node = -1;
@@ -612,8 +559,6 @@ void BacktrackingAlgorithm::restart(const bool full) {
 	
 	if(full)
 		feature[0] = ranked_feature[0].begin();
-
-  assert(blossom.count() == blossom.size() and blossom.size() == 1);
 }
 
 bool BacktrackingAlgorithm::update_upperbound(const int node) {
@@ -679,7 +624,7 @@ bool BacktrackingAlgorithm::backtrack() {
          tree_size[backtrack_node] > max_size[backtrack_node])) {
 
 #ifdef PRINTTRACE
-      if (PRINTTRACE and not updt)
+      if (PRINTTRACE) // and not updt)
         cout << "new best for node " << backtrack_node
              << ": feat=" << *feature[backtrack_node]
              << ", error=" << max_error[backtrack_node]
@@ -876,46 +821,13 @@ bool BacktrackingAlgorithm::grow(const int node) {
   feature[node] = ranked_feature[node].begin();
   end_feature[node] = ranked_feature[node].end();
 
-  // if(depth[node] == 0) {
-  //
-  // 	relevant_features.clear();
-  // 	feature_set.resize(num_feature, true);
-  //   for (int fi{0}; fi < num_feature; ++fi) {
-  // 		if(feature_set[fi] and not null_entropy(0, fi)) {
-  // 			relevant_features.push_back(fi);
-  // 			for (int fj{fi + 1}; fj < num_feature; ++fj) {
-  //       	if(equal(fi, fj))
-  // 					feature_set.reset(fj);
-  //     	}
-  // 		}
-  //   }
-  //
-  // 	if(options.verbosity >= DTOptions::NORMAL)
-  // 		cout << "d feature_reduction=" << (num_feature -
-  // relevant_features.size()) << endl;
-  //
-  // 	filter_features(node, [&](const int f) {return not feature_set[f] or
-  // max_entropy(node, f);});
-  //
-  // } else {
-  //
-  // 	filter_features(node, [&](const int f) {return max_entropy(node, f);});
-  //
-  // }
 
   filter_features(node, [&](const int f) { return max_entropy(node, f); });
-
-  // if (feature[node] == end_feature[node])
-  // 	return false;
 
   blossom.add(node);
   best_tree[node] = (P[0][node].count() < P[1][node].count());
 
-  // assert(not ranked_feature[node].empty());
-
   if (feature[node] == end_feature[node]) {
-
-    // cout << "grow " << node << " (deadend)" << endl;
 
     // assert(false);
     blossom.remove_front(node);
@@ -925,23 +837,18 @@ bool BacktrackingAlgorithm::grow(const int node) {
     tree_size[node] = max_size[node] = min_size[node] = 1;
     optimal[node] = true;
 
-    // if(node > 0)
-    // 	update_upperbound(parent[node]);
-
   } else {
 
     sort_features(node);
     optimal[node] = false;
 
-    int f[2] = {*feature[node] + static_cast<int>(num_feature), *feature[node]};
+    int f[2] = {*feature[node] + num_feature, *feature[node]};
     int err[2] = {min(get_feature_frequency(0, node, f[1]),
                       get_feature_frequency(1, node, f[1])),
                   min(get_feature_frequency(0, node, f[0]),
                       get_feature_frequency(1, node, f[0]))};
 
     if (depth[node] == ub_depth - 1 or err[0] + err[1] == 0) {
-
-      // cout << "grow " << node << " (terminal)" << endl;
 
       blossom.remove_front(node);
 
@@ -953,12 +860,6 @@ bool BacktrackingAlgorithm::grow(const int node) {
       tree_error[node] = max_error[node] = min_error[node] = err[0] + err[1];
       tree_size[node] = max_size[node] = min_size[node] = 3;
       store_best_tree(node, true);
-      // cout << "best_tree[" << node << "] = " << best_tree[node] << endl;
-
-      // if(node > 0)
-      // 	update_upperbound(parent[node]);
-
-      // cout << "best_tree[" << node << "] = " << best_tree[node] << endl;
 
       optimal[node] = true;
 
@@ -1044,8 +945,13 @@ void BacktrackingAlgorithm::initialise_search() {
   for (auto y{0}; y < 2; ++y)
     count_by_example(0, y);
 
-  current_size = 0;
 
+	if(ub_depth == 0)
+		noDecision();
+	else {
+
+  current_size = 0;
+	
   grow(0);
 
   current_error = max_error[0];
@@ -1073,15 +979,21 @@ void BacktrackingAlgorithm::initialise_search() {
   filter_features(0, [&](const int f) { return not feature_set[f]; });
 
   sort_features(0);
+	
+	// assert(store_new_best());
 
   // for(auto f : relevant_features)
   // 	cout << " " << f ;
   // cout << endl;
 	
 }
+	
+}
 
 bool BacktrackingAlgorithm::search() {
   auto sat = false;
+
+  // cout << "ub_depth = " << ub_depth << endl;
 
   while ((not limit_out()) and (ub_error > 0 or size_matters)) {
 
@@ -1102,9 +1014,38 @@ bool BacktrackingAlgorithm::search() {
       expend();
     }
   }
-	
+
   return sat;
 }
+
+void BacktrackingAlgorithm::singleDecision() {
+  // if(ub_depth <= 1 or current_error == 0) {
+  blossom.remove_front(0);
+  for (auto branch{0}; branch < 2; ++branch) {
+    child[branch][0] =
+        -1 - (get_feature_frequency(1, 0, *feature[0] + num_feature) <
+              get_feature_frequency(0, 0, *feature[0]));
+  }
+
+  tree_error[0] = max_error[0] = min_error[0] =
+      get_feature_error(0, *feature[0]);
+  current_size = tree_size[0] = max_size[0] = min_size[0] = 3;
+  store_best_tree(0, true);
+  optimal[0] = true;
+  // } else {
+}
+
+void BacktrackingAlgorithm::noDecision() {
+	blossom.remove_front(0);
+	current_error = tree_error[0] = max_error[0] = min_error[0] = node_error(0);
+	child[0][0] = -1;
+	child[1][0] = -1;
+	current_size = tree_size[0] = max_size[0] = min_size[0] = 1;
+	optimal[0] = true;
+	best_tree[0] = (P[0][0].count() < P[1][0].count());
+	store_new_best();
+}
+
 
 void BacktrackingAlgorithm::minimize_error() {
 
@@ -1137,11 +1078,17 @@ void BacktrackingAlgorithm::minimize_error_depth() {
     separator("search");
 
   auto perfect{false};
+	auto saved_error{ub_error};
   while (ub_depth > 0 and search() and ub_error == 0) {
     perfect = true;
+		saved_error = ub_error;
     ub_error = 1;
     ub_depth = actual_depth - 1;
-    restart(true);
+    
+		restart(true);
+		
+    if (ub_depth == 1)
+      singleDecision();
   }
 
   if (perfect) {
@@ -1170,30 +1117,36 @@ void BacktrackingAlgorithm::minimize_error_depth_size() {
   if (options.verbosity > DTOptions::QUIET)
     separator("search");
 
-  auto perfect{false};
+  auto perfect{current_error == 0};
+  auto saved_error{ub_error};
   while (ub_depth > 0 and search() and ub_error == 0) {
     perfect = true;
+    saved_error = ub_error;
     ub_error = 1;
     ub_depth = actual_depth - 1;
+
     restart(true);
+
+    if (ub_depth == 1)
+      singleDecision();
   }
 
-	++ub_depth;
-	ub_error = 0;
+  if (perfect) {
 
-  if (perfect and ub_depth > 1) {  
-		
-		size_matters = true;
-		optimal[0] = false;
-		
-		restart(true);
-		
-		feature[0] = ranked_feature[0].begin();
-		search();
-		
+    ub_error = saved_error;
+    ++ub_depth;
+
+    if (ub_depth > 1) {
+
+      size_matters = true;
+      optimal[0] = false;
+
+      restart(true);
+
+      feature[0] = ranked_feature[0].begin();
+      search();
+    }
   } 
-	// else
-	//     cleaning();
 
   if (options.verbosity > DTOptions::QUIET) {
     if (interrupted)

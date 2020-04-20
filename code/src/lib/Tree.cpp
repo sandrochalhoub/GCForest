@@ -11,6 +11,14 @@ namespace primer {
 
 Tree::Tree(Wood *w, const int node) : wood(w), idx(node) {}
 
+int Tree::getChild(const int node, const int branch) const {
+  return wood->getChild(node, branch);
+}
+
+int Tree::getFeature(const int node) const {
+  return wood->getFeature(node);
+}
+
 int Tree::predict(const DataSet &data) const {
   auto error{0};
   for (auto y{0}; y < 2; ++y)
@@ -184,10 +192,18 @@ void Wood::setFeature(const int node, const int f) {
   // cout << "free (" << node << "): " << available << endl;
 }
 
+int Wood::getFeature(const int node) const {
+  return feature[node];
+}
+
 void Wood::setChild(const int node, const int branch, const int orphan) {
   child[branch][node] = orphan;
 
   // cout << "free (" << node << "): " << available << endl;
+}
+
+int Wood::getChild(const int node, const int branch) const {
+  return child[branch][node];
 }
 
 std::ostream &operator<<(std::ostream &os, const Tree &x) {

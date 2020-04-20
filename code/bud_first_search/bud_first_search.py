@@ -1,5 +1,6 @@
 
 import wrapper.swig.budFirstSearch as wrapper
+import copy
 
 class BudFirstSearch:
     """
@@ -7,7 +8,9 @@ class BudFirstSearch:
     """
 
     def __init__(self, args):
-        self.args = args
+        self.args = ["bud_first_search.py", "--file", ""] + args
+        self.nodes = None
+        self.edges = None
         self.tree = None
 
     def fit(self, samples):
@@ -27,11 +30,16 @@ class BudFirstSearch:
 
         # Read tree
         nodes = []
+        self.nodes = []
+        self.edges = []
 
         for n in results.nodes:
             nodes += [{"leaf": n.leaf, "feat": n.feat}]
+            self.nodes.append(copy.deepcopy(nodes[-1]))
 
         for e in results.edges:
+            self.edges += [{"parent": e.parent, "child": e.child, "val": e.val}]
+
             if e.val == 0:
                 nodes[e.parent]["left"] = nodes[e.child]
             else:
@@ -41,5 +49,5 @@ class BudFirstSearch:
 
 
 if __name__ == "__main__":
-    b = BudFirstSearch(["au", "b", "a"])
-    b.fit([[1, 0, 1], [0, 1, 0], [0, 1, 0]])
+    b = BudFirstSearch(["--max_depth", "3", "--erroronly"])
+    b.fit([[1, 0, 1], [1, 1, 0], [0, 1, 1], [0, 0, 1]])
