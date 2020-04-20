@@ -1169,8 +1169,6 @@ void BacktrackingAlgorithm::minimize_error_depth_size() {
 
   if (options.verbosity > DTOptions::QUIET)
     separator("search");
-	
-	cout << "ub_depth " << ub_depth << endl;
 
   auto perfect{false};
   while (ub_depth > 0 and search() and ub_error == 0) {
