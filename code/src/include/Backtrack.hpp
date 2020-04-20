@@ -152,7 +152,7 @@ private:
 
   void cleaning();
 
-  void store_new_best();
+  bool store_new_best();
 
   int copy_solution(const int node);
 //@}
@@ -262,6 +262,10 @@ private:
 
   size_t maxSize(const int depth) const;
 
+  void singleDecision();
+	
+	void noDecision();
+	
 public:
   vector<instance> dataset[2];
   vector<dynamic_bitset<>> reverse_dataset[2];
