@@ -1,5 +1,5 @@
 
-import wrapper.swig.budFirstSearch as wrapper
+import wrapper.budFirstSearch as wrapper
 import copy
 
 class BudFirstSearch:
