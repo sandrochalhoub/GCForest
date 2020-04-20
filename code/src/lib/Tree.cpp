@@ -11,8 +11,12 @@ namespace primer {
 
 Tree::Tree(Wood *w, const int node) : wood(w), idx(node) {}
 
-int Tree::getChild(const int i, const int branch) {
-  return wood->getChild(i, branch);
+int Tree::getChild(const int node, const int branch) const {
+  return wood->getChild(node, branch);
+}
+
+int Tree::getFeature(const int node) const {
+  return wood->getFeature(node);
 }
 
 int Tree::predict(const DataSet &data) const {
@@ -188,13 +192,17 @@ void Wood::setFeature(const int node, const int f) {
   // cout << "free (" << node << "): " << available << endl;
 }
 
+int Wood::getFeature(const int node) const {
+  return feature[node];
+}
+
 void Wood::setChild(const int node, const int branch, const int orphan) {
   child[branch][node] = orphan;
 
   // cout << "free (" << node << "): " << available << endl;
 }
 
-int Wood::getChild(const int node, const int branch) {
+int Wood::getChild(const int node, const int branch) const {
   return child[branch][node];
 }
 

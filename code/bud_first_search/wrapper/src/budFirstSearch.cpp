@@ -15,7 +15,7 @@ void addNode(Tree &tree, int node, Results &res) {
   }
   else {
     int id = res.nodes.size();
-    res.nodes.push_back({false, node});
+    res.nodes.push_back({false, tree.getFeature(node)});
 
     // add edge 1
     int node0 = tree.getChild(node, 0);
