@@ -53,7 +53,7 @@ $(OBJ)/%.o:  $(SRC)/%.cpp $(INC)/%.hpp
 # The examples
 $(BIN)/%: $(MOD)/obj/%.o $(PLIBOBJ)
 	@echo 'link '$<
-	$(CCC) $(CFLAGS) $(PLIBOBJ) $(COPTIMIZE) $< -lm -o $@
+	$(CCC) $(CFLAGS) $(PLIBOBJ) $< -lm -o $@
 
 $(MOD)/obj/%.o: $(MOD)/src/%.cpp
 	@echo 'compile '$<
@@ -62,5 +62,5 @@ $(MOD)/obj/%.o: $(MOD)/src/%.cpp
 # Examples, one at a time
 %: $(MOD)/obj/%.o $(PLIBOBJ)
 	@echo 'link '$<	
-	$(CCC) $(CFLAGS) $(PLIBOBJ) $(LFLAGS) $(COPTIMIZE) $< -lm -o $(BIN)/$@
+	$(CCC) $(CFLAGS) $(PLIBOBJ) $(LFLAGS) $< -lm -o $(BIN)/$@
 
