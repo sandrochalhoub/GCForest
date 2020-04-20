@@ -40,7 +40,7 @@ PLIBOBJ = $(patsubst $(SRC)/%, $(OBJ)/%, $(PLIBAUX))
 #------------------------------------------------------------
 
 
-default: $(BIN)/test $(BIN)/primer
+default: $(BIN)/bud_first_search 
 
 all: lib $(BINS) 
 
