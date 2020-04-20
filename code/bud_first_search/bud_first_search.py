@@ -7,7 +7,7 @@ class BudFirstSearch:
     """
 
     def __init__(self, args):
-        self.args = args
+        self.args = ["bud_first_search.py", "--file", ""] + args
         self.tree = None
 
     def fit(self, samples):
@@ -41,5 +41,5 @@ class BudFirstSearch:
 
 
 if __name__ == "__main__":
-    b = BudFirstSearch(["au", "b", "a"])
-    b.fit([[1, 0, 1], [0, 1, 0], [0, 1, 0]])
+    b = BudFirstSearch(["--max_depth", "3"])
+    b.fit([[1, 0, 1], [1, 1, 0], [0, 1, 1], [0, 0, 1]])

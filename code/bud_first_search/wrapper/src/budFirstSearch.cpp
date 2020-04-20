@@ -1,31 +1,36 @@
 #include "budFirstSearch.h"
 
 #include <iostream>
-/*
+
 #include "Backtrack.hpp"
 #include "CmdLine.hpp"
-#include "Tree.hpp"*/
+#include "Tree.hpp"
+
+using namespace primer;
+
+void addNode(Tree &tree, int node, Results &res) {
+  if (node <= 1) {
+    // add node
+    res.nodes.push_back({true, node});
+  }
+  else {
+    int id = res.nodes.size();
+    res.nodes.push_back({false, node});
+
+    // add edge 1
+    int node0 = tree.getChild(node, 0);
+    res.edges.push_back({id, res.nodes.size(), 0});
+    addNode(tree, node0, res);
+
+    // add edge 2
+    int node1 = tree.getChild(node, 1);
+    res.edges.push_back({id, res.nodes.size(), 1});
+    addNode(tree, node1, res);
+  }
+}
 
 Results search(std::vector<std::string> params, std::vector<Example> data) {
-  /*DTOptions opt = parse_dt(params.size(), &params[0]);
-
-  Wood yallen;
-  BacktrackingAlgorithm A(yallen, opt);
-
-  if (opt.mindepth) {
-    if (opt.minsize)
-      A.minimize_error_depth_size();
-    else
-      A.minimize_error_depth();
-  } else
-    A.minimize_error();
-
-  Tree sol = A.getSolution();
-
-  for (Example &example: data) {
-    A.addExample(data.features.begin(), data.features.end(), data.target);
-  }*/
-
+  /*
   std::cout << "size of params: " << params.size() << ", size of data: " << data.size() << std::endl;
 
   for (auto &a : params) {
@@ -40,10 +45,35 @@ Results search(std::vector<std::string> params, std::vector<Example> data) {
     }
     std::cout << b.target << std::endl;
   }
+  */
 
+  std::vector<char*> cparams;
+  for (auto &param : params) {
+    cparams.push_back(const_cast<char*>(param.c_str()));
+  }
+
+  DTOptions opt = parse_dt(cparams.size(), &cparams[0]);
+
+  Wood yallen;
+  BacktrackingAlgorithm A(yallen, opt);
+
+  for (Example &example: data) {
+    A.addExample(example.features.begin(), example.features.end(), example.target);
+  }
+
+  // Solve
+  if (opt.mindepth) {
+    if (opt.minsize)
+      A.minimize_error_depth_size();
+    else
+      A.minimize_error_depth();
+  } else
+    A.minimize_error();
+
+  Tree sol = A.getSolution();
+  std::cout << sol << std::endl;
   // Building result object
   Results res;
-  res.nodes.push_back(Node{true, 0});
-  res.edges.push_back(Edge{0, 0, 0});
+  addNode(sol, sol.idx, res);
   return res;
 }
