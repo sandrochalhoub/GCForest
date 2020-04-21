@@ -3,7 +3,7 @@ include ../boost_home
 WRAPRDIR ?= .
 MAINDIR ?= ..
 
-PYINC = "/usr/include/python3.5"
+PYINC = `python3-config --cflags`
 
 CCC = g++
 
@@ -22,7 +22,7 @@ PWRAPSWIGOBJ = $(patsubst $(SWIG)/%, $(OBJ)/%, $(PWRAPSWIGAUX))
 PLIBOBJ=$(wildcard $(MAINDIR)/src/obj/*.o)
 
 wrapper/_budFirstSearch.so: $(PWRAPOBJ) $(PWRAPSWIGOBJ)
-	$(CCC) -std=c++11 -shared $(PWRAPOBJ) $(PWRAPSWIGOBJ) $(PLIBOBJ) -o wrapper/_budFirstSearch.so
+	$(CCC) -std=c++11 -fPIC -shared $(PWRAPOBJ) $(PWRAPSWIGOBJ) $(PLIBOBJ) -o wrapper/_budFirstSearch.so
 
 $(OBJ)/budFirstSearch.o: $(SRC)/budFirstSearch.cpp
 	$(CCC) -std=c++11 -fPIC -c $(SRC)/budFirstSearch.cpp -I$(INC) -I$(MAININC) -I$(BOOSTDIR) -I../tools -o $(OBJ)/budFirstSearch.o
