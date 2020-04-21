@@ -4,7 +4,8 @@ import copy
 
 class BudFirstSearch:
     """
-    Parametres:
+    Parameters:
+    ...
     """
 
     def __init__(self, args):

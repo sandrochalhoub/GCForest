@@ -34,4 +34,4 @@ $(SWIG)/budFirstSearch_wrap.cxx: $(SWIG)/budFirstSearch.i
 	swig -c++ -python -py3 -outdir wrapper $(SWIG)/budFirstSearch.i
 
 clean:
-	rm $(PWRAPOBJ) $(PWRAPSWIGOBJ) $(SWIG)/*_wrap.cxx wrapper/*.so wrapper/budFirstSearch.py
+	rm -rf $(PWRAPOBJ) $(PWRAPSWIGOBJ) $(SWIG)/*_wrap.cxx wrapper/*.so wrapper/budFirstSearch.py
