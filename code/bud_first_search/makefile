@@ -21,8 +21,8 @@ PLIBOBJ=$(wildcard $(MAINDIR)/src/obj/*.o)
 PYFLAGS=`python-config --cflags` -fPIC
 
 
-$(SWIG)/_budFirstSearch.so: $(PWRAPOBJ) $(PWRAPSWIGOBJ)
-	c++ $(PYFLAGS) -std=c++11 -shared $(PWRAPOBJ) $(PWRAPSWIGOBJ) $(PLIBOBJ) -o $(SWIG)/_budFirstSearch.so
+wrapper/_budFirstSearch.so: $(PWRAPOBJ) $(PWRAPSWIGOBJ)
+	c++ $(PYFLAGS) -std=c++11 -shared $(PWRAPOBJ) $(PWRAPSWIGOBJ) $(PLIBOBJ) -o wrapper/_budFirstSearch.so
 
 $(OBJ)/budFirstSearch.o: $(SRC)/budFirstSearch.cpp
 	c++ $(PYFLAGS) -std=c++11 -fPIC -c $(SRC)/budFirstSearch.cpp -I$(INC) -I$(MAININC) -I$(BOOSTDIR) -I../tools -o $(OBJ)/budFirstSearch.o
@@ -31,7 +31,7 @@ $(OBJ)/budFirstSearch_wrap.o: $(SWIG)/budFirstSearch_wrap.cxx
 	c++ $(PYFLAGS) -std=c++11 -fPIC -c $(SWIG)/budFirstSearch_wrap.cxx -I/usr/include/python3.6 -I$(INC) -o $(OBJ)/budFirstSearch_wrap.o
 
 $(SWIG)/budFirstSearch_wrap.cxx: $(SWIG)/budFirstSearch.i
-	swig -c++ -python -py3 $(SWIG)/budFirstSearch.i
+	swig -c++ -python -py3 -outdir wrapper $(SWIG)/budFirstSearch.i
 
 clean:
-	rm $(PWRAPOBJ) $(PWRAPSWIGOBJ) $(SWIG)/*_wrap.cxx $(SWIG)/*.so $(SWIG)/budFirstSearch.py
+	rm $(PWRAPOBJ) $(PWRAPSWIGOBJ) $(SWIG)/*_wrap.cxx wrapper/*.so wrapper/budFirstSearch.py
