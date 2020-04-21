@@ -1,13 +1,16 @@
 include ../boost_home
 
-
-PYTHON_DIR ?= .
+WRAPRDIR ?= .
 MAINDIR ?= ..
 
-SRC=$(PYTHON_DIR)/wrapper/src
-OBJ=$(PYTHON_DIR)/wrapper/obj
-INC=$(PYTHON_DIR)/wrapper/include
-SWIG=$(PYTHON_DIR)/wrapper/swig
+PYINC = "/usr/include/python3.5"
+
+CCC = g++
+
+SRC=$(WRAPRDIR)/wrapper/src
+OBJ=$(WRAPRDIR)/wrapper/obj
+INC=$(WRAPRDIR)/wrapper/include
+SWIG=$(WRAPRDIR)/wrapper/swig
 MAININC=$(MAINDIR)/src/include
 
 PWRAPSRC = $(wildcard $(SRC)/*.cpp)
@@ -18,17 +21,14 @@ PWRAPOBJ = $(patsubst $(SRC)/%, $(OBJ)/%, $(PWRAPAUX))
 PWRAPSWIGOBJ = $(patsubst $(SWIG)/%, $(OBJ)/%, $(PWRAPSWIGAUX))
 PLIBOBJ=$(wildcard $(MAINDIR)/src/obj/*.o)
 
-PYFLAGS=`python-config --cflags` -fPIC
-
-
 wrapper/_budFirstSearch.so: $(PWRAPOBJ) $(PWRAPSWIGOBJ)
-	c++ $(PYFLAGS) -std=c++11 -shared $(PWRAPOBJ) $(PWRAPSWIGOBJ) $(PLIBOBJ) -o wrapper/_budFirstSearch.so
+	$(CCC) -std=c++11 -shared $(PWRAPOBJ) $(PWRAPSWIGOBJ) $(PLIBOBJ) -o wrapper/_budFirstSearch.so
 
 $(OBJ)/budFirstSearch.o: $(SRC)/budFirstSearch.cpp
-	c++ $(PYFLAGS) -std=c++11 -fPIC -c $(SRC)/budFirstSearch.cpp -I$(INC) -I$(MAININC) -I$(BOOSTDIR) -I../tools -o $(OBJ)/budFirstSearch.o
+	$(CCC) -std=c++11 -fPIC -c $(SRC)/budFirstSearch.cpp -I$(INC) -I$(MAININC) -I$(BOOSTDIR) -I../tools -o $(OBJ)/budFirstSearch.o
 
 $(OBJ)/budFirstSearch_wrap.o: $(SWIG)/budFirstSearch_wrap.cxx
-	c++ $(PYFLAGS) -std=c++11 -fPIC -c $(SWIG)/budFirstSearch_wrap.cxx -I/usr/include/python3.6 -I$(INC) -o $(OBJ)/budFirstSearch_wrap.o
+	$(CCC) -std=c++11 -fPIC -c $(SWIG)/budFirstSearch_wrap.cxx -I$(PYINC) -I$(INC) -o $(OBJ)/budFirstSearch_wrap.o
 
 $(SWIG)/budFirstSearch_wrap.cxx: $(SWIG)/budFirstSearch.i
 	swig -c++ -python -py3 -outdir wrapper $(SWIG)/budFirstSearch.i
