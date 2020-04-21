@@ -4,7 +4,7 @@ import copy
 
 class BudFirstSearch:
     """
-    Paramètres:
+    Parametres:
     """
 
     def __init__(self, args):
