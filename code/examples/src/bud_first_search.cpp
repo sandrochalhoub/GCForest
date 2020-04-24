@@ -34,7 +34,7 @@ along with minicsp.  If not, see <http://www.gnu.org/licenses/>.
 using namespace std;
 using namespace primer;
 
-void read_binary(BacktrackingAlgorithm &A, DTOptions &opt) {
+void read_binary(BacktrackingAlgorithm<> &A, DTOptions &opt) {
 
   string ext{opt.instance_file.substr(opt.instance_file.find_last_of(".") + 1)};
 
@@ -56,7 +56,7 @@ void read_binary(BacktrackingAlgorithm &A, DTOptions &opt) {
   }
 }
 
-void read_non_binary(BacktrackingAlgorithm &A, DTOptions &opt) {
+void read_non_binary(BacktrackingAlgorithm<> &A, DTOptions &opt) {
 
   TypedDataSet input;
 
@@ -108,7 +108,7 @@ int main(int argc, char *argv[]) {
 
   Wood yallen;
 
-  BacktrackingAlgorithm A(yallen, opt);
+  BacktrackingAlgorithm<> A(yallen, opt);
 
   if (opt.binarize) {
 
