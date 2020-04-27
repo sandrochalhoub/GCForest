@@ -2,10 +2,6 @@
 
 #include <iostream>
 
-#include "Backtrack.hpp"
-#include "CmdLine.hpp"
-#include "Tree.hpp"
-
 using namespace primer;
 
 void addNode(Tree &tree, int node, Results &res) {
@@ -76,4 +72,23 @@ Results search(std::vector<std::string> params, std::vector<Example> data) {
   Results res;
   addNode(sol, sol.idx, res);
   return res;
+}
+
+void addExamples(primer::BacktrackingAlgorithm &algo, std::vector<Example> data) {
+  for (Example &example: data) {
+    algo.addExample(example.features.begin(), example.features.end(), example.target);
+  }
+}
+
+DTOptions parse(std::vector<std::string> params) {
+  std::vector<char*> cparams;
+  for (auto &param : params) {
+    cparams.push_back(const_cast<char*>(param.c_str()));
+  }
+
+  return parse_dt(cparams.size(), &cparams[0]);
+}
+
+void free(void *ptr) {
+  delete ptr;
 }

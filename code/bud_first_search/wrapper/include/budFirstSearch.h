@@ -1,5 +1,10 @@
 #include <vector>
 #include <string>
+
+#include "Tree.hpp"
+#include "Backtrack.hpp"
+#include "CmdLine.hpp"
+
 #define SWIG_FILE_WITH_INIT
 
 // Dataset
@@ -33,3 +38,7 @@ struct Results {
 };
 
 extern Results search(std::vector<std::string> params, std::vector<Example> data);
+extern void addExamples(primer::BacktrackingAlgorithm &algo, std::vector<Example> data);
+extern DTOptions parse(std::vector<std::string> params);
+
+extern void free(void *ptr);
