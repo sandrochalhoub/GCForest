@@ -2,6 +2,29 @@
 import wrapper.budFirstSearch as wrapper
 import copy
 
+from enum import IntEnum
+
+# utility enums from CmdLine.hpp
+
+class Verbosity(IntEnum):
+    SILENT=0
+    QUIET=1
+    NORMAL=2
+    YACKING=3
+    SOLVERINFO=4
+
+class NodeStrategy(IntEnum):
+    FIRST=0
+    RANDOM=1
+    ERROR=2
+    ERROR_REDUCTION=3
+
+class FeatureStrategy(IntEnum):
+    MIN_ERROR=0
+    ENTROPY=1
+    GINI=2
+    HYBRID=3
+
 def to_str_vec(str_list):
     vec = wrapper.str_vec(len(str_list))
 
@@ -50,57 +73,33 @@ class BudFirstSearch:
     ...
     """
 
-    def __init__(self, args):
-        self.args = ["bud_first_search.py", "--file", ""] + args
-        self.nodes = None
-        self.edges = None
+    def __init__(self, cmd_line_args = []):
+        self.args = ["bud_first_search.py", "--file", ""] + cmd_line_args
+        self.opt = wrapper.parse(to_str_vec(self.args))
+
         self.tree = None
-
-    def fit(self, samples):
-        args_vec = to_str_vec(self.args)
-        samples_vec = to_sample_vec(samples)
-
-        results = wrapper.search(args_vec, samples_vec)
-
-        # Read tree
-        nodes = []
         self.nodes = []
         self.edges = []
 
-        for n in results.nodes:
-            nodes += [{"leaf": n.leaf, "feat": n.feat}]
-            self.nodes.append(copy.deepcopy(nodes[-1]))
+    def fit(self, samples):
+        self.wood = wrapper.Wood()
 
-        for e in results.edges:
-            self.edges += [{"parent": e.parent, "child": e.child, "val": e.val}]
+        self.algo = wrapper.BacktrackingAlgorithm(self.wood, self.opt)
+        wrapper.addExamples(self.algo, to_sample_vec(samples))
 
-            if e.val == 0:
-                nodes[e.parent]["left"] = nodes[e.child]
-            else:
-                nodes[e.parent]["right"] = nodes[e.child]
+        self.algo.minimize_error()
+        self.tree = self.algo.getSolution()
 
-        self.tree = nodes[0]
+        self.nodes, self.edges = read_tree(self.tree)
 
-
-def test_training():
-    global TEST_SAMPLE
-    opt = wrapper.parse(to_str_vec(["--max_depth", "3"]))
-    wood = wrapper.Wood()
-
-    alg = wrapper.BacktrackingAlgorithm(wood, opt)
-    wrapper.addExamples(alg, to_sample_vec(TEST_SAMPLE))
-
-    alg.minimize_error()
-    tree = alg.getSolution()
-
-    nodes, edges = read_tree(tree)
-    print("nodes:", nodes)
-    print("edges:", edges)
-
+        print("nodes:", self.nodes)
+        print("edges:", self.edges)
 
 TEST_SAMPLE = [[1, 0, 1], [1, 1, 0], [0, 1, 1], [0, 0, 0]]
 
 if __name__ == "__main__":
-    test_training()
-    # b = BudFirstSearch(["--max_depth", "3", "--erroronly"])
-    # b.fit(TEST_SAMPLE)
+    b = BudFirstSearch()
+    b.opt.max_depth = 3
+    b.opt.verbosity = Verbosity.YACKING
+    b.opt.feature_strategy = FeatureStrategy.GINI
+    b.fit(TEST_SAMPLE)

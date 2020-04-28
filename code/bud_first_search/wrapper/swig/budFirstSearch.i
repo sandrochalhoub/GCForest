@@ -14,32 +14,12 @@ struct Example {
   Example(std::vector<int> features, int target);
 };
 
-struct Node {
-  bool leaf;
-  int feat;
-};
-
-struct Edge {
-  int parent;
-  int child;
-  int val;
-};
-
-struct Results {
-  std::vector<Node> nodes;
-  std::vector<Edge> edges;
-};
-
-extern Results search(std::vector<std::string> params, std::vector<Example> data);
-
 extern void addExamples(primer::BacktrackingAlgorithm &algo, std::vector<Example> data);
 extern DTOptions parse(std::vector<std::string> params);
 
 extern void free(void* ptr);
 
 namespace std {
-  %template(node_vec) vector<Node>;
-  %template(edge_vec) vector<Edge>;
   %template(example_vec) vector<Example>;
 
   %template(int_vec) vector<int>;
@@ -51,6 +31,46 @@ namespace std {
 
 class DTOptions {
 public:
+  int verbosity;
+
+  int seed;
+
+  bool print_sol;
+  bool print_par;
+  bool print_ins;
+  bool print_sta;
+  bool print_cmd;
+
+  bool verified;
+
+  double sample;
+
+  int width;
+  double focus;
+
+  int max_depth;
+
+  int restart_base;
+  double restart_factor;
+
+  bool filter;
+
+  double time;
+
+  int search;
+
+  bool bounding;
+
+  int node_strategy;
+
+  int feature_strategy;
+
+  bool binarize;
+
+  bool mindepth;
+  bool minsize;
+
+
   DTOptions();
 };
 
