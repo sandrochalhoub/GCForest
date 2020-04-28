@@ -156,10 +156,10 @@ bool BacktrackingAlgorithm::max_entropy(const int node, const int f) const {
   return me;
 }
 
-// return true if the feature f reduces the error
-bool BacktrackingAlgorithm::reduce_error(const int node, const int f) const {
-  return get_feature_error(node, f) < node_error(node);
-}
+// // return true if the feature f reduces the error
+// bool BacktrackingAlgorithm::reduce_error(const int node, const int f) const {
+//   return get_feature_error(node, f) < node_error(node);
+// }
 
 // return true if the feature f classifies all examples
 bool BacktrackingAlgorithm::null_entropy(const int node, const int f) const {

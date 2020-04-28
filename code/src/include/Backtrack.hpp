@@ -174,8 +174,8 @@ private:
   // return true if all features have been tried feature
   bool no_feature(const int node) const;
 
-  // return true if the feature f reduces the error
-  bool reduce_error(const int node, const int f) const;
+  // // return true if the feature f reduces the error
+  // bool reduce_error(const int node, const int f) const;
 
   // return true if the feature f is true/false in all examples
   bool max_entropy(const int node, const int f) const;
