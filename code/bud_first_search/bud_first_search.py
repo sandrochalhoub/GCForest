@@ -1,5 +1,5 @@
 
-import wrapper.budFirstSearch as wrapper
+from . import wrapper
 import copy
 
 from enum import IntEnum
