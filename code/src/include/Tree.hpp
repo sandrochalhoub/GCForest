@@ -23,7 +23,9 @@ private:
   Wood *wood;
 
 public:
-  const int idx;
+  int idx;
+
+  Tree() = default;
 
   Tree(Wood *w, const int i);
 
@@ -33,7 +35,7 @@ public:
 
   // bool predict(const instance &x) const;
   int predict(const DataSet &data) const;
-	
+
 	template<class rIter>
 	int predict(rIter beg_neg, rIter end_neg, rIter beg_pos, rIter end_pos) const;
 

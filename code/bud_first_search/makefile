@@ -2,8 +2,10 @@ include ../boost_home
 
 WRAPRDIR ?= .
 MAINDIR ?= ..
+# TODO install with setup.py
+INSTALLDIR ?= ../bin/python/bud_first_search
 
-PYINC = `python3-config --cflags`
+
 
 CCC = g++
 
@@ -12,6 +14,10 @@ OBJ=$(WRAPRDIR)/wrapper/obj
 INC=$(WRAPRDIR)/wrapper/include
 SWIG=$(WRAPRDIR)/wrapper/swig
 MAININC=$(MAINDIR)/src/include
+
+PYFLAGS = `python3-config --cflags`
+CFLAGS = -std=c++11 -fPIC -I$(INC) -I$(MAININC) -I$(BOOSTDIR) -I../tools $(PYFLAGS) # -ffloat-store
+LFLAGS = -L$(OBJ) -flto
 
 PWRAPSRC = $(wildcard $(SRC)/*.cpp)
 PWRAPSWIG = $(wildcard $(SWIG)/*.i)
@@ -25,13 +31,18 @@ wrapper/_budFirstSearch.so: $(PWRAPOBJ) $(PWRAPSWIGOBJ)
 	$(CCC) -std=c++11 -fPIC -shared $(PWRAPOBJ) $(PWRAPSWIGOBJ) $(PLIBOBJ) -o wrapper/_budFirstSearch.so
 
 $(OBJ)/budFirstSearch.o: $(SRC)/budFirstSearch.cpp
-	$(CCC) -std=c++11 -fPIC -c $(SRC)/budFirstSearch.cpp -I$(INC) -I$(MAININC) -I$(BOOSTDIR) -I../tools -o $(OBJ)/budFirstSearch.o
+	$(CCC) $(CFLAGS) -c $(SRC)/budFirstSearch.cpp -o $@
 
 $(OBJ)/budFirstSearch_wrap.o: $(SWIG)/budFirstSearch_wrap.cxx
-	$(CCC) -std=c++11 -fPIC -c $(SWIG)/budFirstSearch_wrap.cxx -I$(PYINC) -I$(INC) -o $(OBJ)/budFirstSearch_wrap.o
+	$(CCC) $(CFLAGS) -c $(SWIG)/budFirstSearch_wrap.cxx -o $@
 
 $(SWIG)/budFirstSearch_wrap.cxx: $(SWIG)/budFirstSearch.i
 	swig -c++ -python -py3 -outdir wrapper $(SWIG)/budFirstSearch.i
 
+install:
+	mkdir -p "${INSTALLDIR}/wrapper"
+	cp -r "./bud_first_search.py" "./__init__.py" "${INSTALLDIR}"
+	cp -r "./wrapper/_budFirstSearch.so" "./wrapper/budFirstSearch.py" "${INSTALLDIR}/wrapper"
+
 clean:
-	rm $(PWRAPOBJ) $(PWRAPSWIGOBJ) $(SWIG)/*_wrap.cxx wrapper/*.so wrapper/budFirstSearch.py
+	rm -rf $(PWRAPOBJ) $(PWRAPSWIGOBJ) $(SWIG)/*_wrap.cxx wrapper/*.so wrapper/budFirstSearch.py

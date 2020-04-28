@@ -2,12 +2,9 @@
 
 #include <iostream>
 
-#include "Backtrack.hpp"
-#include "CmdLine.hpp"
-#include "Tree.hpp"
-
 using namespace primer;
 
+/*
 void addNode(Tree &tree, int node, Results &res) {
   if (node <= 1) {
     // add node
@@ -28,52 +25,23 @@ void addNode(Tree &tree, int node, Results &res) {
     addNode(tree, node1, res);
   }
 }
+*/
 
-Results search(std::vector<std::string> params, std::vector<Example> data) {
-  /*
-  std::cout << "size of params: " << params.size() << ", size of data: " << data.size() << std::endl;
-
-  for (auto &a : params) {
-    std::cout << a << std::endl;
+void addExamples(primer::BacktrackingAlgorithm &algo, std::vector<Example> data) {
+  for (Example &example: data) {
+    algo.addExample(example.features.begin(), example.features.end(), example.target);
   }
+}
 
-  for (auto &b : data) {
-    std::cout << "example: ";
-
-    for (int u : b.features) {
-      std::cout << u << " ";
-    }
-    std::cout << b.target << std::endl;
-  }
-  */
-
+DTOptions parse(std::vector<std::string> params) {
   std::vector<char*> cparams;
   for (auto &param : params) {
     cparams.push_back(const_cast<char*>(param.c_str()));
   }
 
-  DTOptions opt = parse_dt(cparams.size(), &cparams[0]);
+  return parse_dt(cparams.size(), &cparams[0]);
+}
 
-  Wood yallen;
-  BacktrackingAlgorithm A(yallen, opt);
-
-  for (Example &example: data) {
-    A.addExample(example.features.begin(), example.features.end(), example.target);
-  }
-
-  // Solve
-  if (opt.mindepth) {
-    if (opt.minsize)
-      A.minimize_error_depth_size();
-    else
-      A.minimize_error_depth();
-  } else
-    A.minimize_error();
-
-  Tree sol = A.getSolution();
-  std::cout << sol << std::endl;
-  // Building result object
-  Results res;
-  addNode(sol, sol.idx, res);
-  return res;
+void free(void *ptr) {
+  delete ptr;
 }
