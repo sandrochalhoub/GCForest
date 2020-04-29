@@ -63,7 +63,7 @@ $(MOD)/obj/%.o: $(MOD)/src/%.cpp
 %: $(MOD)/obj/%.o $(PLIBOBJ)
 	@echo 'link '$<	
 	$(CCC) $(CFLAGS) $(PLIBOBJ) $(LFLAGS) $< -lm -o $(BIN)/$@
-	
+
 wrapper: $(PLIBOBJ)
 	
 
