@@ -91,9 +91,6 @@ class BudFirstSearch:
 
         self.nodes, self.edges = read_tree(self.tree)
 
-        print("nodes:", self.nodes)
-        print("edges:", self.edges)
-
 TEST_SAMPLE = [[1, 0, 1], [1, 1, 0], [0, 1, 1], [0, 0, 0]]
 
 if __name__ == "__main__":
