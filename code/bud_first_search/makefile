@@ -2,10 +2,6 @@ include ../boost_home
 
 WRAPRDIR ?= .
 MAINDIR ?= ..
-# TODO install with setup.py
-INSTALLDIR ?= ../bin/python/bud_first_search
-
-
 
 CCC = g++
 
@@ -38,11 +34,6 @@ $(OBJ)/budFirstSearch_wrap.o: $(SWIG)/budFirstSearch_wrap.cxx
 
 $(SWIG)/budFirstSearch_wrap.cxx: $(SWIG)/budFirstSearch.i
 	swig -c++ -python -py3 -outdir wrapper $(SWIG)/budFirstSearch.i
-
-install:
-	mkdir -p "${INSTALLDIR}/wrapper"
-	cp -r "./bud_first_search.py" "./__init__.py" "${INSTALLDIR}"
-	cp -r "./wrapper/_budFirstSearch.so" "./wrapper/budFirstSearch.py" "${INSTALLDIR}/wrapper"
 
 clean:
 	rm -rf $(PWRAPOBJ) $(PWRAPSWIGOBJ) $(SWIG)/*_wrap.cxx wrapper/*.so wrapper/budFirstSearch.py

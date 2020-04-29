@@ -40,11 +40,7 @@ PLIBOBJ = $(patsubst $(SRC)/%, $(OBJ)/%, $(PLIBAUX))
 #------------------------------------------------------------
 
 
-<<<<<<< HEAD
 default: $(BIN)/bud_first_search wrapper
-=======
-default: $(BIN)/bud_first_search
->>>>>>> 2206efa0d6b8b8725c86f55c89deabc23eb04bc0
 
 all: lib $(BINS)
 
@@ -71,6 +67,6 @@ $(MOD)/obj/%.o: $(MOD)/src/%.cpp
 %: $(MOD)/obj/%.o $(PLIBOBJ)
 	@echo 'link '$<
 	$(CCC) $(CFLAGS) $(PLIBOBJ) $(LFLAGS) $< -lm -o $(BIN)/$@
-	
-wrapper: $(PLIBOBJ) 
+
+wrapper: $(PLIBOBJ)
 
