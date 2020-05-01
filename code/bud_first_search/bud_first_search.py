@@ -92,6 +92,31 @@ class BudFirstSearch:
 
         self.nodes, self.edges = read_tree(self.tree)
 
+    def correct_count(self, samples):
+        correct_count = 0
+
+        for sample in samples:
+            y_pred = self.predict(sample[:-1])
+
+            if y_pred == sample[-1]:
+                correct_count += 1
+
+        return correct_count
+
+    def predict(self, features):
+        if not self.tree:
+            raise ValueError("please call fit before predict!")
+
+        node_id = 0
+        node = self.nodes[node_id]
+
+        while not node["leaf"]:
+            val = features[node["feat"]]
+            node_id = [e["child"] for e in self.edges if e["parent"] == node_id and e["val"] == val][0]
+            node = self.nodes[node_id]
+
+        return node["feat"]
+
 TEST_SAMPLE = [[1, 0, 1], [1, 1, 0], [0, 1, 1], [0, 0, 0]]
 
 if __name__ == "__main__":
