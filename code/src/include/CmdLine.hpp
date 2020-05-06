@@ -162,6 +162,8 @@ public:
   bool mindepth;
   bool minsize;
 
+  bool use_weights;
+
   DTOptions(){};
   DTOptions(const DTOptions &opt)
       : cmdline(opt.cmdline), instance_file(opt.instance_file),

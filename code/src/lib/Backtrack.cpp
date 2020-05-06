@@ -22,8 +22,8 @@ namespace primer {
 
 // ===== IntegerError
 
-
-void IntegerError::count_by_example(IntegerError::Algo &algo, const int node, const int y) const {
+template <typename E_t>
+void IntegerError<E_t>::count_by_example(IntegerError::Algo &algo, const int node, const int y) const {
   auto n{algo.num_feature};
 
   algo.pos_feature_frequency[y][node].clear();
@@ -35,13 +35,26 @@ void IntegerError::count_by_example(IntegerError::Algo &algo, const int node, co
       ++algo.pos_feature_frequency[y][node][f];
 }
 
-int IntegerError::node_error(const IntegerError::Algo &algo, const int i) const {
+template <typename E_t>
+E_t IntegerError<E_t>::node_error(const IntegerError::Algo &algo, const int i) const {
   return std::min(algo.P[0][i].count(), algo.P[1][i].count());
 }
 
 
 // ===== WeightedError
 
+template <typename E_t>
+void WeightedError<E_t>::add_example(WeightedError<E_t>::Algo &algo, const int y, const size_t i) {
+  if (weights[y].size() <= i) {
+    weights[y].resize(i+1);
+  }
+  weights[y][i] = 1;
+}
+
+template <typename E_t>
+void WeightedError<E_t>::set_weight(const int y, const size_t i, const E_t weight) {
+  weights[y][i] = weight;
+}
 
 template <typename E_t>
 void WeightedError<E_t>::count_by_example(WeightedError<E_t>::Algo &algo, const int node, const int y) const {
@@ -81,11 +94,24 @@ E_t WeightedError<E_t>::node_error(const WeightedError<E_t>::Algo &algo, const i
     int y = algo.child[1][p] == i;
     int pfeat = *algo.feature[p];
 
+#ifdef PRINTTRACE
+    if (algo.options.verbosity >= DTOptions::YACKING) {
+      std::cout << "node " << i << ", parent is " << p << ", branch " << y << std::endl;
+      std::cout << "min(" << algo.get_feature_frequency(y, p, pfeat) << ", " << algo.get_feature_frequency(y, p, pfeat + algo.num_feature) << ")" << std::endl;
+    }
+#endif
+
     error = std::min(
       algo.get_feature_frequency(y, p, pfeat),
       algo.get_feature_frequency(y, p, pfeat + algo.num_feature)
     );
   }
+
+#ifdef PRINTTRACE
+  if (algo.options.verbosity >= DTOptions::YACKING) {
+    std::cout << "assert: " << error <<  " == " << std::min(algo.P[0][i].count(), algo.P[1][i].count()) << std::endl;
+  }
+#endif
 
   assert(error == std::min(algo.P[0][i].count(), algo.P[1][i].count()));
   return error;
@@ -106,8 +132,8 @@ BacktrackingAlgorithm<ErrorPolicy, E_t>::BacktrackingAlgorithm(Wood &w, DTOption
   // numExample[1] = 0;
 
   // statistics and options
-  ub_error = INFTY; //(numExample());
-  ub_size = INFTY;
+  ub_error = INFTY(E_t); //(numExample());
+  ub_size = INFTY(size_t);
   ub_depth = options.max_depth;
   size_matters = false;
   actual_depth = 0;
@@ -182,6 +208,7 @@ void BacktrackingAlgorithm<ErrorPolicy, E_t>::setData(const DataSet &data) {
         }
       ++k;
       // cout << endl;
+      error_policy.add_example(*this, y, i);
     }
   }
 }
@@ -966,7 +993,7 @@ bool BacktrackingAlgorithm<ErrorPolicy, E_t>::grow(const int node) {
     optimal[node] = false;
 
     int f[2] = {*feature[node] + num_feature, *feature[node]};
-    int err[2] = {min(get_feature_frequency(0, node, f[1]),
+    E_t err[2] = {min(get_feature_frequency(0, node, f[1]),
                       get_feature_frequency(1, node, f[1])),
                   min(get_feature_frequency(0, node, f[0]),
                       get_feature_frequency(1, node, f[0]))};
@@ -1831,7 +1858,11 @@ void BacktrackingAlgorithm<ErrorPolicy, E_t>::do_asserts() {
 }
 #endif
 
-template class BacktrackingAlgorithm<IntegerError, int>;
+template class IntegerError<int>;
+template class WeightedError<int>;
+template class WeightedError<double>;
+
+template class BacktrackingAlgorithm<IntegerError<int>, int>;
 template class BacktrackingAlgorithm<WeightedError<int>, int>;
 template class BacktrackingAlgorithm<WeightedError<double>, double>;
 

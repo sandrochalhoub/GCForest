@@ -34,7 +34,8 @@ along with minicsp.  If not, see <http://www.gnu.org/licenses/>.
 using namespace std;
 using namespace primer;
 
-void read_binary(BacktrackingAlgorithm<> &A, DTOptions &opt) {
+template <typename Algo_t>
+void read_binary(Algo_t &A, DTOptions &opt) {
 
   string ext{opt.instance_file.substr(opt.instance_file.find_last_of(".") + 1)};
 
@@ -56,7 +57,8 @@ void read_binary(BacktrackingAlgorithm<> &A, DTOptions &opt) {
   }
 }
 
-void read_non_binary(BacktrackingAlgorithm<> &A, DTOptions &opt) {
+template <typename Algo_t>
+void read_non_binary(Algo_t &A, DTOptions &opt) {
 
   TypedDataSet input;
 
@@ -96,19 +98,11 @@ void read_non_binary(BacktrackingAlgorithm<> &A, DTOptions &opt) {
   A.setData(base);
 }
 
-int main(int argc, char *argv[]) {
-
-  DTOptions opt = parse_dt(argc, argv);
-
-  if (opt.print_cmd)
-    cout << opt.cmdline << endl;
-
-  if (opt.print_par)
-    opt.display(cout);
-
+template <typename Algo_t>
+int run_algorithm(DTOptions &opt) {
   Wood yallen;
 
-  BacktrackingAlgorithm<> A(yallen, opt);
+  Algo_t A(yallen, opt);
 
   if (opt.binarize) {
 
@@ -152,5 +146,24 @@ int main(int argc, char *argv[]) {
                        A.dataset[1].begin(), A.dataset[1].end()) == A.error());
 
     cout << "p solution verified (" << A.error() << ")" << endl;
+  }
+  return 0;
+}
+
+int main(int argc, char *argv[]) {
+  DTOptions opt = parse_dt(argc, argv);
+
+  if (opt.print_cmd)
+    cout << opt.cmdline << endl;
+
+  if (opt.print_par)
+    opt.display(cout);
+
+  if (opt.use_weights) {
+    std::cout << "Using weights" << std::endl;
+    return run_algorithm<BacktrackingAlgorithm<WeightedError<int>>>(opt);
+  }
+  else {
+    return run_algorithm<BacktrackingAlgorithm<>>(opt);
   }
 }

@@ -25,12 +25,17 @@ namespace primer {
 
 template <class ErrorPolicy, typename E_t> class BacktrackingAlgorithm;
 
+template <typename E_t>
 class IntegerError {
 public:
-  typedef BacktrackingAlgorithm<IntegerError, int> Algo;
+  typedef BacktrackingAlgorithm<IntegerError<E_t>, E_t> Algo;
 
 
-  int node_error(const Algo &algo, const int i) const;
+  /** This method is called everytime a new example is added to the dataset.
+   * \param i index of the added example */
+  void add_example(Algo &algo, const int y, const size_t i) {}
+
+  E_t node_error(const Algo &algo, const int i) const;
 
   void count_by_example(Algo &algo, const int node, const int y) const;
 };
@@ -39,11 +44,17 @@ template <typename E_t>
 class WeightedError {
 private:
   // weight of each example when computing the error
-  vector<double> weights[2];
+  vector<E_t> weights[2];
 
 public:
   typedef BacktrackingAlgorithm<WeightedError<E_t>, E_t> Algo;
 
+
+  /** This method is called everytime a new example is added to the dataset.
+   * \param i index of the added example */
+  void add_example(Algo &algo, const int y, const size_t i);
+
+  void set_weight(const int y, const size_t i, const E_t weight);
 
   E_t node_error(const Algo &algo, const int i) const;
 
@@ -55,13 +66,11 @@ public:
 * BacktrackingAlgorithm
 **********************************************/
 /// Representation of a list of examples
-template <class ErrorPolicy = IntegerError, typename E_t = int>
+template <class ErrorPolicy = IntegerError<int>, typename E_t = int>
 class BacktrackingAlgorithm {
 
 private:
   friend ErrorPolicy;
-
-  ErrorPolicy error_policy;
 
   /*!@name Parameters*/
   //@{
@@ -300,6 +309,8 @@ private:
 	void noDecision();
 
 public:
+  ErrorPolicy error_policy;
+
   vector<instance> dataset[2];
   vector<dynamic_bitset<>> reverse_dataset[2];
 
@@ -395,6 +406,8 @@ inline void BacktrackingAlgorithm<ErrorPolicy, E_t>::addExample(rIter beg_sample
     }
     ++k;
   }
+
+  error_policy.add_example(*this, y, example[y].size() - 1);
   // cout << endl;
 }
 

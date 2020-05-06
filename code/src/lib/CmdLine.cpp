@@ -413,6 +413,10 @@ DTOptions parse_dt(int argc, char *argv[]) {
                          "entropy, 2:min gini impurity ",
                          false, 2, "int");
 
+  cmd.add<SwitchArg>(opt.use_weights, "", "use_weights",
+                        "activate weighted version of the algorithm",
+                        false);
+
   cmd.parse(argc, argv);
   return opt;
 }
