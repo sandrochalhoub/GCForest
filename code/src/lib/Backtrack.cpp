@@ -91,21 +91,21 @@ E_t WeightedError<E_t>::node_error(const WeightedError<E_t>::Algo &algo, const i
   else {
     // get parent data
     int p = algo.parent[i];
-    int y = algo.child[1][p] == i;
     int pfeat = *algo.feature[p];
 
-#ifdef PRINTTRACE
-    if (algo.options.verbosity >= DTOptions::YACKING) {
-      std::cout << "node " << i << ", parent is " << p << ", branch " << y << std::endl;
-      std::cout << "min(" << algo.get_feature_frequency(y, p, pfeat) << ", " << algo.get_feature_frequency(y, p, pfeat + algo.num_feature) << ")" << std::endl;
+    if (algo.child[0][p] == i) {
+      pfeat += algo.num_feature;
     }
-#endif
 
     error = std::min(
-      algo.get_feature_frequency(y, p, pfeat),
-      algo.get_feature_frequency(y, p, pfeat + algo.num_feature)
+      algo.get_feature_frequency(0, p, pfeat),
+      algo.get_feature_frequency(1, p, pfeat)
     );
   }
+
+  /*
+  // Checks if the error is the same as with no weights.
+  // This assert is valid only if every weight == 1
 
 #ifdef PRINTTRACE
   if (algo.options.verbosity >= DTOptions::YACKING) {
@@ -114,6 +114,7 @@ E_t WeightedError<E_t>::node_error(const WeightedError<E_t>::Algo &algo, const i
 #endif
 
   assert(error == std::min(algo.P[0][i].count(), algo.P[1][i].count()));
+  */
   return error;
 }
 
