@@ -999,8 +999,7 @@ void BacktrackingAlgorithm::initialise_search() {
 }
 
 bool BacktrackingAlgorithm::search() {
-  // auto sat = false;
-  sat = false;
+  auto sat = false;
 
   while ((not limit_out()) and (ub_error > 0 or size_matters)) {
 

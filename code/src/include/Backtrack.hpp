@@ -150,8 +150,6 @@ private:
 
   size_t actual_depth;
 
-  bool sat;
-
   void cleaning();
 
   bool store_new_best();
