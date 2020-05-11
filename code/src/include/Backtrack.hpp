@@ -313,18 +313,18 @@ public:
 	
 	void minimize_error_depth_size();
 
-  Tree getSolution();
+        Tree getSolution() const;
 
-  int error() const;
+        int error() const;
 
-  template <class rIter>
-  void addExample(rIter beg_sample, rIter end_sample, const bool y);
+        template <class rIter>
+        void addExample(rIter beg_sample, rIter end_sample, const bool y);
 
-  /*!@name Printing*/
-  //@{
-  // std::ostream &toCsv(std::ostream &os) const;
-  std::ostream &display(std::ostream &os) const;
-  //@}
+        /*!@name Printing*/
+        //@{
+        // std::ostream &toCsv(std::ostream &os) const;
+        std::ostream &display(std::ostream &os) const;
+        //@}
 };
 
 template <class rIter>
