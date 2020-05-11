@@ -3,7 +3,7 @@ MAINDIR ?= .
 
 COPTIMIZE ?= -O3
 
-CCC = g++
+CCC = g++ 
 
 BIN=$(MAINDIR)/bin
 SRC=$(MAINDIR)/src/lib
@@ -13,7 +13,7 @@ INC=$(MAINDIR)/src/include
 DOC=$(MAINDIR)/doc
 TCL=$(MAINDIR)/tools
 
-CFLAGS = -I$(INC) -I$(TCL) -Wall -I$(BOOSTDIR) # -ffloat-store
+CFLAGS = -I$(INC) -I$(TCL) -Wall -I$(BOOSTDIR) # -ffloat-store 
 LFLAGS = -L$(OBJ) -flto #--static
 
 
@@ -42,17 +42,13 @@ PLIBOBJ = $(patsubst $(SRC)/%, $(OBJ)/%, $(PLIBAUX))
 
 default: $(BIN)/bud_first_search wrapper
 
-all: lib $(BINS)
+all: lib $(BINS) 
 
 # The library
 lib: $(PLIBOBJ) $(PUTIOBJ)
 $(OBJ)/%.o:  $(SRC)/%.cpp $(INC)/%.hpp
 	@echo 'compile '$<
-	$(CCC) $(CFLAGS) -c $< -o $@
-
-# Python wrapper
-wrapper: $(PLIBOBJ) $(PUTIOBJ)
-	(cd bud_first_search && make)
+	$(CCC) $(CFLAGS) -c $< -o $@ 
 
 # The examples
 $(BIN)/%: $(MOD)/obj/%.o $(PLIBOBJ)
@@ -61,12 +57,13 @@ $(BIN)/%: $(MOD)/obj/%.o $(PLIBOBJ)
 
 $(MOD)/obj/%.o: $(MOD)/src/%.cpp
 	@echo 'compile '$<
-	$(CCC) $(CFLAGS) -c $< -o $@
+	$(CCC) $(CFLAGS) -c $< -o $@ 
 
 # Examples, one at a time
 %: $(MOD)/obj/%.o $(PLIBOBJ)
-	@echo 'link '$<
+	@echo 'link '$<	
 	$(CCC) $(CFLAGS) $(PLIBOBJ) $(LFLAGS) $< -lm -o $(BIN)/$@
 
 wrapper: $(PLIBOBJ)
+	
 

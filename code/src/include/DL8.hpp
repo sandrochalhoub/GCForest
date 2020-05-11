@@ -31,8 +31,6 @@ private:
   DTOptions &options;
   vector<vector<int>> example[2];
 
-  // vector<int> decision;
-
   //
   size_t ub_depth;
 
