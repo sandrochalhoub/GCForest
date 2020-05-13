@@ -57,13 +57,13 @@ $(BIN)/%: $(MOD)/obj/%.o $(PLIBOBJ)
 
 $(MOD)/obj/%.o: $(MOD)/src/%.cpp
 	@echo 'compile '$<
-	$(CCC) $(CFLAGS) -c $< -o $@ 
+	$(CCC) $(CFLAGS) -c $< -o $@
 
 # Examples, one at a time
 %: $(MOD)/obj/%.o $(PLIBOBJ)
-	@echo 'link '$<	
+	@echo 'link '$<
 	$(CCC) $(CFLAGS) $(PLIBOBJ) $(LFLAGS) $< -lm -o $(BIN)/$@
 
 wrapper: $(PLIBOBJ)
-	
+	(cd bud_first_search && make)
 

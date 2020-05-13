@@ -32,16 +32,6 @@ def to_str_vec(str_list):
 
     return vec
 
-def to_sample_vec(samples):
-    samples_vec = wrapper.example_vec(len(samples))
-
-    for i in range(len(samples)):
-        sample = samples[i]
-        features_vec = wrapper.int_vec(sample[:-1])
-        samples_vec[i] = wrapper.Example(features_vec, sample[-1])
-
-    return samples_vec
-
 def read_tree(tree):
     nodes = []
     edges = []
@@ -83,8 +73,10 @@ class BudFirstSearch:
     def fit(self, samples):
         self.wood = wrapper.Wood()
 
-        self.algo = wrapper.BacktrackingAlgorithm(self.wood, self.opt)
-        wrapper.addExamples(self.algo, to_sample_vec(samples))
+        self.algo = wrapper.BacktrackingAlgo(self.wood, self.opt)
+
+        for sample in samples:
+            self.algo.addExample(sample)
 
         self.algo.minimize_error()
         self.tree = self.algo.getSolution()
@@ -117,10 +109,3 @@ class BudFirstSearch:
         return node["feat"]
 
 TEST_SAMPLE = [[1, 0, 1], [1, 1, 0], [0, 1, 1], [0, 0, 0]]
-
-if __name__ == "__main__":
-    b = BudFirstSearch()
-    b.opt.max_depth = 3
-    b.opt.verbosity = Verbosity.YACKING
-    b.opt.feature_strategy = FeatureStrategy.GINI
-    b.fit(TEST_SAMPLE)

@@ -35,9 +35,11 @@ opt = bfs.parse(bfs.to_str_vec(["--max_depth", "3"]))
 opt.verbosity = bfs.Verbosity.YACKING
 
 wood = bfs.Wood()
-algo = bfs.BacktrackingAlgorithm(wood, opt)
-# TODO change to algo.addExamples(test) ?
-bfs.addExamples(algo, bfs.to_sample_vec(test))
+algo = bfs.BacktrackingAlgo(wood, opt)
+
+for sample in test:
+  algo.addExample(sample)
+
 algo.minimize_error()
 
 tree = algo.getSolution()

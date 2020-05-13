@@ -33,7 +33,7 @@ public:
 
   /** This method is called everytime a new example is added to the dataset.
    * \param i index of the added example */
-  void add_example(Algo &algo, const int y, const size_t i) {}
+  void add_example(Algo &algo, const int y, const size_t i, const E_t weight = 1) {}
 
   E_t node_error(const Algo &algo, const int i) const;
 
@@ -52,7 +52,7 @@ public:
 
   /** This method is called everytime a new example is added to the dataset.
    * \param i index of the added example */
-  void add_example(Algo &algo, const int y, const size_t i);
+  void add_example(Algo &algo, const int y, const size_t i, const E_t weight = 1);
 
   void set_weight(const int y, const size_t i, const E_t weight);
 
@@ -362,7 +362,9 @@ public:
         E_t error() const;
 
         template <class rIter>
-        void addExample(rIter beg_sample, rIter end_sample, const bool y);
+        void addExample(rIter beg_sample, rIter end_sample, const bool y, const E_t weight = 1);
+
+        void addExample(const std::vector<int> &example, const E_t weight = 1);
 
         /*!@name Printing*/
         //@{
@@ -374,7 +376,7 @@ public:
 template <class ErrorPolicy, typename E_t>
 template <class rIter>
 inline void BacktrackingAlgorithm<ErrorPolicy, E_t>::addExample(rIter beg_sample, rIter end_sample,
-                                       const bool y) {
+                                       const bool y, const E_t weight) {
   int n{static_cast<int>(end_sample - beg_sample)};
 
   if (n > num_feature) {
@@ -407,7 +409,7 @@ inline void BacktrackingAlgorithm<ErrorPolicy, E_t>::addExample(rIter beg_sample
     ++k;
   }
 
-  error_policy.add_example(*this, y, example[y].size() - 1);
+  error_policy.add_example(*this, y, example[y].size() - 1, weight);
   // cout << endl;
 }
 

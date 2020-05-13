@@ -44,11 +44,11 @@ E_t IntegerError<E_t>::node_error(const IntegerError::Algo &algo, const int i) c
 // ===== WeightedError
 
 template <typename E_t>
-void WeightedError<E_t>::add_example(WeightedError<E_t>::Algo &algo, const int y, const size_t i) {
+void WeightedError<E_t>::add_example(WeightedError<E_t>::Algo &algo, const int y, const size_t i, const E_t weight) {
   if (weights[y].size() <= i) {
     weights[y].resize(i+1);
   }
-  weights[y][i] = 1;
+  weights[y][i] = weight;
 }
 
 template <typename E_t>
@@ -1324,6 +1324,11 @@ void BacktrackingAlgorithm<ErrorPolicy, E_t>::minimize_error_depth_size() {
 
   if (options.verbosity > DTOptions::SILENT)
     print_new_best();
+}
+
+template <class ErrorPolicy, typename E_t>
+void BacktrackingAlgorithm<ErrorPolicy, E_t>::addExample(const std::vector<int> &example, const E_t weight) {
+  addExample(example.begin(), example.end() - 1, example.back(), weight);
 }
 
 template <class ErrorPolicy, typename E_t>
