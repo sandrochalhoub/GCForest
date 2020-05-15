@@ -4,7 +4,7 @@
 #ifndef _PRIMER_UTILS_HPP
 #define _PRIMER_UTILS_HPP
 
-#define INFTY static_cast<size_t>(numeric_limits<size_t>::max())
+#define INFTY(type) static_cast<type>(numeric_limits<type>::max())
 
 // #define DEBUG_MODE
 

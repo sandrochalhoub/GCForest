@@ -23,13 +23,55 @@ using namespace std;
 
 namespace primer {
 
+template <class ErrorPolicy, typename E_t> class BacktrackingAlgorithm;
+
+template <typename E_t>
+class IntegerError {
+public:
+  typedef BacktrackingAlgorithm<IntegerError<E_t>, E_t> Algo;
+
+
+  /** This method is called everytime a new example is added to the dataset.
+   * \param i index of the added example */
+  void add_example(Algo &algo, const int y, const size_t i, const E_t weight = 1) {}
+
+  E_t node_error(const Algo &algo, const int i) const;
+
+  void count_by_example(Algo &algo, const int node, const int y) const;
+};
+
+template <typename E_t>
+class WeightedError {
+private:
+  // weight of each example when computing the error
+  vector<E_t> weights[2];
+
+public:
+  typedef BacktrackingAlgorithm<WeightedError<E_t>, E_t> Algo;
+
+
+  /** This method is called everytime a new example is added to the dataset.
+   * \param i index of the added example */
+  void add_example(Algo &algo, const int y, const size_t i, const E_t weight = 1);
+
+  void set_weight(const int y, const size_t i, const E_t weight);
+
+  E_t node_error(const Algo &algo, const int i) const;
+
+  void count_by_example(Algo &algo, const int node, const int y) const;
+
+};
+
 /**********************************************
 * BacktrackingAlgorithm
 **********************************************/
 /// Representation of a list of examples
+template <class ErrorPolicy = IntegerError<int>, typename E_t = int>
 class BacktrackingAlgorithm {
 
 private:
+  friend ErrorPolicy;
+
   /*!@name Parameters*/
   //@{
   /// Argument
@@ -70,7 +112,7 @@ private:
   vector<int> decision;
 
   /// buffers to compute the entropy, one copy per node, in order to backtrack
-  vector<vector<int>> pos_feature_frequency[2];
+  vector<vector<E_t>> pos_feature_frequency[2];
 
   /// the list of features in the order they will be tried
   vector<vector<int>> ranked_feature;
@@ -88,16 +130,16 @@ private:
   vector<int> best_tree;
 
   // this is because I'm stupid
-  vector<size_t> tree_error;
+  vector<E_t> tree_error;
   vector<size_t> tree_size;
 
   // optimistic value. updated only when the node becomes optimal
-  vector<size_t> min_error;
+  vector<E_t> min_error;
   vector<size_t> min_size;
 
   // best value for any possible feature, given the current branch (ancestors)
   // get updated when backtracking from the decision on the current feature
-  vector<size_t> max_error;
+  vector<E_t> max_error;
   vector<size_t> max_size;
 
   vector<int> f_error;
@@ -113,7 +155,7 @@ private:
 
   size_t ub_depth;
 
-  size_t ub_error;
+  E_t ub_error;
 
   size_t search_size;
   size_t search_limit;
@@ -124,7 +166,7 @@ private:
 
   size_t num_restarts;
 
-  size_t current_error;
+  E_t current_error;
 
   size_t current_size;
 
@@ -207,14 +249,14 @@ private:
 
   // returns the error if testing feature f at node i (f must be in [1,m],
   // m=data.numFeature)
-  int get_feature_error(const int i, const int f) const;
+  E_t get_feature_error(const int i, const int f) const;
 
   // returns the number of examples of class y having feature f (f + m
   // represents not-f)
-  int get_feature_frequency(const int y, const int i, const int f) const;
+  E_t get_feature_frequency(const int y, const int i, const int f) const;
 
   // returns the error if we do not test any feature on node i
-  size_t node_error(const int i) const;
+  E_t node_error(const int i) const;
 
   // select the most promising node to branch on
   int highest_error() const;
@@ -263,10 +305,12 @@ private:
   size_t maxSize(const int depth) const;
 
   void singleDecision();
-	
+
 	void noDecision();
-	
+
 public:
+  ErrorPolicy error_policy;
+
   vector<instance> dataset[2];
   vector<dynamic_bitset<>> reverse_dataset[2];
 
@@ -310,15 +354,17 @@ public:
   void minimize_error();
 
   void minimize_error_depth();
-	
+
 	void minimize_error_depth_size();
 
         Tree getSolution() const;
 
-        int error() const;
+        E_t error() const;
 
         template <class rIter>
-        void addExample(rIter beg_sample, rIter end_sample, const bool y);
+        void addExample(rIter beg_sample, rIter end_sample, const bool y, const E_t weight = 1);
+
+        void addExample(const std::vector<int> &example, const E_t weight = 1);
 
         /*!@name Printing*/
         //@{
@@ -327,9 +373,10 @@ public:
         //@}
 };
 
+template <class ErrorPolicy, typename E_t>
 template <class rIter>
-void BacktrackingAlgorithm::addExample(rIter beg_sample, rIter end_sample,
-                                       const bool y) {
+inline void BacktrackingAlgorithm<ErrorPolicy, E_t>::addExample(rIter beg_sample, rIter end_sample,
+                                       const bool y, const E_t weight) {
   int n{static_cast<int>(end_sample - beg_sample)};
 
   if (n > num_feature) {
@@ -361,17 +408,21 @@ void BacktrackingAlgorithm::addExample(rIter beg_sample, rIter end_sample,
     }
     ++k;
   }
+
+  error_policy.add_example(*this, y, example[y].size() - 1, weight);
   // cout << endl;
 }
 
+template <class ErrorPolicy, typename E_t>
 template<class property>
-void BacktrackingAlgorithm::filter_features(const int node, property cond) {
+inline void BacktrackingAlgorithm<ErrorPolicy, E_t>::filter_features(const int node, property cond) {
   for (auto f{end_feature[node] - 1}; f >= feature[node]; --f)
     if (cond(*f))
       swap(*f, *(--end_feature[node]));
 }
 
-std::ostream &operator<<(std::ostream &os, const BacktrackingAlgorithm &x);
+template <class ErrorPolicy, typename E_t>
+std::ostream &operator<<(std::ostream &os, const BacktrackingAlgorithm<ErrorPolicy, E_t> &x);
 }
 
 #endif // _PRIMER_BACKTRACK_HPP
