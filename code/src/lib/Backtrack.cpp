@@ -57,6 +57,11 @@ void WeightedError<E_t>::set_weight(const int y, const size_t i, const E_t weigh
 }
 
 template <typename E_t>
+E_t WeightedError<E_t>::get_weight(const int y, const size_t i) const {
+  return weights[y][i];
+}
+
+template <typename E_t>
 void WeightedError<E_t>::count_by_example(WeightedError<E_t>::Algo &algo, const int node, const int y) const {
   auto n{algo.num_feature};
 

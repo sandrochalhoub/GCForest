@@ -36,6 +36,8 @@ public:
   // bool predict(const instance &x) const;
   int predict(const DataSet &data) const;
 
+  bool predict(const instance &i) const;
+
 	template<class rIter>
 	int predict(rIter beg_neg, rIter end_neg, rIter beg_pos, rIter end_pos) const;
 

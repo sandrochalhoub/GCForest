@@ -27,6 +27,10 @@ int Tree::predict(const DataSet &data) const {
   return error;
 }
 
+bool Tree::predict(const instance &i) const {
+  return wood->predict(idx, i);
+}
+
 size_t Tree::size() const { return wood->size(idx); }
 
 size_t Tree::depth() const { return wood->depth(idx); }

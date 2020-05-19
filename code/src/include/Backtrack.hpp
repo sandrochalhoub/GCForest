@@ -56,6 +56,8 @@ public:
 
   void set_weight(const int y, const size_t i, const E_t weight);
 
+  E_t get_weight(const int y, const size_t i) const;
+
   E_t node_error(const Algo &algo, const int i) const;
 
   void count_by_example(Algo &algo, const int node, const int y) const;
