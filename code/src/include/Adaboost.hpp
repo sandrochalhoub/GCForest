@@ -2,6 +2,8 @@
 #ifndef _PRIMER_ADABOOST_HPP
 #define _PRIMER_ADABOOST_HPP
 
+#include <memory>
+
 #include "Backtrack.hpp"
 
 namespace primer {
@@ -39,7 +41,7 @@ namespace primer {
 
     // internal variables
     size_t it_count;
-    std::vector<WeakClassifier> classifiers;
+    std::vector<std::unique_ptr<WeakClassifier>> classifiers;
 
 
     void iteration();

@@ -31,7 +31,7 @@ namespace primer {
     double pred = 0;
 
     for (auto &clf: classifiers) {
-      pred += clf.weight * (clf.algo.getSolution().predict(i) ? 0 : 1);
+      pred += clf->weight * (clf->algo.getSolution().predict(i) ? 0 : 1);
     }
 
     return pred > 0.5;
@@ -55,8 +55,8 @@ namespace primer {
 
   void Adaboost::iteration() {
     // Create the new predictor
-    classifiers.emplace_back(options);
-    auto &algo = classifiers.back().algo;
+    classifiers.emplace_back(std::make_unique<WeakClassifier>(options));
+    auto &algo = classifiers.back()->algo;
 
     // Add examples
     if (it_count == 0) {
@@ -67,16 +67,20 @@ namespace primer {
     }
 
     algo.minimize_error();
+
+    // Print stuff to evaluate performance
+    auto ex_count = example_count();
+    std::cout << "error: " << algo.error() * ex_count << "/" << ex_count << std::endl;
   }
 
   void Adaboost::initialize_weights() {
-    auto &current_algo = classifiers.back().algo;
+    auto &current_algo = classifiers.back()->algo;
     double m = example_count();
 
     for (int y = 0; y < 2; ++y) {
       int count = dataset[y].size();
 
-      for (int i; i < count; ++i) {
+      for (int i = 0; i < count; ++i) {
         auto &sample = dataset[y][i];
         current_algo.addExample(sample.begin(), sample.end(), y, 1 / m);
       }
@@ -84,8 +88,8 @@ namespace primer {
   }
 
   void Adaboost::update_weights() {
-    auto &last_clf = classifiers.at(classifiers.size() - 2).algo;
-    auto &current_clf = classifiers.back();
+    auto &last_clf = classifiers.at(classifiers.size() - 2)->algo;
+    auto &current_clf = *classifiers.back();
     auto &current_algo = current_clf.algo;
     auto last_tree = last_clf.getSolution();
 
@@ -97,7 +101,7 @@ namespace primer {
     for (int y = 0; y < 2; ++y) {
       int count = dataset[y].size();
 
-      for (int i; i < count; ++i) {
+      for (int i = 0; i < count; ++i) {
         auto &sample = dataset[y][i];
         auto &bsample = bitsets[y][i];
 
@@ -113,7 +117,7 @@ namespace primer {
   }
 
   bool Adaboost::should_stop() {
-    return it_count < max_it;
+    return it_count >= max_it;
   }
 
   size_t Adaboost::example_count() const {

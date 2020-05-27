@@ -40,15 +40,34 @@ E_t IntegerError<E_t>::node_error(const IntegerError::Algo &algo, const int i) c
   return std::min(algo.P[0][i].count(), algo.P[1][i].count());
 }
 
+template <typename E_t>
+E_t IntegerError<E_t>::get_total(const Algo &algo, const int y, const int n) const {
+  return algo.P[y][n].count();
+}
+
 
 // ===== WeightedError
 
 template <typename E_t>
-void WeightedError<E_t>::add_example(WeightedError<E_t>::Algo &algo, const int y, const size_t i, const E_t weight) {
+void WeightedError<E_t>::add_example(Algo &algo, const int y, const size_t i, const E_t weight) {
   if (weights[y].size() <= i) {
     weights[y].resize(i+1);
   }
   weights[y][i] = weight;
+}
+
+template <typename E_t>
+void WeightedError<E_t>::update_node(Algo& algo, const int n) {
+  for (size_t y{0}; y < 2; ++y) {
+    E_t tot{};
+    for (auto s : algo.P[y][n]) {
+      tot += weights[y][s];
+    }
+    if (weight_total[y].size() <= n) {
+      weight_total[y].resize(n + 1);
+    }
+    weight_total[y][n] = tot;
+  }
 }
 
 template <typename E_t>
@@ -62,7 +81,7 @@ E_t WeightedError<E_t>::get_weight(const int y, const size_t i) const {
 }
 
 template <typename E_t>
-void WeightedError<E_t>::count_by_example(WeightedError<E_t>::Algo &algo, const int node, const int y) const {
+void WeightedError<E_t>::count_by_example(Algo &algo, const int node, const int y) const {
   auto n{algo.num_feature};
 
   algo.pos_feature_frequency[y][node].clear();
@@ -76,10 +95,10 @@ void WeightedError<E_t>::count_by_example(WeightedError<E_t>::Algo &algo, const 
 }
 
 template <typename E_t>
-E_t WeightedError<E_t>::node_error(const WeightedError<E_t>::Algo &algo, const int i) const {
+E_t WeightedError<E_t>::node_error(const Algo &algo, const int i) const {
   E_t error{};
 
-  if (i == 0) { // TODO not 0, more like _root or idk
+  if (i == 0) {
     // special case: compute weighted error
     E_t c0{};
     for (auto s : algo.P[0][i]) {
@@ -106,6 +125,7 @@ E_t WeightedError<E_t>::node_error(const WeightedError<E_t>::Algo &algo, const i
       algo.get_feature_frequency(0, p, pfeat),
       algo.get_feature_frequency(1, p, pfeat)
     );
+    std::cout << error << std::endl;
   }
 
   /*
@@ -123,6 +143,10 @@ E_t WeightedError<E_t>::node_error(const WeightedError<E_t>::Algo &algo, const i
   return error;
 }
 
+template <typename E_t>
+E_t WeightedError<E_t>::get_total(const Algo &algo, const int y, const int n) const {
+  return weight_total[y][n];
+}
 
 // ===== BacktrackingAlgorithm
 
@@ -237,7 +261,7 @@ template <class ErrorPolicy, typename E_t>
 E_t BacktrackingAlgorithm<ErrorPolicy, E_t>::get_feature_frequency(const int y, const int n,
                                                  const int f) const {
   return (f >= num_feature
-              ? P[y][n].count() - pos_feature_frequency[y][n][f - num_feature]
+              ? error_policy.get_total(*this, y, n) - pos_feature_frequency[y][n][f - num_feature]
               : pos_feature_frequency[y][n][f]);
 }
 
@@ -613,6 +637,7 @@ bool BacktrackingAlgorithm<ErrorPolicy, E_t>::store_new_best() {
 
       if (ub_error != actual_error) {
         cout << "c warning, wrong tree accuracy!!\n";
+        cout << ub_error << " != " << actual_error << endl;
       }
     }
 
@@ -994,7 +1019,9 @@ bool BacktrackingAlgorithm<ErrorPolicy, E_t>::grow(const int node) {
   filter_features(node, [&](const int f) { return max_entropy(node, f); });
 
   blossom.add(node);
-  best_tree[node] = (P[0][node].count() < P[1][node].count());
+
+  error_policy.update_node(*this, node);
+  best_tree[node] = (error_policy.get_total(*this, 0, node) < error_policy.get_total(*this, 1, node));
 
   if (feature[node] == end_feature[node]) {
 
@@ -1585,7 +1612,7 @@ bool BacktrackingAlgorithm<ErrorPolicy, E_t>::isLeaf(const int node) const {
 }
 
 template <class ErrorPolicy, typename E_t>
-size_t BacktrackingAlgorithm<ErrorPolicy, E_t>::leaf_error(const int node) const {
+E_t BacktrackingAlgorithm<ErrorPolicy, E_t>::leaf_error(const int node) const {
   if (isLeaf(node) or optimal[node]) {
     return max_error[node];
   } else {
@@ -1707,12 +1734,13 @@ void BacktrackingAlgorithm<ErrorPolicy, E_t>::print_trace() {
 
 template <class ErrorPolicy, typename E_t>
 void BacktrackingAlgorithm<ErrorPolicy, E_t>::do_asserts() {
+  const double eps = 0.001; // std::numeric_limits<double>::epsilon();
 
   for (auto b : blossom) {
     assert(not optimal[b]);
   }
 
-  auto total_error{0};
+  E_t total_error{0};
   for (auto d{blossom.fbegin()}; d != blossom.fend(); ++d) {
 
     assert(isLeaf(*d) or ((child[0][*d] < 0 or parent[child[0][*d]] == *d) and
@@ -1723,7 +1751,13 @@ void BacktrackingAlgorithm<ErrorPolicy, E_t>::do_asserts() {
     }
   }
   for (auto b : blossom) {
-    assert(leaf_error(b) == node_error(b));
+    auto le = leaf_error(b);
+    auto ne = node_error(b);
+
+    if (abs(le - ne) >= eps) {
+      cout << le << " / " << ne << endl;
+    }
+    assert(abs(le - ne) < eps);
     total_error += node_error(b);
   }
 
@@ -1731,11 +1765,11 @@ void BacktrackingAlgorithm<ErrorPolicy, E_t>::do_asserts() {
     assert(blossom.index(d) < blossom.size());
   }
 
-  if (total_error != current_error)
+  if (abs(total_error - current_error) >= eps)
     cout << current_error << " / " << total_error << " @" << search_size
          << endl;
 
-  assert(current_error == total_error);
+  assert(abs(current_error - total_error) < eps);
 
   auto total_size{computeSize(0)};
 
