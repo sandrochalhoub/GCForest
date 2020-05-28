@@ -31,6 +31,8 @@ class IntegerError {
 public:
   typedef BacktrackingAlgorithm<IntegerError<E_t>, E_t> Algo;
 
+  static constexpr E_t zero = 0;
+
 
   /** This method is called everytime a new example is added to the dataset.
    * \param i index of the added example */
@@ -57,6 +59,8 @@ private:
 
 public:
   typedef BacktrackingAlgorithm<WeightedError<E_t>, E_t> Algo;
+
+  static constexpr E_t zero = static_cast<E_t>(-0.001);
 
 
   /** This method is called everytime a new example is added to the dataset.

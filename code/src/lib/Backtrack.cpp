@@ -125,7 +125,6 @@ E_t WeightedError<E_t>::node_error(const Algo &algo, const int i) const {
       algo.get_feature_frequency(0, p, pfeat),
       algo.get_feature_frequency(1, p, pfeat)
     );
-    std::cout << error << std::endl;
   }
 
   /*
@@ -351,9 +350,10 @@ void BacktrackingAlgorithm<ErrorPolicy, E_t>::separator(const string &msg) const
 template <class ErrorPolicy, typename E_t>
 void BacktrackingAlgorithm<ErrorPolicy, E_t>::print_new_best() const {
 
+  E_t total = error_policy.get_total(*this, 0, 0) + error_policy.get_total(*this, 1, 0);
   cout << setprecision(5) << left << "d accuracy=" << setw(7)
        << (1.0 -
-           static_cast<double>(ub_error) / static_cast<double>(numExample()))
+           static_cast<double>(ub_error) / static_cast<double>(total))
        << " error=" << setw(4) << ub_error << " depth=" << setw(3)
        << actual_depth << " size=" << setw(3) << ub_size
        // << " backtracks=" << setw(9) << num_backtracks
@@ -921,7 +921,7 @@ void BacktrackingAlgorithm<ErrorPolicy, E_t>::branch(const int node, const int f
   assert(depth[node] < ub_depth - 1);
 
   // we assume that we branch only on tests with non-null error
-  assert(get_feature_error(node, f) > 0);
+  assert(get_feature_error(node, f) > ErrorPolicy::zero);
 
   decision.push_back(node);
   blossom.remove_front(node);

@@ -41,6 +41,7 @@ namespace primer {
 
     // internal variables
     size_t it_count;
+    double total_weight = 0;
     std::vector<std::unique_ptr<WeakClassifier>> classifiers;
 
 
@@ -51,6 +52,8 @@ namespace primer {
     /// Add examples to the new predictor and compute the weights for
     /// the upcoming iteration
     void update_weights();
+
+    void compute_clf_weight();
 
     bool should_stop();
 

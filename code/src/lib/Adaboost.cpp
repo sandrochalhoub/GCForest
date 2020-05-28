@@ -9,9 +9,6 @@ namespace primer {
 
   // ===== Adaboost
 
-  // Ce qui reste à faire :
-  // - quand l'erreur min (?) est inférieure à 0 ?
-
   Adaboost::Adaboost(DTOptions &opt)
     : options(opt), max_it(30) {
 
@@ -31,10 +28,10 @@ namespace primer {
     double pred = 0;
 
     for (auto &clf: classifiers) {
-      pred += clf->weight * (clf->algo.getSolution().predict(i) ? 0 : 1);
+      pred += clf->weight * (clf->algo.getSolution().predict(i) ? 1 : -1);
     }
 
-    return pred > 0.5;
+    return pred > 0;
   }
 
   double Adaboost::get_accuracy() const {
@@ -67,10 +64,12 @@ namespace primer {
     }
 
     algo.minimize_error();
+    compute_clf_weight();
 
     // Print stuff to evaluate performance
     auto ex_count = example_count();
     std::cout << "error: " << algo.error() * ex_count << "/" << ex_count << std::endl;
+    std::cout << "current accuracy: " << get_accuracy() << std::endl;
   }
 
   void Adaboost::initialize_weights() {
@@ -88,15 +87,14 @@ namespace primer {
   }
 
   void Adaboost::update_weights() {
-    auto &last_clf = classifiers.at(classifiers.size() - 2)->algo;
+    auto &last_clf = *classifiers.at(classifiers.size() - 2);
+    auto &last_algo = last_clf.algo;
     auto &current_clf = *classifiers.back();
     auto &current_algo = current_clf.algo;
-    auto last_tree = last_clf.getSolution();
+    auto last_tree = last_algo.getSolution();
 
-    double err = last_clf.error();
-    double alpha = 1. / 2. * log((1. - err) / err);
-
-    current_clf.weight = alpha;
+    double err = last_algo.error();
+    double alpha = last_clf.weight;
 
     for (int y = 0; y < 2; ++y) {
       int count = dataset[y].size();
@@ -108,12 +106,21 @@ namespace primer {
         double u = y == 0 ? -1 : 1;
         double upred = last_tree.predict(bsample) ? 1 : -1;
 
-        double d = last_clf.error_policy.get_weight(y, i);
+        double d = last_algo.error_policy.get_weight(y, i);
         double dnext = d * exp(- alpha * u * upred) / (2 * sqrt(err * (1 - err)));
 
         current_algo.addExample(sample.begin(), sample.end(), y, dnext);
       }
     }
+  }
+
+  void Adaboost::compute_clf_weight() {
+    auto &current_clf = *classifiers.back();
+    auto &current_algo = current_clf.algo;
+
+    double err = current_algo.error();
+    double alpha = 1. / 2. * log((1. - err) / err);
+    current_clf.weight = alpha;
   }
 
   bool Adaboost::should_stop() {
