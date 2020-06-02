@@ -45,6 +45,12 @@ E_t IntegerError<E_t>::get_total(const Algo &algo, const int y, const int n) con
   return algo.P[y][n].count();
 }
 
+template <typename E_t>
+E_t IntegerError<E_t>::get_weight(const int y, const size_t i) const {
+  return 1;
+}
+
+
 
 // ===== WeightedError
 
@@ -633,7 +639,7 @@ bool BacktrackingAlgorithm<ErrorPolicy, E_t>::store_new_best() {
       auto actual_error{0};
       for (auto y{0}; y < 2; ++y)
         for (auto i{0}; i < example[y].size(); ++i)
-          actual_error += (wood.predict(solution_root, dataset[y][i]) != y);
+          actual_error += error_policy.get_weight(y,i) * (wood.predict(solution_root, dataset[y][i]) != y);
 
       if (ub_error != actual_error) {
         cout << "c warning, wrong tree accuracy!!\n";
@@ -685,7 +691,7 @@ void BacktrackingAlgorithm<ErrorPolicy, E_t>::prune(const int node) {
 
 #ifdef PRINTTRACE
       if (PRINTTRACE and options.verbosity >= DTOptions::SOLVERINFO) {
-        cout << "-ERROR = " << current_error << " - " << max_error[node]
+        cout << "-ERROR = " << current_error << " - " << node_error(node)
              << endl;
         cout << "-SIZE = " << current_size << " - " << 1 << endl;
       }

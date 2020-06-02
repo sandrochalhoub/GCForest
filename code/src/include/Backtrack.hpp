@@ -39,6 +39,8 @@ public:
   void add_example(Algo &algo, const int y, const size_t i, const E_t weight = 1) {}
 
   void update_node(Algo& algo, const int n) {}
+	
+	E_t get_weight(const int y, const size_t i) const;
 
   E_t node_error(const Algo &algo, const int i) const;
 
@@ -46,6 +48,7 @@ public:
 
   /// Returns the sum of the weights of all the examples at a specific node
   E_t get_total(const Algo &algo, const int y, const int n) const;
+	
 };
 
 template <typename E_t>
@@ -174,8 +177,10 @@ private:
 
   size_t ub_depth;
 
+public:
   E_t ub_error;
 
+private:
   size_t search_size;
   size_t search_limit;
 

@@ -41,7 +41,7 @@ void read_binary(Algo_t &A, DTOptions &opt) {
 
   if (opt.format == "csv" or (opt.format == "guess" and ext == "csv")) {
     csv::read_binary(opt.instance_file, [&](vector<int> &data) {
-      A.addExample(data.begin(), data.end() - 1, data.back());
+      A.addExample(data.begin(), data.end() - 1, data.back(), 3);
     });
   } else if (opt.format == "dl8" or (opt.format == "guess" and ext == "dl8")) {
     txt::read_binary(opt.instance_file, [&](vector<int> &data) {
@@ -142,9 +142,13 @@ int run_algorithm(DTOptions &opt) {
   }
 
   if (opt.verified) {
-    assert(sol.predict(A.dataset[0].begin(), A.dataset[0].end(),
-                       A.dataset[1].begin(), A.dataset[1].end()) == A.error());
-
+		
+		decltype(A.ub_error) tree_error = sol.predict<int>(A.dataset[0].begin(), A.dataset[0].end(),
+                       A.dataset[1].begin(), A.dataset[1].end(),
+											 [&](const int y, const size_t i) { return A.error_policy.get_weight(y,i);});
+		
+    assert(tree_error == A.error());
+											 
     cout << "p solution verified (" << A.error() << ")" << endl;
   }
   return 0;

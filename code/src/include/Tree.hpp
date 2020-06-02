@@ -17,7 +17,10 @@ using namespace std;
 
 namespace primer {
 
+
 class Wood;
+
+
 class Tree {
 private:
   Wood *wood;
@@ -33,22 +36,23 @@ public:
 
   int getFeature(const int node) const;
 
-  // bool predict(const instance &x) const;
-  int predict(const DataSet &data) const;
+	//   // bool predict(const instance &x) const;
+	// template<typename E_t>
+	//   E_t predict(const DataSet &data) const;
 
   bool predict(const instance &i) const;
+	
+	template<typename E_t, class rIter, typename wf_type>
+	E_t predict(rIter beg_neg, rIter end_neg, rIter beg_pos, rIter end_pos, wf_type weight_function) const;
 
-	template<class rIter>
-	int predict(rIter beg_neg, rIter end_neg, rIter beg_pos, rIter end_pos) const;
+  size_t size() const;
 
-        size_t size() const;
+  size_t depth() const;
 
-        size_t depth() const;
-
-        /*!@name Miscellaneous*/
-        //@{
-        std::ostream &display(std::ostream &os) const;
-        //@}
+  /*!@name Miscellaneous*/
+  //@{
+  std::ostream &display(std::ostream &os) const;
+  //@}
 };
 
 // M
@@ -109,14 +113,14 @@ public:
 std::ostream &operator<<(std::ostream &os, const Tree &x);
 
 
-template<class rIter>
-int Tree::predict(rIter beg_neg, rIter end_neg, rIter beg_pos, rIter end_pos) const {
-  auto error{0};
+template<typename E_t, class rIter, typename wf_type>
+E_t Tree::predict(rIter beg_neg, rIter end_neg, rIter beg_pos, rIter end_pos, wf_type weight_function) const {
+  E_t error{0};
   // for (auto y{0}; y < 2; ++y)
     for (auto i{beg_neg}; i!=end_neg; ++i)
-      error += (wood->predict(idx, *i) != 0);
+      error += weight_function(0, (i-beg_neg)) * (wood->predict(idx, *i) != 0);
     for (auto i{beg_pos}; i!=end_pos; ++i)
-      error += (wood->predict(idx, *i) != 1);
+      error += weight_function(1, (i-beg_pos)) * (wood->predict(idx, *i) != 1);
   return error;
 }
 
