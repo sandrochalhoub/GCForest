@@ -20,6 +20,17 @@ for (auto y{0}; y < 2; ++y) {
 }*/
 
 // ===== IntegerError
+	
+template<typename T>
+T min_positive() {
+	return static_cast<int>(static_cast<T>(1) - std::numeric_limits<T>::epsilon()) + std::numeric_limits<T>::epsilon();
+} 
+
+template<typename T>
+T is_null(T x) {
+	return x <= 10 * std::numeric_limits<T>::epsilon() and x >= -10 * std::numeric_limits<T>::epsilon();
+} 
+
 
 template <typename E_t>
 void IntegerError<E_t>::count_by_example(IntegerError::Algo &algo, const int node, const int y) const {
@@ -280,13 +291,13 @@ void BacktrackingAlgorithm<ErrorPolicy, E_t>::setUbDepth(const size_t u) { ub_de
 // void BacktrackingAlgorithm<ErrorPolicy, E_t>::setUbNode(const size_t u) { ub_size = u; }
 
 template <template<typename> class ErrorPolicy, typename E_t>
-void BacktrackingAlgorithm<ErrorPolicy, E_t>::setUbError(const size_t u) { ub_error = u; }
+void BacktrackingAlgorithm<ErrorPolicy, E_t>::setUbError(const E_t u) { ub_error = u; }
 
 template <template<typename> class ErrorPolicy, typename E_t>
 void BacktrackingAlgorithm<ErrorPolicy, E_t>::addSizeObjective() { size_matters = true; }
 
 template <template<typename> class ErrorPolicy, typename E_t>
-size_t BacktrackingAlgorithm<ErrorPolicy, E_t>::getUbError() const { return ub_error; }
+E_t BacktrackingAlgorithm<ErrorPolicy, E_t>::getUbError() const { return ub_error; }
 
 template <template<typename> class ErrorPolicy, typename E_t>
 size_t BacktrackingAlgorithm<ErrorPolicy, E_t>::getUbDepth() const { return ub_depth; }
@@ -408,9 +419,9 @@ template <template<typename> class ErrorPolicy, typename E_t>
 int BacktrackingAlgorithm<ErrorPolicy, E_t>::highest_error_reduction() const {
 
   auto selected_node{-1};
-  E_t highest_error{0};
+  auto highest_error{0};
 
-  E_t highest_reduction{0};
+  auto highest_reduction{0};
 
 #ifdef PRINTTRACE
   if (PRINTTRACE and options.verbosity >= DTOptions::SOLVERINFO)
@@ -457,7 +468,7 @@ template <template<typename> class ErrorPolicy, typename E_t>
 int BacktrackingAlgorithm<ErrorPolicy, E_t>::highest_error() const {
 
   auto selected_node{-1};
-  E_t highest_error{0};
+  auto highest_error{0};
 
 #ifdef PRINTTRACE
   if (PRINTTRACE and options.verbosity >= DTOptions::SOLVERINFO)
@@ -467,7 +478,7 @@ int BacktrackingAlgorithm<ErrorPolicy, E_t>::highest_error() const {
   // for (auto i{blossom.fbegin()}; i!=blossom.fend(); ++i) {// : blossom) {
   for (auto i : blossom) {
     assert(depth[i] < ub_depth);
-    E_t err{node_error(i)};
+    auto err{node_error(i)};
 
 #ifdef PRINTTRACE
     if (PRINTTRACE and options.verbosity >= DTOptions::SOLVERINFO)
@@ -624,7 +635,7 @@ bool BacktrackingAlgorithm<ErrorPolicy, E_t>::store_new_best() {
         cout << "c warning, wrong tree size!!\n";
       }
 
-      auto actual_error{0};
+      E_t actual_error{0};
       for (auto y{0}; y < 2; ++y)
         for (auto i{0}; i < example[y].size(); ++i)
           actual_error += error_policy.get_weight(y, i) *
@@ -950,7 +961,7 @@ void BacktrackingAlgorithm<ErrorPolicy, E_t>::branch(const int node, const int f
     setChild(node, i, c[i]);
 
   for (auto y{0}; y < 2; ++y) {
-    auto smallest{error_policy.get_total(*this, y, c[1]) < error_policy.get_total(*this, y, c[0])};
+    auto smallest{P[y][c[1]].count() < P[y][c[0]].count()};
 
     count_by_example(c[smallest], y);
 
@@ -1271,10 +1282,10 @@ void BacktrackingAlgorithm<ErrorPolicy, E_t>::minimize_error_depth() {
 
   auto perfect{false};
   // auto saved_error{ub_error};
-  while (ub_depth > 0 and search() and ub_error == 0) {
+  while (ub_depth > 0 and search() and is_null<E_t>(ub_error)) {
     perfect = true;
     // saved_error = ub_error;
-    ub_error = 1;
+    ub_error = min_positive<E_t>();
     ub_depth = actual_depth - 1;
 
     restart(true);
@@ -1312,10 +1323,10 @@ void BacktrackingAlgorithm<ErrorPolicy, E_t>::minimize_error_depth_size() {
 
   auto perfect{current_error == 0};
   // auto saved_error{ub_error};
-  while (ub_depth > 0 and search() and ub_error == 0) {
+  while (ub_depth > 0 and search() and is_null<E_t>(ub_error)) {
     perfect = true;
     // saved_error = ub_error;
-    ub_error = 1;
+    ub_error = min_positive<E_t>();
     ub_depth = actual_depth - 1;
 
     restart(true);
@@ -1376,7 +1387,7 @@ bool BacktrackingAlgorithm<ErrorPolicy, E_t>::fail() {
       c = p;
       p = parent[c];
 
-      auto ube{max_error[p]};
+      E_t ube{max_error[p]};
       auto ubs{max_size[p]};
 
       for (auto i{0}; i < 2; ++i)
@@ -1746,8 +1757,8 @@ void BacktrackingAlgorithm<ErrorPolicy, E_t>::do_asserts() {
     }
   }
   for (auto b : blossom) {
-    auto le = leaf_error(b);
-    auto ne = node_error(b);
+    E_t le = leaf_error(b);
+    E_t ne = node_error(b);
 
     if (abs(le - ne) >= eps) {
       cout << le << " / " << ne << endl;

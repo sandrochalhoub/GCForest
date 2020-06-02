@@ -30,13 +30,6 @@ namespace primer {
 	template <typename E_t>
 	class WeightedError;
 	
-	
-
-//
-// template <typename E_t=int, template<typename> typename ErrorPolicy> class BacktrackingAlgorithm;
-// // template <class ErrorPolicy, typename E_t> class BacktrackingAlgorithm;
-
-
 
 /**********************************************
 * BacktrackingAlgorithm
@@ -119,7 +112,7 @@ private:
   vector<E_t> max_error;
   vector<size_t> max_size;
 
-  vector<int> f_error;
+  vector<E_t> f_error;
   vector<double> f_entropy;
   vector<double> f_gini;
   // vector<double> f_gini_d;
@@ -314,11 +307,11 @@ public:
 
   // void setUbNode(const size_t u);
 
-  void setUbError(const size_t u);
+  void setUbError(const E_t u);
 
   void addSizeObjective();
 
-  size_t getUbError() const;
+  E_t getUbError() const;
 
   size_t getUbDepth() const;
 
