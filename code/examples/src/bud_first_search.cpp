@@ -41,7 +41,7 @@ void read_binary(Algo_t &A, DTOptions &opt) {
 
   if (opt.format == "csv" or (opt.format == "guess" and ext == "csv")) {
     csv::read_binary(opt.instance_file, [&](vector<int> &data) {
-      A.addExample(data.begin(), data.end() - 1, data.back(), 1.1);
+      A.addExample(data.begin(), data.end() - 1, data.back(), 1);
     });
   } else if (opt.format == "dl8" or (opt.format == "guess" and ext == "dl8")) {
     txt::read_binary(opt.instance_file, [&](vector<int> &data) {
