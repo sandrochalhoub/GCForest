@@ -8,7 +8,7 @@
 
 // #define DEBUG_MODE
 
-// #define PRINTTRACE (options.verbosity >= DTOptions::YACKING)
+#define PRINTTRACE (options.verbosity >= DTOptions::YACKING)
 
 namespace primer {
 
