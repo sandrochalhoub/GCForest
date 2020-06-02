@@ -416,9 +416,9 @@ template <class ErrorPolicy, typename E_t>
 int BacktrackingAlgorithm<ErrorPolicy, E_t>::highest_error_reduction() const {
 
   auto selected_node{-1};
-  auto highest_error{0};
+  E_t highest_error{0};
 
-  auto highest_reduction{0};
+  E_t highest_reduction{0};
 
 #ifdef PRINTTRACE
   if (PRINTTRACE and options.verbosity >= DTOptions::SOLVERINFO)
@@ -465,7 +465,7 @@ template <class ErrorPolicy, typename E_t>
 int BacktrackingAlgorithm<ErrorPolicy, E_t>::highest_error() const {
 
   auto selected_node{-1};
-  auto highest_error{0};
+  E_t highest_error{0};
 
 #ifdef PRINTTRACE
   if (PRINTTRACE and options.verbosity >= DTOptions::SOLVERINFO)
@@ -475,7 +475,7 @@ int BacktrackingAlgorithm<ErrorPolicy, E_t>::highest_error() const {
   // for (auto i{blossom.fbegin()}; i!=blossom.fend(); ++i) {// : blossom) {
   for (auto i : blossom) {
     assert(depth[i] < ub_depth);
-    auto err{node_error(i)};
+    E_t err{node_error(i)};
 
 #ifdef PRINTTRACE
     if (PRINTTRACE and options.verbosity >= DTOptions::SOLVERINFO)
@@ -750,7 +750,7 @@ void BacktrackingAlgorithm<ErrorPolicy, E_t>::restart(const bool full) {
 
 template <class ErrorPolicy, typename E_t>
 bool BacktrackingAlgorithm<ErrorPolicy, E_t>::update_upperbound(const int node) {
-  auto err{0};
+  E_t err{0};
   auto sz{1};
   for (auto i{0}; i < 2; ++i)
     if (child[i][node] >= 0) {
@@ -958,7 +958,7 @@ void BacktrackingAlgorithm<ErrorPolicy, E_t>::branch(const int node, const int f
     setChild(node, i, c[i]);
 
   for (auto y{0}; y < 2; ++y) {
-    auto smallest{P[y][c[1]].count() < P[y][c[0]].count()};
+    auto smallest{error_policy.get_total(*this, y, c[1]) < error_policy.get_total(*this, y, c[0])};
 
     count_by_example(c[smallest], y);
 
@@ -1375,7 +1375,7 @@ bool BacktrackingAlgorithm<ErrorPolicy, E_t>::fail() {
       cout << "bound from " << b << endl;
 #endif
 
-    auto lbe{0};
+    E_t lbe{0};
     auto lbs{0};
 
     auto p{b};
