@@ -19,21 +19,35 @@ for (auto y{0}; y < 2; ++y) {
 }
 }*/
 
-// ===== IntegerError
+// ===== CardinalityError
 	
+
+
+template <typename IntegralType>
+typename std::enable_if<std::is_integral<IntegralType>::value, bool>::type
+equal(const IntegralType& a, const IntegralType& b) {
+        return a == b;
+}
+
+template <typename FloatingType>
+typename std::enable_if<std::is_floating_point<FloatingType>::value, bool>::type
+equal(const FloatingType& a, const FloatingType& b) {
+        return std::fabs(a-b) < 1e-6;
+}
+
 template<typename T>
 T min_positive() {
 	return static_cast<int>(static_cast<T>(1) - std::numeric_limits<T>::epsilon()) + std::numeric_limits<T>::epsilon();
 } 
 
 template<typename T>
-T is_null(T x) {
-	return x <= 10 * std::numeric_limits<T>::epsilon() and x >= -10 * std::numeric_limits<T>::epsilon();
+T is_null(const T& x) {
+	return equal<T>(x, 0);
 } 
 
 
 template <typename E_t>
-void IntegerError<E_t>::count_by_example(IntegerError::Algo &algo, const int node, const int y) const {
+void CardinalityError<E_t>::count_by_example(CardinalityError::Algo &algo, const int node, const int y) const {
   auto n{algo.num_feature};
 
   algo.pos_feature_frequency[y][node].clear();
@@ -46,12 +60,12 @@ void IntegerError<E_t>::count_by_example(IntegerError::Algo &algo, const int nod
 }
 
 template <typename E_t>
-E_t IntegerError<E_t>::node_error(const IntegerError::Algo &algo, const int i) const {
+E_t CardinalityError<E_t>::node_error(const CardinalityError::Algo &algo, const int i) const {
   return std::min(algo.P[0][i].count(), algo.P[1][i].count());
 }
 
 template <typename E_t>
-E_t IntegerError<E_t>::get_total(const Algo &algo, const int y, const int n) const {
+E_t CardinalityError<E_t>::get_total(const Algo &algo, const int y, const int n) const {
   return algo.P[y][n].count();
 }
 
@@ -928,7 +942,7 @@ void BacktrackingAlgorithm<ErrorPolicy, E_t>::branch(const int node, const int f
   assert(depth[node] < ub_depth - 1);
 
   // we assume that we branch only on tests with non-null error
-  assert(get_feature_error(node, f) > ErrorPolicy<E_t>::zero);
+  assert(get_feature_error(node, f) >= -ErrorPolicy<E_t>::zero);
 
   decision.push_back(node);
   blossom.remove_front(node);
@@ -1786,11 +1800,11 @@ void BacktrackingAlgorithm<ErrorPolicy, E_t>::do_asserts() {
 }
 #endif
 
-template class IntegerError<int>;
+template class CardinalityError<int>;
 template class WeightedError<int>;
 template class WeightedError<double>;
 
-template class BacktrackingAlgorithm<IntegerError, int>;
+template class BacktrackingAlgorithm<CardinalityError, int>;
 template class BacktrackingAlgorithm<WeightedError, int>;
 template class BacktrackingAlgorithm<WeightedError, double>;
 

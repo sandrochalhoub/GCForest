@@ -2,6 +2,7 @@
 #include <iostream>
 #include <random>
 #include <vector>
+#include <cmath>
 
 #include "DataSet.hpp"
 #include "Partition.hpp"
@@ -21,11 +22,14 @@
 using namespace boost;
 using namespace std;
 
+
+
+
 namespace primer {
 
 
 	template <typename E_t>
-	class IntegerError;
+	class CardinalityError;
 	
 	template <typename E_t>
 	class WeightedError;
@@ -35,8 +39,8 @@ namespace primer {
 * BacktrackingAlgorithm
 **********************************************/
 /// Representation of a list of examples
-// template <class ErrorPolicy = IntegerError<int>, typename E_t = int>
-template <template<typename> class ErrorPolicy = IntegerError, typename E_t = int>
+// template <class ErrorPolicy = CardinalityError<int>, typename E_t = int>
+template <template<typename> class ErrorPolicy = CardinalityError, typename E_t = int>
 class BacktrackingAlgorithm {
 
 private:
@@ -348,9 +352,9 @@ public:
 
 // Allow only integer types (size_t, )
 template <typename E_t>
-class IntegerError {
+class CardinalityError {
 public:
-  typedef BacktrackingAlgorithm<IntegerError, E_t> Algo;
+  typedef BacktrackingAlgorithm<CardinalityError, E_t> Algo;
 
   static constexpr E_t zero = 0;
 
@@ -384,7 +388,7 @@ private:
 public:
   typedef BacktrackingAlgorithm<WeightedError, E_t> Algo;
 
-  static constexpr E_t zero = static_cast<E_t>(-0.001);
+  static constexpr E_t zero = static_cast<E_t>(0.00001);
 
 
   /** This method is called everytime a new example is added to the dataset.
@@ -403,13 +407,15 @@ public:
 
   /// Returns the sum of the weights of all the examples at a specific node
   E_t get_total(const Algo &algo, const int y, const int n) const;
+
 };
 
 
 template <typename E_t>
-E_t IntegerError<E_t>::get_weight(const int y, const size_t i) const {
+E_t CardinalityError<E_t>::get_weight(const int y, const size_t i) const {
   return 1;
 }
+
 
 template <typename E_t>
 E_t WeightedError<E_t>::get_weight(const int y, const size_t i) const {
