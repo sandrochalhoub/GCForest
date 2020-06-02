@@ -10,7 +10,7 @@ namespace primer {
 
   struct WeakClassifier {
     Wood wood;
-    BacktrackingAlgorithm<WeightedError<double>, double> algo;
+    BacktrackingAlgorithm<WeightedError, double> algo;
 
     double weight = 1;
 
@@ -41,7 +41,7 @@ namespace primer {
 
     // internal variables
     size_t it_count;
-    double total_weight = 0;
+    // double total_weight = 0;
     std::vector<std::unique_ptr<WeakClassifier>> classifiers;
 
 

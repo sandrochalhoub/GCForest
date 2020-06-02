@@ -23,76 +23,31 @@ using namespace std;
 
 namespace primer {
 
-template <class ErrorPolicy, typename E_t> class BacktrackingAlgorithm;
 
-// Allow only integer types (size_t, )
-template <typename E_t>
-class IntegerError {
-public:
-  typedef BacktrackingAlgorithm<IntegerError<E_t>, E_t> Algo;
-
-  static constexpr E_t zero = 0;
-
-
-  /** This method is called everytime a new example is added to the dataset.
-   * \param i index of the added example */
-  void add_example(Algo &algo, const int y, const size_t i, const E_t weight = 1) {}
-
-  void update_node(Algo& algo, const int n) {}
+	template <typename E_t>
+	class IntegerError;
 	
-	E_t get_weight(const int y, const size_t i) const;
-
-  E_t node_error(const Algo &algo, const int i) const;
-
-  void count_by_example(Algo &algo, const int node, const int y) const;
-
-  /// Returns the sum of the weights of all the examples at a specific node
-  E_t get_total(const Algo &algo, const int y, const int n) const;
+	template <typename E_t>
+	class WeightedError;
 	
-};
+	
 
-template <typename E_t>
-class WeightedError {
-private:
-  // weight of each example when computing the error
-  vector<E_t> weights[2];
-
-  // total of each example
-  vector<E_t> weight_total[2];
-
-public:
-  typedef BacktrackingAlgorithm<WeightedError<E_t>, E_t> Algo;
-
-  static constexpr E_t zero = static_cast<E_t>(-0.001);
+//
+// template <typename E_t=int, template<typename> typename ErrorPolicy> class BacktrackingAlgorithm;
+// // template <class ErrorPolicy, typename E_t> class BacktrackingAlgorithm;
 
 
-  /** This method is called everytime a new example is added to the dataset.
-   * \param i index of the added example */
-  void add_example(Algo &algo, const int y, const size_t i, const E_t weight = 1);
-
-  void update_node(Algo& algo, const int n);
-
-  void set_weight(const int y, const size_t i, const E_t weight);
-
-  E_t get_weight(const int y, const size_t i) const;
-
-  E_t node_error(const Algo &algo, const int i) const;
-
-  void count_by_example(Algo &algo, const int node, const int y) const;
-
-  /// Returns the sum of the weights of all the examples at a specific node
-  E_t get_total(const Algo &algo, const int y, const int n) const;
-};
 
 /**********************************************
 * BacktrackingAlgorithm
 **********************************************/
 /// Representation of a list of examples
-template <class ErrorPolicy = IntegerError<int>, typename E_t = int>
+// template <class ErrorPolicy = IntegerError<int>, typename E_t = int>
+template <template<typename> class ErrorPolicy = IntegerError, typename E_t = int>
 class BacktrackingAlgorithm {
 
 private:
-  friend ErrorPolicy;
+  friend ErrorPolicy<E_t>;
 
   /*!@name Parameters*/
   //@{
@@ -333,7 +288,7 @@ private:
 	void noDecision();
 
 public:
-  ErrorPolicy error_policy;
+  ErrorPolicy<E_t> error_policy;
 
   vector<instance> dataset[2];
   vector<dynamic_bitset<>> reverse_dataset[2];
@@ -397,7 +352,80 @@ public:
         //@}
 };
 
-template <class ErrorPolicy, typename E_t>
+
+// Allow only integer types (size_t, )
+template <typename E_t>
+class IntegerError {
+public:
+  typedef BacktrackingAlgorithm<IntegerError, E_t> Algo;
+
+  static constexpr E_t zero = 0;
+
+
+  /** This method is called everytime a new example is added to the dataset.
+   * \param i index of the added example */
+  void add_example(Algo &algo, const int y, const size_t i, const E_t weight = 1) {}
+
+  void update_node(Algo& algo, const int n) {}
+	
+	E_t get_weight(const int y, const size_t i) const;
+
+  E_t node_error(const Algo &algo, const int i) const;
+
+  void count_by_example(Algo &algo, const int node, const int y) const;
+
+  /// Returns the sum of the weights of all the examples at a specific node
+  E_t get_total(const Algo &algo, const int y, const int n) const;
+	
+};
+
+template <typename E_t>
+class WeightedError {
+private:
+  // weight of each example when computing the error
+  vector<E_t> weights[2];
+
+  // total of each example
+  vector<E_t> weight_total[2];
+
+public:
+  typedef BacktrackingAlgorithm<WeightedError, E_t> Algo;
+
+  static constexpr E_t zero = static_cast<E_t>(-0.001);
+
+
+  /** This method is called everytime a new example is added to the dataset.
+   * \param i index of the added example */
+  void add_example(Algo &algo, const int y, const size_t i, const E_t weight = 1);
+
+  void update_node(Algo& algo, const int n);
+
+  void set_weight(const int y, const size_t i, const E_t weight);
+
+  E_t get_weight(const int y, const size_t i) const;
+
+  E_t node_error(const Algo &algo, const int i) const;
+
+  void count_by_example(Algo &algo, const int node, const int y) const;
+
+  /// Returns the sum of the weights of all the examples at a specific node
+  E_t get_total(const Algo &algo, const int y, const int n) const;
+};
+
+
+template <typename E_t>
+E_t IntegerError<E_t>::get_weight(const int y, const size_t i) const {
+  return 1;
+}
+
+template <typename E_t>
+E_t WeightedError<E_t>::get_weight(const int y, const size_t i) const {
+  return weights[y][i];
+}
+
+
+
+template <template<typename> class ErrorPolicy, typename E_t>
 template <class rIter>
 inline void BacktrackingAlgorithm<ErrorPolicy, E_t>::addExample(rIter beg_sample, rIter end_sample,
                                        const bool y, const E_t weight) {
@@ -437,7 +465,7 @@ inline void BacktrackingAlgorithm<ErrorPolicy, E_t>::addExample(rIter beg_sample
   // cout << endl;
 }
 
-template <class ErrorPolicy, typename E_t>
+template <template<typename> class ErrorPolicy, typename E_t>
 template<class property>
 inline void BacktrackingAlgorithm<ErrorPolicy, E_t>::filter_features(const int node, property cond) {
   for (auto f{end_feature[node] - 1}; f >= feature[node]; --f)
@@ -445,7 +473,7 @@ inline void BacktrackingAlgorithm<ErrorPolicy, E_t>::filter_features(const int n
       swap(*f, *(--end_feature[node]));
 }
 
-template <class ErrorPolicy, typename E_t>
+template <template<typename> class ErrorPolicy, typename E_t>
 std::ostream &operator<<(std::ostream &os, const BacktrackingAlgorithm<ErrorPolicy, E_t> &x);
 }
 
