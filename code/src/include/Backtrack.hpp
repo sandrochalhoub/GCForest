@@ -389,7 +389,7 @@ private:
   // weight of each example when computing the error
   vector<E_t> weights[2];
 
-  // total of each example
+  // total error for each node
   vector<E_t> weight_total[2];
 
 public:
