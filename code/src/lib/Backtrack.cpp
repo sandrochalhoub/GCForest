@@ -304,21 +304,6 @@ bool BacktrackingAlgorithm<ErrorPolicy, E_t>::no_feature(const int node) const {
 // return true if the feature f is true/false in all examples
 template <template<typename> class ErrorPolicy, typename E_t>
 bool BacktrackingAlgorithm<ErrorPolicy, E_t>::max_entropy(const int node, const int f) const {
-  // auto numNeg{P[0][node].count()};
-  // auto numPos{P[1][node].count()};
-  //
-  // auto meb{(pos_feature_frequency[0][node][f] == numNeg and
-  //          pos_feature_frequency[1][node][f] == numPos) or
-  //         (pos_feature_frequency[1][node][f] == 0 and
-  //          pos_feature_frequency[0][node][f] == 0)};
-
-  // E_t negTotal = error_policy.get_total(*this, 0, node);
-  // E_t posTotal = error_policy.get_total(*this, 1, node);
-  //
-  // auto me{(pos_feature_frequency[0][node][f] == negTotal and
-  //          pos_feature_frequency[1][node][f] == posTotal) or
-  //         (pos_feature_frequency[1][node][f] == 0 and
-  //          pos_feature_frequency[0][node][f] == 0)};
 
   E_t negTotal = error_policy.get_total(*this, 0, node);
   E_t posTotal = error_policy.get_total(*this, 1, node);
@@ -331,30 +316,17 @@ bool BacktrackingAlgorithm<ErrorPolicy, E_t>::max_entropy(const int node, const 
   return me;
 }
 
-// // return true if the feature f reduces the error
-// template <ErrorType E>
-// bool BacktrackingAlgorithm::reduce_error(const int node, const int f) const {
-//   return get_feature_error(node, f) < node_error(node);
-// }
-
 // return true if the feature f classifies all examples
 template <template<typename> class ErrorPolicy, typename E_t>
 bool BacktrackingAlgorithm<ErrorPolicy, E_t>::null_entropy(const int node, const int f) const {
-  // auto numNeg{P[0][node].count()};
-  // auto numPos{P[1][node].count()};
-  //
-  // return (pos_feature_frequency[0][node][f] == numNeg and
-  //         pos_feature_frequency[1][node][f] == 0) or
-  //        (pos_feature_frequency[1][node][f] == numPos and
-  //         pos_feature_frequency[0][node][f] == 0);
 
   E_t negTotal = error_policy.get_total(*this, 0, node);
   E_t posTotal = error_policy.get_total(*this, 1, node);
 
-  auto ne{(pos_feature_frequency[0][node][f] == negTotal and
-           pos_feature_frequency[1][node][f] == 0) or
-          (pos_feature_frequency[1][node][f] == posTotal and
-           pos_feature_frequency[0][node][f] == 0)};
+  auto ne{(equal<E_t>(pos_feature_frequency[0][node][f], negTotal) and
+           equal<E_t>(pos_feature_frequency[1][node][f], 0)) or
+          (equal<E_t>(pos_feature_frequency[1][node][f], posTotal) and
+           equal<E_t>(pos_feature_frequency[0][node][f], 0))};
 
   return ne;
 }
@@ -653,9 +625,9 @@ bool BacktrackingAlgorithm<ErrorPolicy, E_t>::store_new_best() {
           actual_error += error_policy.get_weight(y, i) *
                           (wood.predict(solution_root, dataset[y][i]) != y);
 
-      if (ub_error != actual_error) {
-        cout << "c warning, wrong tree accuracy!!\n";
-        cout << std::setprecision(std::numeric_limits<long double>::digits10 +
+      if (not equal<E_t>(ub_error, actual_error)) {
+        cout << "c warning, wrong tree accuracy!!\n"
+             << std::setprecision(std::numeric_limits<long double>::digits10 +
                                   1)
              << ub_error << " != " << actual_error << endl;
       }
