@@ -613,8 +613,8 @@ Tree BacktrackingAlgorithm<ErrorPolicy, E_t>::getSolution() const { return wood[
 
 template <template<typename> class ErrorPolicy, typename E_t>
 bool BacktrackingAlgorithm<ErrorPolicy, E_t>::store_new_best() {
-  if (current_error < ub_error or
-      (size_matters and current_error == ub_error and current_size < ub_size)) {
+  if (lt<E_t>(current_error, ub_error) or
+      (size_matters and equal<E_t>(current_error, ub_error) and current_size < ub_size)) {
 
     ++num_solutions;
 
@@ -776,8 +776,8 @@ bool BacktrackingAlgorithm<ErrorPolicy, E_t>::update_upperbound(const int node) 
     } else
       ++sz;
 
-  if (err < max_error[node] or
-      (err == max_error[node] and sz < max_size[node])) {
+  if (lt<E_t>(err, max_error[node]) or
+      (equal<E_t>(err, max_error[node]) and sz < max_size[node])) {
     max_error[node] = err;
     max_size[node] = sz;
 // store_best_tree(node, true);
@@ -825,8 +825,8 @@ bool BacktrackingAlgorithm<ErrorPolicy, E_t>::backtrack() {
     // 		current_size -= max_size[backtrack_node];
 
     auto updt{update_upperbound(backtrack_node)};
-    if (updt or (tree_error[backtrack_node] > max_error[backtrack_node]) or
-        (tree_error[backtrack_node] == max_error[backtrack_node] and
+    if (updt or lt<E_t>(max_error[backtrack_node],tree_error[backtrack_node]) or
+        (equal<E_t>(tree_error[backtrack_node],max_error[backtrack_node]) and
          tree_size[backtrack_node] > max_size[backtrack_node])) {
 
 #ifdef PRINTTRACE
@@ -869,7 +869,7 @@ bool BacktrackingAlgorithm<ErrorPolicy, E_t>::backtrack() {
 
     dead_end = (
         // current_error >= ub_error or
-        (ub_error > 0 and max_error[backtrack_node] == 0) or
+        (lt<E_t>(0,ub_error) and equal<E_t>(max_error[backtrack_node], 0)) or
         no_feature(backtrack_node) or
         max_entropy(backtrack_node, *feature[backtrack_node]));
 
@@ -1075,7 +1075,7 @@ bool BacktrackingAlgorithm<ErrorPolicy, E_t>::grow(const int node) {
                   min(get_feature_frequency(0, node, f[0]),
                       get_feature_frequency(1, node, f[0]))};
 
-    if (depth[node] == ub_depth - 1 or err[0] + err[1] == 0) {
+    if (depth[node] == ub_depth - 1 or equal<E_t>(err[0] + err[1],0)) {
 
       blossom.remove_front(node);
 
@@ -1355,7 +1355,7 @@ void BacktrackingAlgorithm<ErrorPolicy, E_t>::minimize_error_depth_size() {
   if (options.verbosity > DTOptions::QUIET)
     separator("search");
 
-  auto perfect{current_error == 0};
+  auto perfect{equal<E_t>(current_error,0)};
   // auto saved_error{ub_error};
   while (ub_depth > 0 and search() and is_null<E_t>(ub_error)) {
     perfect = true;
@@ -1441,7 +1441,7 @@ bool BacktrackingAlgorithm<ErrorPolicy, E_t>::fail() {
              << (child[1][p] >= 0 ? min_size[child[1][p]] : 1) << "]\n";
 #endif
 
-      if (lbe > ube or (lbe == ube and (lbs >= ubs or not size_matters))) {
+      if (lt<E_t>(ube, lbe) or (equal<E_t>(lbe, ube) and (lbs >= ubs or not size_matters))) {
 #ifdef PRINTTRACE
         if (PRINTTRACE)
           cout << "fail!! (" << b << " " << p << " max size = " << max_size[b]
@@ -1581,17 +1581,17 @@ bool BacktrackingAlgorithm<ErrorPolicy, E_t>::equal_feature(const int f_a, const
   int lit_a[2] = {f_a + num_feature, f_a};
   int lit_b[2] = {f_b + num_feature, f_b};
 
-  if ((get_feature_frequency(1, 0, lit_a[0]) ==
-           get_feature_frequency(1, 0, lit_b[0]) and
-       get_feature_frequency(0, 0, lit_a[0]) ==
-           get_feature_frequency(0, 0, lit_b[0]))) {
+  if ((equal<E_t>(get_feature_frequency(1, 0, lit_a[0]),
+           get_feature_frequency(1, 0, lit_b[0])) and
+       equal<E_t>(get_feature_frequency(0, 0, lit_a[0]),
+           get_feature_frequency(0, 0, lit_b[0])))) {
     if (reverse_dataset[0][f_a] == reverse_dataset[0][f_b] and
         reverse_dataset[1][f_a] == reverse_dataset[1][f_b])
       return true;
-  } else if (get_feature_frequency(1, 0, lit_a[0]) ==
-                 get_feature_frequency(1, 0, lit_b[1]) and
-             get_feature_frequency(0, 0, lit_a[0]) ==
-                 get_feature_frequency(0, 0, lit_b[1])) {
+  } else if (equal<E_t>(get_feature_frequency(1, 0, lit_a[0]),
+                 get_feature_frequency(1, 0, lit_b[1])) and
+             equal<E_t>(get_feature_frequency(0, 0, lit_a[0]),
+                 get_feature_frequency(0, 0, lit_b[1]))) {
     auto eq{reverse_dataset[0][f_a].flip() == reverse_dataset[0][f_b]};
     reverse_dataset[0][f_a].flip();
     if (eq) {

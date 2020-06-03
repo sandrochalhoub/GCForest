@@ -33,10 +33,22 @@ equal(const IntegralType &a, const IntegralType &b) {
   return a == b;
 }
 
+template <typename IntegralType>
+typename std::enable_if<std::is_integral<IntegralType>::value, bool>::type
+lt(const IntegralType &a, const IntegralType &b) {
+  return a < b;
+}
+
 template <typename FloatingType>
 typename std::enable_if<std::is_floating_point<FloatingType>::value, bool>::type
 equal(const FloatingType &a, const FloatingType &b) {
   return std::fabs(a - b) < 1e-6;
+}
+
+template <typename FloatingType>
+typename std::enable_if<std::is_floating_point<FloatingType>::value, bool>::type
+lt(const FloatingType &a, const FloatingType &b) {
+  return a + 1e-6 < b;
 }
 
 template <typename E_t> class CardinalityError;
