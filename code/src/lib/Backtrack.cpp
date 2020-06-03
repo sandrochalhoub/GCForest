@@ -83,31 +83,6 @@ E_t CardinalityError<E_t>::get_total(const Algo &algo, const int y, const int n)
 //   weights[y][i] = weight;
 // }
 
-// template <typename E_t>
-// void WeightedError<E_t>::update_node(Algo& algo, const int n) {
-//   if (n == 0) {
-//     for (unsigned y{0}; y < 2; ++y) {
-//       if (weight_total[y].size() <= n)
-//         weight_total[y].resize(n + 1);
-//
-//       weight_total[y][n] = 0;
-//       for (auto s : algo.P[y][n])
-//         weight_total[y][n] += weights[y][s];
-//     }
-//   } else {
-//
-//     // get parent data
-//     int p = algo.parent[n];
-//     int pfeat = *algo.feature[p];
-//
-//     if (algo.child[0][p] == n)
-//       pfeat += algo.num_feature;
-//
-//     for (unsigned y{0}; y < 2; ++y)
-//       weight_total[y][n] = algo.get_feature_frequency(y, p, pfeat);
-//   }
-// }
-
 template <typename E_t>
 void WeightedError<E_t>::update_node(Algo& algo, const int n) {
 
@@ -156,56 +131,7 @@ void WeightedError<E_t>::count_by_example(Algo &algo, const int node, const int 
 
 template <typename E_t>
 E_t WeightedError<E_t>::node_error(const Algo &algo, const int i) const {
-  E_t error{};
-
-  // if (i == 0) {
-  //
-  // 		cout << "HERE\n";
-  //
-  //   // special case: compute weighted error
-  //   E_t c0{};
-  //   for (auto s : algo.P[0][i]) {
-  //     c0 += weights[0][s];
-  //   }
-  //
-  //   E_t c1{};
-  //   for (auto s : algo.P[1][i]) {
-  //     c1 += weights[1][s];
-  //   }
-  //
-  //   error = std::min(c0, c1);
-  // } else {
-  //   // get parent data
-  //   int p = algo.parent[i];
-  //   int pfeat = *algo.feature[p];
-  //
-  //   if (algo.child[0][p] == i) {
-  //     pfeat += algo.num_feature;
-  //   }
-  //
-  //   error = std::min(algo.get_feature_frequency(0, p, pfeat),
-  //                    algo.get_feature_frequency(1, p, pfeat));
-  // }
-
-  error = std::min(weight_total[0][i], weight_total[1][i]);
-
-  // assert( error == std::min(weight_total[0][i], weight_total[1][i]) );
-
-  /*
-  // Checks if the error is the same as with no weights.
-  // This assert is valid only if every weight == 1
-
-  #ifdef PRINTTRACE
-  if (algo.options.verbosity >= DTOptions::YACKING) {
-    std::cout << "assert: " << error <<  " == " <<
-  std::min(algo.P[0][i].count(), algo.P[1][i].count()) << std::endl;
-  }
-  #endif
-
-
-  assert(error == std::min(algo.P[0][i].count(), algo.P[1][i].count()));
-  */
-  return error;
+  return std::min(weight_total[0][i], weight_total[1][i]);
 }
 
 template <typename E_t>
@@ -1006,7 +932,8 @@ void BacktrackingAlgorithm<ErrorPolicy, E_t>::branch(const int node, const int f
   assert(depth[node] < ub_depth - 1);
 
   // we assume that we branch only on tests with non-null error
-  assert(get_feature_error(node, f) >= -ErrorPolicy<E_t>::zero);
+  // assert(get_feature_error(node, f) >= -ErrorPolicy<E_t>::zero);
+	assert( not equal<E_t>(get_feature_error(node, f), 0) );
 
   decision.push_back(node);
   blossom.remove_front(node);
