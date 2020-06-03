@@ -460,9 +460,11 @@ inline void BacktrackingAlgorithm<ErrorPolicy, E_t>::addExample(
 template <template<typename> class ErrorPolicy, typename E_t>
 template<class property>
 inline void BacktrackingAlgorithm<ErrorPolicy, E_t>::filter_features(const int node, property cond) {
-  for (auto f{end_feature[node] - 1}; f >= feature[node]; --f)
-    if (cond(*f))
+  for (auto f{end_feature[node] - 1}; f >= feature[node]; --f) {
+    if (cond(*f)) {
       swap(*f, *(--end_feature[node]));
+		}
+	}
 }
 
 template <template<typename> class ErrorPolicy, typename E_t>

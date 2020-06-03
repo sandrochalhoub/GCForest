@@ -332,11 +332,19 @@ bool BacktrackingAlgorithm<ErrorPolicy, E_t>::no_feature(const int node) const {
 // return true if the feature f is true/false in all examples
 template <template<typename> class ErrorPolicy, typename E_t>
 bool BacktrackingAlgorithm<ErrorPolicy, E_t>::max_entropy(const int node, const int f) const {
-  auto numNeg{P[0][node].count()};
-  auto numPos{P[1][node].count()};
+  // auto numNeg{P[0][node].count()};
+  // auto numPos{P[1][node].count()};
+  //
+  // auto meb{(pos_feature_frequency[0][node][f] == numNeg and
+  //          pos_feature_frequency[1][node][f] == numPos) or
+  //         (pos_feature_frequency[1][node][f] == 0 and
+  //          pos_feature_frequency[0][node][f] == 0)};
 
-  auto me{(pos_feature_frequency[0][node][f] == numNeg and
-           pos_feature_frequency[1][node][f] == numPos) or
+  E_t negTotal = error_policy.get_total(*this, 0, node);
+  E_t posTotal = error_policy.get_total(*this, 1, node);
+	
+  auto me{(pos_feature_frequency[0][node][f] == negTotal and
+           pos_feature_frequency[1][node][f] == posTotal) or
           (pos_feature_frequency[1][node][f] == 0 and
            pos_feature_frequency[0][node][f] == 0)};
 
@@ -352,13 +360,23 @@ bool BacktrackingAlgorithm<ErrorPolicy, E_t>::max_entropy(const int node, const 
 // return true if the feature f classifies all examples
 template <template<typename> class ErrorPolicy, typename E_t>
 bool BacktrackingAlgorithm<ErrorPolicy, E_t>::null_entropy(const int node, const int f) const {
-  auto numNeg{P[0][node].count()};
-  auto numPos{P[1][node].count()};
+  // auto numNeg{P[0][node].count()};
+  // auto numPos{P[1][node].count()};
+  //
+  // return (pos_feature_frequency[0][node][f] == numNeg and
+  //         pos_feature_frequency[1][node][f] == 0) or
+  //        (pos_feature_frequency[1][node][f] == numPos and
+  //         pos_feature_frequency[0][node][f] == 0);
 
-  return (pos_feature_frequency[0][node][f] == numNeg and
-          pos_feature_frequency[1][node][f] == 0) or
-         (pos_feature_frequency[1][node][f] == numPos and
-          pos_feature_frequency[0][node][f] == 0);
+  E_t negTotal = error_policy.get_total(*this, 0, node);
+  E_t posTotal = error_policy.get_total(*this, 1, node);
+
+  auto ne{(pos_feature_frequency[0][node][f] == negTotal and
+           pos_feature_frequency[1][node][f] == 0) or
+          (pos_feature_frequency[1][node][f] == posTotal and
+           pos_feature_frequency[0][node][f] == 0)};
+
+  return ne;
 }
 
 template <template<typename> class ErrorPolicy, typename E_t>
@@ -578,7 +596,7 @@ void BacktrackingAlgorithm<ErrorPolicy, E_t>::sort_features(const int node) {
     if (f_error[*min_error_f] < f_error[*feature[node]]) {
       swap(*feature[node], *min_error_f);
     }
-}
+  }
 }
 
 template <template<typename> class ErrorPolicy, typename E_t>
@@ -1036,12 +1054,13 @@ bool BacktrackingAlgorithm<ErrorPolicy, E_t>::grow(const int node) {
 
   feature[node] = ranked_feature[node].begin();
   end_feature[node] = ranked_feature[node].end();
+	
+	error_policy.update_node(*this, node);
 
   filter_features(node, [&](const int f) { return max_entropy(node, f); });
 
   blossom.add(node);
 
-  error_policy.update_node(*this, node);
   best_tree[node] = (error_policy.get_total(*this, 0, node) <
                      error_policy.get_total(*this, 1, node));
 
@@ -1126,6 +1145,15 @@ void BacktrackingAlgorithm<ErrorPolicy, E_t>::expend() {
     }
     // selected_node = choose();
 
+    if (max_entropy(selected_node, *feature[selected_node])) {
+
+      cout << selected_node << " " << *feature[selected_node] << " "
+           << get_feature_frequency(0, selected_node, *feature[selected_node])
+           << " / " << error_policy.get_total(*this, 0, selected_node) << " || "
+           << get_feature_frequency(1, selected_node, *feature[selected_node])
+           << " / " << error_policy.get_total(*this, 1, selected_node) << endl;
+    }
+
     assert(not max_entropy(selected_node, *feature[selected_node]));
 
     // selected_node = blossom[0];
@@ -1163,6 +1191,8 @@ void BacktrackingAlgorithm<ErrorPolicy, E_t>::initialise_search() {
   for (auto y{0}; y < 2; ++y)
     count_by_example(0, y);
 
+  error_policy.update_node(*this, 0);
+
   if (ub_depth == 0)
     noDecision();
   else {
@@ -1179,7 +1209,7 @@ void BacktrackingAlgorithm<ErrorPolicy, E_t>::initialise_search() {
     relevant_features.clear();
     feature_set.resize(num_feature, true);
     for (int fi{0}; fi < num_feature; ++fi) {
-      if (feature_set[fi] and not null_entropy(0, fi)) {
+      if (feature_set[fi] and not max_entropy(0, fi)) {
         relevant_features.push_back(fi);
 
         for (int fj{fi + 1}; fj < num_feature; ++fj) {
