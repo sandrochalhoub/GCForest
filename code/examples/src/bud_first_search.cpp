@@ -41,7 +41,7 @@ void read_binary(Algo_t &A, DTOptions &opt) {
 
   if (opt.format == "csv" or (opt.format == "guess" and ext == "csv")) {
     csv::read_binary(opt.instance_file, [&](vector<int> &data) {
-      A.addExample(data.begin(), data.end() - 1, data.back(), 1);
+      A.addExample(data.begin(), data.end() - 1, data.back(), 10);
     });
   } else if (opt.format == "dl8" or (opt.format == "guess" and ext == "dl8")) {
     txt::read_binary(opt.instance_file, [&](vector<int> &data) {
@@ -176,7 +176,7 @@ int main(int argc, char *argv[]) {
 
   if (opt.use_weights) {
     std::cout << "Using weights" << std::endl;
-    return run_algorithm<BacktrackingAlgorithm<WeightedError, double>>(opt);
+    return run_algorithm<BacktrackingAlgorithm<WeightedError, int>>(opt);
   } 
 	else {
 	  return run_algorithm<BacktrackingAlgorithm<>>(opt);

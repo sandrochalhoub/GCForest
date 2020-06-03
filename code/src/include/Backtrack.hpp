@@ -27,13 +27,9 @@ using namespace std;
 
 namespace primer {
 
+template <typename E_t> class CardinalityError;
 
-	template <typename E_t>
-	class CardinalityError;
-	
-	template <typename E_t>
-	class WeightedError;
-	
+template <typename E_t> class WeightedError;
 
 /**********************************************
 * BacktrackingAlgorithm
@@ -282,7 +278,7 @@ private:
 
   void singleDecision();
 
-	void noDecision();
+  void noDecision();
 
 public:
   ErrorPolicy<E_t> error_policy;
@@ -331,22 +327,23 @@ public:
 
   void minimize_error_depth();
 
-	void minimize_error_depth_size();
+  void minimize_error_depth_size();
 
-        Tree getSolution() const;
+  Tree getSolution() const;
 
-        E_t error() const;
+  E_t error() const;
 
-        template <class rIter>
-        void addExample(rIter beg_sample, rIter end_sample, const bool y, const E_t weight = 1);
+  template <class rIter>
+  void addExample(rIter beg_sample, rIter end_sample, const bool y,
+                  const E_t weight = 1);
 
-        void addExample(const std::vector<int> &example, const E_t weight = 1);
+  void addExample(const std::vector<int> &example, const E_t weight = 1);
 
-        /*!@name Printing*/
-        //@{
-        // std::ostream &toCsv(std::ostream &os) const;
-        std::ostream &display(std::ostream &os) const;
-        //@}
+  /*!@name Printing*/
+  //@{
+  // std::ostream &toCsv(std::ostream &os) const;
+  std::ostream &display(std::ostream &os) const;
+  //@}
 };
 
 
@@ -358,14 +355,14 @@ public:
 
   static constexpr E_t zero = 0;
 
-
   /** This method is called everytime a new example is added to the dataset.
-   * \param i index of the added example */
-  void add_example(Algo &algo, const int y, const size_t i, const E_t weight = 1) {}
+  * \param i index of the added example */
+  void add_example(Algo &algo, const int y, const size_t i,
+                   const E_t weight = 1) {}
 
-  void update_node(Algo& algo, const int n) {}
-	
-	E_t get_weight(const int y, const size_t i) const;
+  void update_node(Algo &algo, const int n) {}
+
+  E_t get_weight(const int y, const size_t i) const;
 
   E_t node_error(const Algo &algo, const int i) const;
 
@@ -373,7 +370,6 @@ public:
 
   /// Returns the sum of the weights of all the examples at a specific node
   E_t get_total(const Algo &algo, const int y, const int n) const;
-	
 };
 
 template <typename E_t>
@@ -390,12 +386,12 @@ public:
 
   static constexpr E_t zero = static_cast<E_t>(0.00001);
 
-
   /** This method is called everytime a new example is added to the dataset.
-   * \param i index of the added example */
-  void add_example(Algo &algo, const int y, const size_t i, const E_t weight = 1);
+  * \param i index of the added example */
+  void add_example(Algo &algo, const int y, const size_t i,
+                   const E_t weight = 1);
 
-  void update_node(Algo& algo, const int n);
+  void update_node(Algo &algo, const int n);
 
   void set_weight(const int y, const size_t i, const E_t weight);
 
@@ -407,7 +403,6 @@ public:
 
   /// Returns the sum of the weights of all the examples at a specific node
   E_t get_total(const Algo &algo, const int y, const int n) const;
-
 };
 
 
@@ -422,12 +417,10 @@ E_t WeightedError<E_t>::get_weight(const int y, const size_t i) const {
   return weights[y][i];
 }
 
-
-
-template <template<typename> class ErrorPolicy, typename E_t>
+template <template <typename> class ErrorPolicy, typename E_t>
 template <class rIter>
-inline void BacktrackingAlgorithm<ErrorPolicy, E_t>::addExample(rIter beg_sample, rIter end_sample,
-                                       const bool y, const E_t weight) {
+inline void BacktrackingAlgorithm<ErrorPolicy, E_t>::addExample(
+    rIter beg_sample, rIter end_sample, const bool y, const E_t weight) {
   int n{static_cast<int>(end_sample - beg_sample)};
 
   if (n > num_feature) {
