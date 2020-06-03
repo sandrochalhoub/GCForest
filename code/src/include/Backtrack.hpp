@@ -26,19 +26,18 @@ using namespace std;
 
 
 namespace primer {
-	
-	template <typename IntegralType>
-	typename std::enable_if<std::is_integral<IntegralType>::value, bool>::type
-	equal(const IntegralType& a, const IntegralType& b) {
-	        return a == b;
-	}
 
-	template <typename FloatingType>
-	typename std::enable_if<std::is_floating_point<FloatingType>::value, bool>::type
-	equal(const FloatingType& a, const FloatingType& b) {
-	        return std::fabs(a-b) < 1e-6;
-	}
-	
+template <typename IntegralType>
+typename std::enable_if<std::is_integral<IntegralType>::value, bool>::type
+equal(const IntegralType &a, const IntegralType &b) {
+  return a == b;
+}
+
+template <typename FloatingType>
+typename std::enable_if<std::is_floating_point<FloatingType>::value, bool>::type
+equal(const FloatingType &a, const FloatingType &b) {
+  return std::fabs(a - b) < 1e-6;
+}
 
 template <typename E_t> class CardinalityError;
 

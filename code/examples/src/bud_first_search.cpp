@@ -30,7 +30,6 @@ along with minicsp.  If not, see <http://www.gnu.org/licenses/>.
 #include "TXTReader.hpp"
 #include "Tree.hpp"
 #include "TypedDataSet.hpp"
-// #include "run_algo.hpp"
 
 using namespace std;
 using namespace primer;

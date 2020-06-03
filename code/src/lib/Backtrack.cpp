@@ -312,13 +312,21 @@ bool BacktrackingAlgorithm<ErrorPolicy, E_t>::max_entropy(const int node, const 
   //         (pos_feature_frequency[1][node][f] == 0 and
   //          pos_feature_frequency[0][node][f] == 0)};
 
+  // E_t negTotal = error_policy.get_total(*this, 0, node);
+  // E_t posTotal = error_policy.get_total(*this, 1, node);
+  //
+  // auto me{(pos_feature_frequency[0][node][f] == negTotal and
+  //          pos_feature_frequency[1][node][f] == posTotal) or
+  //         (pos_feature_frequency[1][node][f] == 0 and
+  //          pos_feature_frequency[0][node][f] == 0)};
+
   E_t negTotal = error_policy.get_total(*this, 0, node);
   E_t posTotal = error_policy.get_total(*this, 1, node);
-	
-  auto me{(pos_feature_frequency[0][node][f] == negTotal and
-           pos_feature_frequency[1][node][f] == posTotal) or
-          (pos_feature_frequency[1][node][f] == 0 and
-           pos_feature_frequency[0][node][f] == 0)};
+
+  auto me{(equal<E_t>(pos_feature_frequency[0][node][f], negTotal) and
+           equal<E_t>(pos_feature_frequency[1][node][f], posTotal)) or
+          (equal<E_t>(pos_feature_frequency[1][node][f], 0) and
+           equal<E_t>(pos_feature_frequency[0][node][f], 0))};
 
   return me;
 }
@@ -647,7 +655,9 @@ bool BacktrackingAlgorithm<ErrorPolicy, E_t>::store_new_best() {
 
       if (ub_error != actual_error) {
         cout << "c warning, wrong tree accuracy!!\n";
-        cout << ub_error << " != " << actual_error << endl;
+        cout << std::setprecision(std::numeric_limits<long double>::digits10 +
+                                  1)
+             << ub_error << " != " << actual_error << endl;
       }
     }
 
@@ -933,7 +943,14 @@ void BacktrackingAlgorithm<ErrorPolicy, E_t>::branch(const int node, const int f
 
   // we assume that we branch only on tests with non-null error
   // assert(get_feature_error(node, f) >= -ErrorPolicy<E_t>::zero);
-	assert( not equal<E_t>(get_feature_error(node, f), 0) );
+
+  if (equal<E_t>(get_feature_error(node, f), 0)) {
+    auto fe{get_feature_error(node, f)};
+
+    cout << fe << " " << (equal<E_t>(f, 0)) << endl;
+  }
+
+  assert(not equal<E_t>(get_feature_error(node, f), 0));
 
   decision.push_back(node);
   blossom.remove_front(node);
