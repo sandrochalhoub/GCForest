@@ -26,6 +26,19 @@ using namespace std;
 
 
 namespace primer {
+	
+	template <typename IntegralType>
+	typename std::enable_if<std::is_integral<IntegralType>::value, bool>::type
+	equal(const IntegralType& a, const IntegralType& b) {
+	        return a == b;
+	}
+
+	template <typename FloatingType>
+	typename std::enable_if<std::is_floating_point<FloatingType>::value, bool>::type
+	equal(const FloatingType& a, const FloatingType& b) {
+	        return std::fabs(a-b) < 1e-6;
+	}
+	
 
 template <typename E_t> class CardinalityError;
 
@@ -125,10 +138,8 @@ private:
 
   size_t ub_depth;
 
-public:
   E_t ub_error;
 
-private:
   size_t search_size;
   size_t search_limit;
 
@@ -298,7 +309,7 @@ public:
   size_t numFeature() const;
 
   // whether
-  bool equal(const int f_a, const int f_b);
+  bool equal_feature(const int f_a, const int f_b);
 
   void separator(const string &msg) const;
   void print_new_best() const;
@@ -415,6 +426,15 @@ E_t CardinalityError<E_t>::get_weight(const int y, const size_t i) const {
 template <typename E_t>
 E_t WeightedError<E_t>::get_weight(const int y, const size_t i) const {
   return weights[y][i];
+}
+
+template <typename E_t>
+void WeightedError<E_t>::add_example(Algo &algo, const int y, const size_t i,
+                                     const E_t weight) {
+  if (weights[y].size() <= i) {
+    weights[y].resize(i + 1);
+  }
+  weights[y][i] = weight;
 }
 
 template <template <typename> class ErrorPolicy, typename E_t>

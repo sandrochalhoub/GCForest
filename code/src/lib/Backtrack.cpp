@@ -23,17 +23,17 @@ for (auto y{0}; y < 2; ++y) {
 	
 
 
-template <typename IntegralType>
-typename std::enable_if<std::is_integral<IntegralType>::value, bool>::type
-equal(const IntegralType& a, const IntegralType& b) {
-        return a == b;
-}
-
-template <typename FloatingType>
-typename std::enable_if<std::is_floating_point<FloatingType>::value, bool>::type
-equal(const FloatingType& a, const FloatingType& b) {
-        return std::fabs(a-b) < 1e-6;
-}
+// template <typename IntegralType>
+// typename std::enable_if<std::is_integral<IntegralType>::value, bool>::type
+// equal(const IntegralType& a, const IntegralType& b) {
+//         return a == b;
+// }
+//
+// template <typename FloatingType>
+// typename std::enable_if<std::is_floating_point<FloatingType>::value, bool>::type
+// equal(const FloatingType& a, const FloatingType& b) {
+//         return std::fabs(a-b) < 1e-6;
+// }
 
 template<typename T>
 T min_positive() {
@@ -74,13 +74,14 @@ E_t CardinalityError<E_t>::get_total(const Algo &algo, const int y, const int n)
 
 // ===== WeightedError
 
-template <typename E_t>
-void WeightedError<E_t>::add_example(Algo &algo, const int y, const size_t i, const E_t weight) {
-  if (weights[y].size() <= i) {
-    weights[y].resize(i + 1);
-  }
-  weights[y][i] = weight;
-}
+// template <typename E_t>
+// void WeightedError<E_t>::add_example(Algo &algo, const int y, const size_t i,
+// const E_t weight) {
+//   if (weights[y].size() <= i) {
+//     weights[y].resize(i + 1);
+//   }
+//   weights[y][i] = weight;
+// }
 
 template <typename E_t>
 void WeightedError<E_t>::update_node(Algo& algo, const int n) {
@@ -1213,7 +1214,7 @@ void BacktrackingAlgorithm<ErrorPolicy, E_t>::initialise_search() {
         relevant_features.push_back(fi);
 
         for (int fj{fi + 1}; fj < num_feature; ++fj) {
-          if (equal(fi, fj))
+          if (equal_feature(fi, fj))
             feature_set.reset(fj);
         }
       }
@@ -1587,7 +1588,7 @@ double BacktrackingAlgorithm<ErrorPolicy, E_t>::gini(const int node, const int f
 }
 
 template <template<typename> class ErrorPolicy, typename E_t>
-bool BacktrackingAlgorithm<ErrorPolicy, E_t>::equal(const int f_a, const int f_b) {
+bool BacktrackingAlgorithm<ErrorPolicy, E_t>::equal_feature(const int f_a, const int f_b) {
   int lit_a[2] = {f_a + num_feature, f_a};
   int lit_b[2] = {f_b + num_feature, f_b};
 
@@ -1784,7 +1785,7 @@ void BacktrackingAlgorithm<ErrorPolicy, E_t>::print_trace() {
 
 template <template<typename> class ErrorPolicy, typename E_t>
 void BacktrackingAlgorithm<ErrorPolicy, E_t>::do_asserts() {
-  const double eps = 0.001; // std::numeric_limits<double>::epsilon();
+  // const double eps = 0.001; // std::numeric_limits<double>::epsilon();
 
   for (auto b : blossom) {
     assert(not optimal[b]);
@@ -1804,10 +1805,10 @@ void BacktrackingAlgorithm<ErrorPolicy, E_t>::do_asserts() {
     E_t le = leaf_error(b);
     E_t ne = node_error(b);
 
-    if (abs(le - ne) >= eps) {
+    if (not equal<E_t>(le, ne)) {
       cout << le << " / " << ne << endl;
     }
-    assert(abs(le - ne) < eps);
+    assert(equal<E_t>(le, ne));
     total_error += node_error(b);
   }
 
@@ -1815,11 +1816,11 @@ void BacktrackingAlgorithm<ErrorPolicy, E_t>::do_asserts() {
     assert(blossom.index(d) < blossom.size());
   }
 
-  if (abs(total_error - current_error) >= eps)
+  if (not equal<E_t>(total_error, current_error))
     cout << current_error << " / " << total_error << " @" << search_size
          << endl;
 
-  assert(abs(current_error - total_error) < eps);
+  assert(equal<E_t>(total_error, current_error));
 
   auto total_size{computeSize(0)};
 
@@ -1830,12 +1831,16 @@ void BacktrackingAlgorithm<ErrorPolicy, E_t>::do_asserts() {
 }
 #endif
 
-template class CardinalityError<int>;
-template class WeightedError<int>;
-template class WeightedError<double>;
+// // template class CardinalityError<unsigned long>;
+// template class CardinalityError<int>;
+// template class WeightedError<int>;
+// template class WeightedError<double>;
 
+// template class BacktrackingAlgorithm<CardinalityError, unsigned long>;
 template class BacktrackingAlgorithm<CardinalityError, int>;
+template class BacktrackingAlgorithm<CardinalityError, unsigned long int>;
 template class BacktrackingAlgorithm<WeightedError, int>;
+template class BacktrackingAlgorithm<WeightedError, float>;
 template class BacktrackingAlgorithm<WeightedError, double>;
 
 }

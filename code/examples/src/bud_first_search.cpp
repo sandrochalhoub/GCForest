@@ -30,6 +30,7 @@ along with minicsp.  If not, see <http://www.gnu.org/licenses/>.
 #include "TXTReader.hpp"
 #include "Tree.hpp"
 #include "TypedDataSet.hpp"
+// #include "run_algo.hpp"
 
 using namespace std;
 using namespace primer;
@@ -41,7 +42,7 @@ void read_binary(Algo_t &A, DTOptions &opt) {
 
   if (opt.format == "csv" or (opt.format == "guess" and ext == "csv")) {
     csv::read_binary(opt.instance_file, [&](vector<int> &data) {
-      A.addExample(data.begin(), data.end() - 1, data.back(), 10);
+      A.addExample(data.begin(), data.end() - 1, data.back());
     });
   } else if (opt.format == "dl8" or (opt.format == "guess" and ext == "dl8")) {
     txt::read_binary(opt.instance_file, [&](vector<int> &data) {
@@ -98,14 +99,12 @@ void read_non_binary(Algo_t &A, DTOptions &opt) {
   A.setData(base);
 }
 
-
-
-
-template <typename Algo_t>
+template <template <typename> class ErrorPolicy = CardinalityError,
+          typename E_t = unsigned long>
 int run_algorithm(DTOptions &opt) {
   Wood yallen;
 
-  Algo_t A(yallen, opt);
+  BacktrackingAlgorithm<ErrorPolicy, E_t> A(yallen, opt);
 
   if (opt.binarize) {
 
@@ -146,27 +145,24 @@ int run_algorithm(DTOptions &opt) {
 
   if (opt.verified) {
 
-    decltype(A.ub_error) tree_error = sol.predict<decltype(A.ub_error)>(
-        A.dataset[0].begin(), A.dataset[0].end(), A.dataset[1].begin(),
-        A.dataset[1].end(), [&](const int y, const size_t i) {
-          return A.error_policy.get_weight(y, i);
-        });
+    E_t tree_error = sol.predict<E_t>(A.dataset[0].begin(), A.dataset[0].end(),
+                                      A.dataset[1].begin(), A.dataset[1].end(),
+                                      [&](const int y, const size_t i) {
+                                        return A.error_policy.get_weight(y, i);
+                                      });
 
     assert(tree_error == A.error());
 
-    cout << "p solution verified (" << A.error() << ")" << endl;
+    cout << std::setprecision(std::numeric_limits<long double>::digits10 + 1)
+         << "p solution verified (" << tree_error << " / " << A.error() << ")"
+         << endl;
   }
   return 0;
 }
 
 
-
-
-
 int main(int argc, char *argv[]) {
   DTOptions opt = parse_dt(argc, argv);
-	
-	// cout << min_positive<int>() << " " << min_positive<float>() << endl;
 
   if (opt.print_cmd)
     cout << opt.cmdline << endl;
@@ -176,9 +172,9 @@ int main(int argc, char *argv[]) {
 
   if (opt.use_weights) {
     std::cout << "Using weights" << std::endl;
-    return run_algorithm<BacktrackingAlgorithm<WeightedError, int>>(opt);
+    return run_algorithm<WeightedError, double>(opt);
   } 
 	else {
-	  return run_algorithm<BacktrackingAlgorithm<>>(opt);
-	}
+    return run_algorithm<>(opt);
+  }
 }
