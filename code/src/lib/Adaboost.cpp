@@ -10,7 +10,7 @@ namespace primer {
   // ===== Adaboost
 
   Adaboost::Adaboost(DTOptions &opt)
-    : options(opt), max_it(30) {
+    : options(opt), max_it(opt.ada_it) {
 
   }
 
@@ -35,19 +35,43 @@ namespace primer {
   }
 
   double Adaboost::get_accuracy() const {
-    int correct = 0;
+    return get_accuracy(bitsets);
+  }
+
+  double Adaboost::get_test_accuracy() const {
+    return get_accuracy(test_bitsets);
+  }
+
+  void Adaboost::split_dataset(double split_value) {
+    // TODO if dataset is already splitted, reset before splitting again
+    // This is only needed if we call split_dataset() multiple times
+    std::mt19937 rng;
+    rng.seed(options.seed);
 
     for (int y = 0; y < 2; ++y) {
-      int count = bitsets[y].size();
+      std::shuffle(bitsets[y].begin(), bitsets[y].end(), rng);
+      auto size = bitsets[y].size();
+      auto test_size = size_t(split_value * size);
+      auto train_size = size - test_size;
 
-      for (int i = 0; i < count; ++i) {
-        if (predict(bitsets[y][i]) == y) {
-          ++correct;
+      for (int i = 0; i < train_size; ++i) {
+        std::vector<int> example;
+        for (int j = 0; j < bitsets[y][i].size(); ++j) {
+          example.push_back(bitsets[y][i][j] ? 1 : 0);
         }
+        dataset[y][i] = example;
       }
-    }
 
-    return correct / double(example_count());
+      for (int i = 0; i < test_size; ++i) {
+        auto test_example = bitsets[y][train_size + i];
+        test_bitsets[y].push_back(test_example);
+      }
+
+      bitsets[y].resize(train_size);
+      dataset[y].resize(train_size);
+
+      std::cout << "Split: y=" << y << ", test size=" << test_size << ", train size=" << train_size << std::endl;
+    }
   }
 
   void Adaboost::iteration() {
@@ -68,8 +92,8 @@ namespace primer {
 
     // Print stuff to evaluate performance
     auto ex_count = example_count();
-    std::cout << "error: " << algo.error() * ex_count << "/" << ex_count << std::endl;
-    std::cout << "current accuracy: " << get_accuracy() << std::endl;
+    // std::cout << "error: " << algo.error() * ex_count << "/" << ex_count << std::endl;
+    // std::cout << "current accuracy: " << get_accuracy() << std::endl;
   }
 
   void Adaboost::initialize_weights() {
@@ -129,5 +153,24 @@ namespace primer {
 
   size_t Adaboost::example_count() const {
     return dataset[0].size() + dataset[1].size();
+  }
+
+  double Adaboost::get_accuracy(const std::vector<instance> *bitsets) const {
+    int correct = 0;
+    int total = 0;
+
+    for (int y = 0; y < 2; ++y) {
+      int count = bitsets[y].size();
+
+      for (int i = 0; i < count; ++i) {
+        ++total;
+
+        if (predict(bitsets[y][i]) == y) {
+          ++correct;
+        }
+      }
+    }
+
+    return correct / double(total);
   }
 }

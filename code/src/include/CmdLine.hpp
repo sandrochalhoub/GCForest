@@ -158,6 +158,8 @@ public:
   int feature_strategy;
 
   bool binarize;
+  double split;
+  int ada_it;
 
   bool mindepth;
   bool minsize;
@@ -177,7 +179,8 @@ public:
         filter(opt.filter), time(opt.time), search(opt.search),
         bounding(opt.bounding), node_strategy(opt.node_strategy),
         feature_strategy(opt.feature_strategy), binarize(opt.binarize),
-        mindepth(opt.mindepth), minsize(opt.minsize) {}
+        split(opt.split), ada_it(opt.ada_it), mindepth(opt.mindepth),
+        minsize(opt.minsize) {}
 
   ostream &display(ostream &os);
 };
