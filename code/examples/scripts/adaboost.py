@@ -58,9 +58,9 @@ if __name__ == "__main__":
 
     train_pred = adaboost.predict(train_x)
     train_acc = metrics.accuracy_score(train_y, train_pred)
-    print("[Results] Train acc={}".format(train_acc))
+    print("r train acc={}".format(train_acc))
 
     if do_test:
         test_pred = adaboost.predict(test_x)
         test_acc = metrics.accuracy_score(test_y, test_pred)
-        print("[Results] Test acc={}".format(test_acc))
+        print("r test acc={}".format(test_acc))

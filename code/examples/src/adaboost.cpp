@@ -61,6 +61,6 @@ int main(int argc, char *argv[]) {
   A.train();
 
   // Print accuracy
-  std::cout << "Accuracy: " << A.get_accuracy() << std::endl;
-  std::cout << "Test accuracy: " << A.get_test_accuracy() << std::endl;
+  std::cout << "r train acc=" << A.get_accuracy() << std::endl;
+  std::cout << "r test acc=" << A.get_test_accuracy() << std::endl;
 }
