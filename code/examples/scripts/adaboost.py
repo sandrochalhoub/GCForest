@@ -35,12 +35,14 @@ if __name__ == "__main__":
     parser.add_argument("--n_estimators", default=30, type=int, help="Number of estimators in Adaboost")
     parser.add_argument("--split", default=0, type=float, help="Split between train and test data")
     parser.add_argument("--seed", default=12345, type=int, help="Seed for random generator, -1 for no seed (not implemented)")
+    parser.add_argument("--print_par", action="store_true", help="Print parameters")
+    parser.add_argument("--print_data", action="store_true", help="Print datasets properties (number of instances, etc)")
     args = parser.parse_args();
 
     X, Y = read_dataset(args.dataset)
 
     if args.split != 0:
-        print("split={}".format(args.split))
+        print("p split={}".format(args.split))
         train_x, test_x, train_y, test_y = train_test_split(X, Y, test_size=args.split, random_state=args.seed)
         do_test = True
     else:
@@ -50,7 +52,9 @@ if __name__ == "__main__":
 
     rng = np.random.RandomState(args.seed)
 
-    print("Running adaboost with max_depth={}, n_estimators={}".format(args.max_depth, args.n_estimators))
+    print("p max_depth={}".format(args.max_depth))
+    print("p ada_it={}".format(args.n_estimators))
+
     adaboost = AdaBoostClassifier(DecisionTreeClassifier(max_depth=args.max_depth),
                             n_estimators=args.n_estimators, random_state=rng)
 
