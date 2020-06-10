@@ -18,7 +18,7 @@ def setup():
     methods.append(("cart", cart_base))
 
     # Bud methods
-    bud_base = "../../code/bin/adaboost #BENCHMARK --seed #SEED --split %f --max_depth %i --ada_it %i" % (split, max_depth, ada_it)
+    bud_base = "../../code/bin/adaboost #BENCHMARK --seed #SEED --split %f --max_depth %i --ada_it %i --search 100000 --print_par" % (split, max_depth, ada_it)
     methods.append(("bud", bud_base))
 
     keyfile.write('%d methods\n'%len(methods))
@@ -40,4 +40,4 @@ def setup():
 if __name__ == '__main__' :
     setup()
     e = Experiment()
-    e.generate_jobs(timeout='00:01:00')
+    e.generate_jobs(timeout='00:10:00')

@@ -7,13 +7,15 @@ from rocknrun import *
 class GenericParser(object):
 
     def __call__(self,respath):
-        res = {}
-        for line in open(respath, 'r'):
+        res = {
+            "train acc": [],
+            "test acc": []
+        }
+        for line in respath:
             if line.startswith("r "):
-                stats_line = line[2:]
-                data = line.split("=")
-
-                res[data[0]] = data[1]
+                stats_line = line[2:].strip()
+                data = stats_line.split("=")
+                res[data[0].strip()] = [float(data[1])]
         return res
 
 
@@ -36,9 +38,8 @@ if __name__ == '__main__':
         \\hline
         """
 
-
     o = Observation(e, parsers)
-    o.write_summary_table('tex/summary.tex', ['train', 'test'], precisions=[0,2])
-    o.write_large_table('tex/all.tex', ['train', 'test'], precisions=[0,2])
+    o.write_large_table('tex/all.tex', ['train acc', 'test acc'], precisions=[0,2])
+    o.write_summary_table('tex/summary.tex', ['train acc', 'test acc'], precisions=[0,2])
     # o.write_cactus('tex/cactus.tex', X='number of conflicts', Y='cpu time', precision=1, epsilon=.01)
-    compile_latex()
+    # compile_latex()
