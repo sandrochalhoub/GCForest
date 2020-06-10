@@ -47,6 +47,7 @@ namespace primer {
 
     // internal variables
     size_t it_count;
+    double start_time;
     // double total_weight = 0;
     std::vector<std::unique_ptr<WeakClassifier>> classifiers;
 

@@ -1,5 +1,7 @@
 #include "Adaboost.hpp"
 
+#include "utils.hpp"
+
 // https://fr.wikipedia.org/wiki/AdaBoost
 
 namespace primer {
@@ -16,12 +18,15 @@ namespace primer {
 
   void Adaboost::train() {
     it_count = 0;
+    start_time = cpu_time();
     classifiers.clear();
 
     while (!should_stop()) {
       iteration();
       ++it_count;
     }
+
+    std::cout << "r time=" << cpu_time() - start_time << std::endl;
   }
 
   bool Adaboost::predict(const instance &i) const {

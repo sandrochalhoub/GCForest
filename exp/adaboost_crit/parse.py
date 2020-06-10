@@ -23,8 +23,12 @@ if __name__ == '__main__':
     o = Observation(e, parsers)
     train_acc = Statistic('train acc', label='train acc.', precision=lambda x:3)
     test_acc = Statistic('test acc', label='test acc.', precision=lambda x:3)
+    time = Statistic('time', label='time', precision=lambda x:3)
 
-    m_cart = Method('cart', stats=[train_acc, test_acc])
-    m_bud = Method('bud', stats=[train_acc, test_acc])
+    m_error = Method('error', stats=[train_acc, test_acc, time])
+    m_depth = Method('depth', stats=[train_acc, test_acc, time])
+    m_size = Method('size', stats=[train_acc, test_acc, time])
 
-    o.write_table('tex/tabfile.tex', [m_cart,m_bud], benches)
+    o.write_table('tex/crit.tex', [m_error,m_depth, m_size], benches)
+
+    # compile_latex()

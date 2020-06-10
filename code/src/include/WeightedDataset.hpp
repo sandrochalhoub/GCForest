@@ -20,6 +20,10 @@ public:
   template <class Algo>
   void to(Algo &algo);
 
+  size_t example_count() const {
+    return data[0].size() + data[1].size();
+  }
+
 private:
   std::vector<std::vector<int>> data[2];
 };
@@ -32,6 +36,8 @@ inline void WeightedDataset::addExample(rIter beg_sample, rIter end_sample, cons
 
 template <class Algo>
 inline void WeightedDataset::to(Algo &algo) {
+  int dup_count = 0; // for statistics
+
   for (int y = 0; y < 2; ++y) {
     auto &subset = data[y];
 
@@ -45,8 +51,14 @@ inline void WeightedDataset::to(Algo &algo) {
         algo.addExample(subset[i].begin(), subset[i].end(), y, weight);
         weight = 0;
       }
+      else {
+        dup_count++;
+      }
     }
   }
+
+  // print stats
+  std::cout << "r duplicate=" << float(dup_count) / example_count() << std::endl;
 }
 
 }

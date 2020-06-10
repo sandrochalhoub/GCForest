@@ -23,8 +23,11 @@ if __name__ == '__main__':
     o = Observation(e, parsers)
     train_acc = Statistic('train acc', label='train acc.', precision=lambda x:3)
     test_acc = Statistic('test acc', label='test acc.', precision=lambda x:3)
+    time = Statistic('time', label='time', precision=lambda x:3)
 
-    m_cart = Method('cart', stats=[train_acc, test_acc])
-    m_bud = Method('bud', stats=[train_acc, test_acc])
+    m_interrupted = Method('interrupted', stats=[train_acc, test_acc])
+    m_optimal = Method('optimal', stats=[train_acc, test_acc, time])
 
-    o.write_table('tex/tabfile.tex', [m_cart,m_bud], benches)
+    o.write_table('tex/opti.tex', [m_interrupted,m_optimal], benches)
+
+    # compile_latex()
