@@ -58,7 +58,8 @@ inline void WeightedDataset::to(Algo &algo) {
   }
 
   // print stats
-  std::cout << "r duplicate=" << float(dup_count) / example_count() << std::endl;
+  std::cout << "d duplicate=" << dup_count
+            << " dratio=" << float(dup_count) / example_count() << std::endl;
 }
 
 }
