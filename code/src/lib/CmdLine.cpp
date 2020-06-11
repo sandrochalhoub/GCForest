@@ -354,6 +354,12 @@ DTOptions parse_dt(int argc, char *argv[]) {
   cmd.add<SwitchArg>(opt.binarize, "", "binarize", "binarize the data set",
                      false);
 
+  cmd.add<ValueArg<double>>(opt.split, "", "split", "proportion of examples in the test set",
+                            false, 0.0, "double");
+
+  cmd.add<ValueArg<int>>(opt.ada_it, "", "ada_it", "number of iterations for adaboost",
+                         false, 30, "int");
+
   cmd.add<SwitchArg>(opt.mindepth, "", "depthobjective",
                      "switch depth objective on", false);
 

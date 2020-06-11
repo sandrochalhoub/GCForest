@@ -30,6 +30,7 @@ along with minicsp.  If not, see <http://www.gnu.org/licenses/>.
 #include "TXTReader.hpp"
 #include "Tree.hpp"
 #include "TypedDataSet.hpp"
+#include "WeightedDataset.hpp"
 
 using namespace std;
 using namespace primer;
@@ -98,6 +99,32 @@ void read_non_binary(Algo_t &A, DTOptions &opt) {
   A.setData(base);
 }
 
+template <typename Algo_t>
+void read_weighted(Algo_t &A, DTOptions &opt) {
+  WeightedDataset input;
+
+  string ext{opt.instance_file.substr(opt.instance_file.find_last_of(".") + 1)};
+
+  if (opt.format == "csv" or (opt.format == "guess" and ext == "csv")) {
+    csv::read_binary(opt.instance_file, [&](vector<int> &data) {
+      input.addExample(data.begin(), data.end() - 1, data.back());
+    });
+  } else if (opt.format == "dl8" or (opt.format == "guess" and ext == "dl8")) {
+    txt::read_binary(opt.instance_file, [&](vector<int> &data) {
+      auto y = *data.begin();
+      input.addExample(data.begin() + 1, data.end(), y);
+    });
+  } else {
+    if (opt.format != "txt" and ext != "txt")
+      cout << "p Warning, unrecognized format, trying txt\n";
+    txt::read_binary(opt.instance_file, [&](vector<int> &data) {
+      input.addExample(data.begin(), data.end() - 1, data.back());
+    });
+  }
+
+  input.to(A);
+}
+
 template <template <typename> class ErrorPolicy = CardinalityError,
           typename E_t = unsigned long>
 int run_algorithm(DTOptions &opt) {
@@ -105,7 +132,11 @@ int run_algorithm(DTOptions &opt) {
 
   BacktrackingAlgorithm<ErrorPolicy, E_t> A(yallen, opt);
 
-  if (opt.binarize) {
+  if (opt.use_weights) {
+
+    read_weighted(A, opt);
+
+  } else if (opt.binarize) {
 
     read_non_binary(A, opt);
 
@@ -172,7 +203,7 @@ int main(int argc, char *argv[]) {
   if (opt.use_weights) {
     std::cout << "Using weights" << std::endl;
     return run_algorithm<WeightedError, double>(opt);
-  } 
+  }
 	else {
     return run_algorithm<>(opt);
   }

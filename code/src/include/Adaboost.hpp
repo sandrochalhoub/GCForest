@@ -29,7 +29,11 @@ namespace primer {
 
     bool predict(const instance &i) const;
 
+    void split_dataset(double split_value);
+
     double get_accuracy() const;
+
+    double get_test_accuracy() const;
 
     template <class rIter>
     void addExample(rIter beg_sample, rIter end_sample, const bool y);
@@ -39,8 +43,11 @@ namespace primer {
     std::vector<std::vector<int>> dataset[2];
     std::vector<instance> bitsets[2];
 
+    std::vector<instance> test_bitsets[2];
+
     // internal variables
     size_t it_count;
+    double start_time;
     // double total_weight = 0;
     std::vector<std::unique_ptr<WeakClassifier>> classifiers;
 
@@ -58,6 +65,8 @@ namespace primer {
     bool should_stop();
 
     size_t example_count() const;
+
+    double get_accuracy(const std::vector<instance> *bitsets) const;
   };
 
   template <class rIter>
