@@ -110,8 +110,12 @@ namespace primer {
         double dnext = d * exp(- alpha * u * upred) / (2 * sqrt(err * (1 - err)));
 
         current_algo.addExample(sample.begin(), sample.end(), y, dnext);
+				
+				// cout << " " << dnext ;
       }
     }
+		
+		// cout << endl;
   }
 
   void Adaboost::compute_clf_weight() {
