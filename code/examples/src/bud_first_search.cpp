@@ -184,7 +184,7 @@ int run_algorithm(DTOptions &opt) {
     assert(tree_error == A.error());
 
     cout << std::setprecision(std::numeric_limits<long double>::digits10 + 1)
-         << "p solution verified (" << tree_error << " / " << A.error() << ")"
+         << std::setw(0) << "p solution verified (" << tree_error << " / " << A.error() << ")"
          << endl;
   }
   return 0;

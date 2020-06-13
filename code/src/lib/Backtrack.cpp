@@ -85,7 +85,7 @@ E_t CardinalityError<E_t>::get_total(const Algo &algo, const int y, const int n)
 
 template <typename E_t>
 void WeightedError<E_t>::update_node(Algo& algo, const int n) {
-
+	
   for (size_t y{0}; y < 2; ++y) {
     if (weight_total[y].size() <= n)
       weight_total[y].resize(n + 1);
@@ -94,8 +94,8 @@ void WeightedError<E_t>::update_node(Algo& algo, const int n) {
 
   if (n == 0) {
 
-    for (size_t y{0}; y < 2; ++y)
-      for (auto s : algo.P[y][n])
+    for (size_t y{0}; y < 2; ++y) 
+			for (auto s : algo.P[y][n]) 
         weight_total[y][n] += weights[y][s];
 
   } else {
@@ -107,6 +107,7 @@ void WeightedError<E_t>::update_node(Algo& algo, const int n) {
     weight_total[0][n] = algo.get_feature_frequency(0, p, pfeat);
     weight_total[1][n] = algo.get_feature_frequency(1, p, pfeat);
   }
+
 }
 
 template <typename E_t>
@@ -130,7 +131,7 @@ void WeightedError<E_t>::count_by_example(Algo &algo, const int node, const int 
 }
 
 template <typename E_t>
-E_t WeightedError<E_t>::node_error(const Algo &algo, const int i) const {
+E_t WeightedError<E_t>::node_error(const Algo &algo, const int i) const {	
   return std::min(weight_total[0][i], weight_total[1][i]);
 }
 
@@ -341,11 +342,13 @@ void BacktrackingAlgorithm<ErrorPolicy, E_t>::separator(const string &msg) const
 template <template<typename> class ErrorPolicy, typename E_t>
 void BacktrackingAlgorithm<ErrorPolicy, E_t>::print_new_best() const {
 
+
+	
   E_t total =
-      error_policy.get_total(*this, 0, 0) + error_policy.get_total(*this, 1, 0);
+      error_policy.get_total(*this, 0, 0) + error_policy.get_total(*this, 1, 0) + 2 * error_offset;
   cout << setprecision(5) << left << "d accuracy=" << setw(7)
-       << (1.0 - static_cast<double>(ub_error) / static_cast<double>(total))
-       << " error=" << setw(4) << ub_error << " depth=" << setw(3)
+       << (1.0 - static_cast<double>(error_offset + ub_error) / static_cast<double>(total))
+       << " error=" << setw(4) << ub_error + error_offset << " depth=" << setw(3)
        << actual_depth << " size=" << setw(3) << ub_size
        // << " backtracks=" << setw(9) << num_backtracks
        << " choices=" << setw(9) << search_size << " restarts=" << setw(5)
@@ -1614,6 +1617,13 @@ template <template<typename> class ErrorPolicy, typename E_t>
 std::ostream &operator<<(std::ostream &os, const BacktrackingAlgorithm<ErrorPolicy, E_t> &x) {
   return x.display(os);
 }
+
+
+template <template<typename> class ErrorPolicy, typename E_t>
+void BacktrackingAlgorithm<ErrorPolicy, E_t>::setErrorOffset(const E_t e) {
+	error_offset = e;
+}
+
 
 #ifdef PRINTTRACE
 

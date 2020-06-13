@@ -123,6 +123,9 @@ namespace primer {
     auto last_tree = last_algo.getSolution();
 
     double err = last_algo.error();
+		assert(err > 0);
+		
+		
     double alpha = last_clf.weight;
 
     for (int y = 0; y < 2; ++y) {
