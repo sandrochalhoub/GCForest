@@ -27,6 +27,8 @@ using namespace std;
 
 namespace primer {
 
+#define FLOAT_PRECISION 1e-9
+
 template <typename IntegralType>
 typename std::enable_if<std::is_integral<IntegralType>::value, bool>::type
 equal(const IntegralType &a, const IntegralType &b) {
@@ -42,13 +44,13 @@ lt(const IntegralType &a, const IntegralType &b) {
 template <typename FloatingType>
 typename std::enable_if<std::is_floating_point<FloatingType>::value, bool>::type
 equal(const FloatingType &a, const FloatingType &b) {
-  return std::fabs(a - b) < 1e-9;
+  return std::fabs(a - b) < FLOAT_PRECISION;
 }
 
 template <typename FloatingType>
 typename std::enable_if<std::is_floating_point<FloatingType>::value, bool>::type
 lt(const FloatingType &a, const FloatingType &b) {
-  return a + 1e-9 < b;
+  return a + FLOAT_PRECISION < b;
 }
 
 template <typename E_t> class CardinalityError;

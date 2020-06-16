@@ -165,6 +165,7 @@ public:
   bool minsize;
 
   bool use_weights;
+  bool filter_inconsistent;
 
   DTOptions(){};
   DTOptions(const DTOptions &opt)
@@ -180,7 +181,8 @@ public:
         bounding(opt.bounding), node_strategy(opt.node_strategy),
         feature_strategy(opt.feature_strategy), binarize(opt.binarize),
         split(opt.split), ada_it(opt.ada_it), mindepth(opt.mindepth),
-        minsize(opt.minsize) {}
+        minsize(opt.minsize), use_weights(opt.use_weights),
+        filter_inconsistent(opt.filter_inconsistent) {}
 
   ostream &display(ostream &os);
 };

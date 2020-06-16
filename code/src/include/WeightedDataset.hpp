@@ -17,7 +17,7 @@ public:
   template <class rIter>
   void addExample(rIter beg_sample, rIter end_sample, const bool y);
 
-  template <class Algo> void oldto(Algo &algo);
+  template <class Algo> void toInc(Algo &algo);
 
   template <class Algo> void to(Algo &algo);
 
@@ -35,7 +35,7 @@ inline void WeightedDataset::addExample(rIter beg_sample, rIter end_sample, cons
   data[y].push_back(sample);
 }
 
-template <class Algo> inline void WeightedDataset::oldto(Algo &algo) {
+template <class Algo> inline void WeightedDataset::to(Algo &algo) {
   int dup_count = 0; // for statistics
 
   for (int y = 0; y < 2; ++y) {
@@ -62,7 +62,7 @@ template <class Algo> inline void WeightedDataset::oldto(Algo &algo) {
             << " dratio=" << float(dup_count) / example_count() << std::endl;
 }
 
-template <class Algo> inline void WeightedDataset::to(Algo &algo) {
+template <class Algo> inline void WeightedDataset::toInc(Algo &algo) {
   int dup_count = 0; // for statistics
   int sup_count = 0;
 

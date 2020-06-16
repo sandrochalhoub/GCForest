@@ -122,7 +122,10 @@ void read_weighted(Algo_t &A, DTOptions &opt) {
     });
   }
 
-  input.to(A);
+  if (opt.filter_inconsistent)
+    input.toInc(A);
+  else
+    input.to(A);
 }
 
 template <template <typename> class ErrorPolicy = CardinalityError,
@@ -201,8 +204,8 @@ int main(int argc, char *argv[]) {
     opt.display(cout);
 
   if (opt.use_weights) {
-    std::cout << "Using weights" << std::endl;
-    return run_algorithm<WeightedError, double>(opt);
+    // std::cout << "Using weights" << std::endl;
+    return run_algorithm<WeightedError, unsigned long>(opt);
   }
 	else {
     return run_algorithm<>(opt);

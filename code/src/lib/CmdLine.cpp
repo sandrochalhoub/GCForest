@@ -423,6 +423,9 @@ DTOptions parse_dt(int argc, char *argv[]) {
                         "activate weighted version of the algorithm",
                         false);
 
+  cmd.add<SwitchArg>(opt.filter_inconsistent, "", "filter_inconsistent",
+                     "suppress inconsistent samples", false);
+
   cmd.parse(argc, argv);
   return opt;
 }
@@ -497,6 +500,9 @@ ostream &DTOptions::display(ostream &os) {
   }
   os << endl
      << setw(20) << left << "p maximum depth:" << setw(30) << right << max_depth
+     << endl
+     << setw(20) << left << "p use weights:" << setw(30) << right
+     << (use_weights ? "yes" : "no") << (filter_inconsistent ? "*" : "")
      << endl;
   // << setw(20) << left << "p maximum size:" << setw(30) << right << max_size
   // << endl;

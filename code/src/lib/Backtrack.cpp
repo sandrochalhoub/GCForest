@@ -5,36 +5,6 @@
 
 namespace primer {
 
-/*void WeightedError::update_weights() {
-for (auto y{0}; y < 2; ++y) {
-  for (auto i{0}; i < example[y].size(); ++i) {
-    // Compute weight at this iteration
-    // Compute how much examples are wrong on the same leaf as this one
-    double weight = double(wrong_count) / double(total);
-
-    // exponential averaging
-    double a = 0;
-    example_weights[y][i] = weight * a + example_weights[y][i] * (1-a);
-  }
-}
-}*/
-
-// ===== CardinalityError
-	
-
-
-// template <typename IntegralType>
-// typename std::enable_if<std::is_integral<IntegralType>::value, bool>::type
-// equal(const IntegralType& a, const IntegralType& b) {
-//         return a == b;
-// }
-//
-// template <typename FloatingType>
-// typename std::enable_if<std::is_floating_point<FloatingType>::value, bool>::type
-// equal(const FloatingType& a, const FloatingType& b) {
-//         return std::fabs(a-b) < 1e-6;
-// }
-
 template<typename T>
 T min_positive() {
 	return static_cast<int>(static_cast<T>(1) - std::numeric_limits<T>::epsilon()) + std::numeric_limits<T>::epsilon();
@@ -43,8 +13,9 @@ T min_positive() {
 template<typename T>
 T is_null(const T& x) {
 	return equal<T>(x, 0);
-} 
+}
 
+// ===== CardinalityError
 
 template <typename E_t>
 void CardinalityError<E_t>::count_by_example(CardinalityError::Algo &algo, const int node, const int y) const {
@@ -70,18 +41,7 @@ E_t CardinalityError<E_t>::get_total(const Algo &algo, const int y, const int n)
 }
 
 
-
-
 // ===== WeightedError
-
-// template <typename E_t>
-// void WeightedError<E_t>::add_example(Algo &algo, const int y, const size_t i,
-// const E_t weight) {
-//   if (weights[y].size() <= i) {
-//     weights[y].resize(i + 1);
-//   }
-//   weights[y][i] = weight;
-// }
 
 template <typename E_t>
 void WeightedError<E_t>::update_node(Algo& algo, const int n) {
@@ -114,7 +74,6 @@ template <typename E_t>
 void WeightedError<E_t>::set_weight(const int y, const size_t i, const E_t weight) {
   weights[y][i] = weight;
 }
-
 
 template <typename E_t>
 void WeightedError<E_t>::count_by_example(Algo &algo, const int node, const int y) const {
@@ -232,7 +191,7 @@ void BacktrackingAlgorithm<ErrorPolicy, E_t>::setData(const DataSet &data) {
       // cout << endl;
       error_policy.add_example(*this, y, i);
     }
-}
+  }
 }
 
 template <template<typename> class ErrorPolicy, typename E_t>
@@ -850,6 +809,7 @@ bool BacktrackingAlgorithm<ErrorPolicy, E_t>::backtrack() {
 
     // backtrack again
     if (dead_end) {
+
       optimal[backtrack_node] = true;
 
       // store best errors and sizes
@@ -858,6 +818,7 @@ bool BacktrackingAlgorithm<ErrorPolicy, E_t>::backtrack() {
 
 #ifdef PRINTTRACE
       if (PRINTTRACE) {
+        cout << search_size << " ";
         for (auto i{0}; i < decision.size(); ++i)
           cout << "   ";
         cout << "end domain for " << backtrack_node << "! ==> set optimal\n";
@@ -948,9 +909,11 @@ void BacktrackingAlgorithm<ErrorPolicy, E_t>::branch(const int node, const int f
     for (auto i{0}; i < decision.size(); ++i)
       cout << "   ";
     cout << "branch on " << node << " with " << f << " children: " << c[0]
-         << " (" << P[0][c[0]].count() << "/" << P[1][c[0]].count() << ") and  "
-         << c[1] << "(" << P[0][c[1]].count() << "/" << P[1][c[1]].count()
-         << ")" << endl;
+         // << " (" << P[0][c[0]].count() << "/" << P[1][c[0]].count() << ") and
+         // "
+         // << c[1] << "(" << P[0][c[1]].count() << "/" << P[1][c[1]].count()
+         // << ")"
+         << endl;
   }
 #endif
 
@@ -1023,6 +986,11 @@ bool BacktrackingAlgorithm<ErrorPolicy, E_t>::grow(const int node) {
 	error_policy.update_node(*this, node);
 
   filter_features(node, [&](const int f) { return max_entropy(node, f); });
+
+  // cout << search_size;
+  // for(auto f{feature[node]}; f != end_feature[node]; ++f)
+  // 	cout << " " << *f;
+  // cout << endl;
 
   blossom.add(node);
 
@@ -1809,9 +1777,9 @@ void BacktrackingAlgorithm<ErrorPolicy, E_t>::do_asserts() {
 
 // template class BacktrackingAlgorithm<CardinalityError, unsigned long>;
 template class BacktrackingAlgorithm<CardinalityError, int>;
-template class BacktrackingAlgorithm<CardinalityError, unsigned long int>;
+template class BacktrackingAlgorithm<CardinalityError, unsigned long>;
 template class BacktrackingAlgorithm<WeightedError, int>;
 template class BacktrackingAlgorithm<WeightedError, float>;
 template class BacktrackingAlgorithm<WeightedError, double>;
-
+template class BacktrackingAlgorithm<WeightedError, unsigned long>;
 }
