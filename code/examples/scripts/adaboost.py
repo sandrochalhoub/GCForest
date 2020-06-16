@@ -17,14 +17,28 @@ def read_dataset(filename):
     X = []
 
     with open(filename, newline='') as csvfile:
-        reader = csv.reader(csvfile, delimiter=",")
+        if filename.endswith(".dl8") or filename.endswith(".txt"):
+            target_first = filename.endswith(".dl8")
 
-        # Skip one example if the CSV has no header
-        next(reader)
+            for line in csvfile.readlines():
+                values = line.split(" ")
 
-        for row in reader:
-            Y.append(int(row[-1]))
-            X.append([int(x) for x in row[:-1]])
+                if target_first:
+                    Y.append(int(values[0]))
+                    X.append([int(x) for x in values[1:]])
+                else:
+                    Y.append(int(values[-1]))
+                    X.append([int(x) for x in values[:-1]])
+
+        elif filename.endswith(".csv"):
+            reader = csv.reader(csvfile, delimiter=",")
+
+            # Skip one example if the CSV has no header
+            next(reader)
+
+            for row in reader:
+                Y.append(int(row[-1]))
+                X.append([int(x) for x in row[:-1]])
 
     return X, Y
 
