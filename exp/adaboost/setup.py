@@ -10,15 +10,16 @@ def setup():
     methods = []
 
     split = 0.2
-    max_depth = 4
+    max_depth = 3
     ada_it = 30
+    search_size = 100000
 
     # Cart methods
     cart_base = "python3 ../../code/examples/scripts/adaboost.py #BENCHMARK --seed #SEED --split %f --max_depth %i --n_estimators %i" % (split, max_depth, ada_it)
     methods.append(("cart", cart_base))
 
     # Bud methods
-    bud_base = "../../code/bin/adaboost #BENCHMARK --seed #SEED --split %f --max_depth %i --ada_it %i --search 100000 --print_par" % (split, max_depth, ada_it)
+    bud_base = "../../code/bin/adaboost #BENCHMARK --seed #SEED --split %f --max_depth %i --ada_it %i --search %i --print_par" % (split, max_depth, ada_it, search_size)
     methods.append(("bud", bud_base))
 
     keyfile.write('%d methods\n'%len(methods))
@@ -28,7 +29,7 @@ def setup():
         keyfile.write(command + "\n")
 
     # declare the benchmarks (print_benchlist assumes that everything in benchfolder is an instance file)
-    benchfolder = '../datasets/'
+    benchfolder = '/net/phorcys/data/roc/eh/dt/simp/'
     print_benchlist(benchfolder, keyfile)
 
     # declare some seeds
@@ -40,4 +41,4 @@ def setup():
 if __name__ == '__main__' :
     setup()
     e = Experiment()
-    e.generate_jobs(timeout='00:10:00')
+    e.generate_jobs(timeout='00:30:00')
