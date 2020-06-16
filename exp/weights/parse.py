@@ -12,23 +12,19 @@ class GenericParser(object):
 
         for line in output:
             # time
-            if read_result:
-                vals = line.split()
+            vals = line.split()
 
-                for data in [a.split("=") for a in vals]:
-                    if len(data) != 2:
-                        continue
-                    if data[0] == "time":
-                        res[data[0]] = [float(data[1])]
+            for data in [a.split("=") for a in vals]:
+                if len(data) != 2:
+                    continue
+                if data[0] == "dratio":
+                    res[data[0]] = [float(data[1])* 100]
+                if data[0] == "time" and read_result:
+                    res[data[0]] = [float(data[1])]
 
-            if line.find('optimal') >= 0 || line.find('interrupted') >= 0:
+            if line.find('optimal') >= 0 or line.find('interrupted') >= 0:
                 read_result = True
-
-            # other stats
-            if line.startswith("r "):
-                data = line[2:].strip().split("=")
-                res[data[0].strip()] = [float(data[1])]
-
+        
         return res
 
 
@@ -42,11 +38,12 @@ if __name__ == '__main__':
     o = Observation(e, parsers)
     time = Statistic('time', label= 'time', precision=lambda x:3)
     sample_count = Statistic('sample_count', label='\\#s')
-    duplicate = Statistic('duplicate', label='\\% dupli.', precision=lambda x:3)
+    dratio = Statistic('dratio', label='\\% dupli.', precision=lambda x:1)
 
     m_no_weights = Method('no weights', stats=[time])
-    m_weights = Method('weights', stats=[time, duplicate])
+    m_weights = Method('weights', stats=[time, dratio])
 
-    o.write_table('tex/weighted.tex', [m_no_weights,m_weights], benches, info=[sample_count])
+    # o.write_table('tex/weighted.tex', [m_no_weights,m_weights], benches, info=[sample_count])
+    o.write_table('tex/weighted.tex', [m_no_weights,m_weights], benches)
 
     # compile_latex()

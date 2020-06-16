@@ -9,14 +9,15 @@ def setup():
 
     methods = []
 
-    max_depth = 4
+    max_depth = 5
+    search_size = 1000000
 
     # no weights methods
-    no_weights = "../../code/bin/bud_first_search #BENCHMARK --seed #SEED --max_depth %i --search 100000 --print_par" % (max_depth,)
+    no_weights = "../../code/bin/bud_first_search #BENCHMARK --seed #SEED --max_depth %i --search %i --print_par" % (max_depth, search_size)
     methods.append(("no weights", no_weights))
 
     # weights methods
-    weights = "../../code/bin/bud_first_search #BENCHMARK --seed #SEED --max_depth %i --use_weights --search 100000 --print_par" % (max_depth,)
+    weights = "../../code/bin/bud_first_search #BENCHMARK --seed #SEED --max_depth %i --use_weights --search %i --print_par" % (max_depth, search_size)
     methods.append(("weights", weights))
 
     keyfile.write('%d methods\n'%len(methods))

@@ -10,12 +10,12 @@ def setup():
     methods = []
 
     split = 0.2
-    max_depth = 4
+    max_depth = 5
     search_limit = 100000
     ada_it = 30
 
     # Interrupted
-    int_base = "../../code/bin/adaboost #BENCHMARK --seed #SEED --split %f --max_depth %i --ada_it %i --search %i --print_par" % (split, max_depth, search_limit, ada_it)
+    int_base = "../../code/bin/adaboost #BENCHMARK --seed #SEED --split %f --max_depth %i --ada_it %i --search %i --print_par" % (split, max_depth, ada_it, search_limit)
     methods.append(("interrupted", int_base))
 
     # Optimal
