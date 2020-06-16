@@ -158,11 +158,11 @@ namespace primer {
 
     double err = current_algo.error();
     if (err < EPSILON) {
-      double alpha = 1. / 2. * log((1. - err) / err);
-      current_clf.weight = alpha;
+      current_clf.weight = 1e10;
     }
     else {
-      current_clf.weight = 1e10;
+      double alpha = 1. / 2. * log((1. - err) / err);
+      current_clf.weight = alpha;
     }
   }
 
