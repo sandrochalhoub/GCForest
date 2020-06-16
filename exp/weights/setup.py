@@ -10,7 +10,7 @@ def setup():
     methods = []
 
     max_depth = 5
-    search_size = 1000000
+    search_size = 100000000
 
     # no weights methods
     no_weights = "../../code/bin/bud_first_search #BENCHMARK --seed #SEED --max_depth %i --search %i --print_par" % (max_depth, search_size)
@@ -27,7 +27,7 @@ def setup():
         keyfile.write(command + "\n")
 
     # declare the benchmarks (print_benchlist assumes that everything in benchfolder 'is an instance file)
-    benchfolder = '../datasets/'
+    benchfolder = '/net/phorcys/data/roc/eh/dt/simp/'
     print_benchlist(benchfolder, keyfile)
 
     # declare some seeds
@@ -39,4 +39,4 @@ def setup():
 if __name__ == '__main__' :
     setup()
     e = Experiment()
-    e.generate_jobs(timeout='00:10:00')
+    e.generate_jobs(timeout='01:00:00')

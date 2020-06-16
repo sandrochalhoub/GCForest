@@ -10,7 +10,7 @@ def setup():
     methods = []
 
     split = 0.2
-    max_depth = 5 
+    max_depth = 3
     ada_it = 30
 
     # error
@@ -32,7 +32,7 @@ def setup():
         keyfile.write(command + "\n")
 
     # declare the benchmarks (print_benchlist assumes that everything in benchfolder is an instance file)
-    benchfolder = '../datasets/'
+    benchfolder = '/net/phorcys/data/roc/eh/dt/simp/'
     print_benchlist(benchfolder, keyfile)
 
     # declare some seeds
@@ -44,4 +44,4 @@ def setup():
 if __name__ == '__main__' :
     setup()
     e = Experiment()
-    e.generate_jobs(timeout='01:00:00')
+    e.generate_jobs(timeout='02:00:00')

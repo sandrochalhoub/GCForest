@@ -4,6 +4,8 @@
 
 // https://fr.wikipedia.org/wiki/AdaBoost
 
+#define EPSILON std::numeric_limits<double>::epsilon()
+
 namespace primer {
 
   WeakClassifier::WeakClassifier(DTOptions &opt) : algo(wood, opt) {}
@@ -96,7 +98,7 @@ namespace primer {
     compute_clf_weight();
 
     // Print stuff to evaluate performance
-    auto ex_count = example_count();
+    // auto ex_count = example_count();
     // std::cout << "error: " << algo.error() * ex_count << "/" << ex_count << std::endl;
     // std::cout << "current accuracy: " << get_accuracy() << std::endl;
   }
@@ -139,11 +141,11 @@ namespace primer {
         double dnext = d * exp(- alpha * u * upred) / (2 * sqrt(err * (1 - err)));
 
         current_algo.addExample(sample.begin(), sample.end(), y, dnext);
-				
+
 				// cout << " " << dnext ;
       }
     }
-		
+
 		// cout << endl;
   }
 
@@ -152,11 +154,27 @@ namespace primer {
     auto &current_algo = current_clf.algo;
 
     double err = current_algo.error();
-    double alpha = 1. / 2. * log((1. - err) / err);
-    current_clf.weight = alpha;
+    if (err < EPSILON) {
+      double alpha = 1. / 2. * log((1. - err) / err);
+      current_clf.weight = alpha;
+    }
+    else {
+      current_clf.weight = 1e10;
+    }
   }
 
   bool Adaboost::should_stop() {
+    if (!classifiers.empty()) {
+      if (classifiers.back()->algo.error() < EPSILON) {
+        std::cout << "r iterations=" << it_count << std::endl;
+        return true;
+      }
+      if (get_correct_count(bitsets) == example_count()) {
+        std::cout << "r iterations=" << it_count << std::endl;
+        return true;
+      }
+    }
+
     return it_count >= max_it;
   }
 
@@ -165,13 +183,13 @@ namespace primer {
   }
 
   double Adaboost::get_accuracy(const std::vector<instance> *bitsets) const {
-    int correct = 0;
-    int total = 0;
+    size_t correct = 0;
+    size_t total = 0;
 
     for (int y = 0; y < 2; ++y) {
-      int count = bitsets[y].size();
+      size_t count = bitsets[y].size();
 
-      for (int i = 0; i < count; ++i) {
+      for (size_t i = 0; i < count; ++i) {
         ++total;
 
         if (predict(bitsets[y][i]) == y) {
@@ -181,5 +199,24 @@ namespace primer {
     }
 
     return correct / double(total);
+  }
+
+  size_t Adaboost::get_correct_count(const std::vector<instance> *bitsets) const {
+    size_t correct = 0;
+    size_t total = 0;
+
+    for (int y = 0; y < 2; ++y) {
+      size_t count = bitsets[y].size();
+
+      for (size_t i = 0; i < count; ++i) {
+        ++total;
+
+        if (predict(bitsets[y][i]) == y) {
+          ++correct;
+        }
+      }
+    }
+
+    return correct;
   }
 }

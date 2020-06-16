@@ -67,6 +67,8 @@ namespace primer {
     size_t example_count() const;
 
     double get_accuracy(const std::vector<instance> *bitsets) const;
+
+    size_t get_correct_count(const std::vector<instance> *bitsets) const;
   };
 
   template <class rIter>
