@@ -204,10 +204,8 @@ int main(int argc, char *argv[]) {
     opt.display(cout);
 
   if (opt.use_weights) {
-    // std::cout << "Using weights" << std::endl;
     return run_algorithm<WeightedError, unsigned long>(opt);
-  }
-	else {
+  } else {
     return run_algorithm<>(opt);
   }
 }

@@ -27,29 +27,29 @@ using namespace std;
 
 namespace primer {
 
-#define FLOAT_PRECISION 1e-9
+#define FLOAT_PRECISION std::numeric_limits<T>::epsilon()
 
-template <typename IntegralType>
-typename std::enable_if<std::is_integral<IntegralType>::value, bool>::type
-equal(const IntegralType &a, const IntegralType &b) {
+template <typename T>
+typename std::enable_if<std::is_integral<T>::value, bool>::type
+equal(const T &a, const T &b) {
   return a == b;
 }
 
-template <typename IntegralType>
-typename std::enable_if<std::is_integral<IntegralType>::value, bool>::type
-lt(const IntegralType &a, const IntegralType &b) {
+template <typename T>
+typename std::enable_if<std::is_integral<T>::value, bool>::type
+lt(const T &a, const T &b) {
   return a < b;
 }
 
-template <typename FloatingType>
-typename std::enable_if<std::is_floating_point<FloatingType>::value, bool>::type
-equal(const FloatingType &a, const FloatingType &b) {
+template <typename T>
+typename std::enable_if<std::is_floating_point<T>::value, bool>::type
+equal(const T &a, const T &b) {
   return std::fabs(a - b) < FLOAT_PRECISION;
 }
 
-template <typename FloatingType>
-typename std::enable_if<std::is_floating_point<FloatingType>::value, bool>::type
-lt(const FloatingType &a, const FloatingType &b) {
+template <typename T>
+typename std::enable_if<std::is_floating_point<T>::value, bool>::type
+lt(const T &a, const T &b) {
   return a + FLOAT_PRECISION < b;
 }
 

@@ -7,7 +7,7 @@ namespace primer {
 
 template<typename T>
 T min_positive() {
-	return static_cast<int>(static_cast<T>(1) - std::numeric_limits<T>::epsilon()) + std::numeric_limits<T>::epsilon();
+	return static_cast<int>(static_cast<T>(1) - 2*FLOAT_PRECISION) + 2*FLOAT_PRECISION;
 } 
 
 template<typename T>
