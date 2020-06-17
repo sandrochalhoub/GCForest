@@ -4,27 +4,49 @@ from rocknrun import *
 
 
 # Parsers should return a dict stat-name -> value-list. value-list is a list of the different values that the stat takes during a run
-class GenericParser(object):
+class DTParser(object):
+    def __init__(self, separator=' ', equal='=', dataflag='d'):
+        self.equal = equal
+        self.separator = separator
+        self.dataflag = dataflag
+
+    def store(self, stat, vstr, res):
+        stat = stat.strip()
+        if not res.has_key(stat):
+            res[stat] = []
+        val = None
+        try:
+            val = int(vstr)
+        except:
+            val = float(vstr)
+        res[stat].append(val)
 
     def __call__(self,output):
+
         res = {}
-        read_result = False
+        res['optimal'] = [0]
 
         for line in output:
-            # time
-            vals = line.split()
 
-            for data in [a.split("=") for a in vals]:
-                if len(data) != 2:
-                    continue
-                if data[0] == "dratio":
-                    res[data[0]] = [float(data[1])* 100]
-                if data[0] == "time" and read_result:
-                    res[data[0]] = [float(data[1])]
+            # if line.find('Assertion') >= 0:
+            #     continue
 
-            if line.find('optimal') >= 0 or line.find('interrupted') >= 0:
-                read_result = True
-        
+            if line.find('optimal') >= 0:
+                self.store('optimal',1,res)
+
+            if not line.startswith(self.dataflag):
+                continue
+
+            data = line[len(self.dataflag):].split()
+            for st in data:
+                stat,val = st.split(self.equal)
+                if res['optimal'][-1] == 0:
+                    self.store('sol'+stat,val,res)
+                else:
+                    self.store('proof'+stat,val,res)
+                self.store(stat,val,res)
+
+        print str(res)
         return res
 
 
@@ -36,14 +58,29 @@ if __name__ == '__main__':
     # Parsed material: #s, %duplicate, time method 1, time method 2
 
     o = Observation(e, parsers)
+
     time = Statistic('time', label= 'time', precision=lambda x:3)
     sample_count = Statistic('sample_count', label='\\#s')
     dratio = Statistic('dratio', label='\\% dupli.', precision=lambda x:1)
+    error = Statistic('accuracy', label='acc.', precision=lambda x:3)
 
-    m_no_weights = Method('no weights', stats=[time])
-    m_weights = Method('weights', stats=[time, dratio])
+    m_no_weights_success = Method('no weights', stats=[time])
+    m_weights_success = Method('weights', stats=[time, dratio])
+
+    m_no_weights_fails = Method('no weights', stats=[error])
+    m_weights_fails = Method('weights', stats=[error, dratio])
+
+    benches_success = []
+    benches_fail = []
+
+    for b in benches:
+        if len(o.data[m_no_weights_success][b][e.seeds[0]]["optimal"]) > 0:
+            benches_success.append(b)
+        else:
+            benches_fail.append(b)
 
     # o.write_table('tex/weighted.tex', [m_no_weights,m_weights], benches, info=[sample_count])
-    o.write_table('tex/weighted.tex', [m_no_weights,m_weights], benches)
+    o.write_table('tex/weighted_success.tex', [m_no_weights_success,m_weights_success], benches_success)
+    o.write_table('tex/weighted_fails.tex', [m_no_weights_fails, m_weights_fails], benches_fail)
 
     # compile_latex()
