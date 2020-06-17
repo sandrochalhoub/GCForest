@@ -27,7 +27,10 @@ using namespace std;
 
 namespace primer {
 
-#define FLOAT_PRECISION std::numeric_limits<T>::epsilon()
+/// this needs to be templated with "T" and should be 0 for integral types
+/// (e.g., static_cast<T>(1.e-9) should work)
+// #define FLOAT_PRECISION std::numeric_limits<T>::epsilon()
+#define FLOAT_PRECISION static_cast<T>(1.e-9)
 
 template <typename T>
 typename std::enable_if<std::is_integral<T>::value, bool>::type
@@ -117,10 +120,7 @@ private:
   /// store the feature tested at node i (in ranked features)
   vector<vector<int>::iterator> feature;
 
-  // Stores the root of the best subtree found for the current feature of the
-  // parent node
-  // if the node is not optimal, it points to the optimal trees of the childrens
-  // given its root-feature
+  // Stores the root of the best subtree found for the current feature of the parent node if the node is not optimal, it points to the optimal trees of the childrens given its root-feature
   // therefore, *optimal* best trees should not be freed when pruning the node
   // however, they can be freed when replacing the current best.
   vector<int> best_tree;
