@@ -8,7 +8,7 @@ namespace primer {
 template<typename T>
 T min_positive() {
 	return static_cast<int>(static_cast<T>(1) - 2*FLOAT_PRECISION) + 2*FLOAT_PRECISION;
-} 
+}
 
 template<typename T>
 T is_null(const T& x) {
@@ -45,7 +45,7 @@ E_t CardinalityError<E_t>::get_total(const Algo &algo, const int y, const int n)
 
 template <typename E_t>
 void WeightedError<E_t>::update_node(Algo& algo, const int n) {
-	
+
   for (size_t y{0}; y < 2; ++y) {
     if (weight_total[y].size() <= n)
       weight_total[y].resize(n + 1);
@@ -54,8 +54,8 @@ void WeightedError<E_t>::update_node(Algo& algo, const int n) {
 
   if (n == 0) {
 
-    for (size_t y{0}; y < 2; ++y) 
-			for (auto s : algo.P[y][n]) 
+    for (size_t y{0}; y < 2; ++y)
+			for (auto s : algo.P[y][n])
         weight_total[y][n] += weights[y][s];
 
   } else {
@@ -90,7 +90,7 @@ void WeightedError<E_t>::count_by_example(Algo &algo, const int node, const int 
 }
 
 template <typename E_t>
-E_t WeightedError<E_t>::node_error(const Algo &algo, const int i) const {	
+E_t WeightedError<E_t>::node_error(const Algo &algo, const int i) const {
   return std::min(weight_total[0][i], weight_total[1][i]);
 }
 
@@ -302,7 +302,7 @@ template <template<typename> class ErrorPolicy, typename E_t>
 void BacktrackingAlgorithm<ErrorPolicy, E_t>::print_new_best() const {
 
 
-	
+
   E_t total =
       error_policy.get_total(*this, 0, 0) + error_policy.get_total(*this, 1, 0) + 2 * error_offset;
   cout << setprecision(5) << left << "d accuracy=" << setw(7)
@@ -982,7 +982,7 @@ bool BacktrackingAlgorithm<ErrorPolicy, E_t>::grow(const int node) {
 
   feature[node] = ranked_feature[node].begin();
   end_feature[node] = ranked_feature[node].end();
-	
+
 	error_policy.update_node(*this, node);
 
   filter_features(node, [&](const int f) { return max_entropy(node, f); });
@@ -1153,8 +1153,8 @@ void BacktrackingAlgorithm<ErrorPolicy, E_t>::initialise_search() {
     }
 
     if (options.verbosity >= DTOptions::NORMAL)
-      cout << "d feature_reduction=" << (num_feature - relevant_features.size())
-           << endl;
+      cout << "d feature=" << num_feature << " feature_reduction="
+           << (num_feature - relevant_features.size()) << endl;
 
     filter_features(0, [&](const int f) { return not feature_set[f]; });
     sort_features(0);

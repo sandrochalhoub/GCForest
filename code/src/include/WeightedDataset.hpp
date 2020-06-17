@@ -108,7 +108,7 @@ template <class Algo> inline void WeightedDataset::toInc(Algo &algo) {
 
   for (int y = 0; y < 2; ++y) {
     weight[y] = 0;
-		
+
     for (;x[y] != end[y]; ++x[y]) {
       assert(x[1 - y] == end[1 - y]);
 
@@ -122,13 +122,14 @@ template <class Algo> inline void WeightedDataset::toInc(Algo &algo) {
       }
     }
   }
-	
+
 	algo.setErrorOffset(sup_count);
 
   // print stats
   std::cout << "d duplicate=" << dup_count << " suppressed=" << sup_count
             << " ratio=" << float(dup_count + sup_count) / example_count()
-            << std::endl;
+            << " count=" << example_count() << " final_count="
+            << example_count() - (dup_count + sup_count) << std::endl;
 }
 
 }
