@@ -11,8 +11,8 @@ def setup():
 
 
     # dataset methods
-    dataset_base = "../../code/bin/bud_first_search #BENCHMARK --use_weight --filter_inconsistent"
-    methods.append(("cart", cart_base))
+    dataset_base = "../../code/bin/bud_first_search #BENCHMARK --print_par --max_depth 2 --use_weights --filter_inconsistent"
+    methods.append(("dataset", dataset_base))
 
     keyfile.write('%d methods\n'%len(methods))
 
