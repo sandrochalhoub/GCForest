@@ -58,9 +58,9 @@ if __name__ == '__main__':
 
     o = Observation(e, parsers)
 
-    time = Statistic('time', label= 'time', precision=lambda x:3)
+    time = Statistic('time', label= 'time', precision=lambda x:2)
     sample_count = Statistic('sample_count', label='\\#s')
-    dratio = Statistic('dratio', label='\\% dupli.', precision=lambda x:1)
+    dratio = Statistic('dratio', label='\\% dupli.', precision=lambda x:3)
     accuracy = Statistic('accuracy', label='acc.', precision=lambda x:3)
 
     m_no_weights_success = Method('no weights', stats=[time])
