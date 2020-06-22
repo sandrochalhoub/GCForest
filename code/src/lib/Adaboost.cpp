@@ -101,6 +101,10 @@ namespace primer {
     // auto ex_count = example_count();
     // std::cout << "error: " << algo.error() * ex_count << "/" << ex_count << std::endl;
     // std::cout << "current accuracy: " << get_accuracy() << std::endl;
+
+    std::cout << "r train acc=" << get_accuracy() << std::endl;
+    std::cout << "r test acc=" << get_test_accuracy() << std::endl;
+    std::cout << "r time=" << cpu_time() - start_time << std::endl;
   }
 
   void Adaboost::initialize_weights() {
@@ -126,8 +130,8 @@ namespace primer {
 
     double err = last_algo.error();
 		assert(err > 0);
-		
-		
+
+
     double alpha = last_clf.weight;
 
     for (int y = 0; y < 2; ++y) {
