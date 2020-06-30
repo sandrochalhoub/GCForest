@@ -9,7 +9,7 @@ class GenericParser(object):
     def __call__(self,respath):
         res = {}
         for line in respath:
-            if line.startswith("r "):
+            if line.startswith("r ") and respath[-1].startswith("r "):
                 data = line[2:].strip().split("=")
                 res[data[0].strip()] = [float(data[1])]
         return res

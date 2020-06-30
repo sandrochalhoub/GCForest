@@ -10,9 +10,9 @@ def setup():
     methods = []
 
     split = 0.2
-    max_depth = 3
+    max_depth = 4
     ada_it = 30
-    search_size = 100000
+    search_size = 10000000
 
     # Cart methods
     cart_base = "python3 ../../code/examples/scripts/adaboost.py #BENCHMARK --seed #SEED --split %f --max_depth %i --n_estimators %i" % (split, max_depth, ada_it)

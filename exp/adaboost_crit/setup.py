@@ -10,7 +10,7 @@ def setup():
     methods = []
 
     split = 0.2
-    max_depth = 3
+    max_depth = 4
     ada_it = 30
 
     # error

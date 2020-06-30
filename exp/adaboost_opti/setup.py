@@ -10,7 +10,7 @@ def setup():
     methods = []
 
     split = 0.2
-    max_depth = 3
+    max_depth = 4 
     search_limit = 100000
     ada_it = 30
 

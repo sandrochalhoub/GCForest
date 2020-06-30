@@ -9,7 +9,7 @@ class GenericParser(object):
     def __call__(self,respath):
         res = {}
         for line in respath:
-            if line.startswith("r "):
+            if line.startswith("r ") and respath[-1].startswith("r "):
                 data = line[2:].strip().split("=")
                 res[data[0].strip()] = [float(data[1])]
         return res
@@ -29,6 +29,6 @@ if __name__ == '__main__':
     m_depth = Method('depth', stats=[train_acc, test_acc, time])
     m_size = Method('size', stats=[train_acc, test_acc, time])
 
-    o.write_table('tex/crit.tex', [m_error,m_depth, m_size], benches)
+    o.write_table('tex/crit.tex', [m_error, m_size], benches)
 
     # compile_latex()
