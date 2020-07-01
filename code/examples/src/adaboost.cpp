@@ -53,10 +53,7 @@ int main(int argc, char *argv[]) {
   if (opt.verbosity >= DTOptions::NORMAL)
     cout << "d readtime=" << cpu_time() << endl;
 
-  if (opt.split > 0) {
-    A.split_dataset(opt.split);
-  }
-
+  A.preprocess();
   // TODO choose what to minimize?
   A.train();
 

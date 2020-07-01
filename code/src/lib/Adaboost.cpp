@@ -1,6 +1,7 @@
 #include "Adaboost.hpp"
 
 #include "utils.hpp"
+#include "WeightedDataset.hpp"
 
 // https://fr.wikipedia.org/wiki/AdaBoost
 
@@ -16,6 +17,10 @@ namespace primer {
   Adaboost::Adaboost(DTOptions &opt)
     : options(opt), max_it(opt.ada_it) {
 
+  }
+
+  void Adaboost::setErrorOffset(size_t error_offset) {
+    this->error_offset = error_offset;
   }
 
   void Adaboost::train() {
@@ -47,6 +52,31 @@ namespace primer {
 
   double Adaboost::get_test_accuracy() const {
     return get_accuracy(test_bitsets);
+  }
+
+  void Adaboost::preprocess() {
+    // split dataset
+    if (options.split > 0) {
+      split_dataset(options.split);
+    }
+
+    // filter inconsistent examples on training set
+    if (options.filter_inconsistent) {
+      WeightedDataset filter;
+
+      for (int y = 0; y < 2; ++y) {
+        for (int i = 0; i < dataset[y].size(); ++i) {
+          filter.addExample(dataset[y][i].begin(), dataset[y][i].end(), y);
+        }
+
+        bitsets[y].clear();
+        dataset[y].clear();
+      }
+
+      filter.toInc(*this);
+
+      std::cout << "Filter inconsistent: train size=" << bitsets[0].size() + bitsets[1].size() << std::endl;
+    }
   }
 
   void Adaboost::split_dataset(double split_value) {
@@ -131,7 +161,6 @@ namespace primer {
     double err = last_algo.error();
 		assert(err > 0);
 
-
     double alpha = last_clf.weight;
 
     for (int y = 0; y < 2; ++y) {
@@ -148,12 +177,8 @@ namespace primer {
         double dnext = d * exp(- alpha * u * upred) / (2 * sqrt(err * (1 - err)));
 
         current_algo.addExample(sample.begin(), sample.end(), y, dnext);
-
-				// cout << " " << dnext ;
       }
     }
-
-		// cout << endl;
   }
 
   void Adaboost::compute_clf_weight() {
@@ -191,7 +216,7 @@ namespace primer {
 
   double Adaboost::get_accuracy(const std::vector<instance> *bitsets) const {
     size_t correct = 0;
-    size_t total = 0;
+    size_t total = error_offset;
 
     for (int y = 0; y < 2; ++y) {
       size_t count = bitsets[y].size();
