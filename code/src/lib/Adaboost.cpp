@@ -47,7 +47,7 @@ namespace primer {
   }
 
   double Adaboost::get_accuracy() const {
-    return get_accuracy(bitsets);
+    return get_accuracy(bitsets, this->error_offset);
   }
 
   double Adaboost::get_test_accuracy() const {
@@ -128,10 +128,6 @@ namespace primer {
     compute_clf_weight();
 
     // Print stuff to evaluate performance
-    // auto ex_count = example_count();
-    // std::cout << "error: " << algo.error() * ex_count << "/" << ex_count << std::endl;
-    // std::cout << "current accuracy: " << get_accuracy() << std::endl;
-
     std::cout << "r train acc=" << get_accuracy() << std::endl;
     std::cout << "r test acc=" << get_test_accuracy() << std::endl;
     std::cout << "r time=" << cpu_time() - start_time << std::endl;
@@ -139,7 +135,7 @@ namespace primer {
 
   void Adaboost::initialize_weights() {
     auto &current_algo = classifiers.back()->algo;
-    double m = example_count();
+    double m = example_count(bitsets);
 
     for (int y = 0; y < 2; ++y) {
       int count = dataset[y].size();
@@ -201,7 +197,7 @@ namespace primer {
         std::cout << "r iterations=" << it_count << std::endl;
         return true;
       }
-      if (get_correct_count(bitsets) == example_count()) {
+      if (get_correct_count(bitsets, error_offset) == example_count(bitsets, error_offset)) {
         std::cout << "r iterations=" << it_count << std::endl;
         return true;
       }
@@ -210,45 +206,28 @@ namespace primer {
     return it_count >= max_it;
   }
 
-  size_t Adaboost::example_count() const {
-    return dataset[0].size() + dataset[1].size();
+  size_t Adaboost::example_count(const std::vector<instance> *bitsets, size_t error_offset) const {
+    return bitsets[0].size() + bitsets[1].size() + error_offset * 2;
   }
 
-  double Adaboost::get_accuracy(const std::vector<instance> *bitsets) const {
+  double Adaboost::get_accuracy(const std::vector<instance> *bitsets, size_t error_offset) const {
+    // std::cout << get_correct_count(bitsets, error_offset) << "/" << example_count(bitsets, error_offset) << std::endl;
+    return get_correct_count(bitsets, error_offset) / double(example_count(bitsets, error_offset));
+  }
+
+  size_t Adaboost::get_correct_count(const std::vector<instance> *bitsets, size_t error_offset) const {
     size_t correct = 0;
-    size_t total = error_offset;
 
     for (int y = 0; y < 2; ++y) {
       size_t count = bitsets[y].size();
 
       for (size_t i = 0; i < count; ++i) {
-        ++total;
-
         if (predict(bitsets[y][i]) == y) {
           ++correct;
         }
       }
     }
 
-    return correct / double(total);
-  }
-
-  size_t Adaboost::get_correct_count(const std::vector<instance> *bitsets) const {
-    size_t correct = 0;
-    size_t total = 0;
-
-    for (int y = 0; y < 2; ++y) {
-      size_t count = bitsets[y].size();
-
-      for (size_t i = 0; i < count; ++i) {
-        ++total;
-
-        if (predict(bitsets[y][i]) == y) {
-          ++correct;
-        }
-      }
-    }
-
-    return correct;
+    return correct + error_offset;
   }
 }

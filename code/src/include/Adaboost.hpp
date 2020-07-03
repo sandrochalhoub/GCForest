@@ -57,7 +57,7 @@ namespace primer {
 
     std::vector<instance> test_bitsets[2];
 
-    size_t error_offset;
+    size_t error_offset = 0;
 
     // internal variables
     size_t it_count;
@@ -78,11 +78,11 @@ namespace primer {
 
     bool should_stop();
 
-    size_t example_count() const;
+    size_t example_count(const std::vector<instance> *bitsets, size_t error_offset = 0) const;
 
-    double get_accuracy(const std::vector<instance> *bitsets) const;
+    double get_accuracy(const std::vector<instance> *bitsets, size_t error_offset = 0) const;
 
-    size_t get_correct_count(const std::vector<instance> *bitsets) const;
+    size_t get_correct_count(const std::vector<instance> *bitsets, size_t error_offset = 0) const;
   };
 
   template <class rIter>
