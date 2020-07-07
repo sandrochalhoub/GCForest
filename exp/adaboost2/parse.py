@@ -21,8 +21,8 @@ if __name__ == '__main__':
     benches = [Benchmark([b]) for b in e.all_benchmarks]
 
     o = Observation(e, parsers)
-    train_acc = Statistic('train acc', label='train acc.', precision=lambda x:3)
-    test_acc = Statistic('test acc', label='test acc.', precision=lambda x:3)
+    train_acc = Statistic('train acc', label='train acc.', precision=lambda x:3, best=max)
+    test_acc = Statistic('test acc', label='test acc.', precision=lambda x:3, best=max)
 
     l_max_depth = [3, 4, 5, 7, 10, 15]
 
