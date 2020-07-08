@@ -6,22 +6,10 @@
 #include "budFirstSearch.h"
 %}
 
-struct Example {
-  std::vector<int> features;
-  int target;
-
-  Example();
-  Example(std::vector<int> features, int target);
-};
-
-extern void addExamples(primer::BacktrackingAlgorithm &algo, std::vector<Example> data);
 extern DTOptions parse(std::vector<std::string> params);
-
-extern void free(void* ptr);
+extern void read_binary(primer::BacktrackingAlgorithm<IntegerError<int>, int> &A, DTOptions &opt);
 
 namespace std {
-  %template(example_vec) vector<Example>;
-
   %template(int_vec) vector<int>;
   %template(cstr_vec) vector<char*>;
   %template(str_vec) vector<string>;
@@ -31,6 +19,11 @@ namespace std {
 
 class DTOptions {
 public:
+  std::string instance_file;
+  std::string debug;
+  std::string output;
+  std::string format;
+
   int verbosity;
 
   int seed;
@@ -94,6 +87,7 @@ namespace primer {
 
   // BacktrackingAlgorithm
 
+  template <class Error, class ErrorType>
   class BacktrackingAlgorithm {
   public:
     BacktrackingAlgorithm() = delete;
@@ -102,5 +96,14 @@ namespace primer {
     void minimize_error_depth();
     void minimize_error_depth_size();
     Tree getSolution();
+    void addExample(const std::vector<int> &example);
+    void addExample(const std::vector<int> &example, int weight);
   };
+
+  template <class ErrorType> class IntegerError;
+  template <class ErrorType> class WeightedError;
+
+  %template(BacktrackingAlgo) BacktrackingAlgorithm<IntegerError<int>, int>;
+  %template(WeightedBacktrackingAlgo) BacktrackingAlgorithm<WeightedError<int>, int>;
+  %template(WeightedBacktrackingAlgod) BacktrackingAlgorithm<WeightedError<double>, double>;
 }

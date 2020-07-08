@@ -2,6 +2,9 @@
 
 #include <iostream>
 
+#include "CSVReader.hpp"
+#include "TXTReader.hpp"
+
 using namespace primer;
 
 /*
@@ -27,12 +30,6 @@ void addNode(Tree &tree, int node, Results &res) {
 }
 */
 
-void addExamples(primer::BacktrackingAlgorithm &algo, std::vector<Example> data) {
-  for (Example &example: data) {
-    algo.addExample(example.features.begin(), example.features.end(), example.target);
-  }
-}
-
 DTOptions parse(std::vector<std::string> params) {
   std::vector<char*> cparams;
   for (auto &param : params) {
@@ -42,6 +39,23 @@ DTOptions parse(std::vector<std::string> params) {
   return parse_dt(cparams.size(), &cparams[0]);
 }
 
-void free(void *ptr) {
-  delete ptr;
+void read_binary(BacktrackingAlgorithm<> &A, DTOptions &opt) {
+  string ext{opt.instance_file.substr(opt.instance_file.find_last_of(".") + 1)};
+
+  if (opt.format == "csv" or (opt.format == "guess" and ext == "csv")) {
+    csv::read_binary(opt.instance_file, [&](vector<int> &data) {
+      A.addExample(data.begin(), data.end() - 1, data.back());
+    });
+  } else if (opt.format == "dl8" or (opt.format == "guess" and ext == "dl8")) {
+    txt::read_binary(opt.instance_file, [&](vector<int> &data) {
+      auto y = *data.begin();
+      A.addExample(data.begin() + 1, data.end(), y);
+    });
+  } else {
+    if (opt.format != "txt" and ext != "txt")
+      cout << "p Warning, unrecognized format, trying txt\n";
+    txt::read_binary(opt.instance_file, [&](vector<int> &data) {
+      A.addExample(data.begin(), data.end() - 1, data.back());
+    });
+  }
 }
