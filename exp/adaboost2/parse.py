@@ -24,11 +24,11 @@ if __name__ == '__main__':
     train_acc = Statistic('train acc', label='train acc.', precision=lambda x:3, best=max)
     test_acc = Statistic('test acc', label='test acc.', precision=lambda x:3, best=max)
 
-    l_max_depth = [3, 4, 5, 7, 10, 15]
+    l_ada_it = [1, 5, 10, 30, 100]
 
     # One table per max_depth
-    for max_depth in l_max_depth:
-        m_cart = Method('cart_%i' % max_depth, stats=[train_acc, test_acc])
-        m_bud = Method('bud_%i' % max_depth, stats=[train_acc, test_acc])
+    for ada_it in l_ada_it:
+        m_cart = Method('cart_%i' % ada_it, stats=[train_acc, test_acc])
+        m_bud = Method('bud_%i' % ada_it, stats=[train_acc, test_acc])
 
-        o.write_table('tex/max_depth_%i.tex' % max_depth, [m_cart,m_bud], benches)
+        o.write_table('tex/iteration_%i.tex' % ada_it, [m_cart,m_bud], benches)

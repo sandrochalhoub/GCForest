@@ -15,27 +15,38 @@ class GenericParser(object):
         return res
 
 def write_methods_table(o, tabname, methods, lvals):
+    # TODO MARCHE PAS ###  PAS TESTE
+    cols = ["cart", "bud"]
+    subcols = ["train acc.", "test acc."]
+
     with open(tabname, 'r') as tabfile:
         # header
         tabfile.write("\\begin\{longtable\}\{lrrrr\}\n\\toprule\n")
         # columns
-        tabfile.write("& \\multicolumn\{2\}\{c\}\{cart\} & \\multicolumn\{2\}\{c\}\{bud\}\\\\\n")
-        tabfile.write("\\cmidrule(rr)\{2-3\}\\cmidrule(rr)\{4-5\}\n")
+        for m in cols:
+            tabfile.write("& \\multicolumn\{2\}\{c\}\{%s\} " % m)
+        tabfile.write("\n")
+
+        i = 2
+        for m in cols:
+            tabfile.write("\\cmidrule(rr)\{%i-%i\}" % (i, i + len(subcols) - 1))
 
         for i in range(2):
-            for val in ["train acc.", "test acc."]:
-                tabfile.write("& \\multicolumn\{1\}\{c\}\{" + val + "\} ")
+            for val in subcols:
+                tabfile.write("& \\multicolumn\{1\}\{c\}\{%s\} " % val)
 
-        tabfile.write("\\\\\n\\midrule")
+        tabfile.write("\\\\\n\\midrule\n")
 
         for val in lvals:
-            tabfile.write("\\texttt{")
+            tabfile.write("\\texttt\{%i\}" % val)
 
-            # values
-            for ...:
-                tabfile.write("")
+            # values
+            for m in cols:
+                for s in subcols:
+                    tabfile.write(" & %.3f" % o.data)
+                    pass
 
-            tabfile.write("}")
+            tabfile.write("\\\\\n")
 
 
 if __name__ == '__main__':
@@ -56,16 +67,17 @@ if __name__ == '__main__':
         m_cart = Method('cart_%i' % max_depth, stats=[train_acc, test_acc])
         m_bud = Method('bud_%i' % max_depth, stats=[train_acc, test_acc])
 
-        cart_methods.append(m_cart)
-        bud_methods.append(m_bud)
+        cart_methods.append(m_cart.name)
+        bud_methods.append(m_bud.name)
 
         o.write_table('tex/max_depth_%i.tex' % max_depth, [m_cart,m_bud], benches)
 
     # Summary table: Best value for all the proposed depths, for each datasets
-    o.write_summary_table("tex/summary.tex", [train_acc, test_acc], methods=)
+    # o.write_summary_table("tex/summary_cart.tex", ["train acc", "test acc"], methods=cart_methods, bests=[max, max], benches=)
+    # o.write_summary_table("tex/summary_bud.tex", ["train acc", "test acc"], methods=bud_methods, bests=[max, max])
 
     # Table per dataset
     for b in benches:
-
-        write_methods_table(o, "tex/%s.tex" % b.label, bud_methods, cart_methods)
-        # o.write_summary_table('tex/%s.tex' % b.label, )
+        o.write_summary_table("tex/%s.tex" % b.label, ["train acc", "test acc"], methods=cart_methods + bud_methods,
+            bests=[max, max], precisions= [[3]] * 2, benchmarks={b.label})
+        # write_methods_table(o, "tex/%s.tex" % b.label, bud_methods, cart_methods)
