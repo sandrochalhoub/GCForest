@@ -59,9 +59,13 @@ public:
   int feature_strategy;
 
   bool binarize;
+  int ada_it;
 
   bool mindepth;
   bool minsize;
+
+  bool use_weights;
+  bool filter_inconsistent;
 
 
   DTOptions();
@@ -97,7 +101,18 @@ namespace primer {
     void minimize_error_depth_size();
     Tree getSolution();
     void addExample(const std::vector<int> &example);
-    void addExample(const std::vector<int> &example, int weight);
+    void addExample(const std::vector<int> &example, E_t weight);
+  };
+
+  class Adaboost {
+  public:
+    DTOptions &options;
+
+    Adaboost() = delete;
+    Adaboost(DTOptions &opt);
+    void train();
+    bool predict(const std::vector<int> &example) const;
+    void addExample(const std::vector<int> &example);
   };
 
   template <class ErrorType> class CardinalityError;

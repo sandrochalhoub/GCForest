@@ -46,6 +46,17 @@ namespace primer {
     return pred > 0;
   }
 
+  bool Adaboost::predict(const std::vector<int> &sample) const {
+      instance bsample(sample.size());
+
+      for (size_t i = 0; i < sample.size(); ++i) {
+        if (sample[i] == 1) {
+          bsample.set(i);
+        }
+      }
+      return predict(bsample);
+  }
+
   double Adaboost::get_accuracy() const {
     return get_accuracy(bitsets, this->error_offset);
   }

@@ -4,6 +4,7 @@
 #include "Tree.hpp"
 #include "Backtrack.hpp"
 #include "CmdLine.hpp"
+#include "Adaboost.hpp"
 
 #define SWIG_FILE_WITH_INIT
 
