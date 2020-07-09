@@ -56,8 +56,4 @@ int main(int argc, char *argv[]) {
   A.preprocess();
   // TODO choose what to minimize?
   A.train();
-
-  // Print accuracy
-  std::cout << "r train acc=" << A.get_accuracy() << std::endl;
-  std::cout << "r test acc=" << A.get_test_accuracy() << std::endl;
 }

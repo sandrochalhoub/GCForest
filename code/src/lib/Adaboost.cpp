@@ -32,8 +32,6 @@ namespace primer {
       iteration();
       ++it_count;
     }
-
-    std::cout << "r time=" << cpu_time() - start_time << std::endl;
   }
 
   bool Adaboost::predict(const instance &i) const {
@@ -139,9 +137,11 @@ namespace primer {
     compute_clf_weight();
 
     // Print stuff to evaluate performance
-    std::cout << "r train acc=" << get_accuracy() << std::endl;
-    std::cout << "r test acc=" << get_test_accuracy() << std::endl;
-    std::cout << "r time=" << cpu_time() - start_time << std::endl;
+    std::cout << "d ada_train_acc=" << get_accuracy();
+    if (example_count(test_bitsets)) {
+        std::cout << " ada_test_acc=" << get_test_accuracy();
+    }
+    std::cout << " ada_time=" << cpu_time() - start_time << std::endl;
   }
 
   void Adaboost::initialize_weights() {

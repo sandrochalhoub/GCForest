@@ -4,15 +4,38 @@ from rocknrun import *
 
 
 # Parsers should return a dict stat-name -> value-list. value-list is a list of the different values that the stat takes during a run
-class GenericParser(object):
+class DTParser(object):
+    def __init__(self, separator=' ', equal='=', dataflag='d'):
+        self.equal = equal
+        self.separator = separator
+        self.dataflag = dataflag
 
-    def __call__(self,respath):
+    def store(self, stat, vstr, res):
+        stat = stat.strip()
+        if not res.has_key(stat):
+            res[stat] = []
+        val = None
+        try:
+            val = int(vstr)
+        except:
+            val = float(vstr)
+        res[stat].append(val)
+
+    def __call__(self,output):
+
         res = {}
-        for line in respath:
-            if line.startswith("r "):
-                data = line[2:].strip().split("=")
-                res[data[0].strip()] = [float(data[1])]
+
+        for line in output:
+            if not line.startswith(self.dataflag):
+                continue
+
+            data = line[len(self.dataflag):].split()
+            for st in data:
+                stat,val = st.split(self.equal)
+                self.store(stat,val,res)
+
         return res
+
 
 def write_methods_table(o, tabname, methods, lvals):
     # TODO MARCHE PAS ###  PAS TESTE
@@ -55,8 +78,8 @@ if __name__ == '__main__':
     benches = [Benchmark([b]) for b in e.all_benchmarks]
 
     o = Observation(e, parsers)
-    train_acc = Statistic('train acc', label='train acc.', precision=lambda x:3, best=max)
-    test_acc = Statistic('test acc', label='test acc.', precision=lambda x:3, best=max)
+    train_acc = Statistic('ada_train_acc', label='train acc.', precision=lambda x:3, best=max)
+    test_acc = Statistic('ada_test_acc', label='test acc.', precision=lambda x:3, best=max)
 
     l_max_depth = [3, 4, 5, 7, 10, 15]
     cart_methods = []
@@ -78,6 +101,6 @@ if __name__ == '__main__':
 
     # Table per dataset
     for b in benches:
-        o.write_summary_table("tex/%s.tex" % b.label, ["train acc", "test acc"], methods=cart_methods + bud_methods,
+        o.write_summary_table("tex/%s.tex" % b.label, ["ada_train_acc", "ada_test_acc"], methods=cart_methods + bud_methods,
             bests=[max, max], precisions= [[3]] * 2, benchmarks={b.label})
         # write_methods_table(o, "tex/%s.tex" % b.label, bud_methods, cart_methods)

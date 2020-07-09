@@ -62,6 +62,7 @@ if __name__ == "__main__":
     parser.add_argument("--search", default=-1, type=int, help="Search size (for solver \"bud\")")
     parser.add_argument("--split", default=0, type=float, help="Split between train and test data")
     parser.add_argument("--seed", default=12345, type=int, help="Seed for random generator, -1 for no seed (not implemented)")
+    # TODO use print_par & print_data
     parser.add_argument("--print_par", action="store_true", help="Print parameters")
     parser.add_argument("--print_data", action="store_true", help="Print datasets properties (number of instances, etc)")
     args = parser.parse_args();
@@ -95,9 +96,11 @@ if __name__ == "__main__":
 
     train_pred = adaboost.predict(train_x)
     train_acc = metrics.accuracy_score(train_y, train_pred)
-    print("r train acc={}".format(train_acc))
+    print("d ada_train_acc={}".format(train_acc), end="")
 
     if do_test:
         test_pred = adaboost.predict(test_x)
         test_acc = metrics.accuracy_score(test_y, test_pred)
-        print("r test acc={}".format(test_acc))
+        print(" ada_test_acc={}".format(test_acc), end="")
+
+    print("")
