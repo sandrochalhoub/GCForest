@@ -39,7 +39,7 @@ class DTParser(object):
 
 if __name__ == '__main__':
     e = Experiment()
-    parsers = dict([(m, GenericParser()) for m in e.all_methods])
+    parsers = dict([(m, DTParser()) for m in e.all_methods])
     benches = [Benchmark([b]) for b in e.all_benchmarks]
 
     o = Observation(e, parsers)

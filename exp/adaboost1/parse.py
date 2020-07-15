@@ -34,6 +34,10 @@ class DTParser(object):
                 stat,val = st.split(self.equal)
                 self.store(stat,val,res)
 
+        # Compute average tree size:
+        ada_size = res["ada_size"]
+        self.store("avg_size", sum(ada_size) / len(ada_size), res)
+
         return res
 
 
@@ -74,12 +78,13 @@ def write_methods_table(o, tabname, methods, lvals):
 
 if __name__ == '__main__':
     e = Experiment()
-    parsers = dict([(m, GenericParser()) for m in e.all_methods])
+    parsers = dict([(m, DTParser()) for m in e.all_methods])
     benches = [Benchmark([b]) for b in e.all_benchmarks]
 
     o = Observation(e, parsers)
     train_acc = Statistic('ada_train_acc', label='train acc.', precision=lambda x:3, best=max)
     test_acc = Statistic('ada_test_acc', label='test acc.', precision=lambda x:3, best=max)
+    tree_size = Statistic('avg_size', label='tree size', precision=lambda x:2, best=min)
 
     l_max_depth = [3, 4, 5, 7, 10, 15]
     cart_methods = []
@@ -87,8 +92,8 @@ if __name__ == '__main__':
 
     # One table per max_depth
     for max_depth in l_max_depth:
-        m_cart = Method('cart_%i' % max_depth, stats=[train_acc, test_acc])
-        m_bud = Method('bud_%i' % max_depth, stats=[train_acc, test_acc])
+        m_cart = Method('cart_%i' % max_depth, stats=[train_acc, test_acc, tree_size])
+        m_bud = Method('bud_%i' % max_depth, stats=[train_acc, test_acc, tree_size])
 
         cart_methods.append(m_cart.name)
         bud_methods.append(m_bud.name)

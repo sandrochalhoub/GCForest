@@ -141,7 +141,7 @@ namespace primer {
     if (example_count(test_bitsets)) {
         std::cout << " ada_test_acc=" << get_test_accuracy();
     }
-    std::cout << " ada_time=" << cpu_time() - start_time << std::endl;
+    std::cout << " ada_time=" << cpu_time() - start_time << " ada_size=" << algo.getUbSize() << std::endl;
   }
 
   void Adaboost::initialize_weights() {

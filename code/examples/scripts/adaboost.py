@@ -94,13 +94,20 @@ if __name__ == "__main__":
 
     adaboost.fit(train_x, train_y)
 
+    # Get average size of the trees
+    if args.solver == "cart":
+        for clf in adaboost.estimators_:
+            print("d ada_size={}".format(clf.tree_.node_count))
+
     train_pred = adaboost.predict(train_x)
     train_acc = metrics.accuracy_score(train_y, train_pred)
-    print("d ada_train_acc={}".format(train_acc), end="")
+    train_err = len(train_y) - np.sum(np.array(train_y) == np.array(train_pred))
+    print("d ada_train_acc={} ada_train_err={}".format(train_acc, train_err), end="")
 
     if do_test:
         test_pred = adaboost.predict(test_x)
         test_acc = metrics.accuracy_score(test_y, test_pred)
-        print(" ada_test_acc={}".format(test_acc), end="")
+        test_err = len(test_y) - np.sum(np.array(test_y) == np.array(test_pred))
+        print(" ada_test_acc={} ada_test_err={}".format(test_acc, test_err), end="")
 
     print("")
