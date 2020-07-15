@@ -31,6 +31,8 @@ namespace primer {
 
     bool predict(const instance &i) const;
 
+    bool predict(const std::vector<int> &example) const;
+
     /** Preprocess dataset according to options (split, remove inconsistent) */
     void preprocess();
 
@@ -49,6 +51,10 @@ namespace primer {
     */
     template <class rIter>
     void addExample(rIter beg_sample, rIter end_sample, const bool y, size_t weight);
+
+    void addExample(const std::vector<int> &example) {
+        addExample(example.begin(), example.end() - 1, example.back());
+    }
 
   private:
     size_t max_it;
@@ -94,7 +100,7 @@ namespace primer {
     // Add bitset
     instance bsample(sample.size());
 
-    for (int i = 0; i < sample.size(); ++i) {
+    for (size_t i = 0; i < sample.size(); ++i) {
       if (sample[i] == 1) {
         bsample.set(i);
       }

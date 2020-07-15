@@ -12,6 +12,8 @@ from sklearn.ensemble import AdaBoostClassifier
 from sklearn.model_selection import train_test_split
 import sklearn.metrics as metrics
 
+import bud_first_search as bud
+
 def read_dataset(filename):
     Y = []
     X = []
@@ -42,13 +44,25 @@ def read_dataset(filename):
 
     return X, Y
 
+def create_adabud(args):
+    solver = bud.AdaBoostClassifier()
+    solver.opt.ada_it = args.n_estimators
+    solver.opt.max_depth = args.max_depth
+    solver.opt.seed = args.seed
+    solver.opt.search = args.search
+
+    return solver
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("dataset", type=str, help="Dataset file name")
+    parser.add_argument("--solver", default="cart", type=str, help="What solver to use: cart, bud")
     parser.add_argument("--max_depth", default=3, type=int, help="Max depth of the trees")
     parser.add_argument("--n_estimators", default=30, type=int, help="Number of estimators in Adaboost")
+    parser.add_argument("--search", default=-1, type=int, help="Search size (for solver \"bud\")")
     parser.add_argument("--split", default=0, type=float, help="Split between train and test data")
     parser.add_argument("--seed", default=12345, type=int, help="Seed for random generator, -1 for no seed (not implemented)")
+    # TODO use print_par & print_data
     parser.add_argument("--print_par", action="store_true", help="Print parameters")
     parser.add_argument("--print_data", action="store_true", help="Print datasets properties (number of instances, etc)")
     args = parser.parse_args();
@@ -69,16 +83,24 @@ if __name__ == "__main__":
     print("p max_depth={}".format(args.max_depth))
     print("p ada_it={}".format(args.n_estimators))
 
-    adaboost = AdaBoostClassifier(DecisionTreeClassifier(max_depth=args.max_depth),
-                            n_estimators=args.n_estimators, random_state=rng)
+    if args.solver == "cart":
+        adaboost = AdaBoostClassifier(DecisionTreeClassifier(max_depth=args.max_depth),
+                        n_estimators=args.n_estimators, random_state=rng)
+    elif args.solver == "bud":
+        adaboost = create_adabud(args)
+    else:
+        print("Unknown solver: %s" % args.solver)
+        sys.exit(-1)
 
     adaboost.fit(train_x, train_y)
 
     train_pred = adaboost.predict(train_x)
     train_acc = metrics.accuracy_score(train_y, train_pred)
-    print("r train acc={}".format(train_acc))
+    print("d ada_train_acc={}".format(train_acc), end="")
 
     if do_test:
         test_pred = adaboost.predict(test_x)
         test_acc = metrics.accuracy_score(test_y, test_pred)
-        print("r test acc={}".format(test_acc))
+        print(" ada_test_acc={}".format(test_acc), end="")
+
+    print("")
