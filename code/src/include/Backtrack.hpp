@@ -120,7 +120,9 @@ private:
   /// store the feature tested at node i (in ranked features)
   vector<vector<int>::iterator> feature;
 
-  // Stores the root of the best subtree found for the current feature of the parent node if the node is not optimal, it points to the optimal trees of the childrens given its root-feature
+  // Stores the root of the best subtree found for the current feature of the
+  // parent node if the node is not optimal, it points to the optimal trees of
+  // the childrens given its root-feature
   // therefore, *optimal* best trees should not be freed when pruning the node
   // however, they can be freed when replacing the current best.
   vector<int> best_tree;
@@ -187,9 +189,13 @@ private:
   bool size_matters;
 
   size_t actual_depth;
-	
-	// used to account for suppressed inconsistent examples
-	E_t error_offset{0};
+
+  // used to account for suppressed inconsistent examples
+  E_t error_offset{0};
+
+  int num_level_zero_feature;
+  int num_explored{0};
+  bool nb{true};
 
   void cleaning();
 
@@ -328,7 +334,8 @@ public:
   bool equal_feature(const int f_a, const int f_b);
 
   void separator(const string &msg) const;
-  void print_new_best() const;
+  void print_new_best();
+  void print_progress();
 
   void setUbDepth(const size_t u);
 
@@ -366,9 +373,9 @@ public:
 
   void addExample(const std::vector<int> &example, const E_t weight = 1);
 
-	void setErrorOffset(const E_t e);
-  
-	/*!@name Printing*/
+  void setErrorOffset(const E_t e);
+
+  /*!@name Printing*/
   //@{
   // std::ostream &toCsv(std::ostream &os) const;
   std::ostream &display(std::ostream &os) const;
@@ -501,8 +508,8 @@ inline void BacktrackingAlgorithm<ErrorPolicy, E_t>::filter_features(const int n
   for (auto f{end_feature[node] - 1}; f >= feature[node]; --f) {
     if (cond(*f)) {
       swap(*f, *(--end_feature[node]));
-		}
-	}
+    }
+  }
 }
 
 template <template<typename> class ErrorPolicy, typename E_t>

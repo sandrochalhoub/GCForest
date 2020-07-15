@@ -294,26 +294,67 @@ bool BacktrackingAlgorithm<ErrorPolicy, E_t>::null_entropy(const int node, const
 template <template<typename> class ErrorPolicy, typename E_t>
 void BacktrackingAlgorithm<ErrorPolicy, E_t>::separator(const string &msg) const {
   cout << setfill('-') << setw((96 - msg.size()) / 2) << "-"
-       << "[" << msg << "]" << setw((96 - msg.size()) / 2) << "-" << endl
+       << "[" << msg << "]" << setw((96 - msg.size()) / 2 + (msg.size() % 2))
+       << "-" << endl
        << setfill(' ');
 }
 
-template <template<typename> class ErrorPolicy, typename E_t>
-void BacktrackingAlgorithm<ErrorPolicy, E_t>::print_new_best() const {
+template <template <typename> class ErrorPolicy, typename E_t>
+void BacktrackingAlgorithm<ErrorPolicy, E_t>::print_new_best() {
 
-
-
+  if (not nb)
+    cout << endl;
+  nb = true;
   E_t total =
       error_policy.get_total(*this, 0, 0) + error_policy.get_total(*this, 1, 0) + 2 * error_offset;
+
+  double t{
+      static_cast<double>(static_cast<int>(100.0 * (cpu_time() - start_time))) /
+      100.0};
+
   cout << setprecision(5) << left << "d accuracy=" << setw(7)
-       << (1.0 - static_cast<double>(error_offset + ub_error) / static_cast<double>(total))
-       << " error=" << setw(4) << ub_error + error_offset << " depth=" << setw(3)
-       << actual_depth << " size=" << setw(3) << ub_size
+       << (1.0 -
+           static_cast<double>(error_offset + ub_error) /
+               static_cast<double>(total))
+       << " error=" << setw(4) << ub_error + error_offset
+       << " depth=" << setw(3) << actual_depth << " size=" << setw(3) << ub_size
        // << " backtracks=" << setw(9) << num_backtracks
-       << " choices=" << setw(9) << search_size << " restarts=" << setw(5)
-       << num_restarts << " mem=" << setw(4) << wood.size()
-       << " time=" << setprecision(3) << cpu_time() - start_time << right
-       << endl;
+       << " choices=" << setw(9) << search_size << " restarts=" << setw(4)
+       << num_restarts << " mem=" << setw(3) << wood.size() << " time=" << t
+       << right << endl;
+}
+
+template <template <typename> class ErrorPolicy, typename E_t>
+void BacktrackingAlgorithm<ErrorPolicy, E_t>::print_progress() {
+	if(not options.progress)
+		return;
+  int width{82};
+  auto ne{feature[0] - ranked_feature[0].begin() + 1};
+  if (ne > num_explored) {
+    nb = false;
+    num_explored = ne;
+    auto k{num_explored * width / num_level_zero_feature};
+
+    double p{static_cast<double>(num_explored) * 100.0 /
+             static_cast<double>(num_level_zero_feature)};
+
+    double t{static_cast<double>(
+                 static_cast<int>(100.0 * (cpu_time() - start_time))) /
+             100.0};
+    cout << setw(width + 16) << setfill('\b') << "\b" << setw(5)
+         << setprecision(3) << setfill(' ') << p << "%"
+         << " t=" << left << setprecision(3) << setw(5) << t << right << "[";
+    if (k > 0)
+      cout << setw(k) << setfill('=') << "=";
+    if (k < width)
+      cout << setw(width - k) << setfill(' ') << " ";
+    cout << setw(1) << "]";
+    cout.flush();
+    if (k == width) {
+      cout << endl;
+      num_explored = num_level_zero_feature;
+    }
+  }
 }
 
 template <template<typename> class ErrorPolicy, typename E_t>
@@ -1106,6 +1147,7 @@ void BacktrackingAlgorithm<ErrorPolicy, E_t>::expend() {
 
 template <template<typename> class ErrorPolicy, typename E_t>
 void BacktrackingAlgorithm<ErrorPolicy, E_t>::initialise_search() {
+  num_level_zero_feature = num_feature;
 
   setReverse();
 
@@ -1164,7 +1206,10 @@ void BacktrackingAlgorithm<ErrorPolicy, E_t>::initialise_search() {
     // for(auto f : relevant_features)
     // 	cout << " " << f ;
     // cout << endl;
-}
+
+    // assert(feature[0] == ranked_feature[0].begin());
+    num_level_zero_feature = (end_feature[0] - feature[0]);
+  }
 }
 
 template <template<typename> class ErrorPolicy, typename E_t>
@@ -1175,6 +1220,9 @@ bool BacktrackingAlgorithm<ErrorPolicy, E_t>::search() {
 
     if (num_backtracks > restart_limit)
       restart(false);
+
+    if (decision.empty())
+      print_progress();
 
     PRINT_TRACE;
 

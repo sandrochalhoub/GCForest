@@ -426,6 +426,8 @@ DTOptions parse_dt(int argc, char *argv[]) {
   cmd.add<SwitchArg>(opt.filter_inconsistent, "", "filter_inconsistent",
                      "suppress inconsistent samples", false);
 
+  cmd.add<SwitchArg>(opt.progress, "", "progress", "print progress", false);
+
   cmd.parse(argc, argv);
   return opt;
 }

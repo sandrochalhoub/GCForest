@@ -167,6 +167,8 @@ public:
   bool use_weights;
   bool filter_inconsistent;
 
+  bool progress;
+
   DTOptions(){};
   DTOptions(const DTOptions &opt)
       : cmdline(opt.cmdline), instance_file(opt.instance_file),
@@ -182,7 +184,7 @@ public:
         feature_strategy(opt.feature_strategy), binarize(opt.binarize),
         split(opt.split), ada_it(opt.ada_it), mindepth(opt.mindepth),
         minsize(opt.minsize), use_weights(opt.use_weights),
-        filter_inconsistent(opt.filter_inconsistent) {}
+        filter_inconsistent(opt.filter_inconsistent), progress(opt.progress) {}
 
   ostream &display(ostream &os);
 };
