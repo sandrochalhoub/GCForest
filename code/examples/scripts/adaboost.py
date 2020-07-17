@@ -35,7 +35,7 @@ def read_dataset(filename):
         elif filename.endswith(".csv"):
             reader = csv.reader(csvfile, delimiter=",")
 
-            # Skip one example if the CSV has no header
+            # FIXME This skips one example if the CSV has no header :/
             next(reader)
 
             for row in reader:
