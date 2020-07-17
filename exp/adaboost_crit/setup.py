@@ -44,4 +44,4 @@ def setup():
 if __name__ == '__main__' :
     setup()
     e = Experiment()
-    e.generate_jobs(timeout='02:00:00')
+    e.generate_jobs(timeout='03:00:00')

@@ -106,6 +106,11 @@ if __name__ == '__main__':
 
     # Table per dataset
     for b in benches:
-        o.write_summary_table("tex/%s.tex" % b.label, ["ada_train_acc", "ada_test_acc"], methods=cart_methods + bud_methods,
-            bests=[max, max], precisions= [[3]] * 2, benchmarks={b.label})
+        try:
+            o.write_summary_table("tex/%s.tex" % b.label, ["ada_train_acc", "ada_test_acc"], methods=cart_methods + bud_methods,
+                labels=["train acc.", "test acc."], bests=[max, max], precisions= [[3]] * 2, benchmarks={b.label})
+        except:
+            # write_summary_table fails for one dataset where ada_test_acc does not exist for some reason.
+            print "Ignored dataset %s" % b.label
+            continue
         # write_methods_table(o, "tex/%s.tex" % b.label, bud_methods, cart_methods)

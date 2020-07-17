@@ -43,9 +43,9 @@ if __name__ == '__main__':
     benches = [Benchmark([b]) for b in e.all_benchmarks]
 
     o = Observation(e, parsers)
-    train_acc = Statistic('ada_train_acc', label='train acc.', precision=lambda x:3)
-    test_acc = Statistic('ada_test_acc', label='test acc.', precision=lambda x:3)
-    time = Statistic('ada_time', label='time', precision=lambda x:3)
+    train_acc = Statistic('ada_train_acc', label='train acc.', precision=lambda x:3, best=max)
+    test_acc = Statistic('ada_test_acc', label='test acc.', precision=lambda x:3, best=max)
+    time = Statistic('ada_time', label='time', precision=lambda x:3, best=min)
 
     m_error = Method('error', stats=[train_acc, test_acc, time])
     m_depth = Method('depth', stats=[train_acc, test_acc, time])
