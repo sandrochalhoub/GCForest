@@ -3,7 +3,7 @@ from .utils import *
 
 class AdaBoostClassifier:
     def __init__(self):
-        self.opt = wrapper.parse(to_str_vec(["adaboost.py", "--file", "none"]))
+        self.opt = wrapper.parse(to_str_vec(["adaboost.py", "file"]))
 
     def fit(self, X, Y):
         self.algo = wrapper.Adaboost(self.opt)

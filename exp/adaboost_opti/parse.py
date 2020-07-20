@@ -39,15 +39,15 @@ class DTParser(object):
 
 if __name__ == '__main__':
     e = Experiment()
-    parsers = dict([(m, GenericParser()) for m in e.all_methods])
+    parsers = dict([(m, DTParser()) for m in e.all_methods])
     benches = [Benchmark([b]) for b in e.all_benchmarks]
 
     o = Observation(e, parsers)
-    train_acc = Statistic('ada_train_acc', label='train acc.', precision=lambda x:3)
-    test_acc = Statistic('ada_test_acc', label='test acc.', precision=lambda x:3)
-    time = Statistic('ada_time', label='time', precision=lambda x:3)
+    train_acc = Statistic('ada_train_acc', label='train acc.', precision=lambda x:3, best=max)
+    test_acc = Statistic('ada_test_acc', label='test acc.', precision=lambda x:3, best=max)
+    time = Statistic('ada_time', label='time', precision=lambda x:3, best=min)
 
-    m_interrupted = Method('interrupted', stats=[train_acc, test_acc])
+    m_interrupted = Method('interrupted', stats=[train_acc, test_acc, time])
     m_optimal = Method('optimal', stats=[train_acc, test_acc, time])
 
     o.write_table('tex/opti.tex', [m_interrupted,m_optimal], benches)

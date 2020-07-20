@@ -34,23 +34,28 @@ class DTParser(object):
                 stat,val = st.split(self.equal)
                 self.store(stat,val,res)
 
+        # Compute average tree size:
+        ada_size = res["ada_size"]
+        self.store("avg_size", sum(ada_size) / len(ada_size), res)
+
         return res
 
 
 if __name__ == '__main__':
     e = Experiment()
-    parsers = dict([(m, GenericParser()) for m in e.all_methods])
+    parsers = dict([(m, DTParser()) for m in e.all_methods])
     benches = [Benchmark([b]) for b in e.all_benchmarks]
 
     o = Observation(e, parsers)
     train_acc = Statistic('ada_train_acc', label='train acc.', precision=lambda x:3, best=max)
     test_acc = Statistic('ada_test_acc', label='test acc.', precision=lambda x:3, best=max)
+    tree_size = Statistic('avg_size', label='tree size', precision=lambda x:2, best=min)
 
     l_ada_it = [1, 5, 10, 30, 100]
 
     # One table per max_depth
     for ada_it in l_ada_it:
-        m_cart = Method('cart_%i' % ada_it, stats=[train_acc, test_acc])
-        m_bud = Method('bud_%i' % ada_it, stats=[train_acc, test_acc])
+        m_cart = Method('cart_%i' % ada_it, stats=[train_acc, test_acc, tree_size])
+        m_bud = Method('bud_%i' % ada_it, stats=[train_acc, test_acc, tree_size])
 
         o.write_table('tex/iteration_%i.tex' % ada_it, [m_cart,m_bud], benches)

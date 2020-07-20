@@ -35,7 +35,7 @@ def setup():
 
         # Bud methods
         # bud_base = "../../code/bin/adaboost #BENCHMARK --seed #SEED --split %f --max_depth %i --ada_it %i --search %i --print_par" % (split, max_depth, ada_it, search_size)
-        bud_base = "python3 ../../code/examples/scripts/adaboost.py #BENCHMARK --seed #SEED --split %f --max_depth %i --n_estimators %i --search %i" % (split, max_depth, ada_it, search_size)
+        bud_base = "python3 ../../code/examples/scripts/adaboost.py #BENCHMARK --solver bud --seed #SEED --split %f --max_depth %i --n_estimators %i --search %i" % (split, max_depth, ada_it, search_size)
         methods.append(("bud_%i" % ada_it, bud_base))
 
     keyfile.write('%d methods\n'%len(methods))
