@@ -11,18 +11,18 @@ def setup():
 
     split = 0.2
     max_depth = 4
-    ada_it = 30
+    ada_it = 5
 
     # error
-    error_base = "../../code/bin/adaboost #BENCHMARK --seed #SEED --split %f --max_depth %i --ada_it %i --print_par --erroronly" % (split, max_depth, ada_it)
+    error_base = "../../../code/bin/adaboost #BENCHMARK --seed #SEED --split %f --max_depth %i --ada_it %i --print_par --erroronly" % (split, max_depth, ada_it)
     methods.append(("error", error_base))
 
     # error depth
-    depth_base = "../../code/bin/adaboost #BENCHMARK --seed #SEED --split %f --max_depth %i --ada_it %i --print_par --depthonly" % (split, max_depth, ada_it)
+    depth_base = "../../../code/bin/adaboost #BENCHMARK --seed #SEED --split %f --max_depth %i --ada_it %i --print_par --depthonly" % (split, max_depth, ada_it)
     methods.append(("depth", depth_base))
 
     # depth size
-    size_base = "../../code/bin/adaboost #BENCHMARK --seed #SEED --split %f --max_depth %i --ada_it %i --print_par" % (split, max_depth, ada_it)
+    size_base = "../../../code/bin/adaboost #BENCHMARK --seed #SEED --split %f --max_depth %i --ada_it %i --print_par" % (split, max_depth, ada_it)
     methods.append(("size", size_base))
 
     keyfile.write('%d methods\n'%len(methods))

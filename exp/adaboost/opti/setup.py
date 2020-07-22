@@ -10,16 +10,16 @@ def setup():
     methods = []
 
     split = 0.2
-    max_depth = 4 
-    search_limit = 100000
-    ada_it = 30
+    max_depth = 4
+    search_limit = 10000
+    ada_it = 5
 
     # Interrupted
-    int_base = "../../code/bin/adaboost #BENCHMARK --seed #SEED --split %f --max_depth %i --ada_it %i --search %i --print_par" % (split, max_depth, ada_it, search_limit)
+    int_base = "../../../code/bin/adaboost #BENCHMARK --seed #SEED --split %f --max_depth %i --ada_it %i --search %i --print_par" % (split, max_depth, ada_it, search_limit)
     methods.append(("interrupted", int_base))
 
     # Optimal
-    opti_base = "../../code/bin/adaboost #BENCHMARK --seed #SEED --split %f --max_depth %i --ada_it %i --print_par" % (split, max_depth, ada_it)
+    opti_base = "../../../code/bin/adaboost #BENCHMARK --seed #SEED --split %f --max_depth %i --ada_it %i --search %i --print_par" % (split, max_depth, ada_it, 5000000)
     methods.append(("optimal", opti_base))
 
     keyfile.write('%d methods\n'%len(methods))

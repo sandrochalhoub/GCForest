@@ -12,8 +12,8 @@ def print_benchmarks(folder, names, keyfile):
             keyfile.write("%s\n%s\n" % (f, p))
 
 """
-Runs adaboost with different numbers of iterations, to see if testing accuracy
-is better with a few iterations vs with a lot.
+Runs adaboost over a handful of different datasets with variable max_depth to
+see if there is a real benefit over CART
 """
 
 def setup():
@@ -24,19 +24,19 @@ def setup():
     methods = []
 
     split = 0.2
-    max_depth = 6
-    l_ada_it = [1, 5, 10, 30, 100]
-    search_size = 3000000
+    l_max_depth = [3, 4, 5, 7, 10, 15]
+    ada_it = 5
+    search_size = 30000
 
-    for ada_it in l_ada_it:
+    for max_depth in l_max_depth:
         # Cart methods
-        cart_base = "python3 ../../code/examples/scripts/adaboost.py #BENCHMARK --seed #SEED --split %f --max_depth %i --n_estimators %i" % (split, max_depth, ada_it)
-        methods.append(("cart_%i" % ada_it, cart_base))
+        cart_base = "python3 ../../../code/examples/scripts/adaboost.py #BENCHMARK --seed #SEED --split %f --max_depth %i --n_estimators %i" % (split, max_depth, ada_it)
+        methods.append(("cart_%i" % max_depth, cart_base))
 
         # Bud methods
-        # bud_base = "../../code/bin/adaboost #BENCHMARK --seed #SEED --split %f --max_depth %i --ada_it %i --search %i --print_par" % (split, max_depth, ada_it, search_size)
-        bud_base = "python3 ../../code/examples/scripts/adaboost.py #BENCHMARK --solver bud --seed #SEED --split %f --max_depth %i --n_estimators %i --search %i" % (split, max_depth, ada_it, search_size)
-        methods.append(("bud_%i" % ada_it, bud_base))
+        # bud_base = "../../../code/bin/adaboost #BENCHMARK --seed #SEED --split %f --max_depth %i --ada_it %i --search %i --print_par" % (split, max_depth, ada_it, search_size)
+        bud_base = "python3 ../../../code/examples/scripts/adaboost.py #BENCHMARK --solver bud --seed #SEED --split %f --max_depth %i --n_estimators %i --search %i" % (split, max_depth, ada_it, search_size)
+        methods.append(("bud_%i" % max_depth, bud_base))
 
     keyfile.write('%d methods\n'%len(methods))
 
@@ -45,7 +45,9 @@ def setup():
         keyfile.write(command + "\n")
 
     # declare the benchmarks (print_benchlist assumes that everything in benchfolder 'is an instance file)
-    benchfolder = '/net/phorcys/data/roc/eh/dt/simp/'
+    # benchfolder = '/net/phorcys/data/roc/eh/dt/simp/'
+    # benchfolder = '/net/phorcys/data/roc/eh/dt/new/mnist/'
+    benchfolder = '/net/phorcys/data/roc/eh/dt/new/kaggle/bin'
     # Use this if you want to only test some datasets and not every dataset in the folder
     """
     benchnames = [
@@ -64,4 +66,4 @@ def setup():
 if __name__ == '__main__' :
     setup()
     e = Experiment()
-    e.generate_jobs(timeout='03:00:00')
+    e.generate_jobs(timeout='02:00:00')
