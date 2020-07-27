@@ -1,4 +1,5 @@
 from . import wrapper
+from .utils import *
 import copy
 
 from enum import IntEnum
@@ -23,14 +24,6 @@ class FeatureStrategy(IntEnum):
     ENTROPY=1
     GINI=2
     HYBRID=3
-
-def to_str_vec(str_list):
-    vec = wrapper.str_vec(len(str_list))
-
-    for i in range(len(str_list)):
-        vec[i] = str_list[i]
-
-    return vec
 
 def read_tree(tree):
     nodes = []

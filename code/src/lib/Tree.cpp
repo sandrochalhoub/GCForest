@@ -19,12 +19,16 @@ int Tree::getFeature(const int node) const {
   return wood->getFeature(node);
 }
 
-int Tree::predict(const DataSet &data) const {
-  auto error{0};
-  for (auto y{0}; y < 2; ++y)
-    for (auto i : data.example[y])
-      error += (wood->predict(idx, data[i]) != y);
-  return error;
+// int Tree::predict(const DataSet &data) const {
+//   auto error{0};
+//   for (auto y{0}; y < 2; ++y)
+//     for (auto i : data.example[y])
+//       error += (wood->predict(idx, data[i]) != y);
+//   return error;
+// }
+
+bool Tree::predict(const instance &i) const {
+  return wood->predict(idx, i);
 }
 
 size_t Tree::size() const { return wood->size(idx); }

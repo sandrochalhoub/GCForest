@@ -23,6 +23,7 @@ along with minicsp.  If not, see <http://www.gnu.org/licenses/>.
 #include <random>
 
 #include "TXTReader.hpp"
+#include "CSVReader.hpp"
 #include "CmdLine.hpp"
 #include "TypedDataSet.hpp"
 
@@ -30,36 +31,58 @@ using namespace std;
 using namespace primer;
 
 int main(int argc, char* argv[]) {
+    DTOptions opt = parse_dt(argc, argv);
 
-  Options opt = parse(argc, argv);
+    if (opt.print_cmd)
+        cout << opt.cmdline << endl;
 
-  if (opt.print_cmd)
-    cout << opt.cmdline << endl;
+    if (opt.print_par)
+        opt.display(cout);
 
-  if (opt.print_par)
-    opt.display(cout);
-	
+    TypedDataSet input;
 
+    string ext{opt.instance_file.substr(opt.instance_file.find_last_of(".") + 1)};
 
-  TypedDataSet base;
+    if (opt.format == "csv" or (opt.format == "guess" and ext == "csv"))
+      csv::read(
+          opt.instance_file,
+          [&](vector<string> &f) { input.setFeatures(f.begin(), f.end() - 1); },
+          [&](vector<string> &data) {
+            auto y = data.back();
+            data.pop_back();
+            input.addExample(data.begin(), data.end(), y);
+          });
+    else if (opt.format == "dl8" or (opt.format == "guess" and ext == "dl8")) {
+      txt::read(opt.instance_file, [&](vector<string> &data) {
+        auto y = *data.begin();
+        input.addExample(data.begin() + 1, data.end(), y);
+      });
+    } else {
+      if (opt.format != "txt" and ext != "txt")
+        cout << "p Warning, unrecognized format, trying txt\n";
 
-  txt::read(
-      opt.instance_file,
-      [&](vector<string> &data) {
+      txt::read(opt.instance_file, [&](vector<string> &data) {
         auto y = data.back();
         data.pop_back();
-        base.addExample(data.begin(), data.end(), y);
+        input.addExample(data.begin(), data.end(), y);
       });
-			
-			
-	cout << base << endl;
+    }
 
-        DataSet bin;
+    if (opt.print_sol) {
+        cout << input << endl;
+    }
 
-        base.binarize(bin);
+    DataSet bin;
 
+    input.binarize(bin);
+
+    // TODO maybe use levels of verbosity ? output file ?
+    if (opt.print_sol) {
         cout << bin << endl;
+    }
+    else {
+        std::string delimiter(",");
+        std::string wildcard("\n");
+        bin.write(cout, delimiter, wildcard, true, true, false);
+    }
 }
-
-
-

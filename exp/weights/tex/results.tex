@@ -1,0 +1,71 @@
+\documentclass{article}
+
+\usepackage[usenames,dvipsnames,svgnames,table]{xcolor}%% http://ctan.org/pkg/xcolor
+\usepackage{pgfplots}
+\usepackage{longtable}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{tikz}
+\usepackage{fp}
+\usetikzlibrary{arrows,shadows,fit,calc,positioning,decorations.pathreplacing,matrix,shapes,petri,topaths,fadings,mindmap,backgrounds}
+
+\addtolength{\topmargin}{-2cm}
+\addtolength{\oddsidemargin}{-3cm}
+\addtolength{\textheight}{4cm}
+
+\newcommand\cactus[3]{%%
+\begin{tikzpicture}[scale=1.5]
+	\begin{axis}[scatter/classes={
+		a={mark=square*,blue!50,draw=blue!50!black},%%
+		b={mark=triangle*,red!50,draw=red!50!black},%%
+		c={mark=*,black!50!white,draw=black},%%
+		d={mark=diamond*,green!50,draw=green!50!black},%%
+		e={mark=pentagon*,orange!50,draw=orange!50!black},%%
+		f={mark=10-pointed star,draw=blue!60!black},%%
+		g={mark=x,draw=black,thick},%%
+		h={mark=+,draw=red!50!black},%%
+		i={mark=Mercedes star,draw=green!50!black},%%
+		j={mark=square,draw=orange!50!black},%%
+		k={mark=diamond,draw=red!50!black},%%
+		l={mark=o,draw=blue!50!black},%%
+		m={mark=asterisk,draw=magenta!50!black},%%
+		n={mark=triangle,draw=green!50!black},%%
+		o={mark=pentagon,draw=red!50!black},%%
+		p={mark=asterisk,draw=black},%%
+		q={mark=Mercedes star,draw=magenta!50!black},%%
+		r={mark=pentagon*,blue!50,draw=blue!50!black},%%
+		s={mark=x,draw=green!50!black},%%
+		t={mark=diamond*,red!50,draw=red!50!black}},%%
+		mark size=1.5pt,
+		ymode=log,
+		ylabel=CPU Time,
+		xlabel=#1,
+		legend style={ at={(0.02,.98)}, font=\scriptsize,
+		anchor=north west},
+		]
+
+		\foreach \bidule in #3 {
+
+		\addplot[scatter, scatter src=explicit symbolic] coordinates {\bidule};
+
+		}
+		\legend{#2}
+	\end{axis}
+\end{tikzpicture}
+}
+
+
+
+\begin{document}
+
+\begin{center}
+	
+\input{summary.tex}
+
+\input{all.tex}
+
+\input{cactus.tex}
+
+\end{center}
+
+\end{document}

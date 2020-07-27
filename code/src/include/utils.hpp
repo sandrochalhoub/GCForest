@@ -8,7 +8,9 @@
 
 // #define DEBUG_MODE
 
-#define PRINTTRACE (options.verbosity >= DTOptions::YACKING)
+#define PRINTTRACE                                                             \
+  (options.verbosity >= DTOptions::YACKING and search_size > 900 and           \
+   search_size < 1000)
 
 namespace primer {
 

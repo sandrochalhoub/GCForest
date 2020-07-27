@@ -2,6 +2,7 @@
 #include <iostream>
 #include <random>
 #include <vector>
+#include <cmath>
 
 #include "DataSet.hpp"
 #include "Partition.hpp"
@@ -21,56 +22,54 @@
 using namespace boost;
 using namespace std;
 
+
+
+
 namespace primer {
 
-template <class ErrorPolicy, typename E_t> class BacktrackingAlgorithm;
+/// this needs to be templated with "T" and should be 0 for integral types
+/// (e.g., static_cast<T>(1.e-9) should work)
+// #define FLOAT_PRECISION std::numeric_limits<T>::epsilon()
+#define FLOAT_PRECISION static_cast<T>(1.e-9)
 
-template <typename E_t>
-class IntegerError {
-public:
-  typedef BacktrackingAlgorithm<IntegerError<E_t>, E_t> Algo;
+template <typename T>
+typename std::enable_if<std::is_integral<T>::value, bool>::type
+equal(const T &a, const T &b) {
+  return a == b;
+}
 
+template <typename T>
+typename std::enable_if<std::is_integral<T>::value, bool>::type
+lt(const T &a, const T &b) {
+  return a < b;
+}
 
-  /** This method is called everytime a new example is added to the dataset.
-   * \param i index of the added example */
-  void add_example(Algo &algo, const int y, const size_t i, const E_t weight = 1) {}
+template <typename T>
+typename std::enable_if<std::is_floating_point<T>::value, bool>::type
+equal(const T &a, const T &b) {
+  return std::fabs(a - b) < FLOAT_PRECISION;
+}
 
-  E_t node_error(const Algo &algo, const int i) const;
+template <typename T>
+typename std::enable_if<std::is_floating_point<T>::value, bool>::type
+lt(const T &a, const T &b) {
+  return a + FLOAT_PRECISION < b;
+}
 
-  void count_by_example(Algo &algo, const int node, const int y) const;
-};
+template <typename E_t> class CardinalityError;
 
-template <typename E_t>
-class WeightedError {
-private:
-  // weight of each example when computing the error
-  vector<E_t> weights[2];
-
-public:
-  typedef BacktrackingAlgorithm<WeightedError<E_t>, E_t> Algo;
-
-
-  /** This method is called everytime a new example is added to the dataset.
-   * \param i index of the added example */
-  void add_example(Algo &algo, const int y, const size_t i, const E_t weight = 1);
-
-  void set_weight(const int y, const size_t i, const E_t weight);
-
-  E_t node_error(const Algo &algo, const int i) const;
-
-  void count_by_example(Algo &algo, const int node, const int y) const;
-
-};
+template <typename E_t> class WeightedError;
 
 /**********************************************
 * BacktrackingAlgorithm
 **********************************************/
 /// Representation of a list of examples
-template <class ErrorPolicy = IntegerError<int>, typename E_t = int>
+// template <class ErrorPolicy = CardinalityError<int>, typename E_t = int>
+template <template<typename> class ErrorPolicy = CardinalityError, typename E_t = int>
 class BacktrackingAlgorithm {
 
 private:
-  friend ErrorPolicy;
+  friend ErrorPolicy<E_t>;
 
   /*!@name Parameters*/
   //@{
@@ -122,9 +121,8 @@ private:
   vector<vector<int>::iterator> feature;
 
   // Stores the root of the best subtree found for the current feature of the
-  // parent node
-  // if the node is not optimal, it points to the optimal trees of the childrens
-  // given its root-feature
+  // parent node if the node is not optimal, it points to the optimal trees of
+  // the childrens given its root-feature
   // therefore, *optimal* best trees should not be freed when pruning the node
   // however, they can be freed when replacing the current best.
   vector<int> best_tree;
@@ -142,7 +140,7 @@ private:
   vector<E_t> max_error;
   vector<size_t> max_size;
 
-  vector<int> f_error;
+  vector<E_t> f_error;
   vector<double> f_entropy;
   vector<double> f_gini;
   // vector<double> f_gini_d;
@@ -192,6 +190,14 @@ private:
 
   size_t actual_depth;
 
+  // used to account for suppressed inconsistent examples
+  E_t error_offset{0};
+
+  int num_level_zero_feature;
+  int num_explored{0};
+  bool nb{true};
+
+
   void cleaning();
 
   bool store_new_best();
@@ -204,7 +210,7 @@ private:
   void do_asserts();
   // returns the real error for "leaf" nodes (deepest test), and node_error
   // otherwise
-  size_t leaf_error(const int i) const;
+  E_t leaf_error(const int i) const;
 #endif
 
   // resize the data structures for up to k nodes
@@ -306,10 +312,10 @@ private:
 
   void singleDecision();
 
-	void noDecision();
+  void noDecision();
 
 public:
-  ErrorPolicy error_policy;
+  ErrorPolicy<E_t> error_policy;
 
   vector<instance> dataset[2];
   vector<dynamic_bitset<>> reverse_dataset[2];
@@ -326,20 +332,21 @@ public:
   size_t numFeature() const;
 
   // whether
-  bool equal(const int f_a, const int f_b);
+  bool equal_feature(const int f_a, const int f_b);
 
   void separator(const string &msg) const;
-  void print_new_best() const;
+  void print_new_best();
+  void print_progress();
 
   void setUbDepth(const size_t u);
 
   // void setUbNode(const size_t u);
 
-  void setUbError(const size_t u);
+  void setUbError(const E_t u);
 
   void addSizeObjective();
 
-  size_t getUbError() const;
+  E_t getUbError() const;
 
   size_t getUbDepth() const;
 
@@ -355,28 +362,115 @@ public:
 
   void minimize_error_depth();
 
-	void minimize_error_depth_size();
+  void minimize_error_depth_size();
 
-        Tree getSolution() const;
+  Tree getSolution() const;
 
-        E_t error() const;
+  E_t error() const;
 
-        template <class rIter>
-        void addExample(rIter beg_sample, rIter end_sample, const bool y, const E_t weight = 1);
+  template <class rIter>
+  void addExample(rIter beg_sample, rIter end_sample, const bool y,
+                  const E_t weight = 1);
 
-        void addExample(const std::vector<int> &example, const E_t weight = 1);
+  void addExample(const std::vector<int> &example, const E_t weight = 1);
 
-        /*!@name Printing*/
-        //@{
-        // std::ostream &toCsv(std::ostream &os) const;
-        std::ostream &display(std::ostream &os) const;
-        //@}
+  /** Removes all the examples to free memory. The error and the model
+   * still can be retrieved.  */
+  void clearExamples();
+
+	void setErrorOffset(const E_t e);
+
+	/*!@name Printing*/
+  //@{
+  // std::ostream &toCsv(std::ostream &os) const;
+  std::ostream &display(std::ostream &os) const;
+  //@}
 };
 
-template <class ErrorPolicy, typename E_t>
+
+// Allow only integer types (size_t, )
+template <typename E_t>
+class CardinalityError {
+public:
+  typedef BacktrackingAlgorithm<CardinalityError, E_t> Algo;
+
+  // static constexpr E_t zero = 0;
+
+  /** This method is called everytime a new example is added to the dataset.
+  * \param i index of the added example */
+  void add_example(Algo &algo, const int y, const size_t i,
+                   const E_t weight = 1) {}
+
+  void update_node(Algo &algo, const int n) {}
+
+  E_t get_weight(const int y, const size_t i) const;
+
+  E_t node_error(const Algo &algo, const int i) const;
+
+  void count_by_example(Algo &algo, const int node, const int y) const;
+
+  /// Returns the sum of the weights of all the examples at a specific node
+  E_t get_total(const Algo &algo, const int y, const int n) const;
+};
+
+template <typename E_t>
+class WeightedError {
+private:
+  // weight of each example when computing the error
+  vector<E_t> weights[2];
+
+  // total error for each node
+  vector<E_t> weight_total[2];
+
+public:
+  typedef BacktrackingAlgorithm<WeightedError, E_t> Algo;
+
+  // static constexpr E_t zero = static_cast<E_t>(0.00001);
+
+  /** This method is called everytime a new example is added to the dataset.
+  * \param i index of the added example */
+  void add_example(Algo &algo, const int y, const size_t i,
+                   const E_t weight = 1);
+
+  void update_node(Algo &algo, const int n);
+
+  void set_weight(const int y, const size_t i, const E_t weight);
+
+  E_t get_weight(const int y, const size_t i) const;
+
+  E_t node_error(const Algo &algo, const int i) const;
+
+  void count_by_example(Algo &algo, const int node, const int y) const;
+
+  /// Returns the sum of the weights of all the examples at a specific node
+  E_t get_total(const Algo &algo, const int y, const int n) const;
+};
+
+
+template <typename E_t>
+E_t CardinalityError<E_t>::get_weight(const int y, const size_t i) const {
+  return 1;
+}
+
+
+template <typename E_t>
+E_t WeightedError<E_t>::get_weight(const int y, const size_t i) const {
+  return weights[y][i];
+}
+
+template <typename E_t>
+void WeightedError<E_t>::add_example(Algo &algo, const int y, const size_t i,
+                                     const E_t weight) {
+  if (weights[y].size() <= i) {
+    weights[y].resize(i + 1);
+  }
+  weights[y][i] = weight;
+}
+
+template <template <typename> class ErrorPolicy, typename E_t>
 template <class rIter>
-inline void BacktrackingAlgorithm<ErrorPolicy, E_t>::addExample(rIter beg_sample, rIter end_sample,
-                                       const bool y, const E_t weight) {
+inline void BacktrackingAlgorithm<ErrorPolicy, E_t>::addExample(
+    rIter beg_sample, rIter end_sample, const bool y, const E_t weight) {
   int n{static_cast<int>(end_sample - beg_sample)};
 
   if (n > num_feature) {
@@ -413,15 +507,17 @@ inline void BacktrackingAlgorithm<ErrorPolicy, E_t>::addExample(rIter beg_sample
   // cout << endl;
 }
 
-template <class ErrorPolicy, typename E_t>
+template <template<typename> class ErrorPolicy, typename E_t>
 template<class property>
 inline void BacktrackingAlgorithm<ErrorPolicy, E_t>::filter_features(const int node, property cond) {
-  for (auto f{end_feature[node] - 1}; f >= feature[node]; --f)
-    if (cond(*f))
+  for (auto f{end_feature[node] - 1}; f >= feature[node]; --f) {
+    if (cond(*f)) {
       swap(*f, *(--end_feature[node]));
+    }
+  }
 }
 
-template <class ErrorPolicy, typename E_t>
+template <template<typename> class ErrorPolicy, typename E_t>
 std::ostream &operator<<(std::ostream &os, const BacktrackingAlgorithm<ErrorPolicy, E_t> &x);
 }
 

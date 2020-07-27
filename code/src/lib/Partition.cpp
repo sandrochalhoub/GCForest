@@ -71,7 +71,7 @@ Part& Part::operator=(const Part& p) noexcept {
 
 
 size_t Part::count() const {
-  assert(end_idx >= begin_idx);
+  // assert(end_idx >= begin_idx);
 
   return end_idx - begin_idx;
 }
