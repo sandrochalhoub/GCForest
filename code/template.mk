@@ -3,7 +3,7 @@ MAINDIR ?= .
 
 COPTIMIZE ?= -O3
 
-CCC = g++ 
+CCC = g++
 
 BIN=$(MAINDIR)/bin
 SRC=$(MAINDIR)/src/lib
@@ -13,7 +13,7 @@ INC=$(MAINDIR)/src/include
 DOC=$(MAINDIR)/doc
 TCL=$(MAINDIR)/tools
 
-CFLAGS = -I$(INC) -I$(TCL) -Wall -I$(BOOSTDIR) # -ffloat-store 
+CFLAGS = -I$(INC) -I$(TCL) -Wall -I$(BOOSTDIR) # -ffloat-store
 LFLAGS = -L$(OBJ) -flto #--static
 
 
@@ -40,15 +40,15 @@ PLIBOBJ = $(patsubst $(SRC)/%, $(OBJ)/%, $(PLIBAUX))
 #------------------------------------------------------------
 
 
-default: $(BIN)/bud_first_search wrapper
+default: $(BIN)/bud_first_search wrapper adaboost
 
-all: lib $(BINS) 
+all: lib $(BINS)
 
 # The library
 lib: $(PLIBOBJ) $(PUTIOBJ)
 $(OBJ)/%.o:  $(SRC)/%.cpp $(INC)/%.hpp
 	@echo 'compile '$<
-	$(CCC) $(CFLAGS) -c $< -o $@ 
+	$(CCC) $(CFLAGS) -c $< -o $@
 
 # The examples
 $(BIN)/%: $(MOD)/obj/%.o $(PLIBOBJ)
@@ -66,4 +66,3 @@ $(MOD)/obj/%.o: $(MOD)/src/%.cpp
 
 wrapper: $(PLIBOBJ)
 	(cd bud_first_search && make)
-

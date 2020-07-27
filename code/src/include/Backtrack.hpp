@@ -197,6 +197,7 @@ private:
   int num_explored{0};
   bool nb{true};
 
+
   void cleaning();
 
   bool store_new_best();
@@ -373,9 +374,13 @@ public:
 
   void addExample(const std::vector<int> &example, const E_t weight = 1);
 
-  void setErrorOffset(const E_t e);
+  /** Removes all the examples to free memory. The error and the model
+   * still can be retrieved.  */
+  void clearExamples();
 
-  /*!@name Printing*/
+	void setErrorOffset(const E_t e);
+
+	/*!@name Printing*/
   //@{
   // std::ostream &toCsv(std::ostream &os) const;
   std::ostream &display(std::ostream &os) const;

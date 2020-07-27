@@ -1395,6 +1395,14 @@ void BacktrackingAlgorithm<ErrorPolicy, E_t>::addExample(const std::vector<int> 
 }
 
 template <template<typename> class ErrorPolicy, typename E_t>
+void BacktrackingAlgorithm<ErrorPolicy, E_t>::clearExamples() {
+	for (int i{0}; i < 2; ++i) {
+		dataset[i].clear();
+		example[i].clear();
+	}
+}
+
+template <template<typename> class ErrorPolicy, typename E_t>
 bool BacktrackingAlgorithm<ErrorPolicy, E_t>::fail() {
   for (auto b : blossom) {
 

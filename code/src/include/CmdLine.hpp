@@ -160,6 +160,7 @@ public:
   bool binarize;
   double split;
   int ada_it;
+  int ada_stop;
 
   bool mindepth;
   bool minsize;
@@ -182,8 +183,8 @@ public:
         filter(opt.filter), time(opt.time), search(opt.search),
         bounding(opt.bounding), node_strategy(opt.node_strategy),
         feature_strategy(opt.feature_strategy), binarize(opt.binarize),
-        split(opt.split), ada_it(opt.ada_it), mindepth(opt.mindepth),
-        minsize(opt.minsize), use_weights(opt.use_weights),
+        split(opt.split), ada_it(opt.ada_it), ada_stop(opt.ada_stop),
+        mindepth(opt.mindepth), minsize(opt.minsize), use_weights(opt.use_weights),
         filter_inconsistent(opt.filter_inconsistent), progress(opt.progress) {}
 
   ostream &display(ostream &os);
