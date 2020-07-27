@@ -13,6 +13,7 @@ namespace primer {
     BacktrackingAlgorithm<WeightedError, double> algo;
 
     double weight = 1;
+    size_t error;
 
 
     WeakClassifier(DTOptions &opt);
@@ -42,6 +43,8 @@ namespace primer {
 
     double get_test_accuracy() const;
 
+    size_t get_error() const;
+
     template <class rIter>
     void addExample(rIter beg_sample, rIter end_sample, const bool y);
 
@@ -58,6 +61,7 @@ namespace primer {
 
   private:
     size_t max_it;
+    size_t hist_lookup = 0;
     std::vector<std::vector<int>> dataset[2];
     std::vector<instance> bitsets[2];
 
@@ -68,6 +72,11 @@ namespace primer {
     // internal variables
     size_t it_count;
     double start_time;
+    size_t best_error;
+    /// Iteration at which we reached the best error.
+    size_t best_it;
+    /// Final result is the best iteration.
+    bool keep_best = true;
     // double total_weight = 0;
     std::vector<std::unique_ptr<WeakClassifier>> classifiers;
 

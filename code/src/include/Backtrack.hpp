@@ -187,7 +187,7 @@ private:
   bool size_matters;
 
   size_t actual_depth;
-	
+
 	// used to account for suppressed inconsistent examples
 	E_t error_offset{0};
 
@@ -366,8 +366,12 @@ public:
 
   void addExample(const std::vector<int> &example, const E_t weight = 1);
 
+  /** Removes all the examples to free memory. The error and the model
+   * still can be retrieved.  */
+  void clearExamples();
+
 	void setErrorOffset(const E_t e);
-  
+
 	/*!@name Printing*/
   //@{
   // std::ostream &toCsv(std::ostream &os) const;

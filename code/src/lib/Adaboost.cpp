@@ -15,7 +15,7 @@ namespace primer {
   // ===== Adaboost
 
   Adaboost::Adaboost(DTOptions &opt)
-    : options(opt), max_it(opt.ada_it) {
+    : options(opt), max_it(opt.ada_it), hist_lookup(opt.ada_stop) {
 
   }
 
@@ -31,6 +31,16 @@ namespace primer {
     while (!should_stop()) {
       iteration();
       ++it_count;
+    }
+
+    if (keep_best) {
+      it_count = best_it + 1;
+      classifiers.resize(it_count);
+      std::cout << "d best_iteration_count=" << it_count << " ada_train_acc=" << get_accuracy();
+      if (example_count(test_bitsets)) {
+          std::cout << " ada_test_acc=" << get_test_accuracy();
+      }
+      std::cout << std::endl;
     }
   }
 
@@ -56,11 +66,15 @@ namespace primer {
   }
 
   double Adaboost::get_accuracy() const {
-    return get_accuracy(bitsets, this->error_offset);
+    return get_accuracy(bitsets, error_offset);
   }
 
   double Adaboost::get_test_accuracy() const {
     return get_accuracy(test_bitsets);
+  }
+
+  size_t Adaboost::get_error() const {
+    return example_count(bitsets, error_offset) - get_correct_count(bitsets, error_offset);
   }
 
   void Adaboost::preprocess() {
@@ -136,12 +150,24 @@ namespace primer {
     algo.minimize_error();
     compute_clf_weight();
 
+    // Update best error / iteration
+    size_t error = get_error();
+    classifiers.back()->error = error;
+
+    if (it_count == 0 || error < best_error) {
+      best_it = it_count;
+      best_error = error;
+    }
+
     // Print stuff to evaluate performance
     std::cout << "d ada_train_acc=" << get_accuracy();
     if (example_count(test_bitsets)) {
         std::cout << " ada_test_acc=" << get_test_accuracy();
     }
     std::cout << " ada_time=" << cpu_time() - start_time << " ada_size=" << algo.getUbSize() << std::endl;
+
+    // Free memory
+    algo.clearExamples();
   }
 
   void Adaboost::initialize_weights() {
@@ -203,13 +229,21 @@ namespace primer {
   }
 
   bool Adaboost::should_stop() {
+    // Stop if the accuracy does not improve for N iterations
+    if (hist_lookup != 0 && classifiers.size() > hist_lookup) {
+      if (it_count - best_it >= hist_lookup) {
+        std::cout << "d iterations=" << it_count + 1 << std::endl;
+        return true;
+      }
+    }
+
     if (!classifiers.empty()) {
       if (classifiers.back()->algo.error() < EPSILON) {
-        std::cout << "r iterations=" << it_count << std::endl;
+        std::cout << "d iterations=" << it_count + 1 << std::endl;
         return true;
       }
       if (get_correct_count(bitsets, error_offset) == example_count(bitsets, error_offset)) {
-        std::cout << "r iterations=" << it_count << std::endl;
+        std::cout << "d iterations=" << it_count + 1 << std::endl;
         return true;
       }
     }

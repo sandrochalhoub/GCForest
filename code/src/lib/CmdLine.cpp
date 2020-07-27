@@ -357,8 +357,11 @@ DTOptions parse_dt(int argc, char *argv[]) {
   cmd.add<ValueArg<double>>(opt.split, "", "split", "proportion of examples in the test set",
                             false, 0.0, "double");
 
-  cmd.add<ValueArg<int>>(opt.ada_it, "", "ada_it", "number of iterations for adaboost",
+  cmd.add<ValueArg<int>>(opt.ada_it, "", "ada_it", "maximum number of iterations for adaboost",
                          false, 30, "int");
+
+  cmd.add<ValueArg<int>>(opt.ada_stop, "", "ada_stop", "number of iteration without any improvement "
+                        "of accuracy after which Adaboost stops", false, 0, "int");
 
   cmd.add<SwitchArg>(opt.mindepth, "", "depthobjective",
                      "switch depth objective on", false);
