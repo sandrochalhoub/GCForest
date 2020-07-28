@@ -60,6 +60,7 @@ public:
 
   bool binarize;
   int ada_it;
+  int ada_stop;
 
   bool mindepth;
   bool minsize;

@@ -50,6 +50,7 @@ def create_adabud(args):
     solver.opt.max_depth = args.max_depth
     solver.opt.seed = args.seed
     solver.opt.search = args.search
+    solver.opt.ada_stop = args.ada_stop
 
     return solver
 
@@ -59,6 +60,7 @@ if __name__ == "__main__":
     parser.add_argument("--solver", default="cart", type=str, help="What solver to use: cart, bud")
     parser.add_argument("--max_depth", default=3, type=int, help="Max depth of the trees")
     parser.add_argument("--n_estimators", default=30, type=int, help="Number of estimators in Adaboost")
+    parser.add_argument("--ada_stop", default=0, type=int, help="For solver 'bud', number of iterations without any improvement before the algorithm stops.")
     parser.add_argument("--search", default=-1, type=int, help="Search size (for solver \"bud\")")
     parser.add_argument("--split", default=0, type=float, help="Split between train and test data")
     parser.add_argument("--seed", default=12345, type=int, help="Seed for random generator, -1 for no seed (not implemented)")

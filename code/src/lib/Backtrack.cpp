@@ -1399,6 +1399,7 @@ void BacktrackingAlgorithm<ErrorPolicy, E_t>::clearExamples() {
 	for (int i{0}; i < 2; ++i) {
 		dataset[i].clear();
 		example[i].clear();
+		reverse_dataset[i].clear();
 	}
 }
 
