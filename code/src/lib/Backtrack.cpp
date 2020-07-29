@@ -18,6 +18,11 @@ T is_null(const T& x) {
 // ===== CardinalityError
 
 template <typename E_t>
+E_t CardinalityError<E_t>::get_weight(const int y, const size_t i) const {
+  return 1;
+}
+
+template <typename E_t>
 void CardinalityError<E_t>::count_by_example(CardinalityError::Algo &algo, const int node, const int y) const {
   auto n{algo.num_feature};
 
@@ -98,6 +103,15 @@ template <typename E_t>
 E_t WeightedError<E_t>::get_total(const Algo &algo, const int y, const int n) const {
   return weight_total[y][n];
 }
+
+template <typename E_t>
+void WeightedError<E_t>::clear_examples(Algo &algo) {
+	for (int i = 0; i < 2; ++i) {
+		// TODO deleting weights breaks adaboost because it relies on the weights of the previous iteration.
+		//weights[i].clear();
+	}
+}
+
 
 // ===== BacktrackingAlgorithm
 
@@ -1401,6 +1415,8 @@ void BacktrackingAlgorithm<ErrorPolicy, E_t>::clearExamples() {
 		example[i].clear();
 		reverse_dataset[i].clear();
 	}
+
+	error_policy.clear_examples(*this);
 }
 
 template <template<typename> class ErrorPolicy, typename E_t>
