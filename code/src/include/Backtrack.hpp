@@ -75,13 +75,12 @@ private:
   //@{
   /// Argument
   Wood &wood;
-  // DataSet &data;
+  Dataset &data;
   int num_feature;
   // size_t numExample() const;
   // size_t numExample[2];
 
   DTOptions &options;
-  vector<vector<int>> example[2];
 
   vector<int> relevant_features;
   dynamic_bitset<> feature_set;
@@ -317,12 +316,9 @@ private:
 public:
   ErrorPolicy<E_t> error_policy;
 
-  vector<instance> dataset[2];
-  vector<dynamic_bitset<>> reverse_dataset[2];
-
   /*!@name Constructors*/
   //@{
-  explicit BacktrackingAlgorithm(Wood &w, DTOptions &o);
+  explicit BacktrackingAlgorithm(Wood &w, Dataset& dataset, DTOptions &o);
   void setData(const DataSet &data);
   void setReverse();
   void seed(const int s);

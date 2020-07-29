@@ -117,8 +117,9 @@ void WeightedError<E_t>::clear_examples(Algo &algo) {
 
 template <template<typename> class ErrorPolicy, typename E_t>
 BacktrackingAlgorithm<ErrorPolicy, E_t>::BacktrackingAlgorithm(Wood &w,
+																															 Dataset &dataset,
                                                                DTOptions &opt)
-    : wood(w), options(opt) {
+    : wood(w), dataset(dataset), options(opt) {
 
   // start_time = cpu_time();
 
@@ -181,23 +182,23 @@ void BacktrackingAlgorithm<ErrorPolicy, E_t>::setReverse() {
 }
 
 template <template<typename> class ErrorPolicy, typename E_t>
-void BacktrackingAlgorithm<ErrorPolicy, E_t>::setData(const DataSet &data) {
-  num_feature = static_cast<int>(data.numFeature());
+void BacktrackingAlgorithm<ErrorPolicy, E_t>::setData(const DataSet &dset) {
+  num_feature = static_cast<int>(dset.numFeature());
 
   f_error.resize(num_feature, 1);
   f_entropy.resize(num_feature, 1);
   f_gini.resize(num_feature, 1);
 
   for (int y{0}; y < 2; ++y) {
-    dataset[y].resize(data.example[y].count());
-    example[y].resize(data.example[y].count());
+    dataset[y].resize(dset.example[y].count());
+    example[y].resize(dset.example[y].count());
     auto k{0};
-    for (auto i : data.example[y]) {
+    for (auto i : dset.example[y]) {
       // cout << k << ":";
       dataset[y][k].resize(num_feature);
-      dataset[y][k] = data[i];
+      dataset[y][k] = dset[i];
       for (auto j{0}; j < num_feature; ++j)
-        if (data.hasFeature(i, j)) {
+        if (dset.hasFeature(i, j)) {
           example[y][k].push_back(j);
           // cout << " " << j;
         }
