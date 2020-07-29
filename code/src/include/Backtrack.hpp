@@ -411,6 +411,8 @@ public:
 
   /// Returns the sum of the weights of all the examples at a specific node
   E_t get_total(const Algo &algo, const int y, const int n) const;
+
+  void clear_examples(Algo &algo) {}
 };
 
 template <typename E_t>
@@ -444,22 +446,17 @@ public:
 
   /// Returns the sum of the weights of all the examples at a specific node
   E_t get_total(const Algo &algo, const int y, const int n) const;
+
+  void clear_examples(Algo &algo);
 };
 
-
 template <typename E_t>
-E_t CardinalityError<E_t>::get_weight(const int y, const size_t i) const {
-  return 1;
-}
-
-
-template <typename E_t>
-E_t WeightedError<E_t>::get_weight(const int y, const size_t i) const {
+inline E_t WeightedError<E_t>::get_weight(const int y, const size_t i) const {
   return weights[y][i];
 }
 
 template <typename E_t>
-void WeightedError<E_t>::add_example(Algo &algo, const int y, const size_t i,
+inline void WeightedError<E_t>::add_example(Algo &algo, const int y, const size_t i,
                                      const E_t weight) {
   if (weights[y].size() <= i) {
     weights[y].resize(i + 1);
