@@ -455,6 +455,12 @@ inline E_t WeightedError<E_t>::get_weight(const int y, const size_t i) const {
   return weights[y][i];
 }
 
+
+template <typename E_t>
+inline E_t CardinalityError<E_t>::get_weight(const int y, const size_t i) const {
+  return 1;
+}
+
 template <typename E_t>
 inline void WeightedError<E_t>::add_example(Algo &algo, const int y, const size_t i,
                                      const E_t weight) {

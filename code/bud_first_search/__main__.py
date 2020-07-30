@@ -1,8 +1,6 @@
 import sys
 import bud_first_search as bfs
 
-test = bfs.TEST_SAMPLE
-
 opt = bfs.parse(bfs.to_str_vec(sys.argv))
 filename = str(opt.instance_file)
 

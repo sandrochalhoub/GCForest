@@ -85,11 +85,18 @@ if __name__ == "__main__":
     print("p max_depth={}".format(args.max_depth))
     print("p ada_it={}".format(args.n_estimators))
 
+    args.algorithm = "SAMME"
+
     if args.solver == "cart":
         adaboost = AdaBoostClassifier(DecisionTreeClassifier(max_depth=args.max_depth),
-                        n_estimators=args.n_estimators, random_state=rng)
+                        algorithm=args.algorithm, n_estimators=args.n_estimators, random_state=rng)
     elif args.solver == "bud":
-        adaboost = create_adabud(args)
+        # adaboost = create_adabud(args)
+        clf = bud.BudFirstSearchClassifier()
+        clf.opt.max_depth = args.max_depth
+        clf.opt.seed = args.seed
+        clf.opt.search = args.search
+        adaboost = AdaBoostClassifier(clf, algorithm=args.algorithm, n_estimators=args.n_estimators, random_state=rng)
     else:
         print("Unknown solver: %s" % args.solver)
         sys.exit(-1)

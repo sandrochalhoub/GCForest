@@ -18,11 +18,6 @@ T is_null(const T& x) {
 // ===== CardinalityError
 
 template <typename E_t>
-E_t CardinalityError<E_t>::get_weight(const int y, const size_t i) const {
-  return 1;
-}
-
-template <typename E_t>
 void CardinalityError<E_t>::count_by_example(CardinalityError::Algo &algo, const int node, const int y) const {
   auto n{algo.num_feature};
 
