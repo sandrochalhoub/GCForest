@@ -65,8 +65,7 @@ public:
   bool mindepth;
   bool minsize;
 
-  bool use_weights;
-  bool filter_inconsistent;
+  bool preprocessing;
 
 
   DTOptions();

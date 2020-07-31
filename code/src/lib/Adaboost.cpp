@@ -84,7 +84,7 @@ namespace primer {
     }
 
     // filter inconsistent examples on training set
-    if (options.filter_inconsistent) {
+    if (options.preprocessing) {
       WeightedDataset filter;
 
       for (int y = 0; y < 2; ++y) {

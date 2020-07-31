@@ -165,8 +165,8 @@ public:
   bool mindepth;
   bool minsize;
 
-  bool use_weights;
-  bool filter_inconsistent;
+  bool preprocessing;
+  // bool filter_inconsistent;
 
   bool progress;
 
@@ -184,8 +184,8 @@ public:
         bounding(opt.bounding), node_strategy(opt.node_strategy),
         feature_strategy(opt.feature_strategy), binarize(opt.binarize),
         split(opt.split), ada_it(opt.ada_it), ada_stop(opt.ada_stop),
-        mindepth(opt.mindepth), minsize(opt.minsize), use_weights(opt.use_weights),
-        filter_inconsistent(opt.filter_inconsistent), progress(opt.progress) {}
+        mindepth(opt.mindepth), minsize(opt.minsize),
+        preprocessing(opt.preprocessing), progress(opt.progress) {}
 
   ostream &display(ostream &os);
 };

@@ -122,10 +122,10 @@ void read_weighted(Algo_t &A, DTOptions &opt) {
     });
   }
 
-  if (opt.filter_inconsistent)
-    input.toInc(A);
-  else
-    input.to(A);
+  // if (opt.preprocessin)
+  input.toInc(A);
+  // else
+  // input.to(A);
 }
 
 template <template <typename> class ErrorPolicy = CardinalityError,
@@ -135,7 +135,7 @@ int run_algorithm(DTOptions &opt) {
 
   BacktrackingAlgorithm<ErrorPolicy, E_t> A(yallen, opt);
 
-  if (opt.use_weights) {
+  if (opt.preprocessing) {
 
     read_weighted(A, opt);
 
@@ -203,7 +203,7 @@ int main(int argc, char *argv[]) {
   if (opt.print_par)
     opt.display(cout);
 
-  if (opt.use_weights) {
+  if (opt.preprocessing) {
     return run_algorithm<WeightedError, unsigned long>(opt);
   } else {
     return run_algorithm<>(opt);

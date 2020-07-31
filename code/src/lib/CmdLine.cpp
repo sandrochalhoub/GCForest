@@ -422,12 +422,18 @@ DTOptions parse_dt(int argc, char *argv[]) {
                          "entropy, 2:min gini impurity ",
                          false, 2, "int");
 
-  cmd.add<SwitchArg>(opt.use_weights, "", "use_weights",
-                        "activate weighted version of the algorithm",
-                        false);
+  // cmd.add<SwitchArg>(opt.use_weights, "", "use_weights",
+  //                       "activate weighted version of the algorithm",
+  //                       false);
+  //
+  // cmd.add<SwitchArg>(opt.filter_inconsistent, "", "filter_inconsistent",
+  //                    "suppress inconsistent samples", false);
 
-  cmd.add<SwitchArg>(opt.filter_inconsistent, "", "filter_inconsistent",
-                     "suppress inconsistent samples", false);
+  cmd.add<SwitchArg>(opt.preprocessing, "", "preprocessing",
+                     "switch sample preprocessing oon", false);
+
+  cmd.add<SwitchArg>(opt.preprocessing, "", "nopreprocessing",
+                     "switch sample preprocessing off", true);
 
   cmd.add<SwitchArg>(opt.progress, "", "progress", "print progress", false);
 
@@ -506,9 +512,8 @@ ostream &DTOptions::display(ostream &os) {
   os << endl
      << setw(20) << left << "p maximum depth:" << setw(30) << right << max_depth
      << endl
-     << setw(20) << left << "p use weights:" << setw(30) << right
-     << (use_weights ? "yes" : "no") << (filter_inconsistent ? "*" : "")
-     << endl;
+     << setw(20) << left << "p preprocessing:" << setw(30) << right
+     << (preprocessing ? "yes" : "no") << endl;
   // << setw(20) << left << "p maximum size:" << setw(30) << right << max_size
   // << endl;
 
