@@ -24,7 +24,7 @@ def setup():
     methods = []
 
     split = 0.2
-    max_depth = 6
+    max_depth = 5
     l_ada_it = [1, 5, 10, 30, 100]
     search_size = 3000000
 
@@ -65,4 +65,4 @@ def setup():
 if __name__ == '__main__' :
     setup()
     e = Experiment()
-    e.generate_jobs(timeout='03:00:00')
+    e.generate_jobs(timeout='03:00:00', full=True, mem=16000)

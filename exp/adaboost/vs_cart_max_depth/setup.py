@@ -25,7 +25,7 @@ def setup():
 
     split = 0.2
     l_max_depth = [3, 4, 5, 7, 10, 15]
-    ada_it = 5
+    ada_it = 30
     search_size = 30000
 
     for max_depth in l_max_depth:

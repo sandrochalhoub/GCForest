@@ -35,8 +35,9 @@ class DTParser(object):
                 self.store(stat,val,res)
 
         # Compute average tree size:
-        ada_size = res["ada_size"]
-        self.store("avg_size", sum(ada_size) / len(ada_size), res)
+        if "ada_size" in res:
+            ada_size = res["ada_size"]
+            self.store("avg_size", sum(ada_size) / len(ada_size), res)
 
         return res
 

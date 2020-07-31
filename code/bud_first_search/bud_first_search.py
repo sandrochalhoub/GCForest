@@ -68,10 +68,16 @@ class BudFirstSearchClassifier:
         params = self.get_params()
         for name in kwargs:
             if params[name] is kwargs[name]:
-                print(params[name], "is", kwargs[name])
+                print(type(params[name]), params[name], "is", type(kwargs[name]), kwargs[name])
             else:
-                print(params[name], "is not", kwargs[name])
+                print(type(params[name]), params[name], "is not", type(kwargs[name]), kwargs[name])
         """
+        # When the classifier is cloned by AdaBoost, there is a check to verify if parameters
+        # are the same on the original and the clone. The test uses the keyword "is" as above.
+        # For some values, (eg floats or big integers) the check does not pass because the
+        # values are taken from the C++ DTOptions object.
+        # If we return kwargs as the parameter dict, we pass the sanity check.
+        self.params = { key : kwargs[key] for key in self.get_param_names() } if len(kwargs) != 0 else None
 
         self.tree = None
         self.nodes = []
@@ -82,11 +88,18 @@ class BudFirstSearchClassifier:
 
     def get_param_names(self):
         # TODO add useful parameters
-        # "time" does not work (as well as other floating values? Due to scikit learn sanity check)
-        return {"max_depth", "search", "seed", "mindepth", "minsize"}
+        return {"max_depth", "time", "search", "seed", "mindepth", "minsize"}
 
     def get_params(self, deep = False):
-        return { key : getattr(self.opt, key) for key in self.get_param_names() }
+        params = { key : getattr(self.opt, key) for key in self.get_param_names() }
+
+        # if we were cloned: pass the sanity check
+        if self.params == params:
+            return self.params
+        else:
+            self.params = None
+
+        return params
 
     def set_params(self, **kwargs):
         for key in kwargs:
