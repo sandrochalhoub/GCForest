@@ -6,52 +6,31 @@ Install by running
 pip3 install --user .
 ```
 
+from the `code` directory.
+
 ## Usage
 
-- High level API
+- High level API (Sklearn estimator)
 
 ```python
 from bud_first_search import BudFirstSearch
 
-test = [[0, 0, 1], [0, 1, 0]]
+test_X = [[0, 0], [0, 1]]
+test_Y = [0, 1]
 
-clf = BudFirstSearch()
-clf.fit(test)
+clf = BudFirstSearchClassifier()
+clf.fit(test_X, test_Y)
 
 print(clf.nodes)
 print(clf.edges)
+print(clf.predict(test_X))
 ```
 
-- Direct C++ wrapping
-
-```python
-import bud_first_search as bfs
-
-test = [[0, 0, 1], [0, 1, 0]]
-
-# Options can be provided by command line arguments
-opt = bfs.parse(bfs.to_str_vec(["--max_depth", "3"]))
-# Or by changing the fields of opt
-opt.verbosity = bfs.Verbosity.YACKING
-
-wood = bfs.Wood()
-algo = bfs.BacktrackingAlgo(wood, opt)
-
-for sample in test:
-  algo.addExample(sample)
-
-algo.minimize_error()
-
-tree = algo.getSolution()
-print(tree.idx)
-
-# Read the tree the same way as the C++ API does
-# or use:
-nodes, edges = bfs.read_tree(tree)
-print(nodes, edges)
-```
+- Direct C++ wrapping : see file `code/examples/adaboost.py`
 
 ## Add wrapped methods
 
 The simplest way to add a method to the python wrapper is to add its definition
 to the file `bud_first_search/wrapper/swig/budFirstSearch.i`
+
+Do the same when you want to add new classes, class fields, constructors, etc.

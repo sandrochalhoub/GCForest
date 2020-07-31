@@ -52,8 +52,8 @@ def read_tree(tree):
 
 class BudFirstSearchClassifier:
     """
-    Parameters:
-    ...
+    Scikit learn-compatible estimator to use BudFirstSearch with Scikit Learn
+    meta-algorithms (like Adaboost)
     """
 
     def __init__(self, cmd_line_args = [], **kwargs):
@@ -191,6 +191,9 @@ class BudFirstSearchClassifier:
         return np.array(Y)
 
     def correct_count(self, samples):
+        """
+        Returns the number of examples that are correctly classified
+        """
         correct_count = 0
 
         for sample in samples:
