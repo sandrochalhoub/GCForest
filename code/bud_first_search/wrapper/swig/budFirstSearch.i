@@ -7,7 +7,7 @@
 %}
 
 extern DTOptions parse(std::vector<std::string> params);
-extern void read_binary(primer::BacktrackingAlgorithm<IntegerError<int>, int> &A, DTOptions &opt);
+extern void read_binary(primer::BacktrackingAlgorithm<CardinalityError, int> &A, DTOptions &opt);
 
 namespace std {
   %template(int_vec) vector<int>;
@@ -59,9 +59,13 @@ public:
   int feature_strategy;
 
   bool binarize;
+  int ada_it;
+  int ada_stop;
 
   bool mindepth;
   bool minsize;
+
+  bool preprocessing;
 
 
   DTOptions();
@@ -87,7 +91,7 @@ namespace primer {
 
   // BacktrackingAlgorithm
 
-  template <class Error, class ErrorType>
+  template <template<typename> class ErrorPolicy, typename E_t>
   class BacktrackingAlgorithm {
   public:
     BacktrackingAlgorithm() = delete;
@@ -97,13 +101,24 @@ namespace primer {
     void minimize_error_depth_size();
     Tree getSolution();
     void addExample(const std::vector<int> &example);
-    void addExample(const std::vector<int> &example, int weight);
+    void addExample(const std::vector<int> &example, E_t weight);
   };
 
-  template <class ErrorType> class IntegerError;
+  class Adaboost {
+  public:
+    DTOptions &options;
+
+    Adaboost() = delete;
+    Adaboost(DTOptions &opt);
+    void train();
+    bool predict(const std::vector<int> &example) const;
+    void addExample(const std::vector<int> &example);
+  };
+
+  template <class ErrorType> class CardinalityError;
   template <class ErrorType> class WeightedError;
 
-  %template(BacktrackingAlgo) BacktrackingAlgorithm<IntegerError<int>, int>;
-  %template(WeightedBacktrackingAlgo) BacktrackingAlgorithm<WeightedError<int>, int>;
-  %template(WeightedBacktrackingAlgod) BacktrackingAlgorithm<WeightedError<double>, double>;
+  %template(BacktrackingAlgo) BacktrackingAlgorithm<CardinalityError, int>;
+  %template(WeightedBacktrackingAlgo) BacktrackingAlgorithm<WeightedError, int>;
+  %template(WeightedBacktrackingAlgod) BacktrackingAlgorithm<WeightedError, double>;
 }

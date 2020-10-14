@@ -30,6 +30,7 @@ along with minicsp.  If not, see <http://www.gnu.org/licenses/>.
 #include "TXTReader.hpp"
 #include "Tree.hpp"
 #include "TypedDataSet.hpp"
+#include "WeightedDataset.hpp"
 
 using namespace std;
 using namespace primer;
@@ -99,12 +100,46 @@ void read_non_binary(Algo_t &A, DTOptions &opt) {
 }
 
 template <typename Algo_t>
+void read_weighted(Algo_t &A, DTOptions &opt) {
+  WeightedDataset input;
+
+  string ext{opt.instance_file.substr(opt.instance_file.find_last_of(".") + 1)};
+
+  if (opt.format == "csv" or (opt.format == "guess" and ext == "csv")) {
+    csv::read_binary(opt.instance_file, [&](vector<int> &data) {
+      input.addExample(data.begin(), data.end() - 1, data.back());
+    });
+  } else if (opt.format == "dl8" or (opt.format == "guess" and ext == "dl8")) {
+    txt::read_binary(opt.instance_file, [&](vector<int> &data) {
+      auto y = *data.begin();
+      input.addExample(data.begin() + 1, data.end(), y);
+    });
+  } else {
+    if (opt.format != "txt" and ext != "txt")
+      cout << "p Warning, unrecognized format, trying txt\n";
+    txt::read_binary(opt.instance_file, [&](vector<int> &data) {
+      input.addExample(data.begin(), data.end() - 1, data.back());
+    });
+  }
+
+  // if (opt.preprocessin)
+  input.toInc(A);
+  // else
+  // input.to(A);
+}
+
+template <template <typename> class ErrorPolicy = CardinalityError,
+          typename E_t = unsigned long>
 int run_algorithm(DTOptions &opt) {
   Wood yallen;
 
-  Algo_t A(yallen, opt);
+  BacktrackingAlgorithm<ErrorPolicy, E_t> A(yallen, opt);
 
-  if (opt.binarize) {
+  if (opt.preprocessing) {
+
+    read_weighted(A, opt);
+
+  } else if (opt.binarize) {
 
     read_non_binary(A, opt);
 
@@ -142,13 +177,22 @@ int run_algorithm(DTOptions &opt) {
   }
 
   if (opt.verified) {
-    assert(sol.predict(A.dataset[0].begin(), A.dataset[0].end(),
-                       A.dataset[1].begin(), A.dataset[1].end()) == A.error());
 
-    cout << "p solution verified (" << A.error() << ")" << endl;
+    E_t tree_error = sol.predict<E_t>(A.dataset[0].begin(), A.dataset[0].end(),
+                                      A.dataset[1].begin(), A.dataset[1].end(),
+                                      [&](const int y, const size_t i) {
+                                        return A.error_policy.get_weight(y, i);
+                                      });
+
+    assert(tree_error == A.error());
+
+    cout << std::setprecision(std::numeric_limits<long double>::digits10 + 1)
+         << std::setw(0) << "p solution verified (" << tree_error << " / " << A.error() << ")"
+         << endl;
   }
   return 0;
 }
+
 
 int main(int argc, char *argv[]) {
   DTOptions opt = parse_dt(argc, argv);
@@ -159,11 +203,9 @@ int main(int argc, char *argv[]) {
   if (opt.print_par)
     opt.display(cout);
 
-  if (opt.use_weights) {
-    std::cout << "Using weights" << std::endl;
-    return run_algorithm<BacktrackingAlgorithm<WeightedError<int>>>(opt);
-  }
-  else {
-    return run_algorithm<BacktrackingAlgorithm<>>(opt);
+  if (opt.preprocessing) {
+    return run_algorithm<WeightedError, unsigned long>(opt);
+  } else {
+    return run_algorithm<>(opt);
   }
 }

@@ -1,6 +1,8 @@
 from . import wrapper
+from .utils import *
 import copy
 
+import numpy as np
 from enum import IntEnum
 
 # utility enums from CmdLine.hpp
@@ -23,14 +25,6 @@ class FeatureStrategy(IntEnum):
     ENTROPY=1
     GINI=2
     HYBRID=3
-
-def to_str_vec(str_list):
-    vec = wrapper.str_vec(len(str_list))
-
-    for i in range(len(str_list)):
-        vec[i] = str_list[i]
-
-    return vec
 
 def read_tree(tree):
     nodes = []
@@ -56,34 +50,150 @@ def read_tree(tree):
     add_node(tree, tree.idx)
     return nodes, edges
 
-class BudFirstSearch:
+class BudFirstSearchClassifier:
     """
-    Parameters:
-    ...
+    Scikit learn-compatible estimator to use BudFirstSearch with Scikit Learn
+    meta-algorithms (like Adaboost)
     """
 
-    def __init__(self, cmd_line_args = []):
+    def __init__(self, cmd_line_args = [], **kwargs):
         self.args = ["bud_first_search.py", "--file", ""] + cmd_line_args
         self.opt = wrapper.parse(to_str_vec(self.args))
+
+        for key in kwargs:
+            setattr(self.opt, key, kwargs[key])
+
+        """
+        # Mimics the sanity check of Scikit learn to understand why it does not pass
+        params = self.get_params()
+        for name in kwargs:
+            if params[name] is kwargs[name]:
+                print(type(params[name]), params[name], "is", type(kwargs[name]), kwargs[name])
+            else:
+                print(type(params[name]), params[name], "is not", type(kwargs[name]), kwargs[name])
+        """
+        # When the classifier is cloned by AdaBoost, there is a check to verify if parameters
+        # are the same on the original and the clone. The test uses the keyword "is" as above.
+        # For some values, (eg floats or big integers) the check does not pass because the
+        # values are taken from the C++ DTOptions object.
+        # If we return kwargs as the parameter dict, we pass the sanity check.
+        self.params = { key : kwargs[key] for key in self.get_param_names() } if len(kwargs) != 0 else None
 
         self.tree = None
         self.nodes = []
         self.edges = []
 
-    def fit(self, samples):
+        self.classes_ = np.array([0, 1])
+        self.n_classes_ = 2
+
+    def get_param_names(self):
+        # TODO add useful parameters
+        return {"max_depth", "time", "search", "seed", "mindepth", "minsize"}
+
+    def get_params(self, deep = False):
+        params = { key : getattr(self.opt, key) for key in self.get_param_names() }
+
+        # if we were cloned: pass the sanity check
+        if self.params == params:
+            return self.params
+        else:
+            self.params = None
+
+        return params
+
+    def set_params(self, **kwargs):
+        for key in kwargs:
+            if hasattr(self.opt, key):
+                setattr(self.opt, key, kwargs[key])
+
+    def _binarize_data(self, X, Y):
+        """
+        Binarize data (only if necessary).
+        Does not support multiclass.
+        This methods just operates a translation.
+        """
+        vals = set()
+        for x, y in zip(X, Y):
+            vals.update(x)
+            vals.update([y])
+
+        if len(vals) != 2:
+            print("Classification is not binary!")
+
+        if vals == {0, 1}:
+            Xb = X
+            Yb = Y
+        else:
+            Xb = copy.deepcopy(X)
+            Yb = copy.deepcopy(Y)
+
+            for old, new in zip(vals, {0, 1}):
+                print(old, new)
+                for i in range(len(X)):
+                    for j in range(len(X[i])):
+                        if X[i][j] == old:
+                            Xb[i][j] = new
+                    if Y[i] == old:
+                        Yb[i] = new
+        return Xb, Yb
+
+
+    def fit(self, X, Y, sample_weight=None):
         self.wood = wrapper.Wood()
 
-        self.algo = wrapper.BacktrackingAlgo(self.wood, self.opt)
+        Xb, Yb = X, Y # self._binarize_data(X, Y)
 
-        for sample in samples:
-            self.algo.addExample(sample)
+        if sample_weight is not None:
+            self.algo = wrapper.WeightedBacktrackingAlgod(self.wood, self.opt)
 
-        self.algo.minimize_error()
+            for x, y, w in zip(Xb, Yb, sample_weight):
+                # scikit learn classes start at 1
+                self.algo.addExample(to_int_vec(list(x) + [y]), w)
+        else:
+            self.algo = wrapper.BacktrackingAlgo(self.wood, self.opt)
+
+            for x, y in zip(Xb, Yb):
+                # scikit learn classes & features start at 1
+                self.algo.addExample(to_int_vec(list(x) + [y]))
+
+        if self.opt.mindepth:
+            if self.opt.minsize:
+                self.algo.minimize_error_depth_size()
+            else:
+                self.algo.minimize_error_depth()
+        else:
+            self.algo.minimize_error()
+
         self.tree = self.algo.getSolution()
-
         self.nodes, self.edges = read_tree(self.tree)
 
+        # free memory
+        del self.algo
+        del self.wood
+
+    def predict(self, X):
+        if not self.tree:
+            raise ValueError("please call fit before predict!")
+
+        Y = []
+
+        for x in X:
+            node_id = 0
+            node = self.nodes[node_id]
+
+            while not node["leaf"]:
+                val = x[node["feat"]]
+                node_id = [e["child"] for e in self.edges if e["parent"] == node_id and e["val"] == val][0]
+                node = self.nodes[node_id]
+
+            Y.append(node["feat"])
+
+        return np.array(Y)
+
     def correct_count(self, samples):
+        """
+        Returns the number of examples that are correctly classified
+        """
         correct_count = 0
 
         for sample in samples:
@@ -94,18 +204,5 @@ class BudFirstSearch:
 
         return correct_count
 
-    def predict(self, features):
-        if not self.tree:
-            raise ValueError("please call fit before predict!")
-
-        node_id = 0
-        node = self.nodes[node_id]
-
-        while not node["leaf"]:
-            val = features[node["feat"]]
-            node_id = [e["child"] for e in self.edges if e["parent"] == node_id and e["val"] == val][0]
-            node = self.nodes[node_id]
-
-        return node["feat"]
 
 TEST_SAMPLE = [[1, 0, 1], [1, 1, 0], [0, 1, 1], [0, 0, 0]]

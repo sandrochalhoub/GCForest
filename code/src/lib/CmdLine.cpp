@@ -354,6 +354,15 @@ DTOptions parse_dt(int argc, char *argv[]) {
   cmd.add<SwitchArg>(opt.binarize, "", "binarize", "binarize the data set",
                      false);
 
+  cmd.add<ValueArg<double>>(opt.split, "", "split", "proportion of examples in the test set",
+                            false, 0.0, "double");
+
+  cmd.add<ValueArg<int>>(opt.ada_it, "", "ada_it", "maximum number of iterations for adaboost",
+                         false, 30, "int");
+
+  cmd.add<ValueArg<int>>(opt.ada_stop, "", "ada_stop", "number of iteration without any improvement "
+                        "of accuracy after which Adaboost stops", false, 0, "int");
+
   cmd.add<SwitchArg>(opt.mindepth, "", "depthobjective",
                      "switch depth objective on", false);
 
@@ -413,9 +422,20 @@ DTOptions parse_dt(int argc, char *argv[]) {
                          "entropy, 2:min gini impurity ",
                          false, 2, "int");
 
-  cmd.add<SwitchArg>(opt.use_weights, "", "use_weights",
-                        "activate weighted version of the algorithm",
-                        false);
+  // cmd.add<SwitchArg>(opt.use_weights, "", "use_weights",
+  //                       "activate weighted version of the algorithm",
+  //                       false);
+  //
+  // cmd.add<SwitchArg>(opt.filter_inconsistent, "", "filter_inconsistent",
+  //                    "suppress inconsistent samples", false);
+
+  cmd.add<SwitchArg>(opt.preprocessing, "", "preprocessing",
+                     "switch sample preprocessing oon", false);
+
+  cmd.add<SwitchArg>(opt.preprocessing, "", "nopreprocessing",
+                     "switch sample preprocessing off", true);
+
+  cmd.add<SwitchArg>(opt.progress, "", "progress", "print progress", false);
 
   cmd.parse(argc, argv);
   return opt;
@@ -491,7 +511,9 @@ ostream &DTOptions::display(ostream &os) {
   }
   os << endl
      << setw(20) << left << "p maximum depth:" << setw(30) << right << max_depth
-     << endl;
+     << endl
+     << setw(20) << left << "p preprocessing:" << setw(30) << right
+     << (preprocessing ? "yes" : "no") << endl;
   // << setw(20) << left << "p maximum size:" << setw(30) << right << max_size
   // << endl;
 

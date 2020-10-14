@@ -1,0 +1,2 @@
+../../code/bin/bud_first_search /net/phorcys/data/roc/eh/dt/simp/taiwan_binarised.txt --seed 35413 --max_depth 10 --print_par
+../../code/bin/bud_first_search /net/phorcys/data/roc/eh/dt/simp/taiwan_binarised.txt --seed 35413 --max_depth 10 --use_weights --filter_inconsistent --print_par
