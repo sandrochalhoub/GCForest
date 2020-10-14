@@ -391,33 +391,40 @@ public:
 // Allow only integer types (size_t, )
 template <typename E_t>
 class CardinalityError {
-public:
+
   typedef BacktrackingAlgorithm<CardinalityError, E_t> Algo;
 
-  // static constexpr E_t zero = 0;
+  Algo &algo;
+
+public:
+  CardinalityError(Algo &a) : algo(a) {}
 
   /** This method is called everytime a new example is added to the dataset.
   * \param i index of the added example */
-  void add_example(Algo &algo, const int y, const size_t i,
-                   const E_t weight = 1) {}
+  void add_example(const int y, const size_t i, const E_t weight = 1) {}
 
-  void update_node(Algo &algo, const int n) {}
+  void update_node(const int n) {}
 
   E_t get_weight(const int y, const size_t i) const;
 
-  E_t node_error(const Algo &algo, const int i) const;
+  E_t node_error(const int i) const;
 
-  void count_by_example(Algo &algo, const int node, const int y) const;
+  void count_by_example(const int node, const int y) const;
 
   /// Returns the sum of the weights of all the examples at a specific node
-  E_t get_total(const Algo &algo, const int y, const int n) const;
+  E_t get_total(const int y, const int n) const;
 
-  void clear_examples(Algo &algo) {}
+  void clear_examples() {}
 };
 
 template <typename E_t>
 class WeightedError {
+
+  typedef BacktrackingAlgorithm<WeightedError, E_t> Algo;
+
 private:
+  Algo &algo;
+
   // weight of each example when computing the error
   vector<E_t> weights[2];
 
@@ -425,29 +432,26 @@ private:
   vector<E_t> weight_total[2];
 
 public:
-  typedef BacktrackingAlgorithm<WeightedError, E_t> Algo;
-
-  // static constexpr E_t zero = static_cast<E_t>(0.00001);
+  WeightedError(Algo &a) : algo(a) {}
 
   /** This method is called everytime a new example is added to the dataset.
   * \param i index of the added example */
-  void add_example(Algo &algo, const int y, const size_t i,
-                   const E_t weight = 1);
+  void add_example(const int y, const size_t i, const E_t weight = 1);
 
-  void update_node(Algo &algo, const int n);
+  void update_node(const int n);
 
   void set_weight(const int y, const size_t i, const E_t weight);
 
   E_t get_weight(const int y, const size_t i) const;
 
-  E_t node_error(const Algo &algo, const int i) const;
+  E_t node_error(const int i) const;
 
-  void count_by_example(Algo &algo, const int node, const int y) const;
+  void count_by_example(const int node, const int y) const;
 
   /// Returns the sum of the weights of all the examples at a specific node
-  E_t get_total(const Algo &algo, const int y, const int n) const;
+  E_t get_total(const int y, const int n) const;
 
-  void clear_examples(Algo &algo);
+  void clear_examples();
 };
 
 template <typename E_t>
@@ -462,8 +466,8 @@ inline E_t CardinalityError<E_t>::get_weight(const int y, const size_t i) const 
 }
 
 template <typename E_t>
-inline void WeightedError<E_t>::add_example(Algo &algo, const int y, const size_t i,
-                                     const E_t weight) {
+inline void WeightedError<E_t>::add_example(const int y, const size_t i,
+                                            const E_t weight) {
   if (weights[y].size() <= i) {
     weights[y].resize(i + 1);
   }
@@ -506,7 +510,7 @@ inline void BacktrackingAlgorithm<ErrorPolicy, E_t>::addExample(
     ++k;
   }
 
-  error_policy.add_example(*this, y, example[y].size() - 1, weight);
+  error_policy.add_example(y, example[y].size() - 1, weight);
   // cout << endl;
 }
 

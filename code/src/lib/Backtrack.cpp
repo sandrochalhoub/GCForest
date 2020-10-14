@@ -18,7 +18,8 @@ T is_null(const T& x) {
 // ===== CardinalityError
 
 template <typename E_t>
-void CardinalityError<E_t>::count_by_example(CardinalityError::Algo &algo, const int node, const int y) const {
+void CardinalityError<E_t>::count_by_example(const int node,
+                                             const int y) const {
   auto n{algo.num_feature};
 
   algo.pos_feature_frequency[y][node].clear();
@@ -31,20 +32,19 @@ void CardinalityError<E_t>::count_by_example(CardinalityError::Algo &algo, const
 }
 
 template <typename E_t>
-E_t CardinalityError<E_t>::node_error(const CardinalityError::Algo &algo, const int i) const {
+E_t CardinalityError<E_t>::node_error(const int i) const {
   return std::min(algo.P[0][i].count(), algo.P[1][i].count());
 }
 
 template <typename E_t>
-E_t CardinalityError<E_t>::get_total(const Algo &algo, const int y, const int n) const {
+E_t CardinalityError<E_t>::get_total(const int y, const int n) const {
   return algo.P[y][n].count();
 }
 
 
 // ===== WeightedError
 
-template <typename E_t>
-void WeightedError<E_t>::update_node(Algo& algo, const int n) {
+template <typename E_t> void WeightedError<E_t>::update_node(const int n) {
 
   for (size_t y{0}; y < 2; ++y) {
     if (weight_total[y].size() <= n)
@@ -76,7 +76,7 @@ void WeightedError<E_t>::set_weight(const int y, const size_t i, const E_t weigh
 }
 
 template <typename E_t>
-void WeightedError<E_t>::count_by_example(Algo &algo, const int node, const int y) const {
+void WeightedError<E_t>::count_by_example(const int node, const int y) const {
   auto n{algo.num_feature};
 
   algo.pos_feature_frequency[y][node].clear();
@@ -89,31 +89,30 @@ void WeightedError<E_t>::count_by_example(Algo &algo, const int node, const int 
     }
 }
 
-template <typename E_t>
-E_t WeightedError<E_t>::node_error(const Algo &algo, const int i) const {
+template <typename E_t> E_t WeightedError<E_t>::node_error(const int i) const {
   return std::min(weight_total[0][i], weight_total[1][i]);
 }
 
 template <typename E_t>
-E_t WeightedError<E_t>::get_total(const Algo &algo, const int y, const int n) const {
+E_t WeightedError<E_t>::get_total(const int y, const int n) const {
   return weight_total[y][n];
 }
 
-template <typename E_t>
-void WeightedError<E_t>::clear_examples(Algo &algo) {
-	for (int i = 0; i < 2; ++i) {
-		// TODO deleting weights breaks adaboost because it relies on the weights of the previous iteration.
-		//weights[i].clear();
-	}
+template <typename E_t> void WeightedError<E_t>::clear_examples() {
+  for (int i = 0; i < 2; ++i) {
+    // TODO deleting weights breaks adaboost because it relies on the weights of
+    // the previous iteration.
+    // weights[i].clear();
+  }
 }
 
 
 // ===== BacktrackingAlgorithm
 
-template <template<typename> class ErrorPolicy, typename E_t>
+template <template <typename> class ErrorPolicy, typename E_t>
 BacktrackingAlgorithm<ErrorPolicy, E_t>::BacktrackingAlgorithm(Wood &w,
                                                                DTOptions &opt)
-    : wood(w), options(opt) {
+    : wood(w), options(opt), error_policy(*this) {
 
   // start_time = cpu_time();
 
@@ -177,6 +176,9 @@ void BacktrackingAlgorithm<ErrorPolicy, E_t>::setReverse() {
 
 template <template<typename> class ErrorPolicy, typename E_t>
 void BacktrackingAlgorithm<ErrorPolicy, E_t>::setData(const DataSet &data) {
+
+  // cout << "set data\n";
+
   num_feature = static_cast<int>(data.numFeature());
 
   f_error.resize(num_feature, 1);
@@ -198,7 +200,7 @@ void BacktrackingAlgorithm<ErrorPolicy, E_t>::setData(const DataSet &data) {
         }
       ++k;
       // cout << endl;
-      error_policy.add_example(*this, y, i);
+      error_policy.add_example(y, i);
     }
   }
 }
@@ -221,7 +223,7 @@ template <template<typename> class ErrorPolicy, typename E_t>
 E_t BacktrackingAlgorithm<ErrorPolicy, E_t>::get_feature_frequency(
     const int y, const int n, const int f) const {
   return (f >= num_feature
-              ? error_policy.get_total(*this, y, n) -
+              ? error_policy.get_total(y, n) -
                     pos_feature_frequency[y][n][f - num_feature]
               : pos_feature_frequency[y][n][f]);
 }
@@ -262,7 +264,7 @@ size_t BacktrackingAlgorithm<ErrorPolicy, E_t>::getUbSize() const { return ub_si
 
 template <template<typename> class ErrorPolicy, typename E_t>
 E_t BacktrackingAlgorithm<ErrorPolicy, E_t>::node_error(const int i) const {
-  return error_policy.node_error(*this, i);
+  return error_policy.node_error(i);
 }
 
 template <template<typename> class ErrorPolicy, typename E_t>
@@ -274,8 +276,8 @@ bool BacktrackingAlgorithm<ErrorPolicy, E_t>::no_feature(const int node) const {
 template <template<typename> class ErrorPolicy, typename E_t>
 bool BacktrackingAlgorithm<ErrorPolicy, E_t>::max_entropy(const int node, const int f) const {
 
-  E_t negTotal = error_policy.get_total(*this, 0, node);
-  E_t posTotal = error_policy.get_total(*this, 1, node);
+  E_t negTotal = error_policy.get_total(0, node);
+  E_t posTotal = error_policy.get_total(1, node);
 
   auto me{(equal<E_t>(pos_feature_frequency[0][node][f], negTotal) and
            equal<E_t>(pos_feature_frequency[1][node][f], posTotal)) or
@@ -289,8 +291,8 @@ bool BacktrackingAlgorithm<ErrorPolicy, E_t>::max_entropy(const int node, const 
 template <template<typename> class ErrorPolicy, typename E_t>
 bool BacktrackingAlgorithm<ErrorPolicy, E_t>::null_entropy(const int node, const int f) const {
 
-  E_t negTotal = error_policy.get_total(*this, 0, node);
-  E_t posTotal = error_policy.get_total(*this, 1, node);
+  E_t negTotal = error_policy.get_total(0, node);
+  E_t posTotal = error_policy.get_total(1, node);
 
   auto ne{(equal<E_t>(pos_feature_frequency[0][node][f], negTotal) and
            equal<E_t>(pos_feature_frequency[1][node][f], 0)) or
@@ -314,8 +316,8 @@ void BacktrackingAlgorithm<ErrorPolicy, E_t>::print_new_best() {
   if (not nb)
     cout << endl;
   nb = true;
-  E_t total =
-      error_policy.get_total(*this, 0, 0) + error_policy.get_total(*this, 1, 0) + 2 * error_offset;
+  E_t total = error_policy.get_total(0, 0) + error_policy.get_total(1, 0) +
+              2 * error_offset;
 
   double t{
       static_cast<double>(static_cast<int>(100.0 * (cpu_time() - start_time))) /
@@ -565,7 +567,7 @@ void BacktrackingAlgorithm<ErrorPolicy, E_t>::sort_features(const int node) {
 
 template <template<typename> class ErrorPolicy, typename E_t>
 void BacktrackingAlgorithm<ErrorPolicy, E_t>::count_by_example(const int node, const int y) {
-  error_policy.count_by_example(*this, node, y);
+  error_policy.count_by_example(node, y);
 }
 
 template <template<typename> class ErrorPolicy, typename E_t>
@@ -1033,7 +1035,7 @@ bool BacktrackingAlgorithm<ErrorPolicy, E_t>::grow(const int node) {
   feature[node] = ranked_feature[node].begin();
   end_feature[node] = ranked_feature[node].end();
 
-	error_policy.update_node(*this, node);
+  error_policy.update_node(node);
 
   filter_features(node, [&](const int f) { return max_entropy(node, f); });
 
@@ -1044,8 +1046,8 @@ bool BacktrackingAlgorithm<ErrorPolicy, E_t>::grow(const int node) {
 
   blossom.add(node);
 
-  best_tree[node] = (error_policy.get_total(*this, 0, node) <
-                     error_policy.get_total(*this, 1, node));
+  best_tree[node] =
+      (error_policy.get_total(0, node) < error_policy.get_total(1, node));
 
   if (feature[node] == end_feature[node]) {
 
@@ -1132,9 +1134,9 @@ void BacktrackingAlgorithm<ErrorPolicy, E_t>::expend() {
 
       cout << selected_node << " " << *feature[selected_node] << " "
            << get_feature_frequency(0, selected_node, *feature[selected_node])
-           << " / " << error_policy.get_total(*this, 0, selected_node) << " || "
+           << " / " << error_policy.get_total(0, selected_node) << " || "
            << get_feature_frequency(1, selected_node, *feature[selected_node])
-           << " / " << error_policy.get_total(*this, 1, selected_node) << endl;
+           << " / " << error_policy.get_total(1, selected_node) << endl;
     }
 
     assert(not max_entropy(selected_node, *feature[selected_node]));
@@ -1175,7 +1177,7 @@ void BacktrackingAlgorithm<ErrorPolicy, E_t>::initialise_search() {
   for (auto y{0}; y < 2; ++y)
     count_by_example(0, y);
 
-  error_policy.update_node(*this, 0);
+  error_policy.update_node(0);
 
   if (ub_depth == 0)
     noDecision();
@@ -1411,7 +1413,7 @@ void BacktrackingAlgorithm<ErrorPolicy, E_t>::clearExamples() {
 		reverse_dataset[i].clear();
 	}
 
-	error_policy.clear_examples(*this);
+        error_policy.clear_examples();
 }
 
 template <template<typename> class ErrorPolicy, typename E_t>
