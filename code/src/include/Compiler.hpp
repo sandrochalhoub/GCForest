@@ -21,7 +21,7 @@ using namespace std;
 
 namespace primer {
 
-int minLeaf(const int P, const int E);
+int lbLeaf(const int P, const int E);
 
 /**********************************************
 * Compiler
@@ -56,8 +56,9 @@ public:
   vector<vector<E_t>> pos_feature_frequency;
 
   int num_leaf;
-  int numLeaf(const int node) { return (node >= 0 ? best[node] : 1); }
-  int currentSize() { return 2 * (num_leaf + 3 * blossom.count()) - 1; }
+  int numLeaf(const int node) const { return (node >= 0 ? best[node] : 1); }
+	int minLeaf(const int node) const { return (node >= 0 ? lb[node] : 1); }
+  int currentSize() const { return 2 * (num_leaf + 3 * blossom.count()) - 1; }
 
   // int minLeaf(const int node) ;
   // {
@@ -139,6 +140,12 @@ public:
 
   // undo the last decision and remove the previous feature as possible choice
   bool backtrack();
+	
+  // computes a lower bound on the size that one can get without changing any decision of the current branch (of the DT!!!)
+  bool fail();
+	
+	// change the best (minimum) tree size below node, and recursively update parents
+	void updateBest(const int node);
 
   // branch on node by testing f
   void branch(const int node, const int f);
@@ -146,8 +153,9 @@ public:
   // select a node to branch on, the feature to test and create the children
   void expend();
 
-  //
-  void grow(const int node);
+  // returns true if this is a pseudo-leaf
+  bool grow(const int node);
+	// returns true if this is not a leaf
   bool setChild(const int node, const bool branch, const int c);
 
   void initialise_search();
