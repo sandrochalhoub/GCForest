@@ -36,69 +36,30 @@ using namespace std;
 using namespace primer;
 
 template <typename Algo_t>
-void read_binary(Algo_t &A, DTOptions &opt) {
+void read(Algo_t &A, DTOptions &opt) {
+  WeightedDataset input;
 
   string ext{opt.instance_file.substr(opt.instance_file.find_last_of(".") + 1)};
 
   if (opt.format == "csv" or (opt.format == "guess" and ext == "csv")) {
     csv::read_binary(opt.instance_file, [&](vector<int> &data) {
-      A.addExample(data.begin(), data.end() - 1, data.back());
+      input.addExample(data.begin(), data.end() - 1, data.back());
     });
   } else if (opt.format == "dl8" or (opt.format == "guess" and ext == "dl8")) {
     txt::read_binary(opt.instance_file, [&](vector<int> &data) {
-      auto y = *data.begin();
-      A.addExample(data.begin() + 1, data.end(), y);
-    });
-  } else {
-    if (opt.format != "txt" and ext != "txt")
-      cout << "p Warning, unrecognized format, trying txt\n";
-    txt::read_binary(opt.instance_file, [&](vector<int> &data) {
-      A.addExample(data.begin(), data.end() - 1, data.back());
-    });
-  }
-}
-
-template <typename Algo_t>
-void read_non_binary(Algo_t &A, DTOptions &opt) {
-
-  TypedDataSet input;
-
-  string ext{opt.instance_file.substr(opt.instance_file.find_last_of(".") + 1)};
-
-  if (opt.format == "csv" or (opt.format == "guess" and ext == "csv"))
-    csv::read(
-        opt.instance_file,
-        [&](vector<string> &f) { input.setFeatures(f.begin(), f.end() - 1); },
-        [&](vector<string> &data) {
-          auto y = data.back();
-          data.pop_back();
-          input.addExample(data.begin(), data.end(), y);
-        });
-  else if (opt.format == "dl8" or (opt.format == "guess" and ext == "dl8")) {
-    txt::read(opt.instance_file, [&](vector<string> &data) {
       auto y = *data.begin();
       input.addExample(data.begin() + 1, data.end(), y);
     });
   } else {
     if (opt.format != "txt" and ext != "txt")
       cout << "p Warning, unrecognized format, trying txt\n";
-
-    txt::read(opt.instance_file, [&](vector<string> &data) {
-      auto y = data.back();
-      data.pop_back();
-      input.addExample(data.begin(), data.end(), y);
+    txt::read_binary(opt.instance_file, [&](vector<int> &data) {
+      input.addExample(data.begin(), data.end() - 1, data.back());
     });
   }
 
-  DataSet base;
-
-  // cout << input << endl;
-
-  input.binarize(base);
-
-  A.setData(base);
+  input.to(A);
 }
-
 
 
 template <typename E_t = int>
@@ -106,14 +67,7 @@ int run_algorithm(DTOptions &opt) {
 
   Compiler<E_t> A(opt);
 
-	if (opt.binarize) {
-
-    read_non_binary(A, opt);
-
-  } else {
-
-    read_binary(A, opt);
-  }
+  read(A, opt);
 
   if (opt.print_ins) {
     cout << "d examples=" << A.numExample() << " features=" << A.numFeature()
@@ -129,6 +83,26 @@ int run_algorithm(DTOptions &opt) {
     cout << "d readtime=" << cpu_time() << endl;
 
   A.initialise_search();
+	
+	
+	cout << A.numFeature() << " " << A.numExample() << " (" << (A.numFeature() * A.numExample()) << ")" << endl;
+
+	// auto nf{A.numFeature()};
+	// auto ne{A.numExample()};
+	auto nf{5};
+	auto ne{A.numExample()};
+	cout << "f0";
+	for(auto f{1}; f<nf; ++f) {
+		cout << ",f" << f;
+	}
+	cout <<  endl;
+	for(auto x{0}; x<ne; ++x) {
+		for(auto f{0}; f<nf; ++f) {
+			cout << A.reverse_dataset[f][x] << ",";
+		}
+		cout << "0\n";
+	}
+	cout << endl;
 
 
   A.search();

@@ -42,14 +42,11 @@ template <class Algo> inline void WeightedDataset::to(Algo &algo) {
     auto &subset = data[y];
 
     std::sort(subset.begin(), subset.end());
-    int weight = 0;
 
     for (size_t i{0}; i < subset.size(); ++i) {
-      weight++;
-
+			
       if (i == subset.size() - 1 || subset[i] != subset[i+1]) {
-        algo.addExample(subset[i].begin(), subset[i].end(), y, weight);
-        weight = 0;
+        algo.addExample(subset[i].begin(), subset[i].end(), y, 1);
       }
       else {
         dup_count++;
