@@ -21,7 +21,7 @@ using namespace std;
 
 namespace primer {
 
-int lbLeaf(const int P, const int E);
+int lbLeaf(const size_t P, const int E);
 
 /**********************************************
 * Compiler
@@ -102,13 +102,22 @@ public:
 
   double start_time;
 
-  int ub_size;
+  int min_depth_backtrack;
+
+  // int ub_size;
+  int ub_size() const { return best[0]; }
 
   size_t search_size;
 
   dynamic_bitset<> branch_features;
 
-  E_t usize(const int node) const { return 1 << (num_feature - depth[node]); }
+  inline int log_size(const int node) const {
+    return (num_feature - depth[node]);
+  }
+
+  E_t usize(const int node) const { return 1 << log_size(node); }
+
+  bool purePositive(const int node) const;
 
   E_t halfsize(const int node) const {
     return 1 << (num_feature - depth[node] - 1);
@@ -179,7 +188,7 @@ public:
   void print_new_best();
   void print_progress();
 
-  int getUbSize() const;
+  // int getUbSize() const;
 
   void search();
 

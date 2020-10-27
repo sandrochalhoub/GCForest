@@ -83,27 +83,26 @@ int run_algorithm(DTOptions &opt) {
     cout << "d readtime=" << cpu_time() << endl;
 
   A.initialise_search();
-	
-	
-	cout << A.numFeature() << " " << A.numExample() << " (" << (A.numFeature() * A.numExample()) << ")" << endl;
 
-	// auto nf{A.numFeature()};
-	// auto ne{A.numExample()};
-	auto nf{5};
-	auto ne{A.numExample()};
-	cout << "f0";
-	for(auto f{1}; f<nf; ++f) {
-		cout << ",f" << f;
-	}
-	cout <<  endl;
-	for(auto x{0}; x<ne; ++x) {
-		for(auto f{0}; f<nf; ++f) {
-			cout << A.reverse_dataset[f][x] << ",";
-		}
-		cout << "0\n";
-	}
-	cout << endl;
-
+  // cout << A.numFeature() << " " << A.numExample() << " (" << (A.numFeature()
+  // * A.numExample()) << ")" << endl;
+  //
+  // // auto nf{A.numFeature()};
+  // // auto ne{A.numExample()};
+  // auto nf{5};
+  // auto ne{A.numExample()};
+  // cout << "f0";
+  // for(auto f{1}; f<nf; ++f) {
+  // 	cout << ",f" << f;
+  // }
+  // cout <<  endl;
+  // for(auto x{0}; x<ne; ++x) {
+  // 	for(auto f{0}; f<nf; ++f) {
+  // 		cout << A.reverse_dataset[f][x] << ",";
+  // 	}
+  // 	cout << "0\n";
+  // }
+  // cout << endl;
 
   A.search();
 	
@@ -114,6 +113,20 @@ int run_algorithm(DTOptions &opt) {
 int main(int argc, char *argv[]) {
 
   DTOptions opt = parse_dt(argc, argv);
+
+  cout << INFTY(int) << endl;
+
+  cout << (1 << 30) - 1 << endl;
+
+  // cout << (1 << 54) << endl;
+
+  size_t u{1};
+
+  u = (u << 54);
+
+  cout << u << endl;
+
+  cout << log2_64(u) << endl;
 
   if (opt.print_cmd)
     cout << opt.cmdline << endl;

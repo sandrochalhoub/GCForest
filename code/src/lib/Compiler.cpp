@@ -7,25 +7,29 @@ namespace primer {
 template <typename E_t> Compiler<E_t>::Compiler(DTOptions &opt) : options(opt) {
   num_feature = 0;
 	num_leaf = 0;
-  ub_size = INFTY(int);
-  search_size = 0;
+        // depth necessary
+        // min_depth =
+        // ub_size = INFTY(int);
+        search_size = 0;
+
+        min_depth_backtrack = INFTY(int);
 }
 
-int lbLeaf(const int P, const int E) {
+int lbLeaf2(const size_t P, const int E) {
   // int E = num_feature - depth[node]; // the total number of examples is 2^E
   // int P = P[node].count(); // there are P positive examples and 2^E - P
   // negative examples
 
-  // cout << "lbLeaf(" << P << "," << E << ")\n";
+  // cout << "lbLeaf2(" << P << "," << E << ")\n";
 
-  if (P < 0 or E < 0)
-    exit(1);
+  assert(P >= 0 and E >= 0);
+  // exit(1);
 
   // base cases are P==0, P==2^E and P==2^(E-1):
   if (P == 0)
     return 1;
 
-  auto H{(1 << (E - 1))};
+  //
 
   if (E + 1 < 8 * sizeof(int)) {
 
@@ -34,16 +38,20 @@ int lbLeaf(const int P, const int E) {
     //   exit(1);
     // }
 
+    auto H{(1 << (E - 1))};
+
     if (P == 2 * H)
       return 1;
     if (P == H)
       return 2;
     if (P > H)
-      return lbLeaf(P - H, E - 1) + 1;
+      return lbLeaf2(P - H, E - 1) + 1;
   }
 
+  auto NE{log2_64(P) + 1};
+
   // E is large enough, the best is to put everything in P
-  return lbLeaf(P, E - 1) + 1;
+  return lbLeaf2(P, NE) + E - NE;
 }
 
 template <typename E_t> void Compiler<E_t>::count_by_example(const int node) {
@@ -133,7 +141,8 @@ template <typename E_t> void Compiler<E_t>::setReverse() {
 
 template <typename E_t> size_t Compiler<E_t>::size() { return blossom.size(); }
 
-template <typename E_t> int Compiler<E_t>::getUbSize() const { return ub_size; }
+// template <typename E_t> int Compiler<E_t>::getUbSize() const { return
+// ub_size; }
 
 template <typename E_t> bool Compiler<E_t>::no_feature(const int node) const {
   return feature[node] == end_feature[node];
@@ -152,9 +161,9 @@ template <typename E_t> void Compiler<E_t>::print_new_best() {
       static_cast<double>(static_cast<int>(100.0 * (cpu_time() - start_time))) /
       100.0};
 
-  cout << " size = " << setw(3) << ub_size << " choices = " << setw(9)
-       << left << search_size
-       << " time=" << t << right << endl;
+  cout << " size = " << left << setw(3) << ub_size() << " choices = " << setw(9)
+       << search_size << " depth = " << min_depth_backtrack << " time = " << t
+       << right << endl;
 }
 
 template <typename E_t> void Compiler<E_t>::resize(const int k) {
@@ -275,40 +284,50 @@ template <typename E_t> void Compiler<E_t>::prune(const int node) {
 
 template <typename E_t> bool Compiler<E_t>::solutionFound() {
 
-if(blossom.empty()) {
-  auto current_size{currentSize()};
-	
-	assert(current_size > 0);
-		
-  if (current_size < ub_size) {
-    ub_size = currentSize();
-    if (options.verbosity > DTOptions::QUIET)
-      print_new_best();
-  }
-	return true;
-}
+  return blossom.empty();
 
-return false;
+  // if(blossom.empty()) {
+  //   // auto current_size{currentSize()};
+  //
+  // 	// assert(current_size > 0);
+  //
+  //   // if (current_size < ub_size) {
+  // 	if(num_leaf < ub_size()) {
+  //     ub_size = currentSize();
+  //     if (options.verbosity > DTOptions::QUIET)
+  //       print_new_best();
+  //   }
+  // 	return true;
+  // }
+  //
+  // return false;
 }
 
 
 template <typename E_t> void Compiler<E_t>::updateBest(const int node) {
 
-	// cout << "UPDATE BEST (" << node << "): " << best[node] << " / " << numLeaf(child[0][node]) << " + " << numLeaf(child[1][node]) << endl;
+  // cout << "UPDATE BEST (" << node << "): " << best[node] << " / " <<
+  // numLeaf(child[0][node]) << " + " << numLeaf(child[1][node]) << endl;
 
+  auto bl{numLeaf(child[0][node])};
+  auto br{numLeaf(child[1][node])};
 
-	auto bl{numLeaf(child[0][node])};
-	auto br{numLeaf(child[1][node])};
+  if (bl < INFTY(int) and br < INFTY(int)) {
+    auto new_best{bl + br};
+    if (new_best < best[node]) {
+      best[node] = new_best;
 
-	if(bl < INFTY(int) and br < INFTY(int)) {
-		auto new_best{bl + br};
-		if(new_best < best[node]) {
-			best[node] = new_best;
-			if(node)
-				updateBest(parent[node]);
-		}
-	} 
+      if (node == 0 and options.verbosity > DTOptions::QUIET) {
+        if (decision.size() > 0)
+          min_depth_backtrack =
+              std::min(min_depth_backtrack, depth[decision.back()]);
+        print_new_best();
+      }
 
+      if (node)
+        updateBest(parent[node]);
+    }
+  }
 }
 
 // returns a lower bound on the size that one can get without changing any decision of the current branch (of the DT!!!)
@@ -319,27 +338,28 @@ template <typename E_t> bool Compiler<E_t>::fail() {
 		
 	auto node{decision.back()};
 	
-	
-	cout << endl << "node=" << node << endl;
-	cout << child[0][node] << endl; 
-	cout << child[1][node] << endl; 
-	
 	auto LB{minLeaf(child[0][node]) + minLeaf(child[1][node])};
-	
-	cout << LB << endl;
-	
-	cout << "\nLB=" << LB << "/" << best[node] << " (" << node << ")\n";
-	
-	while(node > 0) {
-		auto c{node};
-		node = parent[node];
-		
-		LB += minLeaf(child[child[node][0] == c][node]);
-		
-		cout << "LB=" << LB << "/" << best[node] << " (" << node << ")\n";
-	}
-	
-	return false;
+
+        // cout << "\nLB=" << LB << "/" << best[node] << " (" << node << ")\n";
+
+        while (node > 0) {
+          auto c{node};
+          node = parent[node];
+
+          LB += minLeaf(child[child[0][node] == c][node]);
+
+          // cout << "LB=" << LB << "/" << best[node] << " (" << node <<
+          // ")\n";
+
+          if (LB > best[node] or (node == 0 and LB >= best[node])) {
+            // cout << "fail?\n";
+            return true;
+          }
+
+          //
+        }
+
+        return false;
 }
 
 template <typename E_t> bool Compiler<E_t>::backtrack() {
@@ -353,16 +373,22 @@ template <typename E_t> bool Compiler<E_t>::backtrack() {
     auto node{decision.back()};
     decision.pop_back();
 
-		updateBest(node);
-		// auto bl{numLeaf(child[0][node])};
-		// auto br{numLeaf(child[1][node])};
-		//
-		// // cout << "best = min(" << best[node] << ", (" << bl << " + " << br << ")) [" << INFTY(int) << "]\n";
-		//
-		// if(bl < INFTY(int) and br < INFTY(int)) {
-		// 	best[node] =
-		//       		std::min(best[node], bl + br);
-		// }
+    if (depth[node] < min_depth_backtrack) {
+      min_depth_backtrack = depth[node];
+      print_new_best();
+    }
+
+    updateBest(node);
+// auto bl{numLeaf(child[0][node])};
+// auto br{numLeaf(child[1][node])};
+//
+// // cout << "best = min(" << best[node] << ", (" << bl << " + " << br << "))
+// [" << INFTY(int) << "]\n";
+//
+// if(bl < INFTY(int) and br < INFTY(int)) {
+// 	best[node] =
+//       		std::min(best[node], bl + br);
+// }
 
 #ifdef PRINTTRACE
     if (PRINTTRACE) {
@@ -383,24 +409,35 @@ template <typename E_t> bool Compiler<E_t>::backtrack() {
     if (!dead_end) {
       blossom.add(node);
     } else {
-			
-			assert(best[node] < INFTY(int));
-			assert(lb[node] <= best[node]);
-			
-			
-			// if(lb[node] < best[node]) {
-			// 	cout << lb[node] << " -> " << best[node] << endl;
-			// }
-			
-			lb[node] = best[node];
-			
-			// if(best[node] < INFTY(int))
-			num_leaf += best[node];
+
+      // assert(best[node] < INFTY(int));
+      // assert(lb[node] <= best[node]);
+
+      // if(lb[node] < best[node]) {
+      // 	cout << lb[node] << " -> " << best[node] << endl;
+      // }
+
+      if (best[node] < INFTY(int)) {
+        num_leaf += best[node];
+        lb[node] = best[node];
+      }
     }
 
   } while (dead_end);
 
   return true;
+}
+
+template <typename E_t> bool Compiler<E_t>::purePositive(const int node) const {
+
+  // return P[node].count() == usize(node);
+  //
+  //
+  // P[node].count() == 2^(m - d);
+  //
+
+  return (log_size(node) < 8 * sizeof(size_t) and
+          P[node].count() == usize(node));
 }
 
 template <typename E_t>
@@ -411,7 +448,8 @@ bool Compiler<E_t>::setChild(const int node, const bool branch, const int c) {
 
   if (P[c].count() == 0) {
     child[branch][node] = -1;
-  } else if (P[c].count() == usize(c)) {
+    // } else if (P[c].count() == usize(c)) {
+  } else if (purePositive(c)) {
     child[branch][node] = -2;
   } else {
     child[branch][node] = c;
@@ -428,8 +466,8 @@ void Compiler<E_t>::branch(const int node, const int f) {
     // cout << setw(3) << decision.size();
     // for (auto i{0}; i < decision.size(); ++i)
     //   cout << "   ";
-    cout << "branch on " << node << " (" << P[node].count() << "/"
-         << (usize(node) - P[node].count()) << ") with " << f;
+    cout << "branch on " << node << " (" << P[node].count() << "/2^"
+         << log_size(node) << "-" << P[node].count() << ") with " << f;
   }
   cout.flush();
 #endif
@@ -515,10 +553,10 @@ void Compiler<E_t>::branch(const int node, const int f) {
     //   cout << "   ";
     // cout << "branch on " << node << " (" << P[node].count() << "/"
     //      << (usize(node) - P[node].count()) << ") with " << f
-    cout << " children: " << c[0] << " (" << P[c[0]].count() << "/"
-         << (usize(c[0]) - P[c[0]].count()) << ") and " << c[1] << " ("
-         << P[c[1]].count() << "/" << (usize(c[1]) - P[c[1]].count()) << ")"
-         << endl;
+    cout << " children: " << c[0] << " (" << P[c[0]].count() << "/2^"
+         << log_size(c[0]) << "-" << P[c[0]].count() << ") and " << c[1] << " ("
+         << P[c[1]].count() << "/2^" << log_size(c[1]) << "-" << P[c[1]].count()
+         << ")" << endl;
   }
 #endif
 }
@@ -554,7 +592,9 @@ template <typename E_t> bool Compiler<E_t>::grow(const int node) {
   // cout << endl
   //      << "minleaf " << node << " " << num_feature << " " << depth[node]
   //      << endl;
-  lb[node] = lbLeaf(P[node].count(), num_feature - depth[node]);
+  lb[node] = lbLeaf2(P[node].count(), num_feature - depth[node]);
+
+  // assert(lb[node] == lbLeaf2(P[node].count(), num_feature - depth[node]));
 
   if (P[node].count() == halfsize(node)) {
     int f[2] = {*feature[node] + numFeature(), *feature[node]};
@@ -626,12 +666,14 @@ template <typename E_t> void Compiler<E_t>::search() {
 		
 		++search_size;
 
-    PRINT_TRACE;
+                PRINT_TRACE;
 
+                // if(blossom.empty())
+                // 	cout << "tree (" << num_leaf << ")\n";
 
-    if (solutionFound() or fail()) { //WRONG!!
-      if (not backtrack())
-        break;
+                if (blossom.empty() or fail()) {
+                  if (not backtrack())
+                    break;
     } else {
       expend();
     }
@@ -655,78 +697,81 @@ template <typename E_t> void Compiler<E_t>::print_trace() {
     // cout << setw(3) << decision.size();
     // for (auto i{0}; i < decision.size(); ++i)
     //   cout << "   ";
-    cout << "#leaves = " << num_leaf << "; size = " << currentSize() << "/";
-    if (ub_size < INFTY(int))
-      cout << ub_size;
+    cout << "#leaves = " << num_leaf
+         // << "; size = " << currentSize()
+         << "/";
+    if (ub_size() < INFTY(int))
+      cout << ub_size();
     else
       cout << "inf";
-    cout << "; search=" << search_size << endl;
+    cout << "; search=" << search_size << "; depth=" << min_depth_backtrack
+         << endl;
 
     if (options.verbosity >= DTOptions::SOLVERINFO) {
       cout << "nodes: ";
       for (auto d{blossom.fbegin()}; d != blossom.fend(); ++d) {
-        cout << setw(3) << *d << " ";
+        cout << setw(4) << *d << " ";
       }
       cout << "| ";
       for (auto b : blossom) {
-        cout << setw(3) << b << " ";
+        cout << setw(4) << b << " ";
       }
       cout << "| ";
       for (auto d{blossom.bbegin()}; d != blossom.bend(); ++d) {
-        cout << setw(3) << *d << " ";
+        cout << setw(4) << *d << " ";
       }
       cout << endl << "parent ";
       for (auto d{blossom.fbegin()}; d != blossom.fend(); ++d) {
-        cout << setw(3) << parent[*d] << " ";
+        cout << setw(4) << parent[*d] << " ";
       }
       cout << "  ";
       for (auto b : blossom) {
-        cout << setw(3) << parent[b] << " ";
+        cout << setw(4) << parent[b] << " ";
       }
       cout << endl << " left: ";
       for (auto d{blossom.fbegin()}; d != blossom.fend(); ++d) {
-        cout << setw(3) << child[0][*d] << " ";
+        cout << setw(4) << child[0][*d] << " ";
       }
       cout << "  ";
       for (auto b : blossom) {
-        cout << setw(3) << child[0][b] << " ";
+        cout << setw(4) << child[0][b] << " ";
       }
       cout << endl << "right: ";
       for (auto d{blossom.fbegin()}; d != blossom.fend(); ++d) {
-        cout << setw(3) << child[1][*d] << " ";
+        cout << setw(4) << child[1][*d] << " ";
       }
       cout << "  ";
       for (auto b : blossom) {
-        cout << setw(3) << child[1][b] << " ";
+        cout << setw(4) << child[1][b] << " ";
       }
       cout << endl << "depth: ";
       for (auto d{blossom.fbegin()}; d != blossom.fend(); ++d) {
-        cout << setw(3) << depth[*d] << " ";
+        cout << setw(4) << depth[*d] << " ";
       }
       cout << "  ";
       for (auto b : blossom) {
-        cout << setw(3) << depth[b] << " ";
+        cout << setw(4) << depth[b] << " ";
       }
       cout << endl << "featu: ";
       for (auto d{blossom.fbegin()}; d != blossom.fend(); ++d) {
-        cout << setw(3) << *feature[*d] << " ";
+        cout << setw(4) << *feature[*d] << " ";
       }
       cout << "  ";
       for (auto b : blossom) {
-        cout << setw(3) << *feature[b] << " ";
+        cout << setw(4) << *feature[b] << " ";
       }
       cout << endl << "error: ";
       cout.flush();
       for (auto d{blossom.fbegin()}; d != blossom.fend(); ++d) {
-        cout << setw(3) << node_error(*d) << " ";
+        cout << setw(4) << node_error(*d) << " ";
       }
       cout << "  ";
       for (auto b : blossom) {
-        cout << setw(3) << node_error(b) << " ";
+        cout << setw(4) << node_error(b) << " ";
       }
       cout << endl << "best:  ";
       for (auto d{blossom.fbegin()}; d != blossom.fend(); ++d) {
-        cout << setw(3);
+        cout << setw(4);
         if (best[*d] < INFTY(int))
           cout << best[*d];
         else
@@ -735,7 +780,7 @@ template <typename E_t> void Compiler<E_t>::print_trace() {
       }
       cout << "  ";
       for (auto b : blossom) {
-        cout << setw(3);
+        cout << setw(4);
         if (best[b] < INFTY(int))
           cout << best[b];
         else
@@ -744,11 +789,11 @@ template <typename E_t> void Compiler<E_t>::print_trace() {
       }
       cout << endl << "lb:    ";
       for (auto d{blossom.fbegin()}; d != blossom.fend(); ++d) {
-        cout << setw(3) << lb[*d] << " ";
+        cout << setw(4) << lb[*d] << " ";
       }
       cout << "  ";
       for (auto b : blossom) {
-        cout << setw(3) << lb[b] << " ";
+        cout << setw(4) << lb[b] << " ";
       }
       cout << endl;
       ;
