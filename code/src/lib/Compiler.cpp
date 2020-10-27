@@ -334,6 +334,9 @@ template <typename E_t> bool Compiler<E_t>::fail() {
 		auto c{node};
 		node = parent[node];
 		
+
+		cout << node << endl;
+
 		LB += minLeaf(child[child[node][0] == c][node]);
 		
 		cout << "LB=" << LB << "/" << best[node] << " (" << node << ")\n";
