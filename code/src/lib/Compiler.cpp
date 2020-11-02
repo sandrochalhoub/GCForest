@@ -399,6 +399,8 @@ template <typename E_t> bool Compiler<E_t>::backtrack() {
     }
 #endif
 
+		assert(not no_feature(node));
+
     ++feature[node];
 
     for (auto i{0}; i < 2; ++i)
@@ -578,10 +580,13 @@ template <typename E_t> bool Compiler<E_t>::grow(const int node) {
         ranked_feature[node].push_back(f);
       feature[node] = ranked_feature[node].begin();
     }
+		
   }
 
   feature[node] = ranked_feature[node].begin();
   end_feature[node] = ranked_feature[node].end();
+	
+	assert(not ranked_feature[node].empty());
 
   sort_features(node);
 
@@ -692,6 +697,7 @@ void Compiler<E_t>::addExample(const std::vector<int> &example,
 #ifdef PRINTTRACE
 
 template <typename E_t> void Compiler<E_t>::print_trace() {
+
   if (PRINTTRACE) {
 
     // cout << setw(3) << decision.size();
@@ -755,10 +761,12 @@ template <typename E_t> void Compiler<E_t>::print_trace() {
       cout << endl << "featu: ";
       for (auto d{blossom.fbegin()}; d != blossom.fend(); ++d) {
         cout << setw(4) << *feature[*d] << " ";
+				assert(feature[*d] < end_feature[*d]);
       }
       cout << "  ";
       for (auto b : blossom) {
         cout << setw(4) << *feature[b] << " ";
+				assert(feature[b] < end_feature[b]);
       }
       cout << endl << "error: ";
       cout.flush();
