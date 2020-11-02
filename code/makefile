@@ -1,6 +1,6 @@
 include ./boost_home
 
-COPTIMIZE= -g #-fno-omit-frame-pointer -flto
+COPTIMIZE= -O3 -fno-omit-frame-pointer -flto
 COMPILFLAGS= -std=c++1z -Wno-sign-compare
 
 include ./template.mk
