@@ -15,7 +15,7 @@ template <typename E_t> Compiler<E_t>::Compiler(DTOptions &opt) : options(opt) {
         min_depth_backtrack = INFTY(int);
 }
 
-int lbLeaf2(const size_t P, const int E) {
+int lbLeaf2(const uint64_t P, const int E) {
   // int E = num_feature - depth[node]; // the total number of examples is 2^E
   // int P = P[node].count(); // there are P positive examples and 2^E - P
   // negative examples

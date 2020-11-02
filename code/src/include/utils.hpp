@@ -6,10 +6,12 @@
 
 #define INFTY(type) static_cast<type>(numeric_limits<type>::max()/2)
 
+#include <cstdint>
+
 // #define DEBUG_MODE
 
-#define PRINTTRACE                                                             \
-  (options.verbosity >= DTOptions::YACKING and search_size % 100000 < 10)
+#define PRINTTRACE false
+// (options.verbosity >= DTOptions::YACKING and search_size % 100000 < 10)
 
 namespace primer {
 

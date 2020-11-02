@@ -21,7 +21,7 @@ using namespace std;
 
 namespace primer {
 
-int lbLeaf(const size_t P, const int E);
+int lbLeaf(const uint64_t P, const int E);
 
 /**********************************************
 * Compiler
