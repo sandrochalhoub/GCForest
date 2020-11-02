@@ -53,7 +53,10 @@ namespace primer {
     * without any change.
     */
     template <class rIter>
-    void addExample(rIter beg_sample, rIter end_sample, const bool y, size_t weight);
+    void addExample(rIter beg_sample, rIter end_sample, const bool y, const size_t weight);
+		
+	  void addBitsetExample(const dynamic_bitset<> &sample, const bool y,
+	                  const size_t weight);
 
     void addExample(const std::vector<int> &example) {
         addExample(example.begin(), example.end() - 1, example.back());
@@ -117,9 +120,31 @@ namespace primer {
 
     bitsets[y].push_back(bsample);
   }
+	
+  inline void Adaboost::addBitsetExample(const dynamic_bitset<> &sample, const bool y,
+	                  const size_t weight) {
+    // Add vector
+		std::vector<int> vsample(sample.size(), 0);
+		
+		for (size_t i = 0; i < weight; ++i) {
+   	 bitsets[y].push_back(sample);
+		}
+    // Add bitset
+    // instance bsample(sample.size());
+
+    for (size_t i = 0; i < sample.size(); ++i) {
+      if (sample[i]) {
+        vsample[i] = 1;
+      }
+    }
+
+		for (size_t i = 0; i < weight; ++i) {
+		dataset[y].push_back(vsample); 
+		}   
+  }
 
   template <class rIter>
-  inline void Adaboost::addExample(rIter beg_sample, rIter end_sample, const bool y, size_t weight) {
+  inline void Adaboost::addExample(rIter beg_sample, rIter end_sample, const bool y, const size_t weight) {
     // TODO add with weights once we have implemented:
     // - splitting weighted datasets
     // - Adaboost weights taking weights into account
