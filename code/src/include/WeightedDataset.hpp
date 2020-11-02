@@ -107,6 +107,11 @@ template <class Algo> inline void WeightedDataset::toInc(Algo &algo) {
 
   // for (int y = 0; y < 2; ++y)
   //   std::sort(data[y].begin(), data[y].end());
+	
+	auto t{cpu_time()};
+  if (algo.options.verbosity >= DTOptions::NORMAL)
+    cout << "d readtime=" << t << endl;
+	
 
   for (int y = 0; y < 2; ++y)
     std::sort(data[y].begin(), data[y].end());
@@ -115,9 +120,9 @@ template <class Algo> inline void WeightedDataset::toInc(Algo &algo) {
   // 	for(auto& b : data[y])
   // 		cout << b << endl;
 
-  auto t{cpu_time()};
+  
   if (algo.options.verbosity >= DTOptions::NORMAL)
-    cout << "d sorttime=" << t << endl;
+    cout << "d sorttime=" << cpu_time() - t << endl;
 
   vector<sample>::iterator x[2] = {data[0].begin(), data[1].begin()};
   vector<sample>::iterator end[2] = {data[0].end(), data[1].end()};

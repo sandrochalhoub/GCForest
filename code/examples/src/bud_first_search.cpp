@@ -159,7 +159,7 @@ int run_algorithm(DTOptions &opt) {
     //   }
   }
 
-  if (opt.verbosity >= DTOptions::NORMAL)
+  if (not opt.preprocessing and opt.verbosity >= DTOptions::NORMAL)
     cout << "d readtime=" << cpu_time() << endl;
 
   if (opt.mindepth) {
