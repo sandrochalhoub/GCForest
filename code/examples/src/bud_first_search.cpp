@@ -151,12 +151,6 @@ int run_algorithm(DTOptions &opt) {
   if (opt.print_ins) {
     cout << "d examples=" << A.numExample() << " features=" << A.numFeature()
          << endl;
-    // for (auto y{0}; y < 2; ++y)
-    //   for (auto i{0}; i < A.dataset[y].size(); ++i) {
-    //     for (auto j{0}; j < A.numFeature(); ++j)
-    //       cout << " " << A.dataset[y][i][j];
-    //     cout << endl;
-    //   }
   }
 
   if (not opt.preprocessing and opt.verbosity >= DTOptions::NORMAL)
@@ -167,7 +161,7 @@ int run_algorithm(DTOptions &opt) {
       A.minimize_error_depth_size();
     else
       A.minimize_error_depth();
-  } else
+  } else 
     A.minimize_error();
 
   Tree sol = A.getSolution();

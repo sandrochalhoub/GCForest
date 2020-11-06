@@ -390,6 +390,8 @@ public:
   //@{
   // std::ostream &toCsv(std::ostream &os) const;
   std::ostream &display(std::ostream &os) const;
+	
+	void printDatasetToFile(std::string &filename) const;
   //@}
 };
 
