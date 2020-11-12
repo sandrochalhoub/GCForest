@@ -14,12 +14,13 @@
 \usepackage{fp}
 \usepackage{subfig}
 \usetikzlibrary{arrows,shadows,fit,calc,positioning,decorations.pathreplacing,matrix,shapes,petri,topaths,fadings,mindmap,backgrounds,shapes.geometric}
-\usepackage{geometry}
+% \usepackage{geometry}
 \usepackage{xifthen}
 \usepackage{rotating}
 
-\newgeometry{bottom=2cm,top=2cm}
+% \newgeometry{bottom=2cm,top=2cm}
 
+\newenvironment{proof}{\paragraph{Proof:}}{\hfill$\square$}
 
 \DeclareMathOperator*{\argmax}{arg\,max}
 \DeclareMathOperator*{\argmin}{arg\,min}
@@ -66,7 +67,7 @@
 \newcommand{\aclass}[0]{\ensuremath{l}}
 \newcommand{\ub}[0]{\ensuremath{ub}}
 % \newcommand{\error}[0]{\ensuremath{error}}
-\newcommand{\depth}[1][]{\ensuremath{\ifthenelse{\equal{#1}{}}{depth}{depth({#1})}}}
+% \newcommand{\mdepth}[1][]{\ensuremath{\ifthenelse{\equal{#1}{}}{depth}{depth({#1})}}}
 \newcommand{\test}[1][]{\ensuremath{\ifthenelse{\equal{#1}{}}{test}{test({#1})}}}
 \newcommand{\dom}[1][]{\ensuremath{\ifthenelse{\equal{#1}{}}{dom}{dom({#1})}}}
 \newcommand{\best}[1][]{\ensuremath{\ifthenelse{\equal{#1}{}}{{best}}{{best({#1})}}}}
@@ -77,6 +78,11 @@
 \newcommand{\classlabel}[1][]{\ensuremath{\ifthenelse{\equal{#1}{}}{{y}}{{y({{#1}})}}}}
 
 \newcommand{\abranch}[0]{\ensuremath{b}}
+
+
+\newcommand{\numex}[0]{\ensuremath{n}}
+\newcommand{\numfeat}[0]{\ensuremath{m}}
+\newcommand{\mdepth}[0]{\ensuremath{k}}
 
 
 
@@ -117,6 +123,14 @@
 
 \section*{Introduction}
 
+\begin{itemize}
+	\item Same worst-case complexity than DL8
+	\item No memory usage
+	\item Better anytime behaviour than DL8 (in fact as good as the state of the art heuristics)
+	\item Therefore, strictly better than greedy heuristics and almost always better than DL8
+\end{itemize}
+
+
 We consider the problem of finding the bounded-depth decision tree of maximum accuracy.
 The state of the art includes MIP approaches (BinOCT), a MaxSAT approach based on the SAT encoding proposed by Narodytska et al, and DL8.5.
 The latter algorithm is by far the most efficient, however, it is not \emph{anytime}: the left branch must be optimally solved before a solution of the right branch can be found. Moreover the use of a cache structure means that it uses a lot of memory. This algorithm is practical for a maximum depth of 4 (although using gigabytes of memory) but often not much beyond. Therefore, in a number of cases, a greedy heuristic (such as CART) is still the best method in practice.
@@ -138,7 +152,13 @@ $$
 \bigwedge_{\afeat \in \ex}\afeat \wedge \bigwedge_{\afeat \in \features \setminus \ex}\bar{\afeat}
 $$
 
-A \emph{branch} of a decision tree is a conjunction of (possibly negated) features. 
+
+A \emph{binary decision tree} is a tree whose leaves are labelled with either $\top$ or $\bot$, internal vertices are labelled with features and edges are labelled with either $0$ or $1$.
+
+To a \emph{branch} of a decision tree we can associate the conjunction of features which are on the path from the root to a leaf.
+If the feature vertex is exited by a $1$-edge, the feature is positive in the conjunction, otherwise it is negative.
+
+ 
 %Moreover, if we also consider data points as conjunctions of features (where every feature appears either positively or negatively),
 %given a branch $\abranch \subseteq \features$ 
 Given a data set $\langle \negex,\posex \rangle$, we can associate a data set $\langle \negex(\abranch),\posex(\abranch) \rangle$ to a branch $\abranch$ where:
@@ -180,8 +200,8 @@ The solver DL8.5 is a dynamic programming algorithm. It relies on the observatio
 	\begin{algorithm}
 		\caption{Dynamic Programming Algorithm\label{alg:dynprog}}
 		\TitleOfAlgo{\dynprog}
-		  \KwData{$\negex,\posex,\maxd$}
-		  \KwResult{The minimum error on $\negex,\posex$ for decision trees of depth at most $\maxd$}
+		  \KwData{$\negex,\posex,\features,\maxd$}
+		  \KwResult{The minimum error on $\negex,\posex,\features$ for decision trees of depth $\maxd$}
 			$\error \gets \min(|\negex|,|\posex|)$\;
 			
 			\lIf{$\maxd = 0$ or $\error = 0$} {
@@ -189,10 +209,25 @@ The solver DL8.5 is a dynamic programming algorithm. It relies on the observatio
 			}
 			
 			\ForEach{$\afeat \in \features$} {
-					$\error \gets \min(\error, \dynprog(\negex(\afeat),\posex(\afeat), \maxd-1) + \dynprog(\negex(\bar{\afeat}),\posex(\bar{\afeat}), \maxd-1))$\;
+					$\error \gets \min(\error, \dynprog(\negex(\afeat),\posex(\afeat),\features \setminus \{\afeat\},\maxd-1)$\;
+					\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \  $ + \dynprog(\negex(\bar{\afeat}),\posex(\bar{\afeat}),\features \setminus \{\afeat\},\maxd-1))$\;
 			}
 			\Return $\error$\;
 	\end{algorithm}
+	
+	
+	Let $\numex = |\posex| + |\negex|$, $\numfeat = |\features|$, with the maximum depth $\mdepth \ll \numfeat$. 
+	%The number of recursive calls for Algorithm~\ref{alg:dynprog} is $\Theta(2^{\mdepth-1}{\numfeat \choose \mdepth})$, to explore at most ${\numfeat \choose \mdepth}$ combinations of features for at most $2^{\mdepth-1}$ branches. 
+	%The number of recursive calls for Algorithm~\ref{alg:dynprog} is $\Theta(2^{\mdepth}{\numfeat \choose \mdepth})$, to explore $\Theta({\numfeat \choose \mdepth})$ combinations of features for $\Theta(2^{\mdepth})$ branches. 
+	The number of recursive calls for Algorithm~\ref{alg:dynprog} is $\Theta((2\numfeat)^{\mdepth})$. 
+	Moreover, at each call, the data set must be split into two subsets. However, this splitting procedure can be done in time $\Theta(\numex)$ amortised over a given level of a particular decision tree, since the data sets associated to branches up to a given level form a partition of the original data set.
+	Therefore, since Algorithm~\ref{alg:dynprog} independently explores $\Theta({\numfeat \choose \mdepth})$ sets of branches of depth $\mdepth$, it runs in
+	$\Theta((\numex+2^\mdepth){\numfeat \choose \mdepth})$ time (hence $O((\numex+2^\mdepth)\numfeat^\mdepth)$ time, since we suppose $\mdepth \ll \numfeat$).
+	
+	Note that this is a significant improvement with respect to the $\Theta(\numfeat^{2^{\mdepth}})$ trees (with redundant branches) explored by a brute-force algorithm.
+	 %
+	 % a brute-force algorithm, since the total number of decision trees of depth $\mdepth$ with $\numfeat$ attributes is $\prod_{x=1}^{\mdepth}(1-x+\numfeat)^{2^{\mdepth}}$. If we assume $\mdepth \in O(1)$, this is $\Theta(\numfeat^{2^{\mdepth}})$ distinct trees.
+	 %
 
 
 
@@ -218,20 +253,104 @@ Otherwise, we consider it terminal and its error is the sum of the error of its 
 
 \end{itemize}
 
+
+Notice that to simplify the code, we use branches to directly index array-like data structures in Algorithm~\ref{alg:bud}. Actually, a set of \emph{indices} (at most $2^{\mdepth}$ of them are necessary) are used as proxy for branches in all contexts. At Line~\ref{line:storebest}, the indices for $\abranch \wedge \afeat$, $\abranch \wedge \bar{\afeat}$ are released, and a free index is marked as used when expending a branch at Line~\ref{line:branching}.
+
+
 The classification error of a tree is equal to the sum of the error of its terminal banches, the algorithm returns the minimum value encountered when exploring the possible decision trees.
+In other words, this algorithm will first build a complete tree by expanding non-pure, non-maximal branches in any order. When all leaves are pure of a maximal depth, the last test of the last expanded branch w
+
+
 
 \medskip
 		
-		Let $n = |\posex| + |\negex|$, $m = |\features|$, with the maximum depth $k \leq m$. 
-		The number of recursive calls for Algorithm~\ref{alg:dynprog} is $\Theta(2^km^k)$. At each call, the data set must be split into two subsets. This splitting procedure can be done in time $\Theta(n)$ amortised over a given level of a given decision tree. Since every branch of the tree is independent, Algorithm~\ref{alg:dynprog} explores $O(m^d)$ trees of depth $d$. Therefore Algorithm~\ref{alg:dynprog} runs in $\Theta((n+2^k)m^k)$ time.
-		
+
 		\begin{theorem}
 			The time complexities of Algorithms~\ref{alg:dynprog} and Algorithm~\ref{alg:bud} are equal.
 			\end{theorem}
 			
-			No proof is given, but independent subtrees are not explored in Algorithm~\ref{alg:bud} hence both algorithms do the same computation, except not in the same order. Notice that Algorithm~\ref{alg:bud} eagerly compute the conditional error $\error[\abranch,\afeat]$ for every feature $\afeat \in \features$, which incurs an extra factor $m$ for the data set partitionning task. However, in return the last test of each branch is chosen in $O(1)$ so we gain the same factor $m$.
+			\begin{proof}
+				The proof follows from the fact that both algorithm explore exactly the same set of branches, albeit not in the same order.
+				Both algorithm eventually explore every combination of (negated) feature of size $\mdepth$.
+				
+				We show that this is true for Algorithm~\ref{alg:bud} by recursion on the size of the branch. There is only one branch of size $0$ (the emptyset) and it is given as initial input in \bud. Now suppose that every branch of size $s < \mdepth$ is explored (i.e., inserted into \bud), and consider an arbitrary branch $\abranch \wedge \afeat$ with $|\abranch|=s$. By the recursion hypothesis, the branch $\abranch$ has been put into \bud. Moreover, as long as $\bud \neq \emptyset$, \budalg does not stop. 
+				
+				
+				
+			\end{proof}
 			
-			The big difference is that whereas the cost of finding a first solution is $\Theta((n + 2^{k-1})m^{k-1})$ for Algorithm~\ref{alg:dynprog}, it is equal to $\Theta(kn + 2^k)$ for Algorithm~\ref{alg:bud}, which in practice is very important, as shown in the experimental section.
+			
+			% First, notice that the task of splitting the data set on eevry branch of the search tree can be done exactly as in DL8, that is, in $\Theta(\numex)$ amortised time for each of the $\mdepth$ tree levels.
+			
+			% \begin{proof}
+			
+			First, all branches eventually reached. Consider an arbitrary branch $\abranch$. 
+			
+			
+			\medskip
+			
+			
+			$\best[\abranch]$ is the minimal error of any subtree rooted at $\abranch$ with a feature in $\features \setminus \dom[\abranch]$ is $\best[\abranch]$.
+			This is true for pure branches
+			
+			
+			 and maximum-depth branches (code after condition in Line~\ref{line:leaves}). Now consider a branch $\abranch$ such that $|\abranch|<\mdepth$ and $\forall \afeat \in \features, \error[\abranch,\afeat] > 0$.
+			
+			\medskip
+			
+			
+			
+			
+			Let a branch $\abranch$ be \emph{explored} iff it was put in the stack $\sequence$ and $\dom[\abranch] = \emptyset$.
+			If a branch $\abranch$ is explored, then $\best[\abranch]$ is the minimal error of any subtree rooted at $\abranch$.
+			This is true for pure branches and maximum-depth branches (code after condition in Line~\ref{line:leaves}). Now consider a branch $\abranch$ such that $|\abranch|<\mdepth$ and $\forall \afeat \in \features, \error[\abranch,\afeat] > 0$. 
+			
+			\medskip
+			
+			
+			
+				First, we show that the algorithm is correct. In particular the following property holds:
+				after Line~\ref{line:storebest}, the minimum error of any subtree rooted at $\abranch$ with a feature in $\features \setminus \dom[\abranch]$ is $\best[\abranch]$.
+				
+				
+				Observe that $|\abranch| \leq \mdepth-2$. Indeed, no pair $(\abranch,\afeat)$ is put on $\sequence$ unless $|\abranch| \leq \mdepth-2$. Now suppose that $|\abranch|=\mdepth-2$. Then $\best[\abranch \wedge \afeat]$ is by definition the minimal error of any single-node tree rooted at $\abranch \wedge \afeat$ and likewise, $\best[\abranch \wedge \bar{\afeat}]$ is the minimal error of any single-node tree rooted at $\abranch \wedge \bar{\afeat}$. Therefore, $\best[\abranch \wedge \afeat] + \best[\abranch \wedge \bar{\afeat}]$ is the minimal error of a depth 2 tree rooted at $\abranch$ with a test on $\afeat$. Since all features in $\features \setminus \dom[\abranch]$ have been tried (or belong to $\abranch$) and the minimum was kept, the property holds. 
+				
+				Suppose now that the property holds for $|\abranch|=\mdepth-x$ with $x>2$. Then by the same reasoning as above, the property will also hold for $|\abranch|=\mdepth-x-1$. Therefore is always hold.
+				
+				
+	
+			\medskip	
+				
+				
+				
+				
+				
+				
+			The key is to observe that given a branch $\abranch$ and a feature $\afeat$, just as in DL8, the complexity of computing 
+			$\error[\abranch,\afeat]$ is equal to the complexity of computing $\error[\abranch \wedge \afeat]$ plus the complexity of computing $\error[\abranch \wedge \bar{\afeat}]$. 
+			Indeed, wlog, let the branch $\abranch \wedge \afeat$ be chosen before $\abranch \wedge \bar{\afeat}$. 
+				Both branches will be completed up to the maximal depth, however,
+			the test appended to $\abranch \wedge \afeat$ will no change until
+			
+			
+			
+			
+			the best possible errors for $\abranch \wedge \afeat$ and $\abranch \wedge \bar{\afeat}$
+			
+				
+			% \end{proof}
+			
+			We first show that the number of assignment of tests (Line~\ref{line:assignment}) is $2^{\mdepth-1}\numfeat^{\mdepth-1}$.
+			For $\mdepth=1$ this is true since there is a single assigned test (with the feature $\argmin_{\afeat \in \features}(\error[\emptyset,\afeat])$).
+			
+			Now suppose that the property holds for depth $\mdepth-1$ and consider depth $\mdepth$. 
+			
+			
+			
+			
+			No proof is given, but independent subtrees are not explored in Algorithm~\ref{alg:bud} hence both algorithms do the same computation, except not in the same order. Notice that Algorithm~\ref{alg:bud} eagerly compute the conditional error $\error[\abranch,\afeat]$ for every feature $\afeat \in \features$, which incurs an extra factor $\numfeat$ for the data set partitionning task. However, in return the last test of each branch is chosen in $O(1)$ so we gain the same factor $\numfeat$.
+			
+			The big difference is that whereas the cost of finding a first solution is $\Theta((\numex + 2^{\mdepth-1})\numfeat^{\mdepth-1})$ for Algorithm~\ref{alg:dynprog}, it is equal to $\Theta(\mdepth\numex + 2^\mdepth)$ for Algorithm~\ref{alg:bud}, which in practice is very important, as shown in the experimental section.
 		
 	%T(m,k) = 2mT(m-1, k-1)	
 		
@@ -244,6 +363,60 @@ The classification error of a tree is equal to the sum of the error of its termi
 
 
 
+	\begin{algorithm}
+		\caption{Blossom Algorithm\label{alg:bud}}
+		\TitleOfAlgo{\budalg}
+		  \KwData{$\negex,\posex, \maxd$}
+		  \KwResult{The minimum error on $\negex,\posex$ for decision trees of depth at most $\maxd$}
+		$\sequence \gets []$\;
+		$\bud \gets \{\emptyset\}$\;
+		$\error \gets \min(|\negex|,|\posex|)$\;
+		$\dom \gets (\lambda : {2^{\features}} \mapsto \features)$\;
+		$\best \gets (\lambda : {2^{\features}} \mapsto \infty)$\;
+		
+		\While{$|\sequence| + |\bud| > 0$}{
+		\eIf{$\bud \neq \emptyset$}{
+			%$\abranch \gets \select{\bud}$\;
+			pick and remove $\abranch$ from $\bud$\;
+			
+			\lnl{line:leaves}\eIf{$|\abranch| = \maxd$} {
+				% $\error \gets \error + \error[\abranch,\afeat]$\;
+				$\best[\abranch] \gets \error[\abranch,\afeat]$\;
+			}{
+			\lnl{line:assignment} pick and remove $\afeat$ from $\dom[\abranch]$\;
+			% $\dom[\abranch] \gets \dom[\abranch] \setminus \{\afeat\}$\;
+			push $(\abranch,\afeat)$ on $\sequence$\; 
+			\ForEach{$v \in \{\afeat, \bar{\afeat}\}$}{
+					\lnl{line:branching}\lIf{$\error[\abranch,v] > 0$}{
+						$\bud \gets \bud \cup \{\abranch \wedge v\}$
+					}
+					\lElse{$\best[\abranch,v] = 0$}
+			}
+			}
+		}{
+			% $\best[\emptyset] \gets \min(\best[\emptyset], \error)$\;
+			\Repeat{$\dom[\abranch] \neq \emptyset$ or $|\sequence|=0$}{
+				pop $(\abranch,\afeat)$ from $\sequence$\;
+				\lnl{line:storebest}$\best[\abranch] \gets \min(\best[\abranch], \best[\abranch \wedge \afeat] +  \best[\abranch \wedge \bar{\afeat}])$\;
+				% $\error \gets \error - \best[\abranch \wedge \afeat] -  \best[\abranch \wedge \bar{\afeat}]$\;
+				\lIf{$\dom[\abranch] \neq \emptyset$} {
+					$\bud \gets \bud \cup \{\abranch\}$
+					% \lIf{$\opt[\abranch]$}{$\error \gets \error - \best[\abranch]$}
+				} 
+				% \lElse {
+				% 	$\error \gets \error + \best[\abranch]$%$\error[\abranch,\afeat]$
+				% }
+				% {
+				% 	$\opt[\abranch] \gets \tru$\;
+				% }
+			}
+		}
+		}
+		\Return $\best[\emptyset]$\;
+	\end{algorithm}
+	
+	
+	
 	\begin{algorithm}
 		\caption{Anytime Algorithm\label{alg:bud}}
 		\TitleOfAlgo{\budalg}
@@ -258,11 +431,13 @@ The classification error of a tree is equal to the sum of the error of its termi
 		
 		\While{$|\sequence| + |\bud| > 0$}{
 		\eIf{$\bud \neq \emptyset$}{
-			$\abranch \gets \select{\bud}$\;
-			$\afeat \gets \argmin_{\afeat \in \dom[\abranch]}(\error[\abranch,\afeat])$\;
-			\eIf{$\error[\abranch,\afeat] = 0$ or $|\abranch| = \maxd-1$} {
+			%$\abranch \gets \select{\bud}$\;
+			pick and remove $\abranch$ from $\bud$\;
+			\lnl{line:assignment}$\afeat \gets \argmin_{\afeat \in \dom[\abranch]}(\error[\abranch,\afeat])$\;
+			\lnl{line:leaves}\eIf{$\error[\abranch,\afeat] = 0$ or $|\abranch| = \maxd-1$} {
 				$\error \gets \error + \error[\abranch,\afeat]$\;
 				$\best[\abranch] \gets \error[\abranch,\afeat]$\;
+				$\dom[\abranch] \gets \emptyset$\;
 				% $\opt[\abranch] \gets \tru$\;
 			}{
 			$\dom[\abranch] \gets \dom[\abranch] \setminus \{\afeat\}$\;
@@ -275,16 +450,16 @@ The classification error of a tree is equal to the sum of the error of its termi
 			}
 		}{
 			$\best[\emptyset] \gets \min(\best[\emptyset], \error)$\;
-			\Repeat{$\dom[\abranch] = \emptyset$ and $|\sequence|>0$}{
+			\Repeat{$\dom[\abranch] \neq \emptyset$ or $|\sequence|=0$}{
 				pop $(\abranch,\afeat)$ from $\sequence$\;
-				$\best[\abranch] \gets \min(\best[\abranch], \best[\abranch \wedge \afeat] +  \best[\abranch \wedge \bar{\afeat}])$\;
+				\lnl{line:storebest}$\best[\abranch] \gets \min(\best[\abranch], \best[\abranch \wedge \afeat] +  \best[\abranch \wedge \bar{\afeat}])$\;
 				$\error \gets \error - \best[\abranch \wedge \afeat] -  \best[\abranch \wedge \bar{\afeat}]$\;
 				\lIf{$\dom[\abranch] \neq \emptyset$} {
 					$\bud \gets \bud \cup \{\abranch\}$
 					% \lIf{$\opt[\abranch]$}{$\error \gets \error - \best[\abranch]$}
 				} 
 				\lElse {	
-					$\error \gets \error + \error[\abranch,\afeat]$
+					$\error \gets \error + \best[\abranch]$%$\error[\abranch,\afeat]$
 				}
 				% {
 				% 	$\opt[\abranch] \gets \tru$\;
@@ -304,7 +479,7 @@ The classification error of a tree is equal to the sum of the error of its termi
 % 	\item \sequence\ is simply the list of nodes in the current tree, ordered as they are explored.
 % 	\item \nodes\ is the set of integers used to index a node of the current tree
 % 	\item \bud\ is the set of nodes which do no have an assigned test yet
-% 	\item \depth\ stores the depth of a node
+% 	\item \mdepth\ stores the depth of a node
 % 	\item \test\ stores the feature tested at a node
 % 	\item \dom\ stores the set of possible features which have no yet been tried for this node
 % 	\item \best\ stores the error of the best subtree rooted at a node
@@ -326,7 +501,7 @@ The classification error of a tree is equal to the sum of the error of its termi
 % 		$\error \gets ub$\;
 %
 % 		$\child \gets (\lambda : \mathbb{N} \times \{\fal, \tru\} \mapsto \emptyset)$\;
-% 		$\depth \gets (\lambda : \mathbb{N} \mapsto 0)$\;
+% 		$\mdepth \gets (\lambda : \mathbb{N} \mapsto 0)$\;
 %
 % 		$\test \gets (\lambda : \mathbb{N} \mapsto \emptyset)$\;
 % 		$\dom \gets (\lambda : \mathbb{N} \mapsto \features)$\;
@@ -347,7 +522,7 @@ The classification error of a tree is equal to the sum of the error of its termi
 % 		$\test[\anode] \gets \pop(\dom[\anode])$\;
 %
 %
-% 		\eIf{$\depth[\anode]=k-1$ or $\error{\anode,\test[\anode]}$}
+% 		\eIf{$\mdepth[\anode]=k-1$ or $\error{\anode,\test[\anode]}$}
 % 		{
 % 			$\best[\anode] = \error{\anode,\test[\anode]}$\; %\min(|\posex(\anode=\test[\anode])|,|\negex(\anode=\test[\anode])|)$\;
 % 			$\opt[\anode] = \tru$\;
@@ -384,7 +559,7 @@ The classification error of a tree is equal to the sum of the error of its termi
 % 		}
 % 		}
 %
-% 		\lIf{$\depth[\anode] = k-1$ or $\opt[\anode]$}{$error \gets error - \best[\anode]$}
+% 		\lIf{$\mdepth[\anode] = k-1$ or $\opt[\anode]$}{$error \gets error - \best[\anode]$}
 %
 % 	\end{algorithm}
 %
@@ -437,7 +612,7 @@ The classification error of a tree is equal to the sum of the error of its termi
 % 					\lElse{$\child[\bnode,branch] \gets \bot$}
 % 				}{
 % 					$\child[\bnode,branch] \gets c_{branch}$\;
-% 					$\depth[c_{branch}] \gets \depth[\bnode]+1$\;
+% 					$\mdepth[c_{branch}] \gets \mdepth[\bnode]+1$\;
 % 					$\grow(\bud, \sequence, c_{branch})$\;
 % 				}
 % 			}
