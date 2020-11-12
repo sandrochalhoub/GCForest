@@ -17,6 +17,7 @@
 % \usepackage{geometry}
 \usepackage{xifthen}
 \usepackage{rotating}
+\usepackage{forest}
 
 % \newgeometry{bottom=2cm,top=2cm}
 
@@ -242,7 +243,12 @@ We start from a singleton set \bud\ of open branches or \emph{buds}.
 Moreover, we use an initially empty stack of decisions $\sequence$.
 
 \begin{itemize}
-	\item As long as there is a bud ($\bud \neq \emptyset$), we pick any one $\abranch \in \bud$, a feature $\afeat$ marked as \emph{available} for \abranch, add the pair $(\abranch,\afeat)$ to \sequence\ and expend the tree with the two branches $\abranch \wedge \afeat$ and $\abranch \wedge \bar{\afeat}$. 
+	\item As long as there is a bud ($\bud \neq \emptyset$), we pick any one $\abranch \in \bud$ and check if it can be expended in Line~\ref{line:leaves}. If its length is $\mdepth$ the error is recorded in $\best[\abranch]$, otherwise, we pick a feature $\afeat$ marked as \emph{available} for \abranch, add the pair $(\abranch,\afeat)$ to \sequence\ and expend the tree with the two branches $\abranch \wedge \afeat$ and $\abranch \wedge \bar{\afeat}$. 
+	
+	
+	
+	
+	 a feature $\afeat$ marked as \emph{available} for \abranch, add the pair $(\abranch,\afeat)$ to \sequence\ and expend the tree with the two branches $\abranch \wedge \afeat$ and $\abranch \wedge \bar{\afeat}$. 
 	%These new nodes are added to $\nodes$. 
 	They are added to $\bud$ if their depth is strictly less than $\maxd-1$ (the last feature test is chosen according to minimum error) and if they are not pure, otherwise they are terminal tests and we record the corresponding error.
 
@@ -269,95 +275,98 @@ In other words, this algorithm will first build a complete tree by expanding non
 			The time complexities of Algorithms~\ref{alg:dynprog} and Algorithm~\ref{alg:bud} are equal.
 			\end{theorem}
 			
-			\begin{proof}
+			\begin{proof}[sketch]
 				The proof follows from the fact that both algorithm explore exactly the same set of branches, albeit not in the same order.
 				Both algorithm eventually explore every combination of (negated) feature of size $\mdepth$.
 				
-				We show that this is true for Algorithm~\ref{alg:bud} by recursion on the size of the branch. There is only one branch of size $0$ (the emptyset) and it is given as initial input in \bud. Now suppose that every branch of size $s < \mdepth$ is explored (i.e., inserted into \bud), and consider an arbitrary branch $\abranch \wedge \afeat$ with $|\abranch|=s$. By the recursion hypothesis, the branch $\abranch$ has been put into \bud. Moreover, as long as $\bud \neq \emptyset$, \budalg does not stop. 
+				We show that this is true for Algorithm~\ref{alg:bud} by recursion on the maximum depth $\mdepth$.
+				For $\mdepth = 0$, both algorithm return $\error[\emptyset]=\min(|\negex|, |\posex|)$.
 				
-				
-				
+				Now suppose that for $\mdepth \leq d$ every branch $\abranch$ explored by \dynprog (a recursive call ends on this branch) is also explored by \budalg ($\best[\abranch]$ is set in Lines~\ref{line:best1} or \ref{line:best2}), and let $\mdepth=d+1$. Without loss of generality, we can take an arbitrary branch $\abranch$ of length $d$ and show that the same extentions of $\abranch$ are explored by both algorithms.
+				If $\error[\abranch]=0$, then no extension of $\abranch$ is explored by either algorithm.
+				Otherwise, \dynprog explores every branch $\abranch \wedge \afeat$ and $\abranch \wedge \bar{\afeat}$ for $\afeat \in \features \setminus \abranch$. Since $\abranch$ is explored when $\mdepth = d$ and since $\error[\abranch] \neq 0$, then $\abranch$ will fail the test on Line~\ref{line:leaves} and for a feature $\afeat \in \features \setminus \abranch$, the branches $\abranch \wedge \afeat$ and $\abranch \wedge \bar{\afeat}$ will be explored, and the pair $(\abranch, \afeat)$ will be added to $\sequence$. 
+				Moreover, the algorithm will not stop until $\sequence$ is not empty, hence $(\abranch, \afeat)$ will be poped out of $\sequence$, $\afeat$ removed from $\dom[\abranch]$ and $\abranch$ reinserted into $\bud$. Therefore, for every $\afeat \in \features \setminus \abranch$, $\abranch \wedge \afeat$ and $\abranch \wedge \bar{\afeat}$ will eventually be explored exactly once.
 			\end{proof}
 			
 			
-			% First, notice that the task of splitting the data set on eevry branch of the search tree can be done exactly as in DL8, that is, in $\Theta(\numex)$ amortised time for each of the $\mdepth$ tree levels.
-			
-			% \begin{proof}
-			
-			First, all branches eventually reached. Consider an arbitrary branch $\abranch$. 
-			
-			
-			\medskip
-			
-			
-			$\best[\abranch]$ is the minimal error of any subtree rooted at $\abranch$ with a feature in $\features \setminus \dom[\abranch]$ is $\best[\abranch]$.
-			This is true for pure branches
-			
-			
-			 and maximum-depth branches (code after condition in Line~\ref{line:leaves}). Now consider a branch $\abranch$ such that $|\abranch|<\mdepth$ and $\forall \afeat \in \features, \error[\abranch,\afeat] > 0$.
-			
-			\medskip
-			
-			
-			
-			
-			Let a branch $\abranch$ be \emph{explored} iff it was put in the stack $\sequence$ and $\dom[\abranch] = \emptyset$.
-			If a branch $\abranch$ is explored, then $\best[\abranch]$ is the minimal error of any subtree rooted at $\abranch$.
-			This is true for pure branches and maximum-depth branches (code after condition in Line~\ref{line:leaves}). Now consider a branch $\abranch$ such that $|\abranch|<\mdepth$ and $\forall \afeat \in \features, \error[\abranch,\afeat] > 0$. 
-			
-			\medskip
-			
-			
-			
-				First, we show that the algorithm is correct. In particular the following property holds:
-				after Line~\ref{line:storebest}, the minimum error of any subtree rooted at $\abranch$ with a feature in $\features \setminus \dom[\abranch]$ is $\best[\abranch]$.
-				
-				
-				Observe that $|\abranch| \leq \mdepth-2$. Indeed, no pair $(\abranch,\afeat)$ is put on $\sequence$ unless $|\abranch| \leq \mdepth-2$. Now suppose that $|\abranch|=\mdepth-2$. Then $\best[\abranch \wedge \afeat]$ is by definition the minimal error of any single-node tree rooted at $\abranch \wedge \afeat$ and likewise, $\best[\abranch \wedge \bar{\afeat}]$ is the minimal error of any single-node tree rooted at $\abranch \wedge \bar{\afeat}$. Therefore, $\best[\abranch \wedge \afeat] + \best[\abranch \wedge \bar{\afeat}]$ is the minimal error of a depth 2 tree rooted at $\abranch$ with a test on $\afeat$. Since all features in $\features \setminus \dom[\abranch]$ have been tried (or belong to $\abranch$) and the minimum was kept, the property holds. 
-				
-				Suppose now that the property holds for $|\abranch|=\mdepth-x$ with $x>2$. Then by the same reasoning as above, the property will also hold for $|\abranch|=\mdepth-x-1$. Therefore is always hold.
-				
-				
-	
-			\medskip	
-				
-				
-				
-				
-				
-				
-			The key is to observe that given a branch $\abranch$ and a feature $\afeat$, just as in DL8, the complexity of computing 
-			$\error[\abranch,\afeat]$ is equal to the complexity of computing $\error[\abranch \wedge \afeat]$ plus the complexity of computing $\error[\abranch \wedge \bar{\afeat}]$. 
-			Indeed, wlog, let the branch $\abranch \wedge \afeat$ be chosen before $\abranch \wedge \bar{\afeat}$. 
-				Both branches will be completed up to the maximal depth, however,
-			the test appended to $\abranch \wedge \afeat$ will no change until
-			
-			
-			
-			
-			the best possible errors for $\abranch \wedge \afeat$ and $\abranch \wedge \bar{\afeat}$
-			
-				
-			% \end{proof}
-			
-			We first show that the number of assignment of tests (Line~\ref{line:assignment}) is $2^{\mdepth-1}\numfeat^{\mdepth-1}$.
-			For $\mdepth=1$ this is true since there is a single assigned test (with the feature $\argmin_{\afeat \in \features}(\error[\emptyset,\afeat])$).
-			
-			Now suppose that the property holds for depth $\mdepth-1$ and consider depth $\mdepth$. 
-			
-			
-			
-			
-			No proof is given, but independent subtrees are not explored in Algorithm~\ref{alg:bud} hence both algorithms do the same computation, except not in the same order. Notice that Algorithm~\ref{alg:bud} eagerly compute the conditional error $\error[\abranch,\afeat]$ for every feature $\afeat \in \features$, which incurs an extra factor $\numfeat$ for the data set partitionning task. However, in return the last test of each branch is chosen in $O(1)$ so we gain the same factor $\numfeat$.
-			
-			The big difference is that whereas the cost of finding a first solution is $\Theta((\numex + 2^{\mdepth-1})\numfeat^{\mdepth-1})$ for Algorithm~\ref{alg:dynprog}, it is equal to $\Theta(\mdepth\numex + 2^\mdepth)$ for Algorithm~\ref{alg:bud}, which in practice is very important, as shown in the experimental section.
-		
-	%T(m,k) = 2mT(m-1, k-1)	
-		
-		
-
-
-% \clearpage
+% 			% First, notice that the task of splitting the data set on eevry branch of the search tree can be done exactly as in DL8, that is, in $\Theta(\numex)$ amortised time for each of the $\mdepth$ tree levels.
+%
+% 			% \begin{proof}
+%
+% 			First, all branches eventually reached. Consider an arbitrary branch $\abranch$.
+%
+%
+% 			\medskip
+%
+%
+% 			$\best[\abranch]$ is the minimal error of any subtree rooted at $\abranch$ with a feature in $\features \setminus \dom[\abranch]$ is $\best[\abranch]$.
+% 			This is true for pure branches
+%
+%
+% 			 and maximum-depth branches (code after condition in Line~\ref{line:leaves}). Now consider a branch $\abranch$ such that $|\abranch|<\mdepth$ and $\forall \afeat \in \features, \error[\abranch,\afeat] > 0$.
+%
+% 			\medskip
+%
+%
+%
+%
+% 			Let a branch $\abranch$ be \emph{explored} iff it was put in the stack $\sequence$ and $\dom[\abranch] = \emptyset$.
+% 			If a branch $\abranch$ is explored, then $\best[\abranch]$ is the minimal error of any subtree rooted at $\abranch$.
+% 			This is true for pure branches and maximum-depth branches (code after condition in Line~\ref{line:leaves}). Now consider a branch $\abranch$ such that $|\abranch|<\mdepth$ and $\forall \afeat \in \features, \error[\abranch,\afeat] > 0$.
+%
+% 			\medskip
+%
+%
+%
+% 				First, we show that the algorithm is correct. In particular the following property holds:
+% 				after Line~\ref{line:storebest}, the minimum error of any subtree rooted at $\abranch$ with a feature in $\features \setminus \dom[\abranch]$ is $\best[\abranch]$.
+%
+%
+% 				Observe that $|\abranch| \leq \mdepth-2$. Indeed, no pair $(\abranch,\afeat)$ is put on $\sequence$ unless $|\abranch| \leq \mdepth-2$. Now suppose that $|\abranch|=\mdepth-2$. Then $\best[\abranch \wedge \afeat]$ is by definition the minimal error of any single-node tree rooted at $\abranch \wedge \afeat$ and likewise, $\best[\abranch \wedge \bar{\afeat}]$ is the minimal error of any single-node tree rooted at $\abranch \wedge \bar{\afeat}$. Therefore, $\best[\abranch \wedge \afeat] + \best[\abranch \wedge \bar{\afeat}]$ is the minimal error of a depth 2 tree rooted at $\abranch$ with a test on $\afeat$. Since all features in $\features \setminus \dom[\abranch]$ have been tried (or belong to $\abranch$) and the minimum was kept, the property holds.
+%
+% 				Suppose now that the property holds for $|\abranch|=\mdepth-x$ with $x>2$. Then by the same reasoning as above, the property will also hold for $|\abranch|=\mdepth-x-1$. Therefore is always hold.
+%
+%
+%
+% 			\medskip
+%
+%
+%
+%
+%
+%
+% 			The key is to observe that given a branch $\abranch$ and a feature $\afeat$, just as in DL8, the complexity of computing
+% 			$\error[\abranch,\afeat]$ is equal to the complexity of computing $\error[\abranch \wedge \afeat]$ plus the complexity of computing $\error[\abranch \wedge \bar{\afeat}]$.
+% 			Indeed, wlog, let the branch $\abranch \wedge \afeat$ be chosen before $\abranch \wedge \bar{\afeat}$.
+% 				Both branches will be completed up to the maximal depth, however,
+% 			the test appended to $\abranch \wedge \afeat$ will no change until
+%
+%
+%
+%
+% 			the best possible errors for $\abranch \wedge \afeat$ and $\abranch \wedge \bar{\afeat}$
+%
+%
+% 			% \end{proof}
+%
+% 			We first show that the number of assignment of tests (Line~\ref{line:assignment}) is $2^{\mdepth-1}\numfeat^{\mdepth-1}$.
+% 			For $\mdepth=1$ this is true since there is a single assigned test (with the feature $\argmin_{\afeat \in \features}(\error[\emptyset,\afeat])$).
+%
+% 			Now suppose that the property holds for depth $\mdepth-1$ and consider depth $\mdepth$.
+%
+%
+%
+%
+% 			No proof is given, but independent subtrees are not explored in Algorithm~\ref{alg:bud} hence both algorithms do the same computation, except not in the same order. Notice that Algorithm~\ref{alg:bud} eagerly compute the conditional error $\error[\abranch,\afeat]$ for every feature $\afeat \in \features$, which incurs an extra factor $\numfeat$ for the data set partitionning task. However, in return the last test of each branch is chosen in $O(1)$ so we gain the same factor $\numfeat$.
+%
+% 			The big difference is that whereas the cost of finding a first solution is $\Theta((\numex + 2^{\mdepth-1})\numfeat^{\mdepth-1})$ for Algorithm~\ref{alg:dynprog}, it is equal to $\Theta(\mdepth\numex + 2^\mdepth)$ for Algorithm~\ref{alg:bud}, which in practice is very important, as shown in the experimental section.
+%
+% 	%T(m,k) = 2mT(m-1, k-1)
+%
+%
+%
+%
+% % \clearpage
 
 
 
@@ -367,7 +376,7 @@ In other words, this algorithm will first build a complete tree by expanding non
 		\caption{Blossom Algorithm\label{alg:bud}}
 		\TitleOfAlgo{\budalg}
 		  \KwData{$\negex,\posex, \maxd$}
-		  \KwResult{The minimum error on $\negex,\posex$ for decision trees of depth at most $\maxd$}
+		  \KwResult{The minimum error on $\negex,\posex$ for decision trees of depth $\maxd$}
 		$\sequence \gets []$\;
 		$\bud \gets \{\emptyset\}$\;
 		$\error \gets \min(|\negex|,|\posex|)$\;
@@ -379,19 +388,16 @@ In other words, this algorithm will first build a complete tree by expanding non
 			%$\abranch \gets \select{\bud}$\;
 			pick and remove $\abranch$ from $\bud$\;
 			
-			\lnl{line:leaves}\eIf{$|\abranch| = \maxd$} {
+			\lnl{line:leaves}\eIf{$|\abranch| = \maxd$ or $\error[\abranch] = 0$} {
 				% $\error \gets \error + \error[\abranch,\afeat]$\;
-				$\best[\abranch] \gets \error[\abranch,\afeat]$\;
+				\lnl{line:best1}$\best[\abranch] \gets \error[\abranch]$\;
 			}{
 			\lnl{line:assignment} pick and remove $\afeat$ from $\dom[\abranch]$\;
 			% $\dom[\abranch] \gets \dom[\abranch] \setminus \{\afeat\}$\;
 			push $(\abranch,\afeat)$ on $\sequence$\; 
-			\ForEach{$v \in \{\afeat, \bar{\afeat}\}$}{
-					\lnl{line:branching}\lIf{$\error[\abranch,v] > 0$}{
+			\lnl{line:branching}\lForEach{$v \in \{\afeat, \bar{\afeat}\}$}{
 						$\bud \gets \bud \cup \{\abranch \wedge v\}$
 					}
-					\lElse{$\best[\abranch,v] = 0$}
-			}
 			}
 		}{
 			% $\best[\emptyset] \gets \min(\best[\emptyset], \error)$\;
@@ -472,6 +478,58 @@ In other words, this algorithm will first build a complete tree by expanding non
 	
 	
 
+
+
+	\begin{center}
+		\scalebox{1}{
+			\begin{forest}
+				for tree={%
+					l sep=12pt,
+					s sep=3.5pt,
+					node options={shape=circle, minimum width=10pt, inner sep=0pt, font=\scriptsize},
+		  		edge={thick, -latex, shorten >=1pt, shorten <=1pt},
+				}
+				[{$\emptyset$}
+					[{$a$}
+						[{$b$}]
+						[{$\bar{b}$}]
+						[{$c$}]
+						[{$\bar{c}$}]
+					]
+					[{$\bar{a}$}
+						[{$b$}]
+						[{$\bar{b}$}]
+						[{$c$}]
+						[{$\bar{c}$}]
+					]
+					[{$b$}
+						[{$a$}]
+						[{$\bar{a}$}]
+						[{$c$}]
+						[{$\bar{c}$}]
+					]
+					[{$\bar{b}$}
+						[{$a$}]
+						[{$\bar{a}$}]
+						[{$c$}]
+						[{$\bar{c}$}]
+					]
+					[{$c$}
+						[{$a$}]
+						[{$\bar{a}$}]
+						[{$b$}]
+						[{$\bar{b}$}]
+					]
+					[{$\bar{c}$}
+						[{$a$}]
+						[{$\bar{a}$}]
+						[{$b$}]
+						[{$\bar{b}$}]
+					]
+				]
+			\end{forest}
+		}
+	\end{center}
 
 
 % For readability, we cut the algorithm into four blocks. The initialisation procedure (Algorithm~\ref{alg:init}) set up the data structures used in all other procedures:
