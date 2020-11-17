@@ -151,7 +151,7 @@ public:
 
   bool bounding;
 
-  enum node_strategy { FIRST = 0, RANDOM = 1, ERROR = 2, ERROR_REDUCTION = 3 };
+  enum node_strategy { FIRST = 0, RANDOM = 1, ERROR = 2, ERROR_REDUCTION = 3, ANTIERROR = 4 };
   int node_strategy;
 
   enum feature_strategy { MINERROR = 0, ENTROPY = 1, GINI = 2, HYBRID = 3 };

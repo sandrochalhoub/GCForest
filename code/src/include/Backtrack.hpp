@@ -270,6 +270,7 @@ private:
   // select the most promising node to branch on
   int highest_error() const;
   int highest_error_reduction() const;
+	int lowest_error() const;
 
   // whether node is a leaf (deepest test)
   bool isLeaf(const int node) const;

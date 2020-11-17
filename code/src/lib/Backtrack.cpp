@@ -509,6 +509,50 @@ int BacktrackingAlgorithm<ErrorPolicy, E_t>::highest_error() const {
 }
 
 template <template<typename> class ErrorPolicy, typename E_t>
+int BacktrackingAlgorithm<ErrorPolicy, E_t>::lowest_error() const {
+
+  auto selected_node{-1};
+  auto lowest_error{numExample()};
+
+#ifdef PRINTTRACE
+  if (PRINTTRACE and options.verbosity >= DTOptions::SOLVERINFO)
+    cout << "select";
+#endif
+
+  // for (auto i{blossom.fbegin()}; i!=blossom.fend(); ++i) {// : blossom) {
+  for (auto i : blossom) {
+    assert(depth[i] < ub_depth);
+    auto err{node_error(i)};
+
+#ifdef PRINTTRACE
+    if (PRINTTRACE and options.verbosity >= DTOptions::SOLVERINFO)
+      cout << " " << i << ": (" << err << ")";
+#endif
+
+    if (err < lowest_error) {
+      lowest_error = err;
+      selected_node = i;
+
+#ifdef PRINTTRACE
+      if (PRINTTRACE and options.verbosity >= DTOptions::SOLVERINFO)
+        cout << "*";
+#endif
+  }
+  }
+
+#ifdef PRINTTRACE
+  if (PRINTTRACE and options.verbosity >= DTOptions::SOLVERINFO)
+    cout << endl;
+#endif
+
+  assert(selected_node >= 0);
+
+  // cout << "--> " << selected_node << endl;
+
+  return selected_node;
+}
+
+template <template<typename> class ErrorPolicy, typename E_t>
 void BacktrackingAlgorithm<ErrorPolicy, E_t>::random_perturbation(
     const int node, const int kbest, const int p) {
 
@@ -975,11 +1019,11 @@ void BacktrackingAlgorithm<ErrorPolicy, E_t>::branch(const int node, const int f
     setChild(node, i, c[i]);
 
   for (auto y{0}; y < 2; ++y) {
-    auto smallest{P[y][c[1]].count() < P[y][c[0]].count()};
+    auto lowest{P[y][c[1]].count() < P[y][c[0]].count()};
 
-    count_by_example(c[smallest], y);
+    count_by_example(c[lowest], y);
 
-    deduce_from_sibling(node, c[1 - smallest], c[smallest], y);
+    deduce_from_sibling(node, c[1 - lowest], c[lowest], y);
   }
 
 #ifdef PRINTTRACE
@@ -1128,6 +1172,9 @@ void BacktrackingAlgorithm<ErrorPolicy, E_t>::expend() {
       break;
     case DTOptions::ERROR_REDUCTION:
       selected_node = highest_error_reduction();
+      break;
+    case DTOptions::ANTIERROR:
+      selected_node = lowest_error();
       break;
     }
     // selected_node = choose();

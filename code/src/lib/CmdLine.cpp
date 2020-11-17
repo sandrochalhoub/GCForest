@@ -491,7 +491,8 @@ ostream &DTOptions::display(ostream &os) {
              : (node_strategy == RANDOM
                     ? "random"
                     : (node_strategy == ERROR ? "max error"
-                                              : "max error reduction")))
+                                              : (node_strategy == ERROR_REDUCTION ? "max error reduction"
+																																									: "min error"))))
      << endl
      << setw(20) << left << "p feature strategy:" << setw(30) << right;
 

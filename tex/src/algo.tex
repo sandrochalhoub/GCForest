@@ -1,4 +1,4 @@
-\documentclass{article}
+\documentclass{llncs}
 \usepackage[usenames,dvipsnames,svgnames,table]{xcolor}%% http://ctan.org/pkg/xcolor
 \usepackage[utf8]{inputenc}
 \usepackage{xspace}
@@ -11,23 +11,25 @@
 \usepackage{multirow}
 \usepackage{url}
 \usepackage{tikz}
+\usepackage{pgfplots}
 \usepackage{fp}
 \usepackage{subfig}
 \usetikzlibrary{arrows,shadows,fit,calc,positioning,decorations.pathreplacing,matrix,shapes,petri,topaths,fadings,mindmap,backgrounds,shapes.geometric}
-% \usepackage{geometry}
+\usepackage{geometry}
 \usepackage{xifthen}
 \usepackage{rotating}
 \usepackage{forest}
 
+
 % \newgeometry{bottom=2cm,top=2cm}
 
-\newenvironment{proof}{\paragraph{Proof:}}{\hfill$\square$}
+% \newenvironment{proof}{\paragraph{Proof:}}{\hfill$\square$}
 
 \DeclareMathOperator*{\argmax}{arg\,max}
 \DeclareMathOperator*{\argmin}{arg\,min}
 
 
-\newtheorem{theorem}{Theorem}
+% \newtheorem{theorem}{Theorem}
 
 
 \newcommand{\tru}[0]{\texttt{true}}
@@ -36,9 +38,53 @@
 % \newcommand{\fal}[0]{0}
 
 
+\newcommand\cactus[5]{%%
+\begin{tikzpicture}[scale=.5]
+	\begin{axis}[scatter/classes={
+		a={mark=square*,blue!50,draw=blue!50!black},%%
+		b={mark=triangle*,red!50,draw=red!50!black},%%
+		c={mark=diamond*,green!50,draw=green!50!black},%%
+		d={mark=*,black!50!white,draw=black},%%
+		e={mark=pentagon*,orange!50,draw=orange!50!black},%%
+		f={mark=10-pointed star,draw=blue!60!black},%%
+		g={mark=x,draw=black,thick},%%
+		h={mark=+,draw=red!50!black},%%
+		i={mark=Mercedes star,draw=green!50!black},%%
+		j={mark=square,draw=orange!50!black},%%
+		k={mark=diamond,draw=red!50!black},%%
+		l={mark=o,draw=blue!50!black},%%
+		m={mark=asterisk,draw=magenta!50!black},%%
+		n={mark=triangle,draw=green!50!black},%%
+		o={mark=pentagon,draw=red!50!black},%%
+		p={mark=asterisk,draw=black},%%
+		q={mark=Mercedes star,draw=magenta!50!black},%%
+		r={mark=pentagon*,blue!50,draw=blue!50!black},%%
+		s={mark=x,draw=green!50!black},%%
+		t={mark=diamond*,red!50,draw=red!50!black}},%%
+		mark size=1.5pt,
+		ymode=log,
+		%xmode=log,
+		ylabel=#2,
+		xlabel=#1,
+		font=\large,
+		{#5}
+		]
+
+		\foreach \bidule in #4 {
+
+		\addplot[scatter, scatter src=explicit symbolic] coordinates {\bidule};
+
+		}
+		\legend{#3}
+	\end{axis}
+\end{tikzpicture}
+}
+
+
 \newcommand{\setex}[1]{\ensuremath{{\mathcal X}^{#1}}\xspace}
 \newcommand{\posex}{{\setex{\top}}\xspace}
 \newcommand{\negex}{{\setex{\bot}}\xspace}
+\newcommand{\allex}{{\setex{}}\xspace}
 \newcommand{\setcube}[1]{\ensuremath{{\mathcal C}^{#1}}\xspace}
 \newcommand{\poscube}{{\setcube{1}}\xspace}
 \newcommand{\negcube}{{\setcube{0}}\xspace}
@@ -73,7 +119,7 @@
 \newcommand{\dom}[1][]{\ensuremath{\ifthenelse{\equal{#1}{}}{dom}{dom({#1})}}}
 \newcommand{\best}[1][]{\ensuremath{\ifthenelse{\equal{#1}{}}{{best}}{{best({#1})}}}}
 \newcommand{\maxe}[1][]{\ensuremath{\ifthenelse{\equal{#1}{}}{{max}}{{max({#1})}}}}
-\newcommand{\opt}[1][]{\ensuremath{\ifthenelse{\equal{#1}{}}{terminal}{terminal({#1})}}}
+\newcommand{\opt}[1][]{\ensuremath{\ifthenelse{\equal{#1}{}}{optimal}{optimal({#1})}}}
 \newcommand{\child}[1][]{\ensuremath{\ifthenelse{\equal{#1}{}}{{child}}{{child({{#1}})}}}}
 \newcommand{\error}[1][]{\ensuremath{\ifthenelse{\equal{#1}{}}{{error}}{{error({{#1}})}}}}
 \newcommand{\classlabel}[1][]{\ensuremath{\ifthenelse{\equal{#1}{}}{{y}}{{y({{#1}})}}}}
@@ -105,6 +151,8 @@
 	\SetKwFunction{dleight}{DL8.5}
 	\SetKwFunction{cart}{CART}
 	\SetKwFunction{greedy}{BudFS (first sol.)}
+  \SetKwFunction{murtree}{Murtree}
+	\SetKwFunction{dominated}{Dominated}
 	
 	
 
@@ -122,31 +170,64 @@
 
 \maketitle
 
-\section*{Introduction}
 
-\begin{itemize}
-	\item Same worst-case complexity than DL8
-	\item No memory usage
-	\item Better anytime behaviour than DL8 (in fact as good as the state of the art heuristics)
-	\item Therefore, strictly better than greedy heuristics and almost always better than DL8
-\end{itemize}
+\begin{abstract}
+	
+\end{abstract}
 
+\section{Introduction}
 
-We consider the problem of finding the bounded-depth decision tree of maximum accuracy.
-The state of the art includes MIP approaches (BinOCT), a MaxSAT approach based on the SAT encoding proposed by Narodytska et al, and DL8.5.
-The latter algorithm is by far the most efficient, however, it is not \emph{anytime}: the left branch must be optimally solved before a solution of the right branch can be found. Moreover the use of a cache structure means that it uses a lot of memory. This algorithm is practical for a maximum depth of 4 (although using gigabytes of memory) but often not much beyond. Therefore, in a number of cases, a greedy heuristic (such as CART) is still the best method in practice.
+Ever since the seminal work from Quinlan on using entropy as a heuristic to compute decision classifiers, the question of computing \emph{optimal} decision trees has been alive, and recently a number of algorithms have been introduced for that purpose.
+Several variants and criteria have been proposed. %, e.g. computing the perfect classifier of minimum size~\cite{}, 
+Among those, computing a depth-bounded decision tree of maximum accuracy is often the preferred criterion~\cite{}, because while being straightforward, it captures many desired features: it is resilient to noisy data, and shallow trees are both easier to explain and less prone to overfitting.
 
 \medskip
 
-In this note we introduce what is essentially an anytime version of DL8.5, without cache.
-This algorithm therefore uses linear (in the size of the tree) memory and anytime, hence in principle strictly better than CART. Moreover, on instance where DL8.5 can find a solution, the algorithm described in this note is significantly faster (by about a factor 10).
+Despite the vast offer of exact methods that can potentially provide optimal decision trees, or at least should, given enough time, improve on heuristics, the latter are still vastly more commonly used in practice. Some methods are memory-hungry, some are not anytime, and as far as we know there is not a single algorithm that can provide optimal classifiers while scaling to large datasets, feature space, or tree depth as heuristics do.
+% \begin{itemize}
+% 	\item MinDT -> does not scale, problem with noise
+% 	\item other SAT approaches -> do not scale in some way or another
+% 	\item DL8 -> does not scale in memory, slower
+% 	\item BinOCT -> ? (probably much slower)
+%   \item Murtree -> by far the most efficient, however, does not scale as well on deep trees and not as anytime
+% \end{itemize}
 
-\section*{Notations}
 
-A binary data set is a pair $\langle \negex,\posex \rangle$ where $\negex$ (resp. $\posex$) is a subset of $2^{\features}$. It is associated a label function $\classlabel : 2^{\features} \mapsto \{\top,\bot\}$ such that:
+
+\medskip
+
+In this paper we introduce a relatively \emph{simple} algorithm, that is as memory and time efficient as heuristics, and yet more efficient than most exact methods on most datasets. 
+In a nutshell, this algorithm (\budalg) emulates the dynamic programming algorithm \dleight, while expending non-terminal branches (a.k.a ``buds'') first. As a result, this algorithm is in a sense strictly better than both the standard dynamic programming approach (because it is anytime and at least as fast) and than classic heuristics (because it emulates them during search, without significant overhead).
+%but explores the search space so as to improve its anytime behaviour.
+Our experimental results show that it outperforms the state of the art, to the exception of \murtree for relatively shallow trees (typically for maximum depth 4 or 5), whose more sophisticated (albeit complex) algorithmic features pay off.
+
+
+%
+%
+% \begin{itemize}
+% 	\item Same worst-case complexity than DL8
+% 	\item No memory usage
+% 	\item Better anytime behaviour than DL8 (in fact as good as the state of the art heuristics)
+% 	\item Therefore, strictly better than greedy heuristics and almost always better than DL8
+% \end{itemize}
+%
+%
+% We consider the problem of finding the bounded-depth decision tree of maximum accuracy.
+% The state of the art includes MIP approaches (BinOCT), a MaxSAT approach based on the SAT encoding proposed by Narodytska et al, and DL8.5.
+% The latter algorithm is by far the most efficient, however, it is not \emph{anytime}: the left branch must be optimally solved before a solution of the right branch can be found. Moreover the use of a cache structure means that it uses a lot of memory. This algorithm is practical for a maximum depth of 4 (although using gigabytes of memory) but often not much beyond. Therefore, in a number of cases, a greedy heuristic (such as CART) is still the best method in practice.
+%
+% \medskip
+
+% In this note we introduce what is essentially an anytime version of DL8.5, without cache.
+% This algorithm therefore uses linear (in the size of the tree) memory and anytime, hence in principle strictly better than CART. Moreover, on instance where DL8.5 can find a solution, the algorithm described in this note is significantly faster (by about a factor 10).
+
+\section{Preliminaries}
+
+A binary data set is a pair $\langle \negex,\posex \rangle$ where the negative examples $\negex$ (resp. the positive examples $\posex$) is a subset of $2^{\features}$. It is associated a label function $\classlabel : 2^{\features} \mapsto \{\top,\bot\}$ such that:
 $$
 \forall \aclass \in \{\top,\bot\}, \forall \ex \in \setex{\aclass}, \classlabel[\ex] = \aclass
 $$
+We refer the union of negative and positive examples by $\allex = \negex \cup \posex$.
 %$\top$ and $\bot$ are class labels and 
 A datapoint $\ex$ can equivalently be seen as a subset of $\features$, or as the conjunction:
 $$
@@ -178,7 +259,7 @@ the \emph{minimum error bounded depth decision tree problem} consists in finding
 there exists a binary tree of depth at most $\maxd$ whose sum of error $\error[\abranch]$ for all branches $\abranch$ from the root to the leaves is equal to $\epsilon$.
 
 
-\section*{Dynamic Programming Algorithm}
+\subsection{Dynamic Programming Algorithm}
 
 The solver DL8.5 is a dynamic programming algorithm. It relies on the observation that given a feature test, the two resulting branches are independent subproblems. Algorithm~\ref{alg:dynprog} gives a high level view of DL8.5.
 
@@ -232,7 +313,7 @@ The solver DL8.5 is a dynamic programming algorithm. It relies on the observatio
 
 
 
-\section*{An Anytime Algorithm}
+\section{An Anytime Algorithm}
 
 In a nutshell the algorithm we propose works as follows:
 
@@ -243,32 +324,33 @@ We start from a singleton set \bud\ of open branches or \emph{buds}.
 Moreover, we use an initially empty stack of decisions $\sequence$.
 
 \begin{itemize}
-	\item As long as there is a bud ($\bud \neq \emptyset$), we pick any one $\abranch \in \bud$ and check if it can be expended in Line~\ref{line:leaves}. If its length is $\mdepth$ the error is recorded in $\best[\abranch]$, otherwise, we pick a feature $\afeat$ marked as \emph{available} for \abranch, add the pair $(\abranch,\afeat)$ to \sequence\ and expend the tree with the two branches $\abranch \wedge \afeat$ and $\abranch \wedge \bar{\afeat}$. 
-	
-	
-	
-	
-	 a feature $\afeat$ marked as \emph{available} for \abranch, add the pair $(\abranch,\afeat)$ to \sequence\ and expend the tree with the two branches $\abranch \wedge \afeat$ and $\abranch \wedge \bar{\afeat}$. 
-	%These new nodes are added to $\nodes$. 
-	They are added to $\bud$ if their depth is strictly less than $\maxd-1$ (the last feature test is chosen according to minimum error) and if they are not pure, otherwise they are terminal tests and we record the corresponding error.
+	\item As long as there is a bud ($\bud \neq \emptyset$), we pick any one $\abranch \in \bud$ and check if it can be expended in Line~\ref{line:leaves}. If its length is $\mdepth$ the error at this leaf is recorded in $\best[\abranch]$. Otherwise, we pick a feature $\afeat$ marked as \emph{available} for \abranch, add the pair $(\abranch,\afeat)$ to \sequence\ and expend the tree with the two branches $\abranch \wedge \afeat$ and $\abranch \wedge \bar{\afeat}$. 
+	%
+	%
+	%
+	%
+	%  a feature $\afeat$ marked as \emph{available} for \abranch, add the pair $(\abranch,\afeat)$ to \sequence\ and expend the tree with the two branches $\abranch \wedge \afeat$ and $\abranch \wedge \bar{\afeat}$.
+	% %These new nodes are added to $\nodes$.
+	% They are added to $\bud$ if their depth is strictly less than $\maxd-1$ (the last feature test is chosen according to minimum error) and if they are not pure, otherwise they are terminal tests and we record the corresponding error.
 
-\item As long as there is no bud ($\bud = \emptyset$), we pop the last assignment $(\abranch,\afeat)$ from \sequence, mark the feature $\afeat$ not available for branch $\abranch$ and update the recorded best error of its subtrees. If there is at least one available feature for branch $\abranch$, we add $\abranch$ to $\bud$. 
-Otherwise, we consider it terminal and its error is the sum of the error of its best subtrees.
+\item If there is no bud ($\bud = \emptyset$), then the tree is complete: every branch is of size $\mdepth$ or is pure. In that case we pop the last assignment $(\abranch,\afeat)$ from \sequence, mark the feature $\afeat$ not available for branch $\abranch$ and update the recorded best error of its subtrees. If there is at least one available feature for branch $\abranch$, we add $\abranch$ to $\bud$. 
+Otherwise, we consider it \emph{terminal} and its error is the sum of the error of its best subtrees. This branch will never be expended anymore since it is not added to $\bud$.
 % and we 
 %store the minimum error recorded for any of the possible features.
 
 \end{itemize}
 
 
-Notice that to simplify the code, we use branches to directly index array-like data structures in Algorithm~\ref{alg:bud}. Actually, a set of \emph{indices} (at most $2^{\mdepth}$ of them are necessary) are used as proxy for branches in all contexts. At Line~\ref{line:storebest}, the indices for $\abranch \wedge \afeat$, $\abranch \wedge \bar{\afeat}$ are released, and a free index is marked as used when expending a branch at Line~\ref{line:branching}.
-
-
-The classification error of a tree is equal to the sum of the error of its terminal banches, the algorithm returns the minimum value encountered when exploring the possible decision trees.
-In other words, this algorithm will first build a complete tree by expanding non-pure, non-maximal branches in any order. When all leaves are pure of a maximal depth, the last test of the last expanded branch w
+Notice that to simplify the pseudo-code, we use branches to directly index array-like data structures in Algorithm~\ref{alg:bud}. Actually, a set of \emph{indices} (at most $2^{\mdepth}$ of them are necessary) are used as proxy for branches in all contexts. At Line~\ref{line:storebest}, the indices for $\abranch \wedge \afeat$, $\abranch \wedge \bar{\afeat}$ are released, and a free index is marked as used when expending a branch at Line~\ref{line:branching}. Moreover, the pseudo-code in Algorithm~\ref{alg:bud} does show how the best subtrees of terminal branches are recorded, nor how the overall best error is updated.
 
 
 
-\medskip
+%The classification error of a tree is equal to the sum of the error of its terminal banches, the algorithm returns the minimum value encountered when exploring the possible decision trees.
+%In other words, this algorithm will first build a complete tree by expanding non-pure, non-maximal branches in any order. When all leaves are pure of a maximal depth, the last test of the last expanded branch w
+
+
+
+% \medskip
 		
 
 		\begin{theorem}
@@ -282,11 +364,19 @@ In other words, this algorithm will first build a complete tree by expanding non
 				We show that this is true for Algorithm~\ref{alg:bud} by recursion on the maximum depth $\mdepth$.
 				For $\mdepth = 0$, both algorithm return $\error[\emptyset]=\min(|\negex|, |\posex|)$.
 				
-				Now suppose that for $\mdepth \leq d$ every branch $\abranch$ explored by \dynprog (a recursive call ends on this branch) is also explored by \budalg ($\best[\abranch]$ is set in Lines~\ref{line:best1} or \ref{line:best2}), and let $\mdepth=d+1$. Without loss of generality, we can take an arbitrary branch $\abranch$ of length $d$ and show that the same extentions of $\abranch$ are explored by both algorithms.
+				Now suppose that for $\mdepth \leq d$ every branch $\abranch$ explored by \dynprog (a recursive call ends on this branch) is also explored by \budalg ($\best[\abranch]$ is set in Line~\ref{line:best}), and let $\mdepth=d+1$. Without loss of generality, we can take an arbitrary branch $\abranch$ of length $d$ and show that the same extentions of $\abranch$ are explored by both algorithms.
 				If $\error[\abranch]=0$, then no extension of $\abranch$ is explored by either algorithm.
 				Otherwise, \dynprog explores every branch $\abranch \wedge \afeat$ and $\abranch \wedge \bar{\afeat}$ for $\afeat \in \features \setminus \abranch$. Since $\abranch$ is explored when $\mdepth = d$ and since $\error[\abranch] \neq 0$, then $\abranch$ will fail the test on Line~\ref{line:leaves} and for a feature $\afeat \in \features \setminus \abranch$, the branches $\abranch \wedge \afeat$ and $\abranch \wedge \bar{\afeat}$ will be explored, and the pair $(\abranch, \afeat)$ will be added to $\sequence$. 
 				Moreover, the algorithm will not stop until $\sequence$ is not empty, hence $(\abranch, \afeat)$ will be poped out of $\sequence$, $\afeat$ removed from $\dom[\abranch]$ and $\abranch$ reinserted into $\bud$. Therefore, for every $\afeat \in \features \setminus \abranch$, $\abranch \wedge \afeat$ and $\abranch \wedge \bar{\afeat}$ will eventually be explored exactly once.
 			\end{proof}
+			
+			\medskip
+			
+			The key difference between Algorithms~\ref{alg:dynprog} and \ref{alg:bud} is the order in which branches are explored (see Figure~\ref{fig:searchtree}). In particular, \dynprog must complete the first recursive call before outputing a full tree. Therefore, the computation time before to find a first solution is $\Theta((\numex+2^{\mdepth-1}){\numfeat-1 \choose \mdepth-1})$, that is $O((\numex+2^{\mdepth-1})(\numfeat-1)^{\mdepth-1})$ time. On the other hand, \budalg finds the first tree in $\Theta(2^{\mdepth})$ time.
+			
+			
+		
+			
 			
 			
 % 			% First, notice that the task of splitting the data set on eevry branch of the search tree can be done exactly as in DL8, that is, in $\Theta(\numex)$ amortised time for each of the $\mdepth$ tree levels.
@@ -372,7 +462,8 @@ In other words, this algorithm will first build a complete tree by expanding non
 
 
 
-	\begin{algorithm}
+\begin{algorithm}
+\begin{footnotesize}
 		\caption{Blossom Algorithm\label{alg:bud}}
 		\TitleOfAlgo{\budalg}
 		  \KwData{$\negex,\posex, \maxd$}
@@ -384,13 +475,13 @@ In other words, this algorithm will first build a complete tree by expanding non
 		$\best \gets (\lambda : {2^{\features}} \mapsto \infty)$\;
 		
 		\While{$|\sequence| + |\bud| > 0$}{
-		\eIf{$\bud \neq \emptyset$}{
+		\lnl{line:dive}\eIf{$\bud \neq \emptyset$}{
 			%$\abranch \gets \select{\bud}$\;
 			pick and remove $\abranch$ from $\bud$\;
 			
 			\lnl{line:leaves}\eIf{$|\abranch| = \maxd$ or $\error[\abranch] = 0$} {
 				% $\error \gets \error + \error[\abranch,\afeat]$\;
-				\lnl{line:best1}$\best[\abranch] \gets \error[\abranch]$\;
+				\lnl{line:best}$\best[\abranch] \gets \error[\abranch]$\;
 			}{
 			\lnl{line:assignment} pick and remove $\afeat$ from $\dom[\abranch]$\;
 			% $\dom[\abranch] \gets \dom[\abranch] \setminus \{\afeat\}$\;
@@ -401,7 +492,7 @@ In other words, this algorithm will first build a complete tree by expanding non
 			}
 		}{
 			% $\best[\emptyset] \gets \min(\best[\emptyset], \error)$\;
-			\Repeat{$\dom[\abranch] \neq \emptyset$ or $|\sequence|=0$}{
+			\lnl{line:backtrack}\Repeat{$\dom[\abranch] \neq \emptyset$ or $|\sequence|=0$}{
 				pop $(\abranch,\afeat)$ from $\sequence$\;
 				\lnl{line:storebest}$\best[\abranch] \gets \min(\best[\abranch], \best[\abranch \wedge \afeat] +  \best[\abranch \wedge \bar{\afeat}])$\;
 				% $\error \gets \error - \best[\abranch \wedge \afeat] -  \best[\abranch \wedge \bar{\afeat}]$\;
@@ -419,117 +510,172 @@ In other words, this algorithm will first build a complete tree by expanding non
 		}
 		}
 		\Return $\best[\emptyset]$\;
+	\end{footnotesize}
 	\end{algorithm}
 	
 	
+	% \begin{algorithm}
+	% 	\caption{Anytime Algorithm\label{alg:bud}}
+	% 	\TitleOfAlgo{\budalg}
+	% 	  \KwData{$\negex,\posex, \maxd$}
+	% 	  \KwResult{The minimum error on $\negex,\posex$ for decision trees of depth at most $\maxd$}
+	% 	$\sequence \gets []$\;
+	% 	$\bud \gets \{\emptyset\}$\;
+	% 	$\error \gets \min(|\negex|,|\posex|)$\;
+	% 	$\dom \gets (\lambda : {2^{\features}} \mapsto \features)$\;
+	% 	$\best \gets (\lambda : {2^{\features}} \mapsto \infty)$\;
+	% 	% $\opt \gets (\lambda : {2^{\features}} \mapsto \fal)$\;
+	%
+	% 	\While{$|\sequence| + |\bud| > 0$}{
+	% 	\eIf{$\bud \neq \emptyset$}{
+	% 		%$\abranch \gets \select{\bud}$\;
+	% 		pick and remove $\abranch$ from $\bud$\;
+	% 		\lnl{line:assignment}$\afeat \gets \argmin_{\afeat \in \dom[\abranch]}(\error[\abranch,\afeat])$\;
+	% 		\lnl{line:leaves}\eIf{$\error[\abranch,\afeat] = 0$ or $|\abranch| = \maxd-1$} {
+	% 			$\error \gets \error + \error[\abranch,\afeat]$\;
+	% 			$\best[\abranch] \gets \error[\abranch,\afeat]$\;
+	% 			$\dom[\abranch] \gets \emptyset$\;
+	% 			% $\opt[\abranch] \gets \tru$\;
+	% 		}{
+	% 		$\dom[\abranch] \gets \dom[\abranch] \setminus \{\afeat\}$\;
+	% 		push $(\abranch,\afeat)$ on $\sequence$\; % $ \gets \sequence \oplus (\abranch,\afeat)$\;
+	% 		\ForEach{$v \in \{\afeat, \bar{\afeat}\}$}{
+	% 				\lIf{$\error[\abranch,v] > 0$}{
+	% 					$\bud \gets \bud \cup \{\abranch \wedge v\}$
+	% 				}
+	% 		}
+	% 		}
+	% 	}{
+	% 		$\best[\emptyset] \gets \min(\best[\emptyset], \error)$\;
+	% 		\Repeat{$\dom[\abranch] \neq \emptyset$ or $|\sequence|=0$}{
+	% 			pop $(\abranch,\afeat)$ from $\sequence$\;
+	% 			\lnl{line:storebest}$\best[\abranch] \gets \min(\best[\abranch], \best[\abranch \wedge \afeat] +  \best[\abranch \wedge \bar{\afeat}])$\;
+	% 			$\error \gets \error - \best[\abranch \wedge \afeat] -  \best[\abranch \wedge \bar{\afeat}]$\;
+	% 			\lIf{$\dom[\abranch] \neq \emptyset$} {
+	% 				$\bud \gets \bud \cup \{\abranch\}$
+	% 				% \lIf{$\opt[\abranch]$}{$\error \gets \error - \best[\abranch]$}
+	% 			}
+	% 			\lElse {
+	% 				$\error \gets \error + \best[\abranch]$%$\error[\abranch,\afeat]$
+	% 			}
+	% 			% {
+	% 			% 	$\opt[\abranch] \gets \tru$\;
+	% 			% }
+	% 		}
+	% 	}
+	% 	}
+	% 	\Return $\best[\emptyset]$\;
+	% \end{algorithm}
 	
-	\begin{algorithm}
-		\caption{Anytime Algorithm\label{alg:bud}}
-		\TitleOfAlgo{\budalg}
-		  \KwData{$\negex,\posex, \maxd$}
-		  \KwResult{The minimum error on $\negex,\posex$ for decision trees of depth at most $\maxd$}
-		$\sequence \gets []$\;
-		$\bud \gets \{\emptyset\}$\;
-		$\error \gets \min(|\negex|,|\posex|)$\;
-		$\dom \gets (\lambda : {2^{\features}} \mapsto \features)$\;
-		$\best \gets (\lambda : {2^{\features}} \mapsto \infty)$\;
-		% $\opt \gets (\lambda : {2^{\features}} \mapsto \fal)$\;
-		
-		\While{$|\sequence| + |\bud| > 0$}{
-		\eIf{$\bud \neq \emptyset$}{
-			%$\abranch \gets \select{\bud}$\;
-			pick and remove $\abranch$ from $\bud$\;
-			\lnl{line:assignment}$\afeat \gets \argmin_{\afeat \in \dom[\abranch]}(\error[\abranch,\afeat])$\;
-			\lnl{line:leaves}\eIf{$\error[\abranch,\afeat] = 0$ or $|\abranch| = \maxd-1$} {
-				$\error \gets \error + \error[\abranch,\afeat]$\;
-				$\best[\abranch] \gets \error[\abranch,\afeat]$\;
-				$\dom[\abranch] \gets \emptyset$\;
-				% $\opt[\abranch] \gets \tru$\;
-			}{
-			$\dom[\abranch] \gets \dom[\abranch] \setminus \{\afeat\}$\;
-			push $(\abranch,\afeat)$ on $\sequence$\; % $ \gets \sequence \oplus (\abranch,\afeat)$\;
-			\ForEach{$v \in \{\afeat, \bar{\afeat}\}$}{
-					\lIf{$\error[\abranch,v] > 0$}{
-						$\bud \gets \bud \cup \{\abranch \wedge v\}$
-					}
-			}
-			}
-		}{
-			$\best[\emptyset] \gets \min(\best[\emptyset], \error)$\;
-			\Repeat{$\dom[\abranch] \neq \emptyset$ or $|\sequence|=0$}{
-				pop $(\abranch,\afeat)$ from $\sequence$\;
-				\lnl{line:storebest}$\best[\abranch] \gets \min(\best[\abranch], \best[\abranch \wedge \afeat] +  \best[\abranch \wedge \bar{\afeat}])$\;
-				$\error \gets \error - \best[\abranch \wedge \afeat] -  \best[\abranch \wedge \bar{\afeat}]$\;
-				\lIf{$\dom[\abranch] \neq \emptyset$} {
-					$\bud \gets \bud \cup \{\abranch\}$
-					% \lIf{$\opt[\abranch]$}{$\error \gets \error - \best[\abranch]$}
-				} 
-				\lElse {	
-					$\error \gets \error + \best[\abranch]$%$\error[\abranch,\afeat]$
-				}
-				% {
-				% 	$\opt[\abranch] \gets \tru$\;
-				% }
-			}
-		}
-		}
-		\Return $\best[\emptyset]$\;
-	\end{algorithm}
 	
 	
-
-
-
+	\begin{figure}
 	\begin{center}
+		\tabcolsep=0pt
 		\scalebox{1}{
 			\begin{forest}
 				for tree={%
-					l sep=12pt,
+					l sep=20pt,
 					s sep=3.5pt,
-					node options={shape=circle, minimum width=10pt, inner sep=0pt, font=\scriptsize},
+					node options={shape=rectangle, minimum width=10pt, inner sep=0pt, font=\footnotesize},
 		  		edge={thick, -latex, shorten >=1pt, shorten <=1pt},
 				}
 				[{$\emptyset$}
 					[{$a$}
-						[{$b$}]
-						[{$\bar{b}$}]
-						[{$c$}]
-						[{$\bar{c}$}]
+						[{\begin{tabular}{c}$b$\\1\end{tabular}}]
+						[{\begin{tabular}{c}$\bar{b}$\\2\end{tabular}}]
+						[{\begin{tabular}{c}$c$\\7\end{tabular}}]
+						[{\begin{tabular}{c}$\bar{c}$\\8\end{tabular}}]
 					]
 					[{$\bar{a}$}
-						[{$b$}]
-						[{$\bar{b}$}]
-						[{$c$}]
-						[{$\bar{c}$}]
+						[{\begin{tabular}{c}$b$\\3\end{tabular}}]
+						[{\begin{tabular}{c}$\bar{b}$\\4\end{tabular}}]
+						[{\begin{tabular}{c}$c$\\5\end{tabular}}]
+						[{\begin{tabular}{c}$\bar{c}$\\6\end{tabular}}]
 					]
 					[{$b$}
-						[{$a$}]
-						[{$\bar{a}$}]
-						[{$c$}]
-						[{$\bar{c}$}]
+						[{\begin{tabular}{c}$a$\\9\end{tabular}}]
+						[{\begin{tabular}{c}$\bar{a}$\\10\end{tabular}}]
+						[{\begin{tabular}{c}$c$\\15\end{tabular}}]
+						[{\begin{tabular}{c}$\bar{c}$\\16\end{tabular}}]
 					]
 					[{$\bar{b}$}
-						[{$a$}]
-						[{$\bar{a}$}]
-						[{$c$}]
-						[{$\bar{c}$}]
+						[{\begin{tabular}{c}$a$\\11\end{tabular}}]
+						[{\begin{tabular}{c}$\bar{a}$\\12\end{tabular}}]
+						[{\begin{tabular}{c}$c$\\13\end{tabular}}]
+						[{\begin{tabular}{c}$\bar{c}$\\14\end{tabular}}]
 					]
 					[{$c$}
-						[{$a$}]
-						[{$\bar{a}$}]
-						[{$b$}]
-						[{$\bar{b}$}]
+						[{\begin{tabular}{c}$a$\\17\end{tabular}}]
+						[{\begin{tabular}{c}$\bar{a}$\\18\end{tabular}}]
+						[{\begin{tabular}{c}$b$\\23\end{tabular}}]
+						[{\begin{tabular}{c}$\bar{b}$\\24\end{tabular}}]
 					]
 					[{$\bar{c}$}
-						[{$a$}]
-						[{$\bar{a}$}]
-						[{$b$}]
-						[{$\bar{b}$}]
+						[{\begin{tabular}{c}$a$\\19\end{tabular}}]
+						[{\begin{tabular}{c}$\bar{a}$\\20\end{tabular}}]
+						[{\begin{tabular}{c}$b$\\21\end{tabular}}]
+						[{\begin{tabular}{c}$\bar{b}$\\22\end{tabular}}]
 					]
 				]
 			\end{forest}
 		}
 	\end{center}
+	\caption{\label{fig:searchtree} The search tree for decision trees. \texttt{DynProg} explores it depth first, whereas \texttt{Bud-first-search} explores branches in the order given below the leaves.}
+	%\caption{\label{fig:searchtree} The search tree for decision trees. \dynprog explores it depth first, whereas \budalg explores branches in the order given below the leaves.}
+	\end{figure}
+	
+	
+	
+	
+	% \begin{figure}
+	% \begin{center}
+	% 	\tabcolsep=0pt
+	% 	\scalebox{1}{
+	% 		\begin{forest}
+	% 			for tree={%
+	% 				l sep=20pt,
+	% 				s sep=3.5pt,
+	% 				node options={shape=rectangle, minimum width=10pt, inner sep=0pt, font=\footnotesize},
+	% 	  		edge={thick, -latex, shorten >=1pt, shorten <=1pt},
+	% 			}
+	% 			[{$\emptyset$}
+	% 			 [{$a,\bar{a}$}
+	% 			  [{$a \wedge b$,$a \wedge \bar{b}$}
+	% 					[{$a \wedge b \wedge c$,$a \wedge b \wedge \bar{c}$}]
+	% 					[{$a \wedge \bar{b} \wedge c$,$a \wedge \bar{b} \wedge \bar{c}$}]
+	% 				]
+	% 			  [{$\bar{a} \wedge b$,$\bar{a} \wedge \bar{b}$}]
+	% 			 ]
+	% 			 [{$b$}]
+	% 			 [{$c$}]
+	% 			]
+	% 		\end{forest}
+	% 	}
+	% \end{center}
+	% \caption{\label{fig:searchtree} The search tree for decision trees. \texttt{DynProg} explores it depth first, whereas \texttt{Bud-first-search} explores branches in the order given below the leaves.}
+	% %\caption{\label{fig:searchtree} The search tree for decision trees. \dynprog explores it depth first, whereas \budalg explores branches in the order given below the leaves.}
+	% \end{figure}
+	
+	
+	% \begin{tabular}{c|ll}
+	% 	\# & \bud & \sequence \\
+	% 	\hline
+	% 	1 & $\{\emptyset\}$ & $[]$ \\
+	% 	2 & $\{a,\bar{a}\}$ & $[(\emptyset,a)]$ \\
+	% 	3 & $\{a \wedge b,a \wedge \bar{b},\bar{a}\}$ & $[(\emptyset,a),(a,b)]$ \\
+	% 	4 & $\{a \wedge \bar{b},\bar{a}\}$ & $[(\emptyset,a),(a,b)]$ \\
+	% 	5 & $\{\bar{a}\}$ & $[(\emptyset,a),(a,b)]$ \\
+	% 	6 & $\{\bar{a} \wedge b, \bar{a} \wedge \bar{b}\}$ & $[(\emptyset,a),(a,b),(\bar{a},b)]$ \\
+	% 	7 & $\{\bar{a} \wedge \bar{b}\}$ & $[(\emptyset,a),(a,b),(\bar{a},b)]$ \\
+	% 	8 & $\{\}$ & $[(\emptyset,a),(a,b),(\bar{a},b)]$ \\
+	% 	9 & $\{\bar{a} \wedge c, \bar{a} \wedge \bar{c}\}$ & $[(\emptyset,a),(a,b),(\bar{a},c)]$ \\
+	% 	10 & $\{\bar{a} \wedge \bar{c}\}$ & $[(\emptyset,a),(a,b),(\bar{a},c)]$ \\
+	% 	11 & $\{\}$ & $[(\emptyset,a),(a,b),(\bar{a},c)]$ \\
+	% 	12 & $\{a \wedge c, a \wedge \bar{c}\}$ & $[(\emptyset,a),(a,c)]$ \\
+	% 	13 & $\{a \wedge \bar{c}\}$ & $[(\emptyset,a),(a,c)]$ \\
+	% 	14 & $\{\}$ & $[(\emptyset,a),(a,c)]$ \\
+	% \end{tabular}
 
 
 % For readability, we cut the algorithm into four blocks. The initialisation procedure (Algorithm~\ref{alg:init}) set up the data structures used in all other procedures:
@@ -682,21 +828,364 @@ In other words, this algorithm will first build a complete tree by expanding non
 
 %\clearpage
 
-\section*{Improvements}
+\section{Improvements}
 
-There are a number of implementation details (among them how to return the actual tree rather than simply its classification error) and other improvements, which we will list later.
+The pseudo-code given in Algorithm~\ref{alg:bud} shows the basic structure of the algorithm. 
+As discussed earlier, some important (but rather tedious) parts of the algorithms have been omitted, such as how the best subtrees are stored in Line~\ref{line:storebest} when the best classification score is updated.
+We discuss here only improvements that have an impact on the efficiency of the algorithm.
 
 
-% \clearpage
 
-\section*{Experiments}
 
-\subsection*{Comparison with \dleight}
+\subsection{Heuristic Ordering}
 
-We first compare our algorithm (\budalg) against \dleight on relatively shallow trees (3,4 and 5) in tables~\ref{tab:d3}, \ref{tab:d4} and \ref{tab:d5}, respectively. 
-We give the minimum \emph{error}, maximum \emph{accuracy} (acc.), the cpu \emph{time} and size of the search space (\emph{choices}) required to prove optimality (when a proof is given, as markes by a 1 in the column \emph{opt}) or to find the best solution (otherwise).
+In order to quickly find highly accurate trees, it is important to follow a heuristic. We experimentd with three heuristics based on scores to minimize: \emph{error}, \emph{entropy}~\cite{quinlan86}, and \emph{Gini impurity}~\ref{}. 
+Each of these heuristics associate a score to a feature $\afeat$ at a branch $\abranch$:
+\begin{eqnarray}
+	\textrm{error}: & \error[\abranch,\afeat] \\
+	%\textrm{minimum entropy:} & \sum_{v \in \{\afeat,\bar{\afeat}\}} \frac{|\allex(\abranch \wedge v)|}{|\allex(\abranch)|} \cdot -\sum_{c \in \{\bot,\top\}} \frac{|\setex{c}(\abranch \wedge v)|}{|\setex{c}(\abranch)} \log_{2} \frac{|\setex{c}(\abranch \wedge v)|}{|\setex{c}(\abranch)|} \\
+	\textrm{entropy:} & \sum\limits_{v \in \{\afeat,\bar{\afeat}\}} -p(v,\allex) \sum\limits_{c \in \{\bot,\top\}} p(v,\setex{c}) \log_{2} p(v,\setex{c}) \\
+	\textrm{Gini impurity:} & 2 - \sum\limits_{v \in \{\afeat,\bar{\afeat}\}}\sum\limits_{c \in \{\bot,\top\}} p(v,\setex{c})^2
+\end{eqnarray}
+With $p(v,{\cal S}) = \frac{|{\cal S}(\abranch \wedge v)|}{|{\cal S}(\abranch)|}$.
+%The minimum error is simply defined as 
+
+The feature tests at Line~\ref{line:assignment} of Algorithm~\ref{alg:bud} are explored in non-decreasing order with respect to a score above.
+
+
+In the datasets we used, the Gini impurity was significantly better, and hence all reported experiment results are using Gini impurity. For branches of length $\mdepth-1$, however, we use the error instead. Indeed, the optimal feature $\afeat$ for a branch $\abranch$ that cannot be extended further is the one minimizing $\error[\abranch,\afeat]$. This means that we actuall do not have to try other features for that node, which means that we effectively restrict search to branches of length $\mdepth-1$.
+
+
+%We order the possible features for branch $\abranch$ in non-decreasing order with respect to a score above and 
+%explore the features in that order in Line~\ref{line:assignment}.
+Computing this order costs $\Theta(\numfeat \log \numfeat)$ for each of the $2^{\mdepth}\numfeat^{\mdepth}$ branches added to $\bud$ at Line~\ref{line:branching}. However, since the depth is effectively reduced by one, the resulting complexity 
+%(excluding the time for splitting the dataset) 
+is $O((\numex + 2^{\mdepth} \log \numfeat) \numfeat^{\mdepth})$. This very slight increase is often inconsequencial, since we often have $\numex \geq 2^{\mdepth} \log \numfeat$.
+
+The feature ordering has 
+
+
+\subsection{Lower Bound}
+
+It is possible to fail early using a lower bound on the error given prior decisions in the same way as \murtree, following the idea introduced in \cite{}. The idea is that once some subtrees along a branch $\abranch$ are optimal and the sum of their errors is larger than the current upper bound (the best solution found so far) then there is no need to continue exploring branch $\abranch$. Line~\ref{line:leaves} can be changed to ``$\bud \neq \emptyset ~\& \not\exists \abranch \in \bud, \dominated{\abranch}$''. %Notice that when a branch is ``pruned'' in this way, its 
+
+
+%In this case, we can fail by forcing 
+
+
+First, observe that $\best[\abranch]$ is an upper bound on the classification error for any subtree rooted at $\abranch$, since this value comes from an actual tree (of depth $\mdepth - |\abranch|$ for the dataset $\langle \negex(\abranch),\posex(\abranch) \rangle$). It is possible to propagate this upper bound to parent nodes efficiently (in $O(|\branch|)$ time). Here we assume that this is done every time the value $\best[\abranch]$ is actually updated, by recursively applying the same update procedure to the parent.
+
+
+Now, when the loop in Line~\ref{line:backtrack} makes two or more iterations, it means that for the penultimate branch $\abranch$ popped out of \sequence, all possible subtrees have been explored, and therefore, $\best[\abranch]$ is also a lower bound on the classification error for any subtree rooted at $\abranch$. Let $\opt[\abranch]$ be true if and only if $\abranch$ has been ``backtracked over'' in this way.
+
+
+
+
+Let $\abranch$ be a bud in $\bud$. Trivially, if $|\abranch|=\mdepth-1$  then this branch will entail $\min\{\error[\afeat] \mid \afeat \in \dom[\abranch]\}$ misclassification.
+However, for any parent $\abranch'$ of $\abranch$, if there 
+
+
+
+
+%is $O((\numex + 2^{\mdepth}\numfeat \log \numfeat) \numfeat^{\mdepth-1})$, which is often better than 
+
+
+
+
+% $$
+% \sum_{v \in \{\afeat,\bar{\afeat\}} \frac{|\allex(\abranch \wedge v)|}{|\allex(\abranch)|} \cdot -\sum_{c \in \{\bot,\top\}} \frac{|\setex{c}(\abranch \wedge v)}{|\setex{c}(\abranch)} \log_{2} \frac{|\setex{c}(\abranch \wedge v)}{|\setex{c}(\abranch)}
+% $$
+
+
+% $$
+% 2 - \sum\limits_{v \in \{\afeat,\bar{\afeat}\}}\sum\limits_{c \in \{\bot,\top\}} p(v,\setex{c})^2
+% $$
+
+
+
+\subsection{Preprocessing}
+
+
+\section{Experimental Results}
+
+All experiments were run
+on 7 cluster nodes, each with 36 Intel Xeon CPU E5-2695 v4 2.10GHz cores
+running Linux Ubuntu 16.04.4. Sources were compiled using g++8. 
+Every algorithm was run ten times with the same set of distinct random seeds and a time limit of one hour. We imposed a memory limit of 3.5GB on every instance in the data sets, except for \dleight, where the limit was raised to 50GB.
+
+We used 47 datasets [from...], and for each dataset, we set the maximum depth using integers in $[3,10]$. We organized the results by providing averaged data over the 47 datasets, for each value of maximum depth.
+The raw experimental data from these experiments can be found in the Appendix.
+
+
+
+\subsection{Optimizing trees}
+
+We first compare our algorithm (\budalg) to the state-of-the-art algorithms \murtree and \dleight, for computing optimal trees and proving optimality. We therefore report the ratio of optimality proofs (opt.), the average accuracy (acc.) as well as the average cpu time to either prove optimality or find the best solution.
+As \dleight does not provide a solution for every dataset (for which it went over the memory limit), we provide instead the average relative difference in accuracy w.r.t. \budalg, however, only for the datasets where a decision tree was found. Similarly, we report the average cpu time ratio w.r.t. \budalg, however only for instances which were proven optimal by both algorithms.
+
+
+% We report in Table~\ref{tab:summaryacc} data averaged over the 47 datasets described above, for
+%
+%
+% the average accuracy found within the one hour time limit for \budalg and \murtree
+%
+% on relatively shallow trees (3,4 and 5) in tables~\ref{tab:d3}, \ref{tab:d4} and \ref{tab:d5}, respectively.
+% We give the minimum \emph{error}, the cpu in seconds \emph{time} and size of the search space (\emph{choices}) required to prove optimality (when a proof is given, as markes by a 1 in the column \emph{opt}) or to find the best solution (otherwise).
+
+
+% \begin{table}[htbp]
+% \begin{center}
+% \begin{normalsize}
+% \tabcolsep=3.7pt
+% \input{src/tables/summaryopt.tex}
+% \end{normalsize}
+% \end{center}
+% \caption{\label{tab:summary} Comparison with the state of the art: computing optimal trees}
+% \end{table}
+
+
+\begin{table}[htbp]
+\begin{center}
+\begin{normalsize}
+\tabcolsep=3.7pt
+\input{src/tables/summaryacc.tex}
+\end{normalsize}
+\end{center}
+\caption{\label{tab:summaryacc} Comparison with the state of the art: computing optimal trees}
+\end{table}
+
+
+\subsection{Computing deep classifiers}
+
+Next, we shift our focus to how fast can we obtain accurate trees and how fast can we improve the accuracy over basic solutions found by heuristics.
+Therefore to have a baseline, we use a widely used heuristic: \cart (we used its implementation in scikit-learn).
+Here we report the average error after a given period of time in Table~\ref{tab:summaryspeed}.
+
 
 \medskip
+
+We can see that the first solution found by our algorithm has comparable accuracy (actually, often slightly better) to the one found by \cart. %Moreover, although we would need larger data sets to be confident about that, it seems that our algorithm is faster than \cart to find this first decision tree. %One can conjecture that \cart uses more sophisticated heuristic choices to explain these two observations.
+
+Then, in most cases, it is possible to improve the first solution significantly within a few seconds. Notice that for larger depth, improving the initial solution is harder and the 3s time limit is comparatively tighter than for smaller trees, so the gain of \budalg over \cart is more sensible for small trees.
+
+
+\begin{table}[htbp]
+\begin{center}
+\begin{normalsize}
+\tabcolsep=3pt
+\input{src/tables/summaryspeed.tex}
+\end{normalsize}
+\end{center}
+\caption{\label{tab:summary} Comparison with state the of the art: computing accurate trees}
+\end{table}
+
+
+Figure~\ref{fig:cactus} reports the evolution of accuracy over time, giving a good view of the difference between \murtree and \budalg. The accuracy of the tree returned by \cart is given for reference. 
+
+
+
+\begin{figure}
+	\subfloat[depth=3]{\input{src/tables/scerror3.tex}}
+	\subfloat[depth=5]{\input{src/tables/scerror5.tex}}
+	\subfloat[depth=7]{\input{src/tables/scerror7.tex}}
+
+	\subfloat[depth=8]{\input{src/tables/scerror8.tex}}
+	\subfloat[depth=9]{\input{src/tables/scerror9.tex}}
+	\subfloat[depth=10]{\input{src/tables/scerror10.tex}}
+	\caption{\label{fig:cactus}Accuracy over time}
+\end{figure}
+
+
+
+\clearpage
+
+\newgeometry{bottom=2cm,top=2cm,margin=1cm}
+
+\section*{Appendix}
+
+\begin{table}[htbp]
+\begin{center}
+\begin{footnotesize}
+\tabcolsep=2pt
+\input{src/tables/allopt3.tex}
+\end{footnotesize}
+\end{center}
+\caption{\label{tab:all3} Comparison with state of the art: depth 3}
+\end{table}
+
+
+\begin{table}[htbp]
+\begin{center}
+\begin{footnotesize}
+\tabcolsep=2pt
+\input{src/tables/allopt4.tex}
+\end{footnotesize}
+\end{center}
+\caption{\label{tab:all4} Comparison with state of the art: depth 4}
+\end{table}
+
+\begin{table}[htbp]
+\begin{center}
+\begin{footnotesize}
+\tabcolsep=2pt
+\input{src/tables/allopt5.tex}
+\end{footnotesize}
+\end{center}
+\caption{\label{tab:all5} Comparison with state of the art: depth 5}
+\end{table}
+
+
+\begin{table}[htbp]
+\begin{center}
+\begin{footnotesize}
+\tabcolsep=2pt
+\input{src/tables/allopt6.tex}
+\end{footnotesize}
+\end{center}
+\caption{\label{tab:all6} Comparison with state of the art: depth 6}
+\end{table}
+
+\begin{table}[htbp]
+\begin{center}
+\begin{footnotesize}
+\tabcolsep=2pt
+\input{src/tables/allopt7.tex}
+\end{footnotesize}
+\end{center}
+\caption{\label{tab:all7} Comparison with state of the art: depth 7}
+\end{table}
+
+\begin{table}[htbp]
+\begin{center}
+\begin{footnotesize}
+\tabcolsep=2pt
+\input{src/tables/allopt8.tex}
+\end{footnotesize}
+\end{center}
+\caption{\label{tab:all8} Comparison with state of the art: depth 8}
+\end{table}
+
+\begin{table}[htbp]
+\begin{center}
+\begin{footnotesize}
+\tabcolsep=2pt
+\input{src/tables/allopt9.tex}
+\end{footnotesize}
+\end{center}
+\caption{\label{tab:all9} Comparison with state of the art: depth 9}
+\end{table}
+
+\begin{table}[htbp]
+\begin{center}
+\begin{footnotesize}
+\tabcolsep=2pt
+\input{src/tables/allopt10.tex}
+\end{footnotesize}
+\end{center}
+\caption{\label{tab:all10} Comparison with state of the art: depth 10}
+\end{table}
+
+
+\end{document}
+
+\begin{table}[htbp]
+\begin{center}
+\begin{normalsize}
+\tabcolsep=4pt
+\input{src/tables/allacc9.tex}
+\end{normalsize}
+\end{center}
+\caption{\label{tab:all} Comparison with state of the art: depth 9}
+\end{table}
+
+
+\begin{table}[htbp]
+\begin{center}
+\begin{normalsize}
+\tabcolsep=4pt
+\input{src/tables/allspeed3.tex}
+\end{normalsize}
+\end{center}
+\caption{\label{tab:all} Comparison with state of the art: depth 3}
+\end{table}
+
+\medskip
+
+\begin{table}[htbp]
+\begin{center}
+\begin{normalsize}
+\tabcolsep=4pt
+\input{src/tables/allspeed4.tex}
+\end{normalsize}
+\end{center}
+\caption{\label{tab:all} Comparison with state of the art: depth 4}
+\end{table}
+
+\medskip
+
+\begin{table}[htbp]
+\begin{center}
+\begin{normalsize}
+\tabcolsep=4pt
+\input{src/tables/allspeed9.tex}
+\end{normalsize}
+\end{center}
+\caption{\label{tab:all} Comparison with state of the art: depth 9}
+\end{table}
+
+\medskip
+
+
+
+
+\begin{table}[htbp]
+\begin{center}
+\begin{normalsize}
+\tabcolsep=4pt
+\input{src/tables/allopt3.tex}
+\end{normalsize}
+\end{center}
+\caption{\label{tab:all} Comparison with state of the art: depth 3}
+\end{table}
+
+\medskip
+
+\begin{table}[htbp]
+\begin{center}
+\begin{normalsize}
+\tabcolsep=4pt
+\input{src/tables/allopt4.tex}
+\end{normalsize}
+\end{center}
+\caption{\label{tab:all} Comparison with state of the art: depth 4}
+\end{table}
+
+\medskip
+
+\begin{table}[htbp]
+\begin{center}
+\begin{normalsize}
+\tabcolsep=4pt
+\input{src/tables/allopt5.tex}
+\end{normalsize}
+\end{center}
+\caption{\label{tab:all} Comparison with state of the art: depth 5}
+\end{table}
+
+\medskip
+
+\begin{table}[htbp]
+\begin{center}
+\begin{normalsize}
+\tabcolsep=4pt
+\input{src/tables/allopt6.tex}
+\end{normalsize}
+\end{center}
+\caption{\label{tab:all} Comparison with state of the art: depth 6}
+\end{table}
+
+\medskip
+
 
 When the maximum depth and number of feature is not too large, both algorithms are comparable, although \budalg is systematically faster. However, when the depth or the number of features grows, the best solution found by \dleight is often of much lower quality. In fact, in most cases, it reaches the time or memory limit without outputing a solution (the missing entries corresponds to \dleight reaching the 50GB memory limit). Notice that \budalg uses a tiny memory space (much lower than the size of the data set).
 
@@ -706,43 +1195,33 @@ When the maximum depth and number of feature is not too large, both algorithms a
 \begin{center}
 \begin{normalsize}
 \tabcolsep=5pt
-\input{src/tables/depth3.tex}
+\input{src/tables/cpusmall3.tex}
 \end{normalsize}
 \end{center}
-\caption{\label{tab:d3} Comparison with state of the art for optimal small trees (max depth=3)}
+\caption{\label{tab:d3} Comparison with state of the art on shallow trees (max depth=3)}
 \end{table}
 
 \begin{table}[htbp]
 \begin{center}
 \begin{normalsize}
 \tabcolsep=5pt
-\input{src/tables/depth4.tex}
+\input{src/tables/cpusmall4.tex}
 \end{normalsize}
 \end{center}
-\caption{\label{tab:d4} Comparison with state of the art for optimal small trees (max depth=4)}
+\caption{\label{tab:d4} Comparison with state of the art on shallow trees (max depth=4)}
 \end{table}
 
 \begin{table}[htbp]
 \begin{center}
 \begin{normalsize}
 \tabcolsep=5pt
-\input{src/tables/depth5.tex}
+\input{src/tables/cpusmall5.tex}
 \end{normalsize}
 \end{center}
-\caption{\label{tab:d5} Comparison with state of the art for optimal small trees (max depth=5)}
+\caption{\label{tab:d5} Comparison with state of the art on shallow trees (max depth=5)}
 \end{table}
 
 
-
-\subsection*{Comparison with \cart}
-
-Next, we compare our algorithm (\budalg) against \cart (its implemention in scikit-learn) on deeper trees (4 and 7 and 10). Here we give the accuracy of the first solution found by \budalg (\greedy) and the best solution found given a 3 seconds time limit (\budalg) in tables \ref{tab:d3}, \ref{tab:d4} and \ref{tab:d5}.
-
-\medskip
-
-We can see that the first solution found by our algorithm has comparable accuracy (actually, often slightly better) to the one found by \cart. Moreover, although we would need larger data sets to be confident about that, it seems that our algorithm is faster than \cart to find this first decision tree. %One can conjecture that \cart uses more sophisticated heuristic choices to explain these two observations.
-
-Then, in most cases, it is possible to improve the first solution significantly within a few seconds. Notice that for larger depth, improving the initial solution is harder and the 3s time limit is comparatively tighter than for smaller trees, so the gain of \budalg over \cart is more sensible for small trees.
 
 
 
@@ -779,7 +1258,7 @@ Then, in most cases, it is possible to improve the first solution significantly 
 \end{table}
 
 
-\subsection*{Size stats}
+\subsection{Size stats}
 
 
 \begin{table}[htbp]
