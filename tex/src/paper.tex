@@ -158,9 +158,9 @@
 
 \DontPrintSemicolon
 
-\title{Backtracking DT}
+\title{A Simple and Efficient Anytime Algorithm for Computing Optimal Decision Trees}
 
-\author{Emir Demirovi\'c\inst{1} Emmanuel Hebrard\inst{2} \and Louis Jean\inst{2}}
+\author{Emir Demirovi\'c\inst{1} \and Emmanuel Hebrard\inst{2} \and Louis Jean\inst{2}}
 \institute{TU DELFT, The Netherlands, email: e.demirovic@tudelft.nl
   \and LAAS-CNRS, Universit\'e de Toulouse, CNRS, France, email: \{hebrard,ljean\}@laas.fr}
 
@@ -180,9 +180,9 @@
 
 \section{Introduction}
 
-Ever since the seminal work from Quinlan on using entropy as a heuristic to compute decision classifiers, the question of computing \emph{optimal} decision trees has been alive, and recently a number of algorithms have been introduced for that purpose.
+Ever since the seminal work from Quinlan on using entropy as a heuristic to compute decision classifiers~\cite{10.1023/A:1022643204877,c4-5}, the question of computing \emph{optimal} decision trees has been alive, and recently a number of algorithms have been introduced for that purpose.
 Several variants and criteria have been proposed. %, e.g. computing the perfect classifier of minimum size~\cite{}, 
-Among those, computing a depth-bounded decision tree of maximum accuracy is often the preferred criterion~\cite{}, because while being straightforward, it captures many desired features: it is resilient to noisy data, and shallow trees are both easier to explain and less prone to overfitting.
+Among those, computing a depth-bounded decision tree of maximum accuracy is often the preferred criterion~\cite{dl8,verhaeghe2019learning,bertsimas2017optimal,hu2019optimal}, because while being straightforward, it captures many desired features: it is resilient to noisy data, and shallow trees are both easier to explain and less prone to overfitting.
 
 \medskip
 
@@ -200,9 +200,9 @@ Despite the vast offer of exact methods that can potentially provide optimal dec
 \medskip
 
 In this paper we introduce a relatively \emph{simple} algorithm, that is as memory and time efficient as heuristics, and yet more efficient than most exact methods on most datasets. 
-In a nutshell, this algorithm (\budalg) emulates the dynamic programming algorithm \dleight, while expending non-terminal branches (a.k.a ``buds'') first. As a result, this algorithm is in a sense strictly better than both the standard dynamic programming approach (because it is anytime and at least as fast) and than classic heuristics (because it emulates them during search, without significant overhead).
+In a nutshell, this algorithm (\budalg) emulates the dynamic programming algorithm \dleight~\cite{dl8}, while expending non-terminal branches (a.k.a ``buds'') first. As a result, this algorithm is in a sense strictly better than both the standard dynamic programming approach (because it is anytime and at least as fast) and than classic heuristics (because it emulates them during search, without significant overhead).
 %but explores the search space so as to improve its anytime behaviour.
-Our experimental results show that it outperforms the state of the art, to the exception of \murtree for relatively shallow trees (typically for maximum depth 4 or 5), whose more sophisticated (albeit complex) algorithmic features pay off.
+Our experimental results show that it outperforms the state of the art, to the exception of \murtree~\cite{DBLP:journals/corr/abs-2007-12652} on relatively shallow trees (typically for maximum depth 4 or 5), for which this its more sophisticated (albeit complex) algorithmic features pay off.
 
 
 %
