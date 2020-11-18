@@ -991,15 +991,15 @@ instead of absolute values, we provide the average relative difference in error 
 % We give the minimum \emph{error}, the cpu in seconds \emph{time} and size of the search space (\emph{choices}) required to prove optimality (when a proof is given, as markes by a 1 in the column \emph{opt}) or to find the best solution (otherwise).
 
 
-\begin{table}[htbp]
-\begin{center}
-\begin{normalsize}
-\tabcolsep=3.7pt
-\input{src/tables/summaryopt.tex}
-\end{normalsize}
-\end{center}
-\caption{\label{tab:summary} Comparison with the state of the art: computing optimal trees}
-\end{table}
+% \begin{table}[htbp]
+% \begin{center}
+% \begin{normalsize}
+% \tabcolsep=3.7pt
+% \input{src/tables/summaryopt.tex}
+% \end{normalsize}
+% \end{center}
+% \caption{\label{tab:summary} Comparison with the state of the art: computing optimal trees}
+% \end{table}
 
 
 \begin{table}[htbp]
@@ -1047,16 +1047,16 @@ We can see in those graphs that \murtree finds an initial tree extremely quickly
 
 
 
-% \begin{figure}
-% 	\subfloat[depth=3]{\input{src/tables/scerror3.tex}}
-% 	\subfloat[depth=5]{\input{src/tables/scerror5.tex}}
-% 	\subfloat[depth=7]{\input{src/tables/scerror7.tex}}
-%
-% 	\subfloat[depth=8]{\input{src/tables/scerror8.tex}}
-% 	\subfloat[depth=9]{\input{src/tables/scerror9.tex}}
-% 	\subfloat[depth=10]{\input{src/tables/scerror10.tex}}
-% 	\caption{\label{fig:cactus}Accuracy over time}
-% \end{figure}
+\begin{figure}
+	\subfloat[depth=3]{\input{src/tables/scerror3.tex}}
+	\subfloat[depth=5]{\input{src/tables/scerror5.tex}}
+	\subfloat[depth=7]{\input{src/tables/scerror7.tex}}
+
+	\subfloat[depth=8]{\input{src/tables/scerror8.tex}}
+	\subfloat[depth=9]{\input{src/tables/scerror9.tex}}
+	\subfloat[depth=10]{\input{src/tables/scerror10.tex}}
+	\caption{\label{fig:cactus}Accuracy over time}
+\end{figure}
 
 \bibliographystyle{plain}
 \bibliography{src/references}
