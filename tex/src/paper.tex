@@ -991,15 +991,15 @@ instead of absolute values, we provide the average relative difference in error 
 % We give the minimum \emph{error}, the cpu in seconds \emph{time} and size of the search space (\emph{choices}) required to prove optimality (when a proof is given, as markes by a 1 in the column \emph{opt}) or to find the best solution (otherwise).
 
 
-% \begin{table}[htbp]
-% \begin{center}
-% \begin{normalsize}
-% \tabcolsep=3.7pt
-% \input{src/tables/summaryopt.tex}
-% \end{normalsize}
-% \end{center}
-% \caption{\label{tab:summary} Comparison with the state of the art: computing optimal trees}
-% \end{table}
+\begin{table}[htbp]
+\begin{center}
+\begin{normalsize}
+\tabcolsep=3.7pt
+\input{src/tables/summaryopt.tex}
+\end{normalsize}
+\end{center}
+\caption{\label{tab:summary} Comparison with the state of the art: computing optimal trees}
+\end{table}
 
 
 \begin{table}[htbp]
@@ -1022,7 +1022,7 @@ Here we report the average error after a given period of time (3 seconds, 10 sec
 
 \medskip
 
-We can see that the first solution found by our algorithm has comparable accuracy (actually, often slightly better) to the one found by \cart. The implementation of \cart in scikit-learn does not seem to be very efficient. However, this is not so relevant as it is clear that one greedy run of the heuristic can be implemented to ba as fast as the first dive of \budalg. The point of this experiment is threefold: first, the first solution is very similar to that found by \cart (here we believe that the only difference is to use the feature yielding the minimum error instead of the feature with minimum Gini impurity for the deepest feature tests); second, this tree
+We can see that the first solution found by our algorithm has comparable accuracy (actually, often slightly better) to the one found by \cart. The implementation of \cart in scikit-learn does not seem to be very efficient computationally. However, this is not so relevant as it is clear that one greedy run of the heuristic can be implemented to be as fast as the first dive of \budalg. The point of this experiment is threefold: first, it shows that the first solution is very similar to that found by \cart (here we believe that the only difference is to use the feature yielding the minimum error instead of the feature with minimum Gini impurity for the deepest feature tests); second, this tree
 is found extremely quickly, and there is no scaling issue with respect to the depth of the tree or with respect to the size of the dataset; third, even for large datasets and deep trees, the accuracy of the initial classifier can be significantly improved given a reasonable computation time.
 
 %Moreover, although we would need larger data sets to be confident about that, it seems that our algorithm is faster than \cart to find this first decision tree. %One can conjecture that \cart uses more sophisticated heuristic choices to explain these two observations.
@@ -1047,16 +1047,16 @@ We can see in those graphs that \murtree finds an initial tree extremely quickly
 
 
 
-\begin{figure}
-	\subfloat[depth=3]{\input{src/tables/scerror3.tex}}
-	\subfloat[depth=5]{\input{src/tables/scerror5.tex}}
-	\subfloat[depth=7]{\input{src/tables/scerror7.tex}}
-
-	\subfloat[depth=8]{\input{src/tables/scerror8.tex}}
-	\subfloat[depth=9]{\input{src/tables/scerror9.tex}}
-	\subfloat[depth=10]{\input{src/tables/scerror10.tex}}
-	\caption{\label{fig:cactus}Accuracy over time}
-\end{figure}
+% \begin{figure}
+% 	\subfloat[depth=3]{\input{src/tables/scerror3.tex}}
+% 	\subfloat[depth=5]{\input{src/tables/scerror5.tex}}
+% 	\subfloat[depth=7]{\input{src/tables/scerror7.tex}}
+%
+% 	\subfloat[depth=8]{\input{src/tables/scerror8.tex}}
+% 	\subfloat[depth=9]{\input{src/tables/scerror9.tex}}
+% 	\subfloat[depth=10]{\input{src/tables/scerror10.tex}}
+% 	\caption{\label{fig:cactus}Accuracy over time}
+% \end{figure}
 
 \bibliographystyle{plain}
 \bibliography{src/references}
