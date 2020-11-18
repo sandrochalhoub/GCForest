@@ -15,10 +15,11 @@
 \usepackage{fp}
 \usepackage{subfig}
 \usetikzlibrary{arrows,shadows,fit,calc,positioning,decorations.pathreplacing,matrix,shapes,petri,topaths,fadings,mindmap,backgrounds,shapes.geometric}
-\usepackage{geometry}
+% \usepackage{geometry}
 \usepackage{xifthen}
 \usepackage{rotating}
 \usepackage{forest}
+\usepackage{relsize}
 
 
 % \newgeometry{bottom=2cm,top=2cm}
@@ -39,7 +40,7 @@
 
 
 \newcommand\cactus[5]{%%
-\begin{tikzpicture}[scale=.5]
+\begin{tikzpicture}[scale=.46]
 	\begin{axis}[scatter/classes={
 		a={mark=square*,blue!50,draw=blue!50!black},%%
 		b={mark=triangle*,red!50,draw=red!50!black},%%
@@ -183,7 +184,7 @@
 
 \section{Introduction}
 
-Ever since the seminal work from Quinlan on using entropy as a heuristic to compute decision classifiers~\cite{10.1023/A:1022643204877,c4-5}, the question of computing \emph{optimal} decision trees has been alive, and recently a number of algorithms have been introduced for that purpose.
+Ever since the pionneering work decision tree classifiers~\cite{breiman1984classification,10.1023/A:1022643204877}, the question of computing \emph{optimal} decision trees has been alive, and recently a number of algorithms have been introduced for that purpose.
 Several variants and criteria have been proposed. %, e.g. computing the perfect classifier of minimum size~\cite{}, 
 Among those, computing a depth-bounded decision tree of maximum accuracy is often the preferred criterion~\cite{bertsimas2017optimal,hu2019optimal,dl8,verhaeghe2019learning}, because while being straightforward, it captures many desired features: it is resilient to noisy data, and shallow trees are both easier to explain and less prone to overfitting.
 
@@ -203,12 +204,12 @@ Despite the vast offer of exact methods that can potentially provide optimal dec
 \medskip
 
 In this paper we introduce a relatively \emph{simple} algorithm, that is as memory and time efficient as heuristics, and yet more efficient than most exact methods on most datasets. 
-This algorithm can be seen as an instance of the framework introduced in \cite{DBLP:journals/corr/abs-2007-12652}, tuned to have the best scalability and anytime behavior as possible.
+This algorithm can be seen as an instance of the more general framework introduced in \cite{DBLP:journals/corr/abs-2007-12652}, however tuned to have the best scalability to large trees and the best anytime behavior as possible.
 
 In a nutshell, this algorithm (\budalg) emulates the dynamic programming algorithm \dleight~\cite{dl8}, while expending non-terminal branches (a.k.a ``buds'') first. As a result, this algorithm is in a sense strictly better than both the standard dynamic programming approach (because it is anytime and at least as fast) and than classic heuristics (because it emulates them during search, without significant overhead).
 %but explores the search space so as to improve its anytime behaviour.
-Our experimental results show that it outperforms the state of the art, to the exception of \murtree~\cite{DBLP:journals/corr/abs-2007-12652} on relatively shallow trees (typically for maximum depth 4 or 5), for which this its more sophisticated (albeit complex) algorithmic features pay off.
-
+Our experimental results show that it outperforms the state of the art, to the exception of \murtree~\cite{DBLP:journals/corr/abs-2007-12652} on relatively shallow trees (typically for maximum depth up to 4), for which this its more sophisticated (albeit complex) algorithmic features can pay off.
+In particular, on datasets that \dleight can tackle, \budalg can always find classifiers at least as accurate faster, and when the former can prove optimality, the latter does it orders of magnitude faster.
 
 %
 %
@@ -306,13 +307,15 @@ The solver DL8.5 is a dynamic programming algorithm. It relies on the observatio
 	\end{algorithm}
 	
 	
-	Let $\numex = |\posex| + |\negex|$, $\numfeat = |\features|$, with the maximum depth $\mdepth \ll \numfeat$. 
+	Let $\numex = |\posex| + |\negex|$, $\numfeat = |\features|$, and let $\mdepth$ be the maximum depth.
+	We can safely assume $\mdepth \leq \numfeat$ (otherwise all features can be tested on every branch) and $\mdepth \leq \log \numex$ (otherwise we could have one distinct branch per datapoint), and it is often assumed that
+	 $\mdepth \ll \numfeat$ and $\mdepth \ll \log \numex$. 
 	%The number of recursive calls for Algorithm~\ref{alg:dynprog} is $\Theta(2^{\mdepth-1}{\numfeat \choose \mdepth})$, to explore at most ${\numfeat \choose \mdepth}$ combinations of features for at most $2^{\mdepth-1}$ branches. 
 	%The number of recursive calls for Algorithm~\ref{alg:dynprog} is $\Theta(2^{\mdepth}{\numfeat \choose \mdepth})$, to explore $\Theta({\numfeat \choose \mdepth})$ combinations of features for $\Theta(2^{\mdepth})$ branches. 
 	The number of recursive calls for Algorithm~\ref{alg:dynprog} is $\Theta((2\numfeat)^{\mdepth})$. 
 	Moreover, at each call, the data set must be split into two subsets. However, this splitting procedure can be done in time $\Theta(\numex)$ amortised over a given level of a particular decision tree, since the data sets associated to branches up to a given level form a partition of the original data set.
 	Therefore, since Algorithm~\ref{alg:dynprog} independently explores $\Theta({\numfeat \choose \mdepth})$ sets of branches of depth $\mdepth$, it runs in
-	$\Theta((\numex+2^\mdepth){\numfeat \choose \mdepth})$ time (hence $O((\numex+2^\mdepth)\numfeat^\mdepth)$ time, since we suppose $\mdepth \ll \numfeat$).
+	$\Theta((\numex+2^\mdepth){\numfeat \choose \mdepth})$ time (hence $O(\numex\numfeat^\mdepth)$ time, since we suppose $\mdepth \ll \numfeat$ and $\mdepth \ll \log \numex$).
 	
 	Note that this is a significant improvement with respect to the $\Theta(\numfeat^{2^{\mdepth}})$ trees (with redundant branches) explored by a brute-force algorithm.
 	 %
@@ -381,7 +384,7 @@ Notice that to simplify the pseudo-code, we use branches to directly index array
 			
 			\medskip
 			
-			The key difference between Algorithms~\ref{alg:dynprog} and \ref{alg:bud} is the order in which branches are explored (see Figure~\ref{fig:searchtree}). In particular, \dynprog must complete the first recursive call before outputing a full tree. Therefore, the computation time before to find a first solution is $\Theta((\numex+2^{\mdepth-1}){\numfeat-1 \choose \mdepth-1})$, that is $O((\numex+2^{\mdepth-1})(\numfeat-1)^{\mdepth-1})$ time. On the other hand, \budalg finds the first tree in $\Theta(2^{\mdepth})$ time.
+			The key difference between Algorithms~\ref{alg:dynprog} and \ref{alg:bud} is the order in which branches are explored (see Figure~\ref{fig:searchtree}). In particular, \dynprog must complete the first recursive call before outputing a full tree. Therefore, the computation time before to find a first tree is $\Theta((\numex+2^{\mdepth-1}){\numfeat-1 \choose \mdepth-1})$, that is $O(\numex(\numfeat-1)^{\mdepth-1})$ time. On the other hand, \budalg finds a first tree in $\Theta(2^{\mdepth}+\numex\numfeat) = \Theta(\numex\numfeat)$ time.
 			
 			
 		
@@ -848,7 +851,7 @@ We discuss here only improvements that have an impact on the efficiency of the a
 
 \subsection{Heuristic Ordering}
 
-In order to quickly find highly accurate trees, it is important to follow a heuristic. We experimentd with three heuristics based on scores to minimize: \emph{error}, \emph{entropy}~\cite{quinlan86}, and \emph{Gini impurity}~\ref{}. 
+In order to quickly find highly accurate trees, it is important to follow a heuristic. We experimented with three heuristics based on scores to minimize: \emph{error}, \emph{entropy}~\cite{10.1023/A:1022643204877}, and \emph{Gini impurity}~\cite{breiman1984classification}. 
 Each of these heuristics associate a score to a feature $\afeat$ at a branch $\abranch$:
 \begin{eqnarray}
 	\textrm{error}: & \error[\abranch,\afeat] \\
@@ -898,7 +901,7 @@ The procedure $\dominated{\abranch}$ can therefore simply check, for all parent 
 
 \medskip
 
-This reasoning will be more effective when good upper bounds are found early, hence the feature ordering heuristic discussed in the previous section has an impact. Moreover, the order in which buds are expended (the choice of branch in Line\ref{line:budchoice}) has an impact as well. We found that the simplest branch selection strategy was also the one giving the best results: we expend first the branch that was inserted into \bud first (i.e., \bud is \emph{FIFO}). One possible explanation is that by avoiding to unnecessarily ``jump'' to different parts of the decision tree, this strategy promotes optimizing sibling subtrees first, and therefore, deeper tree earlier.
+This reasoning will be more effective when good upper bounds are found early, hence the feature ordering heuristic discussed in the previous section has an impact. Moreover, the order in which buds are expended (the choice of branch in Line\ref{line:budchoice}) has an impact as well. We found that the simplest branch selection strategy was also the one giving the best results: we expend first the branch that was inserted into \bud\ first (i.e., \bud\ is \emph{FIFO}). One possible explanation is that by avoiding to unnecessarily ``jump'' to different parts of the decision tree, this strategy promotes optimizing sibling subtrees first, and therefore, deeper tree earlier.
 
 % intuitivelly, one want to optimize the branches of the decision trees with the largest error first, in order to benefit from larger lower bounds earlier. To this end, it
 
@@ -943,15 +946,18 @@ We can use the weighted version to handle noisy data, by merging duplicated data
 Let $\weight_{\bot}$ (resp. $\weight_{\top}$) denote the number of occurrences of $x$ in $\setex{\bot}$ (resp. $\setex{\top}$). We use the weight function $\weight[x] = |\weight_{\bot}(x) - \weight_{\top}(x)|$. Then, for any datapoint $x$, we remove all but one of its occurrences, in $\setex{\bot}$ if $\weight_{\bot}>\weight_{\top}$, in $\setex{\top}$ if $\weight_{\top}>\weight_{\bot}$, and suppress it completely if $\weight_{\top}=\weight_{\bot}$.
 The reported error will then need to be offset by the number of pair of suppressed inconsistant datapoints, that is:
 $
-\sum\limits_{x \in \allex}\min(\weight_{\bot}(x), weight_{\top}(x))
+\sum_{x \in \allex}\min(\weight_{\bot}(x), \weight_{\top}(x))
 $.
 Reducing the number of datapoints in the dataset has a non-null, although tiny impact on efficiency. However, suppressing inconsistent datapoints is very important. In particular, proving optimality when the minimum error is positive basically requires to exhaust the search space and is therefore extremely costly. On the other hand, when there exists a perfect tree within the maximum depth, we can stop as soon as we find it. This preprocessing allows to benefit from that when we find a tree whose error is equal to the number of pair of inconsistent datapoints in the original dataset.
 This preprocessing can be done in $O(\numfeat \numex \log \numex)$ by ordering the datapoints in lexicographic order and then processing them in sequence.
 
 \paragraph{Feature reduction.}
 
-A feature $\afeat$ is redundant if there exists a feature $\afeat'$ such that either: $\forall x \in \allex, \afeat \in x \iff \afeat' \in x$, or $\forall x \in \allex, \afeat \in x \iff \afeat' \in x$. We simply remove such redundant features. 
+A feature $\afeat$ is redundant if there exists a feature $\afeat'$ such that either: $\forall x \in \allex, \afeat \in x \iff \afeat' \in x$, or $\forall x \in \allex, \afeat \in x \iff \afeat' \in x$. We simply remove such redundant features. This can be done by comparing pairs of rows of the dataset via bitset operations, and therefore in time $O(\numex\numfeat^2)$.
+
 This may appear very naive, however, it turns out that the binarization techniques (one-hot encoding) used to turn general datasets into binary dataset are often not optimized and many redundant features do exist. The number of features ($\numfeat$) has a huge impact on the complexity of the algorithm since the branching factor in the tree representing the search space is $2\numfeat$ (see Figure~\ref{fig:searchtree}).
+
+Moreover, at every branch, ``informationless'' features (i.e., features $\afeat$ such that $(\forall x \in \posex(\abranch) \afeat \in x) \iff (\forall x \in \negex(\abranch) \afeat \in x)$) can be suppressed at no additional cost since this can be detected when computing the feature ordering criterion.
 
 
 
@@ -970,8 +976,10 @@ The raw experimental data from these experiments can be found in the Appendix.
 
 \subsection{Optimizing trees}
 
-We first compare our algorithm (\budalg) to the state-of-the-art algorithms \murtree and \dleight, for computing optimal trees and proving optimality. We therefore report the ratio of optimality proofs (opt.), the average accuracy (acc.) as well as the average cpu time to either prove optimality or find the best solution.
-As \dleight does not provide a solution for every dataset (for which it went over the memory limit), we provide instead the average relative difference in accuracy w.r.t. \budalg, however, only for the datasets where a decision tree was found. Similarly, we report the average cpu time ratio w.r.t. \budalg, however only for instances which were proven optimal by both algorithms.
+We first compare our algorithm (\budalg) to the state-of-the-art algorithms \murtree and \dleight, for computing optimal trees and proving optimality. We therefore report in Table~\ref{tab:summaryacc} the average error (error), the average accuracy (acc.), 
+the ratio of optimality proofs (opt.), as well as the average cpu time (cpu) to either prove optimality or find the best solution.
+As \dleight does not provide a solution for every dataset (on some instance it goes over the memory limit of 50GB), we provide the number of datasets for which a solution was returned (sol.). Moreover, 
+instead of absolute values, we provide the average relative difference in error and accuracy w.r.t. \budalg, however, and only for the datasets where a decision tree was found. Similarly, we report the average cpu time ratio w.r.t. \budalg, however, only for instances which were proven optimal by both algorithms\footnote{every instance proven optimal by \dleight is also proven optimal by \budalg and \murtree}.
 
 
 % We report in Table~\ref{tab:summaryacc} data averaged over the 47 datasets described above, for
@@ -996,10 +1004,10 @@ As \dleight does not provide a solution for every dataset (for which it went ove
 
 \begin{table}[htbp]
 \begin{center}
-\begin{normalsize}
-\tabcolsep=3.7pt
+\begin{footnotesize}
+\tabcolsep=1.5pt
 \input{src/tables/summaryacc.tex}
-\end{normalsize}
+\end{footnotesize}
 \end{center}
 \caption{\label{tab:summaryacc} Comparison with the state of the art: computing optimal trees}
 \end{table}
@@ -1008,61 +1016,68 @@ As \dleight does not provide a solution for every dataset (for which it went ove
 \subsection{Computing deep classifiers}
 
 Next, we shift our focus to how fast can we obtain accurate trees and how fast can we improve the accuracy over basic solutions found by heuristics.
-Therefore to have a baseline, we use a widely used heuristic: \cart (we used its implementation in scikit-learn).
-Here we report the average error after a given period of time in Table~\ref{tab:summaryspeed}.
+Therefore, in order to have a baseline, we use a well known heuristic: \cart (we ran its implementation in scikit-learn).
+Here we report the average error after a given period of time (3 seconds, 10 seconds, 1 minute or 5 minutes) in Table~\ref{tab:summaryspeed}.
 
 
 \medskip
 
-We can see that the first solution found by our algorithm has comparable accuracy (actually, often slightly better) to the one found by \cart. %Moreover, although we would need larger data sets to be confident about that, it seems that our algorithm is faster than \cart to find this first decision tree. %One can conjecture that \cart uses more sophisticated heuristic choices to explain these two observations.
+We can see that the first solution found by our algorithm has comparable accuracy (actually, often slightly better) to the one found by \cart. The implementation of \cart in scikit-learn does not seem to be very efficient. However, this is not so relevant as it is clear that one greedy run of the heuristic can be implemented to ba as fast as the first dive of \budalg. The point of this experiment is threefold: first, the first solution is very similar to that found by \cart (here we believe that the only difference is to use the feature yielding the minimum error instead of the feature with minimum Gini impurity for the deepest feature tests); second, this tree
+is found extremely quickly, and there is no scaling issue with respect to the depth of the tree or with respect to the size of the dataset; third, even for large datasets and deep trees, the accuracy of the initial classifier can be significantly improved given a reasonable computation time.
 
-Then, in most cases, it is possible to improve the first solution significantly within a few seconds. Notice that for larger depth, improving the initial solution is harder and the 3s time limit is comparatively tighter than for smaller trees, so the gain of \budalg over \cart is more sensible for small trees.
+%Moreover, although we would need larger data sets to be confident about that, it seems that our algorithm is faster than \cart to find this first decision tree. %One can conjecture that \cart uses more sophisticated heuristic choices to explain these two observations.
+
+%Then, in most cases, it is possible to improve the first solution significantly within a few seconds. Notice that for larger depth, improving the initial solution is harder and the 3s time limit is comparatively tighter than for smaller trees, so the gain of \budalg over \cart is more sensible for small trees.
 
 
 \begin{table}[htbp]
 \begin{center}
-\begin{normalsize}
-\tabcolsep=3pt
+\begin{footnotesize}
+\tabcolsep=1.5pt
 \input{src/tables/summaryspeed.tex}
-\end{normalsize}
+\end{footnotesize}
 \end{center}
-\caption{\label{tab:summary} Comparison with state the of the art: computing accurate trees}
+\caption{\label{tab:summaryspeed} Comparison with state the of the art: computing accurate trees}
 \end{table}
 
 
-Figure~\ref{fig:cactus} reports the evolution of accuracy over time, giving a good view of the difference between \murtree and \budalg. The accuracy of the tree returned by \cart is given for reference. 
+Figure~\ref{fig:cactus} reports the evolution of accuracy over time, giving a good view of the difference between \murtree and \budalg during search. The accuracy of the tree returned by \cart is given for reference. 
+We can see in those graphs that \murtree finds an initial tree extremely quickly, although with very low accuracy. This is because \murtree show progress even when the tree is not complete, i.e., the first solution is always a single node with the most promising feature. We can see in Table~\ref{tab:summaryspeed} that this is indeed always the same feature, irrespective of the maximum depth.
 
 
 
-% \begin{figure}
-% 	\subfloat[depth=3]{\input{src/tables/scerror3.tex}}
-% 	\subfloat[depth=5]{\input{src/tables/scerror5.tex}}
-% 	\subfloat[depth=7]{\input{src/tables/scerror7.tex}}
-%
-% 	\subfloat[depth=8]{\input{src/tables/scerror8.tex}}
-% 	\subfloat[depth=9]{\input{src/tables/scerror9.tex}}
-% 	\subfloat[depth=10]{\input{src/tables/scerror10.tex}}
-% 	\caption{\label{fig:cactus}Accuracy over time}
-% \end{figure}
+
+\begin{figure}
+	\subfloat[depth=3]{\input{src/tables/scerror3.tex}}
+	\subfloat[depth=5]{\input{src/tables/scerror5.tex}}
+	\subfloat[depth=7]{\input{src/tables/scerror7.tex}}
+
+	\subfloat[depth=8]{\input{src/tables/scerror8.tex}}
+	\subfloat[depth=9]{\input{src/tables/scerror9.tex}}
+	\subfloat[depth=10]{\input{src/tables/scerror10.tex}}
+	\caption{\label{fig:cactus}Accuracy over time}
+\end{figure}
 
 \bibliographystyle{plain}
 \bibliography{src/references}
 
 \clearpage
 
-\newgeometry{bottom=2cm,top=2cm,margin=1cm}
+% \newgeometry{bottom=2cm,top=2cm,margin=1cm}
 
 \section*{Appendix}
 
-\begin{table}[htbp]
-\begin{center}
-\begin{footnotesize}
-\tabcolsep=2pt
-\input{src/tables/allopt3.tex}
-\end{footnotesize}
-\end{center}
-\caption{\label{tab:all3} Comparison with state of the art: depth 3}
-\end{table}
+\hspace*{-1.5cm}%
+\begin{table}[htbp]%
+\begin{center}%
+\begin{footnotesize}%
+\tabcolsep=2pt%
+\input{src/tables/allopt3.tex}%
+\end{footnotesize}%
+\end{center}%
+\caption{\label{tab:all3} Comparison with state of the art: depth 3}%
+\end{table}%
+\hspace*{-1.5cm}%
 
 
 \begin{table}[htbp]
