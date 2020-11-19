@@ -1,0 +1,17 @@
+\begin{tabular}{lrrrrrrrrrrrr}
+\toprule
+\multirow{2}{*}{$\mdepth$}&  \multicolumn{3}{c}{\budalg} & \multicolumn{3}{c}{\noheuristic} & \multicolumn{3}{c}{\nopreprocessing} & \multicolumn{3}{c}{\nolb}\\
+\cmidrule(rr){2-4}\cmidrule(rr){5-7}\cmidrule(rr){8-10}\cmidrule(rr){11-13}
+& \multicolumn{1}{c}{error} & \multicolumn{1}{c}{opt.} & \multicolumn{1}{c}{cpu} & \multicolumn{1}{c}{error} & \multicolumn{1}{c}{opt.} & \multicolumn{1}{c}{cpu$^*$} & \multicolumn{1}{c}{error} & \multicolumn{1}{c}{opt.} & \multicolumn{1}{c}{cpu$^*$} & \multicolumn{1}{c}{error} & \multicolumn{1}{c}{opt.} & \multicolumn{1}{c}{cpu$^*$} \\
+\midrule
+
+\texttt{3} & 1328 & 0.93 & 465 & \textbf{1326} & 0.93 & $\mathsmaller{\times}$0.84 & 1328 & 0.93 & $\mathsmaller{\times}$2.92 & 1328 & 0.93 & $\mathsmaller{\times}$1.01\\
+\texttt{4} & 1144 & 0.61 & 594 & 1237 & 0.61 & $\mathsmaller{\times}$0.82 & 1140 & 0.54 & $\mathsmaller{\times}$5.15 & \textbf{1140} & 0.61 & $\mathsmaller{\times}$1.08\\
+\texttt{5} & \textbf{1010} & 0.52 & 826 & 1154 & \textbf{0.54} & $\mathsmaller{\times}$1.10 & 1011 & 0.41 & $\mathsmaller{\times}$8.02 & 1010 & 0.52 & $\mathsmaller{\times}$1.23\\
+\texttt{6} & \textbf{889} & 0.41 & 1139 & 1116 & 0.41 & $\mathsmaller{\times}$1789 & 891 & 0.35 & $\mathsmaller{\times}$7.52 & 889 & 0.41 & $\mathsmaller{\times}$1.28\\
+\texttt{7} & \textbf{789} & 0.39 & 1215 & 1094 & 0.39 & $\mathsmaller{\times}$147 & 790 & 0.35 & $\mathsmaller{\times}$13 & 790 & 0.39 & $\mathsmaller{\times}$1.40\\
+\texttt{8} & 704 & 0.43 & 792 & 1069 & 0.41 & $\mathsmaller{\times}$810 & \textbf{704} & 0.33 & $\mathsmaller{\times}$2.08 & 704 & 0.43 & $\mathsmaller{\times}$1.42\\
+\texttt{9} & \textbf{637} & 0.43 & 788 & 1058 & 0.41 & $\mathsmaller{\times}$370 & 641 & 0.35 & $\mathsmaller{\times}$2.68 & 637 & 0.43 & $\mathsmaller{\times}$1.36\\
+\texttt{10} & \textbf{575} & \textbf{0.52} & 678 & 1005 & 0.46 & $\mathsmaller{\times}$509 & 576 & 0.39 & $\mathsmaller{\times}$3.24 & 575 & 0.50 & $\mathsmaller{\times}$1.14\\
+\bottomrule
+\end{tabular}

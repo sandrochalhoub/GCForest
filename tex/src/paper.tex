@@ -957,7 +957,7 @@ This preprocessing can be done in $O(\numfeat \numex \log \numex)$ by ordering t
 
 \paragraph{Feature reduction.}
 
-A feature $\afeat$ is redundant if there exists a feature $\afeat'$ such that either: $\forall x \in \allex, \afeat \in x \iff \afeat' \in x$, or $\forall x \in \allex, \afeat \in x \iff \afeat' \in x$. We simply remove such redundant features. This can be done by comparing pairs of rows of the dataset via bitset operations, and therefore in time $O(\numex\numfeat^2)$.
+A feature $\afeat$ is redundant if there exists a feature $\afeat'$ such that either: $\forall x \in \allex, \afeat \in x \iff \afeat' \in x$, or $\forall x \in \allex, \afeat \in x \iff \afeat' \not\in x$. We simply remove such redundant features. This can be done by comparing pairs of rows of the dataset via bitset operations, and therefore in time $O(\numex\numfeat^2)$.
 
 This may appear very naive, however, it turns out that the binarization techniques (one-hot encoding) used to turn general datasets into binary dataset are often not optimized and many redundant features do exist. The number of features ($\numfeat$) has a huge impact on the complexity of the algorithm since the branching factor in the tree representing the search space is $2\numfeat$ (see Figure~\ref{fig:searchtree}).
 
@@ -1009,7 +1009,7 @@ instead of absolute values, we provide the average relative difference in error 
 \begin{table}[htbp]
 \begin{center}
 \begin{footnotesize}
-\tabcolsep=1.5pt
+\tabcolsep=1.7pt
 \input{src/tables/summaryacc.tex}
 \end{footnotesize}
 \end{center}
@@ -1037,7 +1037,7 @@ is found extremely quickly, and there is no scaling issue with respect to the de
 \begin{table}[htbp]
 \begin{center}
 \begin{footnotesize}
-\tabcolsep=1.5pt
+\tabcolsep=1.8pt
 \input{src/tables/summaryspeed.tex}
 \end{footnotesize}
 \end{center}
@@ -1051,28 +1051,38 @@ We can see in those graphs that \murtree finds an initial tree extremely quickly
 
 
 
-% \begin{figure}
-% 	\subfloat[depth=3]{\input{src/tables/scerror3.tex}}
-% 	\subfloat[depth=5]{\input{src/tables/scerror5.tex}}
-% 	\subfloat[depth=7]{\input{src/tables/scerror7.tex}}
-%
-% 	\subfloat[depth=8]{\input{src/tables/scerror8.tex}}
-% 	\subfloat[depth=9]{\input{src/tables/scerror9.tex}}
-% 	\subfloat[depth=10]{\input{src/tables/scerror10.tex}}
-% 	\caption{\label{fig:cactus}Accuracy over time}
-% \end{figure}
+\begin{figure}
+	\subfloat[depth=3]{\input{src/tables/scerror3.tex}}
+	\subfloat[depth=5]{\input{src/tables/scerror5.tex}}
+	\subfloat[depth=7]{\input{src/tables/scerror7.tex}}
+
+	\subfloat[depth=8]{\input{src/tables/scerror8.tex}}
+	\subfloat[depth=9]{\input{src/tables/scerror9.tex}}
+	\subfloat[depth=10]{\input{src/tables/scerror10.tex}}
+	\caption{\label{fig:cactus}Accuracy over time}
+\end{figure}
 
 \subsection{Factor analysis}
 
 \begin{table}[htbp]
 \begin{center}
 \begin{footnotesize}
-\tabcolsep=1.5pt
+\tabcolsep=2pt
 \input{src/tables/factorbfs.tex}
 \end{footnotesize}
 \end{center}
 \caption{\label{tab:factor} Factor analysis}
 \end{table}
+
+% \begin{table}[htbp]
+% \begin{center}
+% \begin{footnotesize}
+% \tabcolsep=1.5pt
+% \input{src/tables/factormur.tex}
+% \end{footnotesize}
+% \end{center}
+% \caption{\label{tab:factor} Factor analysis}
+% \end{table}
 
 
 \bibliographystyle{plain}
