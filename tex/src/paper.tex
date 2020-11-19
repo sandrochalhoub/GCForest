@@ -159,6 +159,10 @@
 	\SetKwFunction{dominated}{Dominated}
 	
 	
+	\newcommand{\nolb}[0]{No lower bound}
+	\newcommand{\nopreprocessing}[0]{No preprocessing}
+	\newcommand{\noheuristic}[0]{No heuristic}
+	
 
 \DontPrintSemicolon
 
@@ -1047,16 +1051,29 @@ We can see in those graphs that \murtree finds an initial tree extremely quickly
 
 
 
-\begin{figure}
-	\subfloat[depth=3]{\input{src/tables/scerror3.tex}}
-	\subfloat[depth=5]{\input{src/tables/scerror5.tex}}
-	\subfloat[depth=7]{\input{src/tables/scerror7.tex}}
+% \begin{figure}
+% 	\subfloat[depth=3]{\input{src/tables/scerror3.tex}}
+% 	\subfloat[depth=5]{\input{src/tables/scerror5.tex}}
+% 	\subfloat[depth=7]{\input{src/tables/scerror7.tex}}
+%
+% 	\subfloat[depth=8]{\input{src/tables/scerror8.tex}}
+% 	\subfloat[depth=9]{\input{src/tables/scerror9.tex}}
+% 	\subfloat[depth=10]{\input{src/tables/scerror10.tex}}
+% 	\caption{\label{fig:cactus}Accuracy over time}
+% \end{figure}
 
-	\subfloat[depth=8]{\input{src/tables/scerror8.tex}}
-	\subfloat[depth=9]{\input{src/tables/scerror9.tex}}
-	\subfloat[depth=10]{\input{src/tables/scerror10.tex}}
-	\caption{\label{fig:cactus}Accuracy over time}
-\end{figure}
+\subsection{Factor analysis}
+
+\begin{table}[htbp]
+\begin{center}
+\begin{footnotesize}
+\tabcolsep=1.5pt
+\input{src/tables/factorbfs.tex}
+\end{footnotesize}
+\end{center}
+\caption{\label{tab:factor} Factor analysis}
+\end{table}
+
 
 \bibliographystyle{plain}
 \bibliography{src/references}
@@ -1067,7 +1084,6 @@ We can see in those graphs that \murtree finds an initial tree extremely quickly
 
 \section*{Appendix}
 
-\hspace*{-1.5cm}%
 \begin{table}[htbp]%
 \begin{center}%
 \begin{footnotesize}%
@@ -1077,8 +1093,6 @@ We can see in those graphs that \murtree finds an initial tree extremely quickly
 \end{center}%
 \caption{\label{tab:all3} Comparison with state of the art: depth 3}%
 \end{table}%
-\hspace*{-1.5cm}%
-
 
 \begin{table}[htbp]
 \begin{center}
@@ -1149,6 +1163,89 @@ We can see in those graphs that \murtree finds an initial tree extremely quickly
 \end{footnotesize}
 \end{center}
 \caption{\label{tab:all10} Comparison with state of the art: depth 10}
+\end{table}
+
+
+
+
+\begin{table}[htbp]%
+\begin{center}%
+\begin{footnotesize}%
+\tabcolsep=2pt%
+\input{src/tables/allfact3.tex}%
+\end{footnotesize}%
+\end{center}%
+\caption{\label{tab:fact3} Factor analysis: depth 3}%
+\end{table}%
+
+\begin{table}[htbp]
+\begin{center}
+\begin{footnotesize}
+\tabcolsep=2pt
+\input{src/tables/allfact4.tex}
+\end{footnotesize}
+\end{center}
+\caption{\label{tab:fact4} Factor analysis: depth 4}
+\end{table}
+
+\begin{table}[htbp]
+\begin{center}
+\begin{footnotesize}
+\tabcolsep=2pt
+\input{src/tables/allfact5.tex}
+\end{footnotesize}
+\end{center}
+\caption{\label{tab:fact5} Factor analysis: depth 5}
+\end{table}
+
+\begin{table}[htbp]
+\begin{center}
+\begin{footnotesize}
+\tabcolsep=2pt
+\input{src/tables/allfact6.tex}
+\end{footnotesize}
+\end{center}
+\caption{\label{tab:fact6} Factor analysis: depth 6}
+\end{table}
+
+\begin{table}[htbp]
+\begin{center}
+\begin{footnotesize}
+\tabcolsep=2pt
+\input{src/tables/allfact7.tex}
+\end{footnotesize}
+\end{center}
+\caption{\label{tab:fact7} Factor analysis: depth 7}
+\end{table}
+
+\begin{table}[htbp]
+\begin{center}
+\begin{footnotesize}
+\tabcolsep=2pt
+\input{src/tables/allfact8.tex}
+\end{footnotesize}
+\end{center}
+\caption{\label{tab:fact8} Factor analysis: depth 8}
+\end{table}
+
+\begin{table}[htbp]
+\begin{center}
+\begin{footnotesize}
+\tabcolsep=2pt
+\input{src/tables/allfact9.tex}
+\end{footnotesize}
+\end{center}
+\caption{\label{tab:fact9} Factor analysis: depth 9}
+\end{table}
+
+\begin{table}[htbp]
+\begin{center}
+\begin{footnotesize}
+\tabcolsep=2pt
+\input{src/tables/allfact10.tex}
+\end{footnotesize}
+\end{center}
+\caption{\label{tab:fact10} Factor analysis: depth 10}
 \end{table}
 
 

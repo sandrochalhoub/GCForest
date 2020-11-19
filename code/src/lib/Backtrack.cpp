@@ -609,6 +609,11 @@ void BacktrackingAlgorithm<ErrorPolicy, E_t>::sort_features(const int node) {
       swap(*feature[node], *min_error_f);
     }
   }
+  //
+  //
+  // for(auto f{feature[node]}; f!=end_feature[node]; ++f) {
+  // 	cout << setw(4) << *f << " " << f_gini[*f] << endl;
+  // }
 }
 
 template <template<typename> class ErrorPolicy, typename E_t>
@@ -1253,12 +1258,43 @@ void BacktrackingAlgorithm<ErrorPolicy, E_t>::initialise_search() {
       if (feature_set[fi] and not max_entropy(0, fi)) {
         relevant_features.push_back(fi);
 
-        for (int fj{fi + 1}; fj < num_feature; ++fj) {
-          if (equal_feature(fi, fj))
-            feature_set.reset(fj);
-        }
+        if (options.preprocessing)
+          for (int fj{fi + 1}; fj < num_feature; ++fj) {
+            if (equal_feature(fi, fj)) {
+              feature_set.reset(fj);
+            }
+          }
       }
     }
+
+    // if (options.preprocessing) {
+    //   sort(relevant_features.begin(), relevant_features.end(),
+    //        [&](const int a, const int b) {
+    //          auto pa{get_feature_frequency(1, 0, a)};
+    //          auto pb{get_feature_frequency(1, 0, b)};
+    //          auto na{get_feature_frequency(0, 0, a)};
+    //          auto nb{get_feature_frequency(0, 0, b)};
+    //          if (pa < pb)
+    //            return true;
+    //          if (pa == pb) {
+    //            if (na < nb)
+    //              return true;
+    //            if (na == nb) {
+    //              if (reverse_dataset[0][a] < reverse_dataset[0][b])
+    //                return true;
+    //              if (reverse_dataset[0][a] > reverse_dataset[0][b])
+    //                return false;
+    //              return (reverse_dataset[1][a] <= reverse_dataset[0][b]);
+    //            }
+    //          }
+    //          return false;
+    //        });
+    //
+    //   for (int fi{1}; fi < num_feature; ++fi) {
+    //     if (equal_feature(relevant_features[fi - 1], relevant_features[fi]))
+    //       feature_set.reset(relevant_features[fi]);
+    //   }
+    // }
 
     if (options.verbosity >= DTOptions::NORMAL)
       cout << "d feature=" << num_feature << " feature_reduction="
@@ -1623,6 +1659,14 @@ double BacktrackingAlgorithm<ErrorPolicy, E_t>::gini(const int node, const int f
   double p[2];           // = {0,0};
   double gini[2];        // = {0,0};
 
+  // for (auto x{0}; x < 2; ++x) {
+  //
+  //   for (auto y{0}; y < 2; ++y)
+  //     cout << static_cast<double>(get_feature_frequency(y, node, truef[x]))
+  //          << " ";
+  // }
+  // cout << endl;
+
   // conditional to value x for feature
   for (auto x{0}; x < 2; ++x) {
 
@@ -1641,8 +1685,58 @@ double BacktrackingAlgorithm<ErrorPolicy, E_t>::gini(const int node, const int f
       gini[x] -= p[y] * p[y];
   }
 
+  // cout << feature << " " << ((gini[0] / (branch_size[0] * branch_size[0])) - 1)
+  //      << endl
+  //      << ((gini[1] / (branch_size[1] * branch_size[1])) - 1) << endl;
+
   return ((gini[1] / branch_size[1]) + (gini[0] / branch_size[0]));
 }
+
+// template <template<typename> class ErrorPolicy, typename E_t>
+// double BacktrackingAlgorithm<ErrorPolicy, E_t>::gini(const int node, const
+// int feature) {
+//   int not_feature = (feature + num_feature);
+//   int truef[2] = {not_feature, feature};
+//
+//   double branch_size[2]; // = {0,0};
+//   double p[2];           // = {0,0};
+//   double gini[2];        // = {0,0};
+//
+// 	//   for (auto x{0}; x < 2; ++x) {
+// 	//
+// 	//     for (auto y{0}; y < 2; ++y)
+// 	//       cout << static_cast<double>(get_feature_frequency(y, node, truef[x]))
+// 	//            << " ";
+// 	//   }
+// 	//   cout << endl;
+// 	//
+// 	// cout << feature << " " ;
+//
+//   // conditional to value x for feature
+//   for (auto x{0}; x < 2; ++x) {
+//
+//     for (auto y{0}; y < 2; ++y)
+//       p[y] = static_cast<double>(
+//           get_feature_frequency(y, node,
+//                                 truef[x])); // how many class-i samples if f=x
+//
+//     // number of samples falling on this side
+//     branch_size[x] = p[0] + p[1];
+//
+//     // we compute on integers, normalized by n^2
+//     gini[x] = 0;
+// 		// auto tsize{(branch_size[x] * branch_size[x])};
+//
+//     for (auto y{0}; y < 2; ++y)
+//       gini[x] -= (p[y] * p[y]);
+// 		gini[x] /= (branch_size[x] * branch_size[x]);
+//
+// 		// cout << gini[x] << endl;
+//    }
+//
+// 	return 2 - gini[0] - gini[1];
+//   // return ((gini[1] / branch_size[1]) + (gini[0] / branch_size[0]));
+// }
 
 template <template<typename> class ErrorPolicy, typename E_t>
 bool BacktrackingAlgorithm<ErrorPolicy, E_t>::equal_feature(const int f_a, const int f_b) {
