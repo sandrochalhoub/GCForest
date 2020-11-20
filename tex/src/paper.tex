@@ -136,6 +136,9 @@
 \newcommand{\mdepth}[0]{\ensuremath{k}}
 
 
+\newcommand{\grow}[2]{\ensuremath{{#1}\oplus{#2}}}
+
+
 
 	\SetKwFunction{storebest}{storeBest}
 	\SetKwFunction{solution}{solution}
@@ -147,7 +150,7 @@
 	\SetKwFunction{push}{push}
 	\SetKwFunction{prune}{prune}
 	% \SetKwFunction{error}{error}
-	\SetKwFunction{grow}{grow}
+	%\SetKwFunction{grow}{grow}
 	\SetKwFunction{branch}{branch}
 	\SetKwFunction{select}{select\&remove}
 	\SetKwFunction{budalg}{Bud-first-search}
@@ -236,45 +239,50 @@ In particular, on datasets that \dleight can tackle, \budalg can always find cla
 
 \section{Preliminaries}
 
-A binary data set is a pair $\langle \negex,\posex \rangle$ where the negative datapoints $\negex$ (resp. the positive datapoints $\posex$) is a subset of $2^{\features}$. It is associated a label function $\classlabel : 2^{\features} \mapsto \{\top,\bot\}$ such that:
-$$
-\forall \aclass \in \{\top,\bot\}, \forall \ex \in \setex{\aclass}, \classlabel[\ex] = \aclass
-$$
+A binary data set is a pair $\langle \negex,\posex \rangle$ where the negative datapoints $\negex$ (resp. the positive datapoints $\posex$) is a subset of the feature space $\prod_{\afeat \in \features}\{\afeat,\bar{\afeat}\}$.
+% $2^{\features}$.
+% It is associated a label function $\classlabel : 2^{\features} \mapsto \{\top,\bot\}$ such that:
+% $$
+% \forall \aclass \in \{\top,\bot\}, \forall \ex \in \setex{\aclass}, \classlabel[\ex] = \aclass
+% $$
 We refer the union of negative and positive datapoints by $\allex = \negex \cup \posex$.
-%$\top$ and $\bot$ are class labels and 
-A datapoint $\ex$ can equivalently be seen as a subset of $\features$, or as the conjunction:
-$$
-\bigwedge_{\afeat \in \ex}\afeat \wedge \bigwedge_{\afeat \in \features \setminus \ex}\bar{\afeat}
-$$
+% %$\top$ and $\bot$ are class labels and
+% A datapoint $\ex$ can equivalently be seen as a subset of $\features$, or as the conjunction:
+% $$
+% \bigwedge_{\afeat \in \ex}\afeat \wedge \bigwedge_{\afeat \in \features \setminus \ex}\bar{\afeat}
+% $$
 
 
-A \emph{binary decision tree} is a tree whose leaves are labelled with either $\top$ or $\bot$, internal vertices are labelled with features and edges are labelled with either $0$ or $1$.
-
-To a \emph{branch} of a decision tree we can associate the conjunction of features which are on the path from the root to a leaf.
-If the feature vertex is exited by a $1$-edge, the feature is positive in the conjunction, otherwise it is negative.
+A \emph{binary decision tree} is a tree whose leaves are labelled with either $\top$ or $\bot$, internal vertices are labelled with features and the two edges exiting a node labelled with $\afeat$ are respectively labelled with $\afeat$ and $\bar{\afeat}$.
+A \emph{branch} of a decision tree we can therefore be identified to the set of labels on the corresponding edges.
+%To a \emph{branch} of a decision tree we can associate the set of labels on the corresponding edges.
+%conjunction of features which are on the path from the root to a leaf. If the feature vertex is exited by a $1$-edge, the feature is positive in the conjunction, otherwise it is negative.
 
  
 %Moreover, if we also consider data points as conjunctions of features (where every feature appears either positively or negatively),
 %given a branch $\abranch \subseteq \features$ 
 Given a data set $\langle \negex,\posex \rangle$, we can associate a data set $\langle \negex(\abranch),\posex(\abranch) \rangle$ to a branch $\abranch$ where:
 \begin{eqnarray*}
-\negex(\abranch) = \{\ex \mid \ex \in \negex, \ex \models \abranch\}\\
-\posex(\abranch) = \{\ex \mid \ex \in \posex, \ex \models \abranch\}
+\negex(\abranch) = \{\ex \mid \ex \in \negex, \abranch \subseteq \ex\}\\
+\posex(\abranch) = \{\ex \mid \ex \in \posex, \abranch \subseteq \ex\}
 \end{eqnarray*}
 
-We write $\error[\abranch]$ for $\min(|\negex(\abranch)|, |\posex(\abranch)|)$, and $\error[\abranch,\afeat]$ for $\error[\abranch \wedge \afeat] + \error[\abranch \wedge \bar{\afeat}]$.
-A branch \abranch\ is said \emph{pure} iff $\error[\abranch]=0$.
+We write $\grow{\abranch}{\afeat}$ as a shortcut for $\abranch \cup \{\afeat\}$.
+The classification error for branch $\abranch$ is $\error[\abranch]=\min(|\negex(\abranch)|, |\posex(\abranch)|)$
+%Let $\error[\abranch]$ be $\min(|\negex(\abranch)|, |\posex(\abranch)|)$, 
+and we write $\error[\abranch,\afeat]$ for $\error[\grow{\abranch}{\afeat}] + \error[\grow{\abranch}{\bar{\afeat}}]$.
+%A branch \abranch\ is said \emph{pure} iff $\error[\abranch]=0$.
 
 \medskip
 
-Given a binary dataset $\langle \negex,\posex \rangle$ with label function $\classlabel$,
-the \emph{minimum error bounded depth decision tree problem} consists in finding the minimum value $\epsilon$ such
-there exists a binary tree of depth at most $\maxd$ whose sum of error $\error[\abranch]$ for all branches $\abranch$ from the root to the leaves is equal to $\epsilon$.
+Given a binary dataset $\langle \negex,\posex \rangle$ on the features \features, %with label function $\classlabel$,
+the \emph{minimum error bounded depth decision tree problem} consists in finding a binary decision tree with labels in \features\ whose branches have cardinality at most $\mdepth$ and the sum of the classification error ($\error[\abranch]$) of its maximal branches is minimum.
+%of depth at most $\maxd$ whose sum of error $\error[\abranch]$ for all branches $\abranch$ from the root to the leaves is equal to $\epsilon$.
 
 
 \subsection{Dynamic Programming Algorithm}
 
-The solver DL8.5 is a dynamic programming algorithm. It relies on the observation that given a feature test, the two resulting branches are independent subproblems. Algorithm~\ref{alg:dynprog} gives a high level view of DL8.5.
+The solver DL8.5 is a dynamic programming algorithm for the minimum error bounded depth decision tree problem. It relies on the observation that given a feature test, the two resulting branches are independent subproblems. Algorithm~\ref{alg:dynprog} gives a high level view of DL8.5.
 
 
 	% \begin{algorithm}
@@ -287,7 +295,7 @@ The solver DL8.5 is a dynamic programming algorithm. It relies on the observatio
 	% 		}
 	% 		$\best \gets \error[\abranch]$\;
 	% 		\ForEach{$\afeat \in \features \setminus \abranch$} {
-	% 				$\best \gets \min(\best, \dynprog(\negex,\posex, \abranch \wedge \afeat, \maxd-1) + \dynprog(\negex,\posex, \abranch \wedge \bar{\afeat}, \maxd-1))$\;
+	% 				$\best \gets \min(\best, \dynprog(\negex,\posex, \grow{\abranch}{\afeat}, \maxd-1) + \dynprog(\negex,\posex, \grow{\abranch}{\bar{\afeat}}, \maxd-1))$\;
 	% 		}
 	% 		\Return $\best$\;
 	% \end{algorithm}
@@ -339,16 +347,16 @@ We start from a singleton set \bud\ of open branches or \emph{buds}.
 Moreover, we use an initially empty stack of decisions $\sequence$.
 
 \begin{itemize}
-	\item As long as there is a bud ($\bud \neq \emptyset$), we pick any one $\abranch \in \bud$ and check if it can be expended in Line~\ref{line:leaves}. If its length is $\mdepth$ the error at this leaf is recorded in $\best[\abranch]$. Otherwise, we pick a feature $\afeat$ marked as \emph{available} for \abranch, add the pair $(\abranch,\afeat)$ to \sequence\ and expend the tree with the two branches $\abranch \wedge \afeat$ and $\abranch \wedge \bar{\afeat}$. 
+	\item As long as there is a bud ($\bud \neq \emptyset$), we pick any one $\abranch \in \bud$ and check if it can be expended in Line~\ref{line:leaves}. If its length is $\mdepth$ the error at this leaf is recorded in $\best[\abranch]$. Otherwise, we pick a feature $\afeat$ marked as \emph{available} for \abranch, add the pair $(\abranch,\afeat)$ to \sequence\ and expend the tree with the two branches $\grow{\abranch}{\afeat}$ and $\grow{\abranch}{\bar{\afeat}}$. 
 	%
 	%
 	%
 	%
-	%  a feature $\afeat$ marked as \emph{available} for \abranch, add the pair $(\abranch,\afeat)$ to \sequence\ and expend the tree with the two branches $\abranch \wedge \afeat$ and $\abranch \wedge \bar{\afeat}$.
+	%  a feature $\afeat$ marked as \emph{available} for \abranch, add the pair $(\abranch,\afeat)$ to \sequence\ and expend the tree with the two branches $\grow{\abranch}{\afeat}$ and $\grow{\abranch}{\bar{\afeat}}$.
 	% %These new nodes are added to $\nodes$.
 	% They are added to $\bud$ if their depth is strictly less than $\maxd-1$ (the last feature test is chosen according to minimum error) and if they are not pure, otherwise they are terminal tests and we record the corresponding error.
 
-\item If there is no bud ($\bud = \emptyset$), then the tree is complete: every branch is of size $\mdepth$ or is pure. In that case we pop the last assignment $(\abranch,\afeat)$ from \sequence, mark the feature $\afeat$ not available for branch $\abranch$ and update the recorded best error of its subtrees. If there is at least one available feature for branch $\abranch$, we add $\abranch$ to $\bud$. 
+\item If there is no bud ($\bud = \emptyset$), then the tree is complete: every branch $\abranch$ is such that $|\abranch| = \mdepth$ or $\error[\abranch]=0$. In that case we pop the last assignment $(\abranch,\afeat)$ from \sequence, mark the feature $\afeat$ not available for branch $\abranch$ and update the recorded best error of its subtrees. If there is at least one available feature for branch $\abranch$, we add $\abranch$ to $\bud$. 
 Otherwise, we consider it \emph{terminal} and its error is the sum of the error of its best subtrees. This branch will never be expended anymore since it is not added to $\bud$.
 % and we 
 %store the minimum error recorded for any of the possible features.
@@ -356,7 +364,7 @@ Otherwise, we consider it \emph{terminal} and its error is the sum of the error 
 \end{itemize}
 
 
-Notice that to simplify the pseudo-code, we use branches to directly index array-like data structures in Algorithm~\ref{alg:bud}. Actually, a set of \emph{indices} (at most $2^{\mdepth}$ of them are necessary) are used as proxy for branches in all contexts. At Line~\ref{line:storebest}, the indices for $\abranch \wedge \afeat$, $\abranch \wedge \bar{\afeat}$ are released, and a free index is marked as used when expending a branch at Line~\ref{line:branching}. Moreover, the pseudo-code in Algorithm~\ref{alg:bud} does show how the best subtrees of terminal branches are recorded, nor how the overall best error is updated.
+Notice that to simplify the pseudo-code, we use branches to directly index array-like data structures in Algorithm~\ref{alg:bud}. Actually, a set of \emph{indices} (at most $2^{\mdepth}$ of them are necessary) are used as proxy for branches in all contexts. At Line~\ref{line:storebest}, the indices for $\grow{\abranch}{\afeat}$, $\grow{\abranch}{\bar{\afeat}}$ are released, and a free index is marked as used when expending a branch at Line~\ref{line:branching}. Moreover, the pseudo-code in Algorithm~\ref{alg:bud} does show how the best subtrees of terminal branches are recorded, nor how the overall best error is updated.
 
 
 
@@ -381,8 +389,14 @@ Notice that to simplify the pseudo-code, we use branches to directly index array
 				
 				Now suppose that for $\mdepth \leq d$ every branch $\abranch$ explored by \dynprog (a recursive call ends on this branch) is also explored by \budalg ($\best[\abranch]$ is set in Line~\ref{line:best}), and let $\mdepth=d+1$. Without loss of generality, we can take an arbitrary branch $\abranch$ of length $d$ and show that the same extentions of $\abranch$ are explored by both algorithms.
 				If $\error[\abranch]=0$, then no extension of $\abranch$ is explored by either algorithm.
-				Otherwise, \dynprog explores every branch $\abranch \wedge \afeat$ and $\abranch \wedge \bar{\afeat}$ for $\afeat \in \features \setminus \abranch$. Since $\abranch$ is explored when $\mdepth = d$ and since $\error[\abranch] \neq 0$, then $\abranch$ will fail the test on Line~\ref{line:leaves} and for a feature $\afeat \in \features \setminus \abranch$, the branches $\abranch \wedge \afeat$ and $\abranch \wedge \bar{\afeat}$ will be explored, and the pair $(\abranch, \afeat)$ will be added to $\sequence$. 
-				Moreover, the algorithm will not stop until $\sequence$ is not empty, hence $(\abranch, \afeat)$ will be poped out of $\sequence$, $\afeat$ removed from $\dom[\abranch]$ and $\abranch$ reinserted into $\bud$. Therefore, for every $\afeat \in \features \setminus \abranch$, $\abranch \wedge \afeat$ and $\abranch \wedge \bar{\afeat}$ will eventually be explored exactly once.
+				Otherwise, if $\afeat \not\in \abranch$ and $\bar{\afeat}\not\in \abranch$, then 
+				\dynprog explores the branches $\grow{\abranch}{\afeat}$ and $\grow{\abranch}{\bar{\afeat}}$.
+				%every branch $\grow{\abranch}{\afeat}$ and $\grow{\abranch}{\bar{\afeat}}$ for $\afeat \in \features \setminus \abranch$. 
+				Since $\abranch$ is explored when $\mdepth = d$ and since $\error[\abranch] \neq 0$, then $\abranch$ will fail the test on Line~\ref{line:leaves} and a feature $\afeat$ such that $\afeat \not\in \abranch$ and $\bar{\afeat}\not\in \abranch$ will be selected, 
+				%for a feature $\afeat \in \features \setminus \abranch$, 
+				the branches $\grow{\abranch}{\afeat}$ and $\grow{\abranch}{\bar{\afeat}}$ will be explored, and the pair $(\abranch, \afeat)$ will be added to $\sequence$. 
+				Moreover, the algorithm will not stop until $\sequence$ is not empty, hence $(\abranch, \afeat)$ will eventually be popped out of $\sequence$, $\afeat$ removed from $\dom[\abranch]$ and $\abranch$ reinserted into $\bud$. Therefore, for every $\afeat \in \features$, such that neither $\afeat \in \abranch$ nor $\bar{\afeat}\in \abranch$,
+				 $\grow{\abranch}{\afeat}$ and $\grow{\abranch}{\bar{\afeat}}$ will eventually be explored exactly once.
 				\hfill$\square$
 			\end{proof}
 			
@@ -428,7 +442,7 @@ Notice that to simplify the pseudo-code, we use branches to directly index array
 % 				after Line~\ref{line:storebest}, the minimum error of any subtree rooted at $\abranch$ with a feature in $\features \setminus \dom[\abranch]$ is $\best[\abranch]$.
 %
 %
-% 				Observe that $|\abranch| \leq \mdepth-2$. Indeed, no pair $(\abranch,\afeat)$ is put on $\sequence$ unless $|\abranch| \leq \mdepth-2$. Now suppose that $|\abranch|=\mdepth-2$. Then $\best[\abranch \wedge \afeat]$ is by definition the minimal error of any single-node tree rooted at $\abranch \wedge \afeat$ and likewise, $\best[\abranch \wedge \bar{\afeat}]$ is the minimal error of any single-node tree rooted at $\abranch \wedge \bar{\afeat}$. Therefore, $\best[\abranch \wedge \afeat] + \best[\abranch \wedge \bar{\afeat}]$ is the minimal error of a depth 2 tree rooted at $\abranch$ with a test on $\afeat$. Since all features in $\features \setminus \dom[\abranch]$ have been tried (or belong to $\abranch$) and the minimum was kept, the property holds.
+% 				Observe that $|\abranch| \leq \mdepth-2$. Indeed, no pair $(\abranch,\afeat)$ is put on $\sequence$ unless $|\abranch| \leq \mdepth-2$. Now suppose that $|\abranch|=\mdepth-2$. Then $\best[\grow{\abranch}{\afeat}]$ is by definition the minimal error of any single-node tree rooted at $\grow{\abranch}{\afeat}$ and likewise, $\best[\grow{\abranch}{\bar{\afeat}}]$ is the minimal error of any single-node tree rooted at $\grow{\abranch}{\bar{\afeat}}$. Therefore, $\best[\grow{\abranch}{\afeat}] + \best[\grow{\abranch}{\bar{\afeat}}]$ is the minimal error of a depth 2 tree rooted at $\abranch$ with a test on $\afeat$. Since all features in $\features \setminus \dom[\abranch]$ have been tried (or belong to $\abranch$) and the minimum was kept, the property holds.
 %
 % 				Suppose now that the property holds for $|\abranch|=\mdepth-x$ with $x>2$. Then by the same reasoning as above, the property will also hold for $|\abranch|=\mdepth-x-1$. Therefore is always hold.
 %
@@ -442,15 +456,15 @@ Notice that to simplify the pseudo-code, we use branches to directly index array
 %
 %
 % 			The key is to observe that given a branch $\abranch$ and a feature $\afeat$, just as in DL8, the complexity of computing
-% 			$\error[\abranch,\afeat]$ is equal to the complexity of computing $\error[\abranch \wedge \afeat]$ plus the complexity of computing $\error[\abranch \wedge \bar{\afeat}]$.
-% 			Indeed, wlog, let the branch $\abranch \wedge \afeat$ be chosen before $\abranch \wedge \bar{\afeat}$.
+% 			$\error[\abranch,\afeat]$ is equal to the complexity of computing $\error[\grow{\abranch}{\afeat}]$ plus the complexity of computing $\error[\grow{\abranch}{\bar{\afeat}}]$.
+% 			Indeed, wlog, let the branch $\grow{\abranch}{\afeat}$ be chosen before $\grow{\abranch}{\bar{\afeat}}$.
 % 				Both branches will be completed up to the maximal depth, however,
-% 			the test appended to $\abranch \wedge \afeat$ will no change until
+% 			the test appended to $\grow{\abranch}{\afeat}$ will no change until
 %
 %
 %
 %
-% 			the best possible errors for $\abranch \wedge \afeat$ and $\abranch \wedge \bar{\afeat}$
+% 			the best possible errors for $\grow{\abranch}{\afeat}$ and $\grow{\abranch}{\bar{\afeat}}$
 %
 %
 % 			% \end{proof}
@@ -487,8 +501,12 @@ Notice that to simplify the pseudo-code, we use branches to directly index array
 		$\sequence \gets []$\;
 		$\bud \gets \{\emptyset\}$\;
 		$\error \gets \min(|\negex|,|\posex|)$\;
-		$\dom \gets (\lambda : {2^{\features}} \mapsto \features)$\;
-		$\best \gets (\lambda : {2^{\features}} \mapsto \infty)$\;
+		% $\dom \gets (\lambda : {2^{\features}} \mapsto \features)$\;
+		% $\best \gets (\lambda : {2^{\features}} \mapsto \infty)$\;
+		$\dom \gets (\lambda : {2^{\prod_{\afeat \in \features}\{\afeat,\bar{\afeat}\}}} \mapsto \features)$\;
+		$\best \gets (\lambda : {2^{\prod_{\afeat \in \features}\{\afeat,\bar{\afeat}\}}} \mapsto \infty)$\;
+		
+		
 		
 		\While{$|\sequence| + |\bud| > 0$}{
 		\lnl{line:dive}\eIf{$\bud \neq \emptyset$}{
@@ -510,8 +528,8 @@ Notice that to simplify the pseudo-code, we use branches to directly index array
 			% $\best[\emptyset] \gets \min(\best[\emptyset], \error)$\;
 			\lnl{line:backtrack}\Repeat{$\dom[\abranch] \neq \emptyset$ or $|\sequence|=0$}{
 				pop $(\abranch,\afeat)$ from $\sequence$\;
-				\lnl{line:storebest}$\best[\abranch] \gets \min(\best[\abranch], \best[\abranch \wedge \afeat] +  \best[\abranch \wedge \bar{\afeat}])$\;
-				% $\error \gets \error - \best[\abranch \wedge \afeat] -  \best[\abranch \wedge \bar{\afeat}]$\;
+				\lnl{line:storebest}$\best[\abranch] \gets \min(\best[\abranch], \best[\grow{\abranch}{\afeat}] +  \best[\grow{\abranch}{\bar{\afeat}}])$\;
+				% $\error \gets \error - \best[\grow{\abranch}{\afeat}] -  \best[\grow{\abranch}{\bar{\afeat}}]$\;
 				\lIf{$\dom[\abranch] \neq \emptyset$} {
 					$\bud \gets \bud \cup \{\abranch\}$
 					% \lIf{$\opt[\abranch]$}{$\error \gets \error - \best[\abranch]$}
@@ -565,8 +583,8 @@ Notice that to simplify the pseudo-code, we use branches to directly index array
 	% 		$\best[\emptyset] \gets \min(\best[\emptyset], \error)$\;
 	% 		\Repeat{$\dom[\abranch] \neq \emptyset$ or $|\sequence|=0$}{
 	% 			pop $(\abranch,\afeat)$ from $\sequence$\;
-	% 			\lnl{line:storebest}$\best[\abranch] \gets \min(\best[\abranch], \best[\abranch \wedge \afeat] +  \best[\abranch \wedge \bar{\afeat}])$\;
-	% 			$\error \gets \error - \best[\abranch \wedge \afeat] -  \best[\abranch \wedge \bar{\afeat}]$\;
+	% 			\lnl{line:storebest}$\best[\abranch] \gets \min(\best[\abranch], \best[\grow{\abranch}{\afeat}] +  \best[\grow{\abranch}{\bar{\afeat}}])$\;
+	% 			$\error \gets \error - \best[\grow{\abranch}{\afeat}] -  \best[\grow{\abranch}{\bar{\afeat}}]$\;
 	% 			\lIf{$\dom[\abranch] \neq \emptyset$} {
 	% 				$\bud \gets \bud \cup \{\abranch\}$
 	% 				% \lIf{$\opt[\abranch]$}{$\error \gets \error - \best[\abranch]$}
@@ -845,6 +863,7 @@ Notice that to simplify the pseudo-code, we use branches to directly index array
 %\clearpage
 
 \section{Extensions of the Algorithm}
+\label{sec:ext}
 
 The pseudo-code given in Algorithm~\ref{alg:bud} shows the basic structure of the algorithm. 
 As discussed earlier, some important (but rather tedious) parts of the algorithms have been omitted, such as how the best subtrees are stored in Line~\ref{line:storebest} when the best classification score is updated.
@@ -854,16 +873,18 @@ We discuss here only improvements that have an impact on the efficiency of the a
 
 
 \subsection{Heuristic Ordering}
+\label{sec:heuristic}
 
 In order to quickly find highly accurate trees, it is important to follow a heuristic. We experimented with three heuristics based on scores to minimize: \emph{error}, \emph{entropy}~\cite{10.1023/A:1022643204877}, and \emph{Gini impurity}~\cite{breiman1984classification}. 
-Each of these heuristics associate a score to a feature $\afeat$ at a branch $\abranch$:
+Each of these heuristics associates a score to a feature $\afeat$ at a branch $\abranch$:
 \begin{eqnarray}
 	\textrm{error}: & \error[\abranch,\afeat] \\
-	%\textrm{minimum entropy:} & \sum_{v \in \{\afeat,\bar{\afeat}\}} \frac{|\allex(\abranch \wedge v)|}{|\allex(\abranch)|} \cdot -\sum_{c \in \{\bot,\top\}} \frac{|\setex{c}(\abranch \wedge v)|}{|\setex{c}(\abranch)} \log_{2} \frac{|\setex{c}(\abranch \wedge v)|}{|\setex{c}(\abranch)|} \\
-	\textrm{entropy:} & \sum\limits_{v \in \{\afeat,\bar{\afeat}\}} -p(v,\allex) \sum\limits_{c \in \{\bot,\top\}} p(v,\setex{c}) \log_{2} p(v,\setex{c}) \\
-	\textrm{Gini impurity:} & 2 - \sum\limits_{v \in \{\afeat,\bar{\afeat}\}}\sum\limits_{c \in \{\bot,\top\}} p(v,\setex{c})^2
+	%\textrm{minimum entropy:} & \sum_{v \in \{\afeat,\bar{\afeat}\}} \frac{|\allex(\abranch \wedge v)|}{|\allex(\abranch)|} \cdot -\sum_{\aclass \in \{\bot,\top\}} \frac{|\setex{\aclass}(\abranch \wedge v)|}{|\setex{\aclass}(\abranch)} \log_{2} \frac{|\setex{\aclass}(\abranch \wedge v)|}{|\setex{\aclass}(\abranch)|} \\
+	\textrm{entropy:} & \sum\limits_{v \in \{\afeat,\bar{\afeat}\}} -p(v,\allex) \sum\limits_{\aclass \in \{\bot,\top\}} p(v,\setex{\aclass}) \log_{2} p(v,\setex{\aclass}) \\
+	\textrm{Gini impurity:} &  \sum\limits_{v \in \{\afeat,\bar{\afeat}\}} p(v,\setex{\aclass})(1 - \sum\limits_{\aclass \in \{\bot,\top\}} p(v,\setex{\aclass})^2)
 \end{eqnarray}
-With $p(v,{\cal S}) = \frac{|{\cal S}(\abranch \wedge v)|}{|{\cal S}(\abranch)|}$.
+With $p(v,{\cal S}) = \frac{|{\cal S}(\abranch \wedge v)|}{|{\cal S}(\abranch)|}$ the ratio of datapoints with feature $v$ in the set ${\cal S}$.
+% With $p(v,{\cal S}) = \frac{|{\cal S}(\abranch \wedge v)|}{|{\cal S}(\abranch)|}$.
 %The minimum error is simply defined as 
 
 The feature tests at Line~\ref{line:assignment} of Algorithm~\ref{alg:bud} are explored in non-decreasing order with respect to one of the scores above.
@@ -882,6 +903,7 @@ The feature ordering has a very significant impact on how quickly the algorithm 
 
 
 \subsection{Lower Bound}
+\label{sec:lb}
 
 It is possible to fail early using a lower bound on the error given prior decisions in the same way as \murtree, following the idea introduced in \cite{dl8}. The idea is that once some subtrees along a branch $\abranch$ are optimal and the sum of their errors is larger than the current upper bound (the best solution found so far) then there is no need to continue exploring branch $\abranch$. Line~\ref{line:leaves} can be changed to ``\textbf{If} $\bud \neq \emptyset ~\& \not\exists \abranch \in \bud, \dominated{\abranch}$ \textbf{then}''. %Notice that when a branch is ``pruned'' in this way, its 
 
@@ -937,6 +959,7 @@ This reasoning will be more effective when good upper bounds are found early, he
 
 
 \subsection{Preprocessing}
+\label{sec:preprocessing}
 
 Finally, we use two preprocessing techniques, one on the dataset and one on the features. Although extremely straightforward (and probably not novel), they both have a significant impact.
 
@@ -1064,6 +1087,14 @@ We can see in those graphs that \murtree finds an initial tree extremely quickly
 
 \subsection{Factor analysis}
 
+Finally, we report results of three variants of \budalg, in order to analyse the relative contributions of the factors described in Section~\ref{sec:ext}. For each variant, we report the average error (error), the ratio of optimality proofs (opt.) and the cpu time ratio with respect to the default setting on datasets for which an optimal tree has been found.
+
+In the variant ``No heuristic'', the Gini impurity heuristic described in Section~\ref{sec:heuristic} is disabled, and replaced by simply selecting first the feature with minimum error. For shallow trees (depth 3 or 4), since in many cases the search space is completely exhausted, not computing the slightly more costly Gini impurity score may actually be a good choice and we observe run time reduction of about 15\% to 20\%. However, the accuracy of the trees decreases extremely rapidly for larger maximum depth. As a results, many less optimality proofs are obtained, and they take much longer to compute.
+
+In the variant ``No preprocessing'', both dataset and feature preprocessings described in Section~\ref{sec:preprocessing} are disabled. The feature ordering is impacted by the removal of inconsistent datapoints, and therefore it may happen that, by luck, a more acurate tree is found for the non-preprocessed dataset than for the preprocessed one. However, in most cases, the preprocessing does pay of, yielding more optimality proofs, better accuracy, and shorter runtimes (on that last aspect, we estimate that most of the gain is due to the removal of redundant features, and of inconsistent datapoints, whereas the fusion of duplicated datapoints accounts for only a few percent speed-up).
+
+In the variant ``No lower bound'', the lower bound technique described in Section~\ref{sec:lb} is disabled. In this case we observe a small increase in computational time (from 1\% up to 40\%). However, the search space is explored in the same order, and it only slightly negatively affect accuracy and the number of optimality proofs.
+
 \begin{table}[htbp]
 \begin{center}
 \begin{footnotesize}
@@ -1085,8 +1116,17 @@ We can see in those graphs that \murtree finds an initial tree extremely quickly
 % \end{table}
 
 
+\section{Conlusion}
+
+We have introduced a simple, exact, iterative, memory-efficient and anytime algorithm for computing optimaly-accurate tree classifiers of bounded depth.
+This algorithm is considerably more efficient than state-of-the-art exact algorithms. Moreover, it has no significant time nor memory overhead with respect to greedy heuristic methods.
+
+
 \bibliographystyle{plain}
 \bibliography{src/references}
+
+
+\end{document}
 
 \clearpage
 

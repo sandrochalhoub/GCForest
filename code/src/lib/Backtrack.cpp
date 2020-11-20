@@ -1690,6 +1690,7 @@ double BacktrackingAlgorithm<ErrorPolicy, E_t>::gini(const int node, const int f
   //      << ((gini[1] / (branch_size[1] * branch_size[1])) - 1) << endl;
 
   return ((gini[1] / (branch_size[1])) + (gini[0] / (branch_size[0])));
+	// return ((gini[1] / (branch_size[1] * branch_size[1])) + (gini[0] / (branch_size[0] * branch_size[0])));
 }
 
 // template <template<typename> class ErrorPolicy, typename E_t>
