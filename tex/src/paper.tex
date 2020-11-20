@@ -186,7 +186,7 @@
 
 
 \begin{abstract}
-	
+	In this paper we introduce a relatively \emph{simple} algorithm: \budalg, that is as memory and time efficient as heuristics, and yet more efficient than most exact methods on most datasets. State-of-the-art exact methods often have poor anytime behavior, and hardly scale on deep trees. In our experiments, we found that they are typically orders of magnitude slower than the propposed algorithm to compute classifiers that significantly improve upon greedy heuristics. 
 \end{abstract}
 
 \section{Introduction}
@@ -210,10 +210,10 @@ Despite the vast offer of exact methods that can potentially provide optimal dec
 
 \medskip
 
-In this paper we introduce a relatively \emph{simple} algorithm, that is as memory and time efficient as heuristics, and yet more efficient than most exact methods on most datasets. 
+In this paper we introduce a relatively \emph{simple} algorithm (\budalg), that is as memory and time efficient as heuristics, and yet more efficient than most exact methods on most datasets. 
 This algorithm can be seen as an instance of the more general framework introduced in \cite{DBLP:journals/corr/abs-2007-12652}, however tuned to have the best scalability to large trees and the best anytime behavior as possible.
 
-In a nutshell, this algorithm (\budalg) emulates the dynamic programming algorithm \dleight~\cite{dl8}, while expending non-terminal branches (a.k.a ``buds'') first. As a result, this algorithm is in a sense strictly better than both the standard dynamic programming approach (because it is anytime and at least as fast) and than classic heuristics (because it emulates them during search, without significant overhead).
+In a nutshell, \budalg emulates the dynamic programming algorithm \dleight~\cite{dl8}, while always expending non-terminal branches (a.k.a ``buds'') before optimizing grown branches. As a result, this algorithm is in a sense strictly better than both the standard dynamic programming approach (because it is anytime and at least as fast) and than classic heuristics (because it emulates them during search, without significant overhead).
 %but explores the search space so as to improve its anytime behaviour.
 Our experimental results show that it outperforms the state of the art, to the exception of \murtree~\cite{DBLP:journals/corr/abs-2007-12652} on relatively shallow trees (typically for maximum depth up to 4), for which this its more sophisticated (albeit complex) algorithmic features can pay off.
 In particular, on datasets that \dleight can tackle, \budalg can always find classifiers at least as accurate faster, and when the former can prove optimality, the latter does it orders of magnitude faster.
@@ -245,7 +245,7 @@ A binary data set is a pair $\langle \negex,\posex \rangle$ where the negative d
 % $$
 % \forall \aclass \in \{\top,\bot\}, \forall \ex \in \setex{\aclass}, \classlabel[\ex] = \aclass
 % $$
-We refer the union of negative and positive datapoints by $\allex = \negex \cup \posex$.
+We denote the union of negative and positive datapoints by $\allex = \negex \cup \posex$.
 % %$\top$ and $\bot$ are class labels and
 % A datapoint $\ex$ can equivalently be seen as a subset of $\features$, or as the conjunction:
 % $$
@@ -312,8 +312,8 @@ The solver DL8.5 is a dynamic programming algorithm for the minimum error bounde
 			}
 			
 			\ForEach{$\afeat \in \features$} {
-					$\error \gets \min(\error, \dynprog(\negex(\afeat),\posex(\afeat),\features \setminus \{\afeat\},\maxd-1)$\;
-					\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \  $ + \dynprog(\negex(\bar{\afeat}),\posex(\bar{\afeat}),\features \setminus \{\afeat\},\maxd-1))$\;
+					$\error \gets \min(\error, \dynprog(\negex(\{\afeat\}),\posex(\{\afeat\}),\features \setminus \{\afeat\},\maxd-1)$\;
+					\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \  $ + \dynprog(\negex(\{\bar{\afeat}\}),\posex(\{\bar{\afeat}\}),\features \setminus \{\afeat\},\maxd-1))$\;
 			}
 			\Return $\error$\;
 	\end{algorithm}
@@ -521,7 +521,7 @@ Notice that to simplify the pseudo-code, we use branches to directly index array
 			% $\dom[\abranch] \gets \dom[\abranch] \setminus \{\afeat\}$\;
 			push $(\abranch,\afeat)$ on $\sequence$\; 
 			\lnl{line:branching}\lForEach{$v \in \{\afeat, \bar{\afeat}\}$}{
-						$\bud \gets \bud \cup \{\abranch \wedge v\}$
+						$\bud \gets \bud \cup \{\grow{\abranch}{v}\}$
 					}
 			}
 		}{
@@ -655,7 +655,7 @@ Notice that to simplify the pseudo-code, we use branches to directly index array
 			\end{forest}
 		}
 	\end{center}
-	\caption{\label{fig:searchtree} The search tree for decision trees. \texttt{DynProg} explores it depth first, whereas \texttt{Bud-first-search} explores branches in the order given below the leaves.}
+	\caption{\label{fig:searchtree} The search tree for decision trees. \texttt{DynProg} explores it depth first, whereas \texttt{Bud-first-search} explores the leaves in the order given below.}
 	%\caption{\label{fig:searchtree} The search tree for decision trees. \dynprog explores it depth first, whereas \budalg explores branches in the order given below the leaves.}
 	\end{figure}
 	
@@ -883,7 +883,7 @@ Each of these heuristics associates a score to a feature $\afeat$ at a branch $\
 	\textrm{entropy:} & \sum\limits_{v \in \{\afeat,\bar{\afeat}\}} -p(v,\allex) \sum\limits_{\aclass \in \{\bot,\top\}} p(v,\setex{\aclass}) \log_{2} p(v,\setex{\aclass}) \\
 	\textrm{Gini impurity:} &  \sum\limits_{v \in \{\afeat,\bar{\afeat}\}} p(v,\setex{\aclass})(1 - \sum\limits_{\aclass \in \{\bot,\top\}} p(v,\setex{\aclass})^2)
 \end{eqnarray}
-With $p(v,{\cal S}) = \frac{|{\cal S}(\abranch \wedge v)|}{|{\cal S}(\abranch)|}$ the ratio of datapoints with feature $v$ in the set ${\cal S}$.
+With $p(v,{\cal S}) = \frac{|{\cal S}(\grow{\abranch}{v})|}{|{\cal S}(\abranch)|}$ the ratio of datapoints with feature $v$ in the set ${\cal S}$.
 % With $p(v,{\cal S}) = \frac{|{\cal S}(\abranch \wedge v)|}{|{\cal S}(\abranch)|}$.
 %The minimum error is simply defined as 
 
@@ -897,9 +897,9 @@ In the datasets we used, the Gini impurity was significantly better, and hence a
 %explore the features in that order in Line~\ref{line:assignment}.
 Computing this order costs $\Theta(\numfeat \log \numfeat)$ for each of the $2^{\mdepth}\numfeat^{\mdepth}$ branches added to $\bud$ at Line~\ref{line:branching}. However, since the depth is effectively reduced by one, the resulting complexity 
 %(excluding the time for splitting the dataset) 
-is $O((\numex + 2^{\mdepth} \log \numfeat) \numfeat^{\mdepth})$. This very slight increase is often inconsequencial, since we often have $\numex \geq 2^{\mdepth} \log \numfeat$.
+is $O((\numex + 2^{\mdepth} \log \numfeat) \numfeat^{\mdepth})$. This very slight increase is often inconsequencial, as long as we have $\numex \geq 2^{\mdepth} \log \numfeat$.
 
-The feature ordering has a very significant impact on how quickly the algorithm can improve the accuracy of the classifier. Moreover, it also has an impact (though much less significant) on the computational time necessary to explore the whole search space and prove optimality, because of the lower bound technique detailed in the next section.
+The feature ordering has a very significant impact on how quickly the algorithm can improve the accuracy of the classifier. Moreover, it also has an impact (though indirect and much less significant) on the computational time necessary to explore the whole search space and prove optimality, because of the lower bound technique detailed in the next section.
 
 
 \subsection{Lower Bound}
@@ -920,10 +920,49 @@ Now, when the loop in Line~\ref{line:backtrack} makes two or more iterations, it
 Let $\abranch$ be a bud in $\bud$. Trivially, if $|\abranch|=\mdepth-1$ then this branch will entail $\min\{\error[\afeat] \mid \afeat \in \dom[\abranch]\}$ misclassification.
 However, for any parent $\abranch'$ of $\abranch$, we can define a lower bound $\lb{\abranch',\abranch}$, \emph{given the feature tests} $\abranch \setminus \abranch'$ as follows:
 $$
-\lb{\abranch',\abranch} = \sum\limits_{\abranch' \subset \abranch'' \wedge \afeat \subseteq \abranch}\opt[\abranch'' \wedge \bar{\afeat}]\best[\abranch'' \wedge \bar{\afeat}]
+\lb{\abranch',\abranch} = \sum\limits_{\abranch' \subset \grow{\abranch''}{\afeat} \subseteq \abranch}\opt[\grow{\abranch''}{\bar{\afeat}}]\best[\grow{\abranch''}{\bar{\afeat}}]
 $$
 This lower bound is correct as long as the branch $\abranch$ belongs to the decision tree.
 The procedure $\dominated{\abranch}$ can therefore simply check, for all parent $\abranch'$ of $\abranch$ up until the root ($\emptyset$), whether $\lb{\abranch',\abranch} \geq \best[\abranch']$. As a result, a branch $\abranch$ which is guaranteed, by this reasoning, to never belong to a non-dominated tree will not be explored further.
+
+
+
+	\begin{figure}
+	\begin{center}
+		\tabcolsep=0pt
+		\scalebox{1}{
+			\begin{forest}
+				for tree={%
+					l sep=25pt,
+					s sep=10pt,
+					node options={shape=rectangle, minimum width=10pt, inner sep=1pt, font=\footnotesize},
+		  		edge={-latex, shorten >=1pt, shorten <=1pt},
+				}
+				[{$b:50$}
+					[{$a:22$}, edge={very thick}, edge label={node[midway,fill=white,inner sep=2pt,font=\scriptsize]{$b$}}
+					 [{$e:17^*$}, edge label={node[midway,fill=white,inner sep=2pt,font=\scriptsize]{$a$}}
+					 ]
+					 [{$c:7$}, edge={very thick}, edge label={node[midway,fill=white,inner sep=2pt,font=\scriptsize]{$\bar{a}$}}
+					 	[{$f:\infty$}, edge label={node[midway,fill=white,inner sep=2pt,font=\scriptsize]{$c$}}
+							[., edge label={node[midway,fill=white,inner sep=2pt,font=\scriptsize]{$f$}}]
+							[., edge label={node[midway,fill=white,inner sep=2pt,font=\scriptsize]{$\bar{f}$}}]
+						]
+						[{$g:\infty$}, edge={very thick}, edge label={node[midway,fill=white,inner sep=2pt,font=\scriptsize]{$\bar{c}$}}
+							[., edge={very thick}, edge label={node[midway,fill=white,inner sep=2pt,font=\scriptsize]{$g$}}]
+							[., edge label={node[midway,fill=white,inner sep=2pt,font=\scriptsize]{$\bar{g}$}}]
+					 	]
+					 ]
+					]
+					[{$d:31^*$}, edge label={node[midway,fill=white,inner sep=2pt,font=\scriptsize]{$\bar{b}$}}
+					]
+				]
+			\end{forest}
+		}
+	\end{center}
+	\caption{\label{fig:lowerbound} Example of lower bound computation.}
+	%\caption{\label{fig:searchtree} The search tree for decision trees. \dynprog explores it depth first, whereas \budalg explores branches in the order given below the leaves.}
+	\end{figure}
+
 
 \medskip
 
