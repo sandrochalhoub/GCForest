@@ -82,9 +82,14 @@
 }
 
 
-\newcommand{\setex}[1]{\ensuremath{{\mathcal X}^{#1}}\xspace}
-\newcommand{\posex}{{\setex{\top}}\xspace}
-\newcommand{\negex}{{\setex{\bot}}\xspace}
+%\def\posclass{\top}
+%\def\negclass{\bot}
+\def\posclass{+}
+\def\negclass{-}
+\def\datasymb{D}
+\newcommand{\setex}[1]{\ensuremath{{\mathcal \datasymb}^{#1}}\xspace}
+\newcommand{\posex}{{\setex{\posclass}}\xspace}
+\newcommand{\negex}{{\setex{\negclass}}\xspace}
 \newcommand{\allex}{{\setex{}}\xspace}
 \newcommand{\setcube}[1]{\ensuremath{{\mathcal C}^{#1}}\xspace}
 \newcommand{\poscube}{{\setcube{1}}\xspace}
@@ -239,21 +244,22 @@ In particular, on datasets that \dleight can tackle, \budalg can always find cla
 
 \section{Preliminaries}
 
-A binary data set is a pair $\langle \negex,\posex \rangle$ where the negative datapoints $\negex$ (resp. the positive datapoints $\posex$) is a subset of the feature space $\prod_{\afeat \in \features}\{\afeat,\bar{\afeat}\}$.
+A binary data set is a pair $\langle \negex,\posex \rangle$ where $\negex$ and $\posex$ are subsets of the feature space $\prod_{\afeat \in \features}\{\afeat,\bar{\afeat}\}$, and are standing, respectively, for negative and positve datapoints.
 % $2^{\features}$.
-% It is associated a label function $\classlabel : 2^{\features} \mapsto \{\top,\bot\}$ such that:
+% It is associated a label function $\classlabel : 2^{\features} \mapsto \{\posclass,\negclass\}$ such that:
 % $$
-% \forall \aclass \in \{\top,\bot\}, \forall \ex \in \setex{\aclass}, \classlabel[\ex] = \aclass
+% \forall \aclass \in \{\posclass,\negclass\}, \forall \ex \in \setex{\aclass}, \classlabel[\ex] = \aclass
 % $$
-We denote the union of negative and positive datapoints by $\allex = \negex \cup \posex$.
-% %$\top$ and $\bot$ are class labels and
+%We denote $\allex$ the 
+We denote the union of all datapoints by $\allex = \negex \cup \posex$.
+% %$\posclass$ and $\negclass$ are class labels and
 % A datapoint $\ex$ can equivalently be seen as a subset of $\features$, or as the conjunction:
 % $$
 % \bigwedge_{\afeat \in \ex}\afeat \wedge \bigwedge_{\afeat \in \features \setminus \ex}\bar{\afeat}
 % $$
 
 
-A \emph{binary decision tree} is a tree whose leaves are labelled with either $\top$ or $\bot$, internal vertices are labelled with features and the two edges exiting a node labelled with $\afeat$ are respectively labelled with $\afeat$ and $\bar{\afeat}$.
+A \emph{binary decision tree} is a tree whose leaves are labelled with either $\posclass$ or $\negclass$, internal vertices are labelled with features and the two edges exiting a node labelled with $\afeat$ are respectively labelled with $\afeat$ and $\bar{\afeat}$.
 A \emph{branch} of a decision tree can therefore be identified to the set of labels on the corresponding edges.
 %To a \emph{branch} of a decision tree we can associate the set of labels on the corresponding edges.
 %conjunction of features which are on the path from the root to a leaf. If the feature vertex is exited by a $1$-edge, the feature is positive in the conjunction, otherwise it is negative.
@@ -503,8 +509,8 @@ Notice that to simplify the pseudo-code, we use branches to directly index array
 		$\error \gets \min(|\negex|,|\posex|)$\;
 		% $\dom \gets (\lambda : {2^{\features}} \mapsto \features)$\;
 		% $\best \gets (\lambda : {2^{\features}} \mapsto \infty)$\;
-		$\dom \gets (\lambda : {2^{\prod_{\afeat \in \features}\{\afeat,\bar{\afeat}\}}} \mapsto \features)$\;
-		$\best \gets (\lambda : {2^{\prod_{\afeat \in \features}\{\afeat,\bar{\afeat}\}}} \mapsto \infty)$\;
+		$\dom \gets (\lambda : 2^{\features \cup \bar{\features}} \mapsto \features)$\;
+		$\best \gets (\lambda : 2^{\features \cup \bar{\features}} \mapsto \infty)$\;
 		
 		
 		
@@ -722,7 +728,7 @@ Notice that to simplify the pseudo-code, we use branches to directly index array
 % 	\item \dom\ stores the set of possible features which have no yet been tried for this node
 % 	\item \best\ stores the error of the best subtree rooted at a node
 % 	\item \opt\ indicates whether the best subtree of a given node is optimal
-% 	\item \child\ stores the children of a node (children can be nodes or $\{\top, \bot\}$)
+% 	\item \child\ stores the children of a node (children can be nodes or $\{\posclass, \negclass\}$)
 % 	\item $\error{\anode}$ $\min(|\posex(\anode)|,|\negex(\anode)|)$
 % 	\item $\error{\anode,\afeat}$ $\min(|\posex(\anode=\afeat)|,|\negex(\anode=\afeat)|)$
 % \end{itemize}
@@ -767,8 +773,8 @@ Notice that to simplify the pseudo-code, we use branches to directly index array
 % 			\ForEach{$branch \in \{\tru, \fal\}$}
 % 			{
 % 				% $\child[\anode,branch] \gets (|\posex(\anode=\test[\anode])| > |\negex(\anode=\test[\anode])|)$\;
-% 				\lIf{$|\posex(\anode=\test[\anode])| > |\negex(\anode=\test[\anode])|$}{$\child[\anode,branch] \gets \top$}
-% 				\lElse{$\child[\anode,branch] \gets \bot$}
+% 				\lIf{$|\posex(\anode=\test[\anode])| > |\negex(\anode=\test[\anode])|$}{$\child[\anode,branch] \gets \posclass$}
+% 				\lElse{$\child[\anode,branch] \gets \negclass$}
 % 			}
 % 		}
 % 		{
@@ -791,7 +797,7 @@ Notice that to simplify the pseudo-code, we use branches to directly index array
 %
 % 		\ForEach{$branch \in \{\tru, \fal\}$}
 % 		{
-% 		\lIf{$\child[\anode,branch] \not\in \{\top, \bot\}$}
+% 		\lIf{$\child[\anode,branch] \not\in \{\posclass, \negclass\}$}
 % 		{
 % 			$\prune{\child[\anode,branch]}$
 % 		}
@@ -846,8 +852,8 @@ Notice that to simplify the pseudo-code, we use branches to directly index array
 % 			\ForEach{$branch \in \{\tru, \fal\}$}{
 % 				\eIf{$\min(|\posex(c_{branch})|,|\negex(c_{branch})|) = 0$}
 % 				{
-% 					\lIf{$|\posex(c_{branch})|>|\negex(c_{branch})|$}{$\child[\bnode,branch] \gets \top$}
-% 					\lElse{$\child[\bnode,branch] \gets \bot$}
+% 					\lIf{$|\posex(c_{branch})|>|\negex(c_{branch})|$}{$\child[\bnode,branch] \gets \posclass$}
+% 					\lElse{$\child[\bnode,branch] \gets \negclass$}
 % 				}{
 % 					$\child[\bnode,branch] \gets c_{branch}$\;
 % 					$\mdepth[c_{branch}] \gets \mdepth[\bnode]+1$\;
@@ -879,9 +885,9 @@ In order to quickly find highly accurate trees, it is important to follow a heur
 Each of these heuristics associates a score to a feature $\afeat$ at a branch $\abranch$:
 \begin{eqnarray}
 	\textrm{error}: & \error[\abranch,\afeat] \\
-	%\textrm{minimum entropy:} & \sum_{v \in \{\afeat,\bar{\afeat}\}} \frac{|\allex(\abranch \wedge v)|}{|\allex(\abranch)|} \cdot -\sum_{\aclass \in \{\bot,\top\}} \frac{|\setex{\aclass}(\abranch \wedge v)|}{|\setex{\aclass}(\abranch)} \log_{2} \frac{|\setex{\aclass}(\abranch \wedge v)|}{|\setex{\aclass}(\abranch)|} \\
-	\textrm{entropy:} & \sum\limits_{v \in \{\afeat,\bar{\afeat}\}} -p(v,\allex) \sum\limits_{\aclass \in \{\bot,\top\}} p(v,\setex{\aclass}) \log_{2} p(v,\setex{\aclass}) \\
-	\textrm{Gini impurity:} &  \sum\limits_{v \in \{\afeat,\bar{\afeat}\}} p(v,\setex{\aclass})(1 - \sum\limits_{\aclass \in \{\bot,\top\}} p(v,\setex{\aclass})^2)
+	%\textrm{minimum entropy:} & \sum_{v \in \{\afeat,\bar{\afeat}\}} \frac{|\allex(\abranch \wedge v)|}{|\allex(\abranch)|} \cdot -\sum_{\aclass \in \{\negclass,\posclass\}} \frac{|\setex{\aclass}(\abranch \wedge v)|}{|\setex{\aclass}(\abranch)} \log_{2} \frac{|\setex{\aclass}(\abranch \wedge v)|}{|\setex{\aclass}(\abranch)|} \\
+	\textrm{entropy:} & \sum\limits_{v \in \{\afeat,\bar{\afeat}\}} -p(v,\allex) \sum\limits_{\aclass \in \{\negclass,\posclass\}} p(v,\setex{\aclass}) \log_{2} p(v,\setex{\aclass}) \\
+	\textrm{Gini impurity:} &  \sum\limits_{v \in \{\afeat,\bar{\afeat}\}} p(v,\setex{\aclass})(1 - \sum\limits_{\aclass \in \{\negclass,\posclass\}} p(v,\setex{\aclass})^2)
 \end{eqnarray}
 With $p(v,{\cal S}) = \frac{|{\cal S}(\grow{\abranch}{v})|}{|{\cal S}(\abranch)|}$ the ratio of datapoints with feature $v$ in the set ${\cal S}$.
 % With $p(v,{\cal S}) = \frac{|{\cal S}(\abranch \wedge v)|}{|{\cal S}(\abranch)|}$.
@@ -987,12 +993,12 @@ This reasoning will be more effective when good upper bounds are found early, he
 
 
 % $$
-% \sum_{v \in \{\afeat,\bar{\afeat\}} \frac{|\allex(\abranch \wedge v)|}{|\allex(\abranch)|} \cdot -\sum_{c \in \{\bot,\top\}} \frac{|\setex{c}(\abranch \wedge v)}{|\setex{c}(\abranch)} \log_{2} \frac{|\setex{c}(\abranch \wedge v)}{|\setex{c}(\abranch)}
+% \sum_{v \in \{\afeat,\bar{\afeat\}} \frac{|\allex(\abranch \wedge v)|}{|\allex(\abranch)|} \cdot -\sum_{c \in \{\negclass,\posclass\}} \frac{|\setex{c}(\abranch \wedge v)}{|\setex{c}(\abranch)} \log_{2} \frac{|\setex{c}(\abranch \wedge v)}{|\setex{c}(\abranch)}
 % $$
 
 
 % $$
-% 2 - \sum\limits_{v \in \{\afeat,\bar{\afeat}\}}\sum\limits_{c \in \{\bot,\top\}} p(v,\setex{c})^2
+% 2 - \sum\limits_{v \in \{\afeat,\bar{\afeat}\}}\sum\limits_{c \in \{\negclass,\posclass\}} p(v,\setex{c})^2
 % $$
 
 
@@ -1009,10 +1015,10 @@ $$
 $$
 We can use the weighted version to handle noisy data, by merging duplicated datapoints and suppressing inconsistent datapoints.
 
-Let $\weight_{\bot}$ (resp. $\weight_{\top}$) denote the number of occurrences of $x$ in $\setex{\bot}$ (resp. $\setex{\top}$). We use the weight function $\weight[x] = |\weight_{\bot}(x) - \weight_{\top}(x)|$. Then, for any datapoint $x$, we remove all but one of its occurrences, in $\setex{\bot}$ if $\weight_{\bot}>\weight_{\top}$, in $\setex{\top}$ if $\weight_{\top}>\weight_{\bot}$, and suppress it completely if $\weight_{\top}=\weight_{\bot}$.
+Let $\weight_{\negclass}$ (resp. $\weight_{\posclass}$) denote the number of occurrences of $x$ in $\setex{\negclass}$ (resp. $\setex{\posclass}$). We use the weight function $\weight[x] = |\weight_{\negclass}(x) - \weight_{\posclass}(x)|$. Then, for any datapoint $x$, we remove all but one of its occurrences, in $\setex{\negclass}$ if $\weight_{\negclass}>\weight_{\posclass}$, in $\setex{\posclass}$ if $\weight_{\posclass}>\weight_{\negclass}$, and suppress it completely if $\weight_{\posclass}=\weight_{\negclass}$.
 The reported error will then need to be offset by the number of pair of suppressed inconsistant datapoints, that is:
 $
-\sum_{x \in \allex}\min(\weight_{\bot}(x), \weight_{\top}(x))
+\sum_{x \in \allex}\min(\weight_{\negclass}(x), \weight_{\posclass}(x))
 $.
 Reducing the number of datapoints in the dataset has a non-null, although tiny impact on efficiency. However, suppressing inconsistent datapoints is very important. In particular, proving optimality when the minimum error is positive basically requires to exhaust the search space and is therefore extremely costly. On the other hand, when there exists a perfect tree within the maximum depth, we can stop as soon as we find it. This preprocessing allows to benefit from that when we find a tree whose error is equal to the number of pair of inconsistent datapoints in the original dataset.
 This preprocessing can be done in $O(\numfeat \numex \log \numex)$ by ordering the datapoints in lexicographic order and then processing them in sequence.
@@ -1165,7 +1171,7 @@ This algorithm is considerably more efficient than state-of-the-art exact algori
 \bibliography{src/references}
 
 
-\end{document}
+% \end{document}
 
 \clearpage
 
@@ -1173,32 +1179,34 @@ This algorithm is considerably more efficient than state-of-the-art exact algori
 
 \section*{Appendix}
 
+\renewcommand{\arraystretch}{.955}
+
 \begin{table}[htbp]%
 \begin{center}%
-\begin{footnotesize}%
+\begin{scriptsize}%
 \tabcolsep=2pt%
 \input{src/tables/allopt3.tex}%
-\end{footnotesize}%
+\end{scriptsize}%
 \end{center}%
 \caption{\label{tab:all3} Comparison with state of the art: depth 3}%
 \end{table}%
 
 \begin{table}[htbp]
 \begin{center}
-\begin{footnotesize}
+\begin{scriptsize}
 \tabcolsep=2pt
 \input{src/tables/allopt4.tex}
-\end{footnotesize}
+\end{scriptsize}
 \end{center}
 \caption{\label{tab:all4} Comparison with state of the art: depth 4}
 \end{table}
 
 \begin{table}[htbp]
 \begin{center}
-\begin{footnotesize}
+\begin{scriptsize}
 \tabcolsep=2pt
 \input{src/tables/allopt5.tex}
-\end{footnotesize}
+\end{scriptsize}
 \end{center}
 \caption{\label{tab:all5} Comparison with state of the art: depth 5}
 \end{table}
@@ -1206,50 +1214,50 @@ This algorithm is considerably more efficient than state-of-the-art exact algori
 
 \begin{table}[htbp]
 \begin{center}
-\begin{footnotesize}
+\begin{scriptsize}
 \tabcolsep=2pt
 \input{src/tables/allopt6.tex}
-\end{footnotesize}
+\end{scriptsize}
 \end{center}
 \caption{\label{tab:all6} Comparison with state of the art: depth 6}
 \end{table}
 
 \begin{table}[htbp]
 \begin{center}
-\begin{footnotesize}
+\begin{scriptsize}
 \tabcolsep=2pt
 \input{src/tables/allopt7.tex}
-\end{footnotesize}
+\end{scriptsize}
 \end{center}
 \caption{\label{tab:all7} Comparison with state of the art: depth 7}
 \end{table}
 
 \begin{table}[htbp]
 \begin{center}
-\begin{footnotesize}
+\begin{scriptsize}
 \tabcolsep=2pt
 \input{src/tables/allopt8.tex}
-\end{footnotesize}
+\end{scriptsize}
 \end{center}
 \caption{\label{tab:all8} Comparison with state of the art: depth 8}
 \end{table}
 
 \begin{table}[htbp]
 \begin{center}
-\begin{footnotesize}
+\begin{scriptsize}
 \tabcolsep=2pt
 \input{src/tables/allopt9.tex}
-\end{footnotesize}
+\end{scriptsize}
 \end{center}
 \caption{\label{tab:all9} Comparison with state of the art: depth 9}
 \end{table}
 
 \begin{table}[htbp]
 \begin{center}
-\begin{footnotesize}
+\begin{scriptsize}
 \tabcolsep=2pt
 \input{src/tables/allopt10.tex}
-\end{footnotesize}
+\end{scriptsize}
 \end{center}
 \caption{\label{tab:all10} Comparison with state of the art: depth 10}
 \end{table}
@@ -1259,80 +1267,80 @@ This algorithm is considerably more efficient than state-of-the-art exact algori
 
 \begin{table}[htbp]%
 \begin{center}%
-\begin{footnotesize}%
+\begin{scriptsize}%
 \tabcolsep=2pt%
 \input{src/tables/allfact3.tex}%
-\end{footnotesize}%
+\end{scriptsize}%
 \end{center}%
 \caption{\label{tab:fact3} Factor analysis: depth 3}%
 \end{table}%
 
 \begin{table}[htbp]
 \begin{center}
-\begin{footnotesize}
+\begin{scriptsize}
 \tabcolsep=2pt
 \input{src/tables/allfact4.tex}
-\end{footnotesize}
+\end{scriptsize}
 \end{center}
 \caption{\label{tab:fact4} Factor analysis: depth 4}
 \end{table}
 
 \begin{table}[htbp]
 \begin{center}
-\begin{footnotesize}
+\begin{scriptsize}
 \tabcolsep=2pt
 \input{src/tables/allfact5.tex}
-\end{footnotesize}
+\end{scriptsize}
 \end{center}
 \caption{\label{tab:fact5} Factor analysis: depth 5}
 \end{table}
 
 \begin{table}[htbp]
 \begin{center}
-\begin{footnotesize}
+\begin{scriptsize}
 \tabcolsep=2pt
 \input{src/tables/allfact6.tex}
-\end{footnotesize}
+\end{scriptsize}
 \end{center}
 \caption{\label{tab:fact6} Factor analysis: depth 6}
 \end{table}
 
 \begin{table}[htbp]
 \begin{center}
-\begin{footnotesize}
+\begin{scriptsize}
 \tabcolsep=2pt
 \input{src/tables/allfact7.tex}
-\end{footnotesize}
+\end{scriptsize}
 \end{center}
 \caption{\label{tab:fact7} Factor analysis: depth 7}
 \end{table}
 
 \begin{table}[htbp]
 \begin{center}
-\begin{footnotesize}
+\begin{scriptsize}
 \tabcolsep=2pt
 \input{src/tables/allfact8.tex}
-\end{footnotesize}
+\end{scriptsize}
 \end{center}
 \caption{\label{tab:fact8} Factor analysis: depth 8}
 \end{table}
 
 \begin{table}[htbp]
 \begin{center}
-\begin{footnotesize}
+\begin{scriptsize}
 \tabcolsep=2pt
 \input{src/tables/allfact9.tex}
-\end{footnotesize}
+\end{scriptsize}
 \end{center}
 \caption{\label{tab:fact9} Factor analysis: depth 9}
 \end{table}
 
 \begin{table}[htbp]
 \begin{center}
-\begin{footnotesize}
+\begin{scriptsize}
 \tabcolsep=2pt
 \input{src/tables/allfact10.tex}
-\end{footnotesize}
+\end{scriptsize}
 \end{center}
 \caption{\label{tab:fact10} Factor analysis: depth 10}
 \end{table}
