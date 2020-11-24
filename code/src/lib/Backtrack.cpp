@@ -1212,12 +1212,11 @@ void BacktrackingAlgorithm<ErrorPolicy, E_t>::expend() {
 
 template <template<typename> class ErrorPolicy, typename E_t>
 void BacktrackingAlgorithm<ErrorPolicy, E_t>::initialise_search() {
-	
-	
-	if(options.output != "") {
-		printDatasetToFile(options.output);
-	}
-	
+
+  // if(options.output != "") {
+  // 	printDatasetToFile(options.output);
+  // }
+
   num_level_zero_feature = num_feature;
 
   setReverse();
@@ -1801,21 +1800,19 @@ std::ostream &BacktrackingAlgorithm<ErrorPolicy, E_t>::display(std::ostream &os)
   return os;
 }
 
-template <template<typename> class ErrorPolicy, typename E_t>
-void BacktrackingAlgorithm<ErrorPolicy, E_t>::printDatasetToFile(std::string &filename) const {
-	
-	ofstream outfile(filename.c_str(), ofstream::out);
-	
-	for(auto y{0}; y<2; ++y) {
-		for(auto x{0}; x<example[y].size(); ++x) {
-			outfile << y;
-			for(auto f{0}; f<numFeature(); ++f) {
-				outfile << " " << dataset[y][x][f];
-			}
-			outfile << endl;
-		}
-	}
-	outfile.close();
+template <template <typename> class ErrorPolicy, typename E_t>
+void BacktrackingAlgorithm<ErrorPolicy, E_t>::printDatasetToFile(
+    ostream &outfile) const {
+  for (auto y{0}; y < 2; ++y) {
+    for (auto x{0}; x < example[y].size(); ++x) {
+      outfile << y;
+      for (auto f{0}; f < numFeature(); ++f) {
+        outfile << " " << dataset[y][x][f];
+      }
+      outfile << endl;
+    }
+  }
+  // outfile.close();
 }
 
 template <template<typename> class ErrorPolicy, typename E_t>

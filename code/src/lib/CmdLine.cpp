@@ -375,6 +375,11 @@ DTOptions parse_dt(int argc, char *argv[]) {
   cmd.add<SwitchArg>(opt.minsize, "", "depthonly", "switch size objective off",
                      true);
 
+  cmd.add<SwitchArg>(opt.nosolve, "", "nosolve", "switch solving off", false);
+
+  cmd.add<ValueArg<string>>(opt.reference_class, "", "class", "reference class",
+                            false, "", "string");
+
   // ValueArg (const std::string &flag, const std::string &name, const
   // std::string &desc, bool req, T value, Constraint< T > *constraint, Visitor
   // *v=NULL)

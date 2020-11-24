@@ -65,6 +65,8 @@ void read_non_binary(Algo_t &A, DTOptions &opt) {
 
   string ext{opt.instance_file.substr(opt.instance_file.find_last_of(".") + 1)};
 
+  // cout << "here\n" ;
+
   if (opt.format == "csv" or (opt.format == "guess" and ext == "csv"))
     csv::read(
         opt.instance_file,
@@ -79,6 +81,19 @@ void read_non_binary(Algo_t &A, DTOptions &opt) {
       auto y = *data.begin();
       input.addExample(data.begin() + 1, data.end(), y);
     });
+  } else if (opt.format == "train" or
+             (opt.format == "guess" and ext == "train")) {
+    txt::read(opt.instance_file, [&](vector<string> &data) {
+      auto y = *data.begin();
+      input.addExample(data.begin() + 1, data.end() - 1, y);
+    });
+  } else if (opt.format == "tst" or (opt.format == "guess" and ext == "tst")) {
+    txt::read(opt.instance_file, [&](vector<string> &data) {
+      auto y = *data.rbegin();
+      if (opt.reference_class != " " and opt.reference_class != y)
+        y = ("not" + opt.reference_class);
+      input.addExample(data.begin(), data.end() - 1, y);
+    });
   } else {
     if (opt.format != "txt" and ext != "txt")
       cout << "p Warning, unrecognized format, trying txt\n";
@@ -92,9 +107,9 @@ void read_non_binary(Algo_t &A, DTOptions &opt) {
 
   DataSet base;
 
-  // cout << input << endl;
-
   input.binarize(base);
+
+  // cout << base << endl;
 
   A.setData(base);
 }
@@ -135,13 +150,13 @@ int run_algorithm(DTOptions &opt) {
 
   BacktrackingAlgorithm<ErrorPolicy, E_t> A(yallen, opt);
 
-  if (opt.preprocessing) {
-
-    read_weighted(A, opt);
-
-  } else if (opt.binarize) {
+  if (opt.binarize) {
 
     read_non_binary(A, opt);
+
+  } else if (opt.preprocessing) {
+
+    read_weighted(A, opt);
 
   } else {
 
@@ -149,40 +164,51 @@ int run_algorithm(DTOptions &opt) {
   }
 
   if (opt.print_ins) {
-    cout << "d examples=" << A.numExample() << " features=" << A.numFeature()
-         << endl;
+    if (opt.nosolve) {
+      if (opt.output != "") {
+        ofstream outfile(opt.output.c_str(), ofstream::out);
+        A.printDatasetToFile(outfile);
+      } else {
+        A.printDatasetToFile(cout);
+      }
+    } else {
+      cout << "d examples=" << A.numExample() << " features=" << A.numFeature()
+           << endl;
+    }
   }
 
   if (not opt.preprocessing and opt.verbosity >= DTOptions::NORMAL)
     cout << "d readtime=" << cpu_time() << endl;
 
-  if (opt.mindepth) {
-    if (opt.minsize)
-      A.minimize_error_depth_size();
-    else
-      A.minimize_error_depth();
-  } else 
-    A.minimize_error();
+  if (not opt.nosolve) {
+    if (opt.mindepth) {
+      if (opt.minsize)
+        A.minimize_error_depth_size();
+      else
+        A.minimize_error_depth();
+    } else
+      A.minimize_error();
 
-  Tree sol = A.getSolution();
+    Tree sol = A.getSolution();
 
-  if (opt.print_sol) {
-    cout << sol << endl;
-  }
+    if (opt.print_sol) {
+      cout << sol << endl;
+    }
 
-  if (opt.verified) {
+    if (opt.verified) {
 
-    E_t tree_error = sol.predict<E_t>(A.dataset[0].begin(), A.dataset[0].end(),
-                                      A.dataset[1].begin(), A.dataset[1].end(),
-                                      [&](const int y, const size_t i) {
-                                        return A.error_policy.get_weight(y, i);
-                                      });
+      E_t tree_error = sol.predict<E_t>(
+          A.dataset[0].begin(), A.dataset[0].end(), A.dataset[1].begin(),
+          A.dataset[1].end(), [&](const int y, const size_t i) {
+            return A.error_policy.get_weight(y, i);
+          });
 
-    assert(tree_error == A.error());
+      assert(tree_error == A.error());
 
-    cout << std::setprecision(std::numeric_limits<long double>::digits10 + 1)
-         << std::setw(0) << "p solution verified (" << tree_error << " / " << A.error() << ")"
-         << endl;
+      cout << std::setprecision(std::numeric_limits<long double>::digits10 + 1)
+           << std::setw(0) << "p solution verified (" << tree_error << " / "
+           << A.error() << ")" << endl;
+    }
   }
   return 0;
 }

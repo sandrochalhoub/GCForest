@@ -161,10 +161,14 @@
 	\SetKwFunction{budalg}{Bud-first-search}
 	\SetKwFunction{dynprog}{DynProg}
 	\SetKwFunction{dleight}{DL8.5}
+	\SetKwFunction{olddleight}{DL8}
 	\SetKwFunction{cart}{CART}
 	\SetKwFunction{greedy}{BudFS (first sol.)}
   \SetKwFunction{murtree}{Murtree}
 	\SetKwFunction{dominated}{Dominated}
+	\SetKwFunction{idthree}{ID3}
+	\SetKwFunction{cfour}{C4.5}
+	
 	
 	
 	\newcommand{\nolb}[0]{No lower bound}
@@ -191,56 +195,87 @@
 
 
 \begin{abstract}
-	In this paper we introduce a relatively \emph{simple} algorithm: \budalg, that is as memory and time efficient as heuristics, and yet more efficient than most exact methods on most data sets. State-of-the-art exact methods often have poor anytime behavior, and hardly scale on deep trees. In our experiments, we found that they are typically orders of magnitude slower than the propposed algorithm to compute classifiers that significantly improve upon greedy heuristics. 
+	In this paper we introduce a relatively \emph{simple} algorithm: \budalg, that is as memory and time efficient as heuristics, and yet more efficient than most exact methods on most data sets. State-of-the-art exact methods often have poor anytime behavior, and hardly scale to deep trees. In our experiments, we found that they are typically orders of magnitude slower than the propposed algorithm to compute classifiers that significantly improve upon greedy heuristics. 
 \end{abstract}
 
 \section{Introduction}
 
-Ever since the pionneering work decision tree classifiers~\cite{breiman1984classification,10.1023/A:1022643204877}, the question of computing \emph{optimal} decision trees has been alive, and recently a number of algorithms have been introduced for that purpose.
-Several variants and criteria have been proposed. %, e.g. computing the perfect classifier of minimum size~\cite{}, 
-Among those, computing a depth-bounded decision tree of maximum accuracy is often the preferred criterion~\cite{bertsimas2017optimal,hu2019optimal,dl8,verhaeghe2019learning}, because while being straightforward, it captures many desired features: it is resilient to noisy data, and shallow trees are both easier to explain and less prone to overfitting.
+In conclusion of their short paper showing that computing decision tree classifiers of maximum accuracy is NP-complete, Hyafil and Rivest stated: ``Accordingly, it is to be expected that that good heuristics for constructing near-optimal binary decision trees will be the best solution to this problem in the near future.''~\cite{NPhardTrees}. Indeed, heuristic approaches such as \cart\cite{breiman1984classification}, \idthree~\cite{10.1023/A:1022643204877} or \cfour~\cite{c4-5} have been prevalent long afterward, and are still vastly more commonly used in practice than exact approaches.
 
-\medskip
+%\medskip
 
-Despite the vast offer of exact methods that can potentially provide optimal decision trees, or at least should, given enough time, improve on heuristics, the latter are still vastly more commonly used in practice. Some methods are memory-hungry, some are not anytime, and as far as we know there is not a single algorithm that can provide optimal classifiers while scaling to large data sets, feature space, or tree depth as heuristics do.
-% \begin{itemize}
-% 	\item MinDT -> does not scale, problem with noise
-% 	\item other SAT approaches -> do not scale in some way or another
-% 	\item DL8 -> does not scale in memory, slower
-% 	\item BinOCT -> ? (probably much slower)
-%   \item Murtree -> by far the most efficient, however, does not scale as well on deep trees and not as anytime
-% \end{itemize}
+It is well established, however, that optimal decision trees (for some combination of accuracy, depth and size) generalize better to unseen data than heuristic trees. This experiment has been confirmed in several publications\footnote{Hence we shall not reproduce once again such experiments in this paper.}, in particular for the objective criterion considered in this paper: maximizing the accuracy given an upper bound on the depth~\cite{avellanedaefficient,bertsimas2017optimal,bertsimas2007classification,DBLP:conf/ijcai/Hu0HH20,DBLP:journals/corr/abs-2007-12652,dl8}. 
+Another valuable feature of smaller and/or shallower trees is that interpreting or explaining their prediction is comparatively easier, which is often valuable. 
 
+%\medskip
 
+Despite these desirable features, exact methods have not been widely adopted yet for a simple reason: they do not scale. There has been a significant progress lately, and the most recent approaches show very promising results. However, no exact method can be considered consistantly better than heuristics. 
+For SAT~\cite{avellanedaefficient,narodytska2018learning} and Integer Programming approaches~\cite{aghaei2020learning,bertsimas2017optimal,bertsimas2007classification,verwer2019learning}, the size of the encoding is a first hurdle. All these models require a number of variables at least proportional to the size of the tree and to the number of datapoints. As a result, scaling beyond a few thousands datapoints is difficult. 
+On the other hand, dynamic programming algorithms \olddleight~\cite{dl8} and \dleight~\cite{dl85} scale very well to large data sets. Moreover, these algorithms leverage branch independence: sibling subtrees can be optimized independently, which as a great impact on computational complexity. However, \dleight tends to be memory hungry and furthermore, is not anytime.
+The constraint programming approach of Verhaeghe \textit{et al.} emulates these positive features using dedicated propagation algorithms and search strategies~\cite{verhaeghe2019learning}, while being potentially anytime, although it does not quite match \dleight's efficiency.
+Finally, a recently introduced algorithm, \murtree~\cite{DBLP:journals/corr/abs-2007-12652}, improves on earlier dynamic programming in several ways. As a result, it clearly dominates previous exact methods. It is more memory efficient, orders of magnitude faster than \dleight, and has a better anytime behavior. However, our experimental results show that for deeper trees, none of these methods can reliably outperform heuristics.
+ 
 
 \medskip
 
 In this paper we introduce a relatively \emph{simple} algorithm (\budalg), that is as memory and time efficient as heuristics, and yet more efficient than most exact methods on most data sets. 
-This algorithm can be seen as an instance of the more general framework introduced in \cite{DBLP:journals/corr/abs-2007-12652}, however tuned to have the best scalability to large trees and the best anytime behavior as possible.
+This algorithm can be seen as an instance of the more general framework introduced in \cite{DBLP:journals/corr/abs-2007-12652}, however tuned to have the best scalability to large trees and the best anytime behavior as possible. 
+%As a result, it is comparable to \murtree on shallow trees, while clearly outperforming the state of the art on deep trees.
 
 In a nutshell, \budalg emulates the dynamic programming algorithm \dleight~\cite{dl8}, while always expending non-terminal branches (a.k.a ``buds'') before optimizing grown branches. As a result, this algorithm is in a sense strictly better than both the standard dynamic programming approach (because it is anytime and at least as fast) and than classic heuristics (because it emulates them during search, without significant overhead).
 %but explores the search space so as to improve its anytime behaviour.
-Our experimental results show that it outperforms the state of the art, to the exception of \murtree~\cite{DBLP:journals/corr/abs-2007-12652} on relatively shallow trees (typically for maximum depth up to 4), for which this its more sophisticated (albeit complex) algorithmic features can pay off.
+Our experimental results show that it outperforms the state of the art, to the exception of \murtree on relatively shallow trees (typically for maximum depth up to 4), for which this its more sophisticated (albeit complex) algorithmic features can pay off.
 In particular, on data sets that \dleight can tackle, \budalg can always find classifiers at least as accurate faster, and when the former can prove optimality, the latter does it orders of magnitude faster.
 
+
+
+
+% Therefore, we shall not reproduce once again such experiments and only consider efficiency with respect to the primary objective.
+% Other criteria have been used, for instance a number of approaches have considered the problem of computing a perfectly accurate tree of minimal size and/or depth~\cite{DBLP:conf/cp/BessiereHO09,narodytska2018learning}. This criterion is usually considered less useful because it is not robust to noisy data sets and is prone to overfitting. It is possible to adapt these approaches to accuracy maximization under a fixed depth~\cite{DBLP:conf/ijcai/Hu0HH20}, although the resulting method is not extremely efficient.
+% Alternatively, Hu \textit{et al.} advocate a combination of accuracy and tree size~\cite{hu2019optimal}. We leave more complex criteria for future work as the main focus of this paper is to improve the state of the art for the most commonly used objective.
+% %Alternatively, a number of approaches have considered the problem of computing a perfectly accurate tree of minimal size and/or depth
 %
 %
-% \begin{itemize}
-% 	\item Same worst-case complexity than DL8
-% 	\item No memory usage
-% 	\item Better anytime behaviour than DL8 (in fact as good as the state of the art heuristics)
-% 	\item Therefore, strictly better than greedy heuristics and almost always better than DL8
-% \end{itemize}
-%
-%
-% We consider the problem of finding the bounded-depth decision tree of maximum accuracy.
-% The state of the art includes MIP approaches (BinOCT), a MaxSAT approach based on the SAT encoding proposed by Narodytska et al, and DL8.5.
-% The latter algorithm is by far the most efficient, however, it is not \emph{anytime}: the left branch must be optimally solved before a solution of the right branch can be found. Moreover the use of a cache structure means that it uses a lot of memory. This algorithm is practical for a maximum depth of 4 (although using gigabytes of memory) but often not much beyond. Therefore, in a number of cases, a greedy heuristic (such as CART) is still the best method in practice.
+% %The idea of computing optimal decision tree classifiers is very old. The problem being
+% %Ever since the pionneering work on decision tree classifiers~\cite{breiman1984classification,10.1023/A:1022643204877}, the question of computing \emph{optimal} decision trees has been alive, and recently a number of algorithms have been introduced for that purpose.
+% Several variants and criteria have been proposed. %, e.g. computing the perfect classifier of minimum size~\cite{},
+% Among those, computing a depth-bounded decision tree of maximum accuracy is often the preferred criterion~\cite{bertsimas2017optimal,hu2019optimal,dl8,verhaeghe2019learning}, because while being straightforward, it captures many desired features: it is resilient to noisy data, and shallow trees are both easier to explain and less prone to overfitting.
 %
 % \medskip
-
-% In this note we introduce what is essentially an anytime version of DL8.5, without cache.
-% This algorithm therefore uses linear (in the size of the tree) memory and anytime, hence in principle strictly better than CART. Moreover, on instance where DL8.5 can find a solution, the algorithm described in this note is significantly faster (by about a factor 10).
+%
+% Despite the vast offer of exact methods that can potentially provide optimal decision trees, or at least should, given enough time, improve on heuristics, the latter are still vastly more commonly used in practice. Some methods are memory-hungry, some are not anytime, and as far as we know there is not a single algorithm that can provide optimal classifiers while scaling to large data sets, feature space, or tree depth as heuristics do.
+% % \begin{itemize}
+% % 	\item MinDT -> does not scale, problem with noise
+% % 	\item other SAT approaches -> do not scale in some way or another
+% % 	\item DL8 -> does not scale in memory, slower
+% % 	\item BinOCT -> ? (probably much slower)
+% %   \item Murtree -> by far the most efficient, however, does not scale as well on deep trees and not as anytime
+% % \end{itemize}
+%
+%
+%
+% \medskip
+%
+%
+%
+% %
+% %
+% % \begin{itemize}
+% % 	\item Same worst-case complexity than DL8
+% % 	\item No memory usage
+% % 	\item Better anytime behaviour than DL8 (in fact as good as the state of the art heuristics)
+% % 	\item Therefore, strictly better than greedy heuristics and almost always better than DL8
+% % \end{itemize}
+% %
+% %
+% % We consider the problem of finding the bounded-depth decision tree of maximum accuracy.
+% % The state of the art includes MIP approaches (BinOCT), a MaxSAT approach based on the SAT encoding proposed by Narodytska et al, and DL8.5.
+% % The latter algorithm is by far the most efficient, however, it is not \emph{anytime}: the left branch must be optimally solved before a solution of the right branch can be found. Moreover the use of a cache structure means that it uses a lot of memory. This algorithm is practical for a maximum depth of 4 (although using gigabytes of memory) but often not much beyond. Therefore, in a number of cases, a greedy heuristic (such as CART) is still the best method in practice.
+% %
+% % \medskip
+%
+% % In this note we introduce what is essentially an anytime version of DL8.5, without cache.
+% % This algorithm therefore uses linear (in the size of the tree) memory and anytime, hence in principle strictly better than CART. Moreover, on instance where DL8.5 can find a solution, the algorithm described in this note is significantly faster (by about a factor 10).
 
 \section{Preliminaries}
 
@@ -259,7 +294,9 @@ We denote the union of all datapoints by $\allex = \negex \cup \posex$.
 % $$
 
 
-A \emph{binary decision tree} is a tree whose leaves are labelled with either $\posclass$ or $\negclass$, internal vertices are labelled with features and the two edges exiting a node labelled with $\afeat$ are respectively labelled with $\afeat$ and $\bar{\afeat}$.
+A \emph{binary decision tree} is a tree whose 
+%leaves are labelled with either $\posclass$ or $\negclass$, 
+internal vertices are labelled with features and the two edges exiting a node labelled with $\afeat$ are respectively labelled with $\afeat$ and $\bar{\afeat}$.
 A \emph{branch} of a decision tree can therefore be identified to the set of labels on the corresponding edges.
 %To a \emph{branch} of a decision tree we can associate the set of labels on the corresponding edges.
 %conjunction of features which are on the path from the root to a leaf. If the feature vertex is exited by a $1$-edge, the feature is positive in the conjunction, otherwise it is negative.
@@ -282,7 +319,8 @@ and we write $\error[\abranch,\afeat]$ for $\error[\grow{\abranch}{\afeat}] + \e
 \medskip
 
 Given a binary data set $\langle \negex,\posex \rangle$ on the features \features, %with label function $\classlabel$,
-the \emph{minimum error bounded depth decision tree problem} consists in finding a binary decision tree with labels in \features\ whose branches have cardinality at most $\mdepth$ and the sum of the classification error ($\error[\abranch]$) of its maximal branches is minimum.
+the \emph{minimum error bounded depth decision tree problem} consists in finding a binary decision tree with vertex labels in \features\ whose branches have cardinality at most $\mdepth$ and the sum of the classification error %($\error[\abranch]$) 
+of its maximal branches is minimum.
 %of depth at most $\maxd$ whose sum of error $\error[\abranch]$ for all branches $\abranch$ from the root to the leaves is equal to $\epsilon$.
 
 
@@ -387,8 +425,8 @@ Notice that to simplify the pseudo-code, we use branches to directly index array
 			\end{theorem}
 			
 			\begin{proof}[sketch]
-				The proof follows from the fact that both algorithm explore exactly the same set of branches, albeit not in the same order.
-				Both algorithm eventually explore every combination of (negated) feature of size $\mdepth$.
+				The proof follows from the fact that both algorithms explore exactly the same set of branches, albeit not in the same order:
+				they explore every combination of (negated) feature of size $\mdepth$.
 				
 				We show that this is true for Algorithm~\ref{alg:bud} by recursion on the maximum depth $\mdepth$.
 				For $\mdepth = 0$, both algorithm return $\error[\emptyset]=\min(|\negex|, |\posex|)$.
@@ -1161,7 +1199,7 @@ In the variant ``No lower bound'', the lower bound technique described in Sectio
 % \end{table}
 
 
-\section{Conlusion}
+\section{Conclusion}
 
 We have introduced a simple, exact, iterative, memory-efficient and anytime algorithm for computing optimaly-accurate tree classifiers of bounded depth.
 This algorithm is considerably more efficient than state-of-the-art exact algorithms. Moreover, it has no significant time nor memory overhead with respect to greedy heuristic methods.

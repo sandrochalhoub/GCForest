@@ -10,6 +10,14 @@ from the `code` directory.
 
 ## Usage
 
+- Command line
+
+bin/bud_first_search <datafile> [options]
+
+to binarize a non-binary dataset:
+
+bin/bud_first_search <datafile> --verbosity 0 --binarize --nosolve --print_ins [--output filename]
+
 - High level API (Sklearn estimator)
 
 ```python

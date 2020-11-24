@@ -162,6 +162,9 @@ public:
   int ada_it;
   int ada_stop;
 
+  bool nosolve;
+  string reference_class;
+
   bool mindepth;
   bool minsize;
 
@@ -184,6 +187,7 @@ public:
         bounding(opt.bounding), node_strategy(opt.node_strategy),
         feature_strategy(opt.feature_strategy), binarize(opt.binarize),
         split(opt.split), ada_it(opt.ada_it), ada_stop(opt.ada_stop),
+        nosolve(opt.nosolve), reference_class(opt.reference_class),
         mindepth(opt.mindepth), minsize(opt.minsize),
         preprocessing(opt.preprocessing), progress(opt.progress) {}
 
