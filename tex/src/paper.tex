@@ -30,6 +30,9 @@
 \DeclareMathOperator*{\argmin}{arg\,min}
 
 
+\def\HiLi{\leavevmode\rlap{\hbox to \hsize{\color{yellow!50}\leaders\hrule height .8\baselineskip depth .5ex\hfill}}}
+
+
 % \newtheorem{theorem}{Theorem}
 
 
@@ -144,7 +147,7 @@
 \newcommand{\grow}[2]{\ensuremath{{#1}\oplus{#2}}}
 
 
-
+\SetKw{Break}{break}
 	\SetKwFunction{storebest}{storeBest}
 	\SetKwFunction{solution}{solution}
 	\SetKwFunction{deadend}{deadEnd}
@@ -152,6 +155,7 @@
 	\SetKwFunction{backtrack}{backtrack}
 	\SetKwFunction{dt}{BTDT}
 	\SetKwFunction{pop}{pop}
+	\SetKwFunction{back}{back}
 	\SetKwFunction{push}{push}
 	\SetKwFunction{prune}{prune}
 	% \SetKwFunction{error}{error}
@@ -168,6 +172,7 @@
 	\SetKwFunction{dominated}{Dominated}
 	\SetKwFunction{idthree}{ID3}
 	\SetKwFunction{cfour}{C4.5}
+	\SetKwFunction{cp}{CP}
 	
 	
 	
@@ -549,6 +554,7 @@ Notice that to simplify the pseudo-code, we use branches to directly index array
 		% $\best \gets (\lambda : {2^{\features}} \mapsto \infty)$\;
 		$\dom \gets (\lambda : 2^{\features \cup \bar{\features}} \mapsto \features)$\;
 		$\best \gets (\lambda : 2^{\features \cup \bar{\features}} \mapsto \infty)$\;
+		\HiLi $\opt \gets (\lambda : 2^{\features \cup \bar{\features}} \mapsto 0)$\;
 		
 		
 		
@@ -570,14 +576,20 @@ Notice that to simplify the pseudo-code, we use branches to directly index array
 			}
 		}{
 			% $\best[\emptyset] \gets \min(\best[\emptyset], \error)$\;
-			\lnl{line:backtrack}\Repeat{$\dom[\abranch] \neq \emptyset$ or $|\sequence|=0$}{
+			\lnl{line:backtrack}\While{$|\sequence| > 0$}{
 				pop $(\abranch,\afeat)$ from $\sequence$\;
 				\lnl{line:storebest}$\best[\abranch] \gets \min(\best[\abranch], \best[\grow{\abranch}{\afeat}] +  \best[\grow{\abranch}{\bar{\afeat}}])$\;
 				% $\error \gets \error - \best[\grow{\abranch}{\afeat}] -  \best[\grow{\abranch}{\bar{\afeat}}]$\;
-				\lIf{$\dom[\abranch] \neq \emptyset$} {
-					$\bud \gets \bud \cup \{\abranch\}$
+				\eIf{$\dom[\abranch] \neq \emptyset$ \colorbox{yellow!50}{and $|\abranch|<\mdepth$}} {
+					\HiLi \If{$\forall \abranch' \subseteq \abranch, \lb{\abranch',\abranch} < \best[\abranch']$} {
+					$\bud \gets \bud \cup \{\abranch\}$\;
+					\Break\;
+					}
 					% \lIf{$\opt[\abranch]$}{$\error \gets \error - \best[\abranch]$}
 				} 
+				{
+					\HiLi $\opt[\abranch] \gets 1$\;
+				}
 				% \lElse {
 				% 	$\error \gets \error + \best[\abranch]$%$\error[\abranch,\afeat]$
 				% }
@@ -585,6 +597,27 @@ Notice that to simplify the pseudo-code, we use branches to directly index array
 				% 	$\opt[\abranch] \gets \tru$\;
 				% }
 			}
+			
+			
+			
+			% \lnl{line:backtrack}\Repeat{($\dom[\abranch] \neq \emptyset$ or $|\sequence|=0$) and $\opt[\abranch]=0$}{
+			% 	pop $(\abranch,\afeat)$ from $\sequence$\;
+			% 	\lnl{line:storebest}$\best[\abranch] \gets \min(\best[\abranch], \best[\grow{\abranch}{\afeat}] +  \best[\grow{\abranch}{\bar{\afeat}}])$\;
+			% 	% $\error \gets \error - \best[\grow{\abranch}{\afeat}] -  \best[\grow{\abranch}{\bar{\afeat}}]$\;
+			% 	\lIf{$\dom[\abranch] \neq \emptyset$} {
+			% 		$\bud \gets \bud \cup \{\abranch\}$
+			% 		% \lIf{$\opt[\abranch]$}{$\error \gets \error - \best[\abranch]$}
+			% 	}
+			% 	\lElse {
+			% 		$\opt[\abranch] \gets 1$\;
+			% 	}
+			% 	% \lElse {
+			% 	% 	$\error \gets \error + \best[\abranch]$%$\error[\abranch,\afeat]$
+			% 	% }
+			% 	% {
+			% 	% 	$\opt[\abranch] \gets \tru$\;
+			% 	% }
+			% }
 		}
 		}
 		\Return $\best[\emptyset]$\;
@@ -970,10 +1003,14 @@ This lower bound is correct as long as the branch $\abranch$ belongs to the deci
 The procedure $\dominated{\abranch}$ can therefore simply check, for all parent $\abranch'$ of $\abranch$ up until the root ($\emptyset$), whether $\lb{\abranch',\abranch} \geq \best[\abranch']$. As a result, a branch $\abranch$ which is guaranteed, by this reasoning, to never belong to a non-dominated tree will not be explored further.
 
 
+\begin{example}[Lower bound reasoning]
+	
+	Figure~\ref{fig:lowerbound} shows a snapshot of the excution of \budalg. Leaves of the tree labelled by a dot (``.'') are buds of the tree, waiting for a feature test on that branch. In other words, we have $\bud=\{\{b,a\},\{b,\bar{a},c,\bar{g}\}\}$. Other nodes are labelled with their feature test, and with the values of $\best[\abranch]$ for the branch $\abranch$ ending on that node. When all subtrees of a branch $\abranch$ have been explored (hence $\opt[\abranch]=1$), this is marked by a ``$^*$''. 
+
 
 	\begin{figure}
 	\begin{center}
-		\tabcolsep=0pt
+\subfloat[upper bounds] {
 		\scalebox{1}{
 			\begin{forest}
 				for tree={%
@@ -984,16 +1021,17 @@ The procedure $\dominated{\abranch}$ can therefore simply check, for all parent 
 				}
 				[{$b:50$}
 					[{$a:22$}, edge={very thick}, edge label={node[midway,fill=white,inner sep=2pt,font=\scriptsize]{$b$}}
-					 [{$e:17^*$}, edge label={node[midway,fill=white,inner sep=2pt,font=\scriptsize]{$a$}}
+					 [{$.$}, edge label={node[midway,fill=white,inner sep=2pt,font=\scriptsize]{$a$}}
 					 ]
-					 [{$c:7$}, edge={very thick}, edge label={node[midway,fill=white,inner sep=2pt,font=\scriptsize]{$\bar{a}$}}
-					 	[{$f:\infty$}, edge label={node[midway,fill=white,inner sep=2pt,font=\scriptsize]{$c$}}
-							[., edge label={node[midway,fill=white,inner sep=2pt,font=\scriptsize]{$f$}}]
-							[., edge label={node[midway,fill=white,inner sep=2pt,font=\scriptsize]{$\bar{f}$}}]
+					 [{$c:17$}, edge={very thick}, edge label={node[midway,fill=white,inner sep=2pt,font=\scriptsize]{$\bar{a}$}}
+					 	[{$f:15^*$}, edge label={node[midway,fill=white,inner sep=2pt,font=\scriptsize]{$c$}}
+							% [$\posclass$, edge label={node[midway,fill=white,inner sep=2pt,font=\scriptsize]{$f$}}]
+							% [$\negclass$, edge label={node[midway,fill=white,inner sep=2pt,font=\scriptsize]{$\bar{f}$}}]
 						]
 						[{$g:\infty$}, edge={very thick}, edge label={node[midway,fill=white,inner sep=2pt,font=\scriptsize]{$\bar{c}$}}
-							[., edge={very thick}, edge label={node[midway,fill=white,inner sep=2pt,font=\scriptsize]{$g$}}]
-							[., edge label={node[midway,fill=white,inner sep=2pt,font=\scriptsize]{$\bar{g}$}}]
+							[., edge={very thick}, edge label={node[midway,fill=white,inner sep=2pt,font=\scriptsize]{$g$}}
+							]
+							[{$h:3^*$}, edge label={node[midway,fill=white,inner sep=2pt,font=\scriptsize]{$\bar{g}$}}]
 					 	]
 					 ]
 					]
@@ -1002,10 +1040,44 @@ The procedure $\dominated{\abranch}$ can therefore simply check, for all parent 
 				]
 			\end{forest}
 		}
+		}
+		\subfloat[lower bounds w.r.t. $\{b,\bar{a},c,\bar{g}\}$] {
+		\scalebox{1}{
+			\begin{forest}
+				for tree={%
+					l sep=25pt,
+					s sep=10pt,
+					node options={shape=rectangle, minimum width=10pt, inner sep=1pt, font=\footnotesize},
+		  		edge={-latex, shorten >=1pt, shorten <=1pt},
+				}
+				[{$b,[49,50]$}
+					[{$a,[18,22]$}, edge={very thick}, edge label={node[midway,fill=white,inner sep=2pt,font=\scriptsize]{$b$}}
+					 [{$.$}, edge label={node[midway,fill=white,inner sep=2pt,font=\scriptsize]{$a$}}
+					 ]
+					 [{$c,[18,17]$}, edge={very thick}, edge label={node[midway,fill=white,inner sep=2pt,font=\scriptsize]{$\bar{a}$}}
+					 	[{$f,15^*$}, edge label={node[midway,fill=white,inner sep=2pt,font=\scriptsize]{$c$}}
+							% [$\posclass$, edge label={node[midway,fill=white,inner sep=2pt,font=\scriptsize]{$f$}}]
+							% [$\negclass$, edge label={node[midway,fill=white,inner sep=2pt,font=\scriptsize]{$\bar{f}$}}]
+						]
+						[{$g,[3,\infty]$}, edge={very thick}, edge label={node[midway,fill=white,inner sep=2pt,font=\scriptsize]{$\bar{c}$}}
+							[., edge={very thick}, edge label={node[midway,fill=white,inner sep=2pt,font=\scriptsize]{$g$}}
+							]
+							[{$h,3^*$}, edge label={node[midway,fill=white,inner sep=2pt,font=\scriptsize]{$\bar{g}$}}]
+					 	]
+					 ]
+					]
+					[{$d:31^*$}, edge label={node[midway,fill=white,inner sep=2pt,font=\scriptsize]{$\bar{b}$}}
+					]
+				]
+			\end{forest}
+		}
+		}
 	\end{center}
 	\caption{\label{fig:lowerbound} Example of lower bound computation.}
 	%\caption{\label{fig:searchtree} The search tree for decision trees. \dynprog explores it depth first, whereas \budalg explores branches in the order given below the leaves.}
 	\end{figure}
+
+\end{example}
 
 
 \medskip
@@ -1157,16 +1229,16 @@ We can see in those graphs that \murtree finds an initial tree extremely quickly
 
 
 
-\begin{figure}
-	\subfloat[depth=3]{\input{src/tables/scerror3.tex}}
-	\subfloat[depth=5]{\input{src/tables/scerror5.tex}}
-	\subfloat[depth=7]{\input{src/tables/scerror7.tex}}
-
-	\subfloat[depth=8]{\input{src/tables/scerror8.tex}}
-	\subfloat[depth=9]{\input{src/tables/scerror9.tex}}
-	\subfloat[depth=10]{\input{src/tables/scerror10.tex}}
-	\caption{\label{fig:cactus}Accuracy over time}
-\end{figure}
+% \begin{figure}
+% 	\subfloat[depth=3]{\input{src/tables/scerror3.tex}}
+% 	\subfloat[depth=5]{\input{src/tables/scerror5.tex}}
+% 	\subfloat[depth=7]{\input{src/tables/scerror7.tex}}
+%
+% 	\subfloat[depth=8]{\input{src/tables/scerror8.tex}}
+% 	\subfloat[depth=9]{\input{src/tables/scerror9.tex}}
+% 	\subfloat[depth=10]{\input{src/tables/scerror10.tex}}
+% 	\caption{\label{fig:cactus}Accuracy over time}
+% \end{figure}
 
 \subsection{Factor analysis}
 
