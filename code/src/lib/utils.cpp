@@ -6,7 +6,7 @@
 #include "utils.hpp"
 
 
-namespace primer {
+namespace blossom {
 
 	double cpu_time(void) {
 	  struct rusage ru;

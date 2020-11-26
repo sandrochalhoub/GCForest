@@ -6,7 +6,7 @@
 
 #include "Backtrack.hpp"
 
-namespace primer {
+namespace blossom {
 
   struct WeakClassifier {
     Wood wood;

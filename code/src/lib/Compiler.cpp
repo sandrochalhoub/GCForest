@@ -1,7 +1,7 @@
 
 #include "Compiler.hpp"
 
-namespace primer {
+namespace blossom {
 
 
 template <typename E_t> Compiler<E_t>::Compiler(DTOptions &opt) : options(opt) {
@@ -108,25 +108,25 @@ template <typename E_t> int Compiler<E_t>::numFeature() const {
   return num_feature;
 }
 
-template <typename E_t> void Compiler<E_t>::setData(const DataSet &data) {
-
-  num_feature = static_cast<int>(data.numFeature());
-
-  f_error.resize(num_feature, 1);
-  f_entropy.resize(num_feature, 1);
-  f_gini.resize(num_feature, 1);
-
-  example.resize(data.example[0].count());
-  auto k{0};
-  for (auto i : data.example[0]) {
-    for (auto j{0}; j < num_feature; ++j)
-      if (data.hasFeature(i, j)) {
-        example[k].push_back(j);
-      }
-    ++k;
-  }
-  setReverse();
-}
+// template <typename E_t> void Compiler<E_t>::setData(const DataSet &data) {
+//
+//   num_feature = static_cast<int>(data.numFeature());
+//
+//   f_error.resize(num_feature, 1);
+//   f_entropy.resize(num_feature, 1);
+//   f_gini.resize(num_feature, 1);
+//
+//   example.resize(data.example[0].count());
+//   auto k{0};
+//   for (auto i : data.example[0]) {
+//     for (auto j{0}; j < num_feature; ++j)
+//       if (data.hasFeature(i, j)) {
+//         example[k].push_back(j);
+//       }
+//     ++k;
+//   }
+//   setReverse();
+// }
 
 template <typename E_t> void Compiler<E_t>::setReverse() {
 

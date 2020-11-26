@@ -7,7 +7,7 @@
 
 #define EPSILON std::numeric_limits<double>::epsilon()
 
-namespace primer {
+namespace blossom {
 
   WeakClassifier::WeakClassifier(DTOptions &opt) : algo(wood, opt) {}
 

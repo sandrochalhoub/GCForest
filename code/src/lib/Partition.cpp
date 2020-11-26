@@ -5,7 +5,7 @@
 
 using namespace std;
 
-namespace primer {
+namespace blossom {
 
 TreePartition::TreePartition() {}
 

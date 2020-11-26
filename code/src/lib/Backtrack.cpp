@@ -5,7 +5,7 @@
 
 // #define DEBUG_GINI
 
-namespace primer {
+namespace blossom {
 
 template<typename T>
 T min_positive() {

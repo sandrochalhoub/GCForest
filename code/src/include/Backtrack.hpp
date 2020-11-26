@@ -4,7 +4,7 @@
 #include <vector>
 #include <cmath>
 
-#include "DataSet.hpp"
+#include "CmdLine.hpp"
 #include "Partition.hpp"
 #include "SparseSet.hpp"
 #include "Tree.hpp"
@@ -25,7 +25,7 @@ using namespace std;
 
 
 
-namespace primer {
+namespace blossom {
 
 /// this needs to be templated with "T" and should be 0 for integral types
 /// (e.g., static_cast<T>(1.e-9) should work)

@@ -15,15 +15,15 @@
 using namespace boost;
 
 typedef int dtype;
-typedef dynamic_bitset<> word;
+// typedef dynamic_bitset<> word;
 
 #define INTEGER 0
 #define FLOAT 1
 #define SYMBOL 2
 
-static const word nothing{word()};
+static const instance nothing{instance()};
 
-namespace primer {
+namespace blossom {
 
 template <typename T> bool is(const std::string &someString) {
   using boost::lexical_cast;
@@ -39,9 +39,9 @@ template <typename T> bool is(const std::string &someString) {
 }
 
 // concatenate w1 and w2
-word concatenate(const word &w1, const word &w2) {
-  word wa{w1};
-  word wb{w2};
+instance concatenate(const instance &w1, const instance &w2) {
+  instance wa{w1};
+  instance wb{w2};
   auto sz{w1.size() + w2.size()};
   wa.resize(sz);
   wb.resize(sz);
@@ -50,7 +50,7 @@ word concatenate(const word &w1, const word &w2) {
   return wa;
 }
 
-// encoding from type T to binary words
+// encoding from type T to binary instances
 template <typename T> class Encoding {
 
 public:
@@ -60,8 +60,8 @@ public:
   virtual void encode(typename std::vector<T>::iterator beg,
                       typename std::vector<T>::iterator end) = 0;
 
-  // returns the word associated to value x
-  virtual const word &getEncoding(T &x) const = 0;
+  // returns the instance associated to value x
+  virtual const instance &getEncoding(T &x) const = 0;
 
   virtual size_t size() const = 0;
 	
@@ -77,12 +77,12 @@ public:
   // const bool test()
 };
 
-// encoding from type T to binary words
+// encoding from type T to binary instances
 template <typename T> class TrivialEncoding : public Encoding<T> {
 
 protected:
   vector<T> value_set;
-  vector<word> lit;
+  vector<instance> lit;
 
 public:
 	// virtual ~TrivialEncoding() {}
@@ -99,8 +99,8 @@ public:
     lit.push_back(dynamic_bitset<>(1, true));
   }
 
-  // returns the word associated to value x
-  virtual const word &getEncoding(T &x) const {
+  // returns the instance associated to value x
+  virtual const instance &getEncoding(T &x) const {
     return lit[(x == value_set[1])];
   }
 	
@@ -124,11 +124,11 @@ public:
   // const bool test()
 };
 
-// encoding from type T to binary words
+// encoding from type T to binary instances
 template <typename T> class ClassicEncoding : public Encoding<T> {
 
 protected:
-  map<T, word> encoding_map;
+  map<T, instance> encoding_map;
   vector<T> value_set;
 
 public:
@@ -143,8 +143,8 @@ public:
       value_set.push_back(*it);
   }
 
-  // returns the word associated to value x
-  const word &getEncoding(T &x) const {
+  // returns the instance associated to value x
+  const instance &getEncoding(T &x) const {
     auto it = encoding_map.find(x);
     if (it != encoding_map.end()) {
       return it->second;
@@ -545,7 +545,7 @@ public:
 
     auto bin_feature_count{0};
     for (auto i{0}; i < size(); ++i) {
-      word binex;
+      instance binex;
       for (auto f{0}; f < numFeature(); ++f) {
         auto r{feature_rank[f]};
         if (feature_type[f] == INTEGER) {
@@ -573,7 +573,7 @@ public:
         }
       }
 
-      // word db;
+      // instance db;
       // bin.duplicate_format(binex, db);
       // bin.add(db, label[i] != min_label);
 			bin.addExample(binex, label[i] != min_label);

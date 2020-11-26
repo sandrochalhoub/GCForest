@@ -4,21 +4,18 @@
 #include <vector>
 #include <algorithm>
 
-#include "DataSet.hpp"
+#include "typedef.hpp"
 
-namespace primer {
+namespace blossom {
 
 class WeightedDataset {
 public:
-  // typedef std::vector<int> sample;
-  typedef dynamic_bitset<> sample;
-
   WeightedDataset() = default;
 
   template <class rIter>
   void addExample(rIter beg_row, rIter end_row, const int target);
 	
-  void addExample(sample& x, const bool y);
+  void addExample(instance& x, const bool y);
 
   template <class rIter>
   void newExample(rIter beg_row, rIter end_row, const bool y);
@@ -30,8 +27,7 @@ public:
   size_t example_count() const { return data[0].size() + data[1].size(); }
 
 private:
-  // std::vector<std::vector<int>> data[2];
-  std::vector<sample> data[2];
+  std::vector<instance> data[2];
 };
 
 template <class rIter>
@@ -58,11 +54,11 @@ inline void WeightedDataset::addExample(rIter beg_row, rIter end_row,
     }
   }
 
-  // std::vector<int> example(beg_sample, end_sample);
+  // std::vector<int> example(beg_instance, end_instance);
   // data[y].push_back(example);
 }
 
-inline void WeightedDataset::addExample(sample& x, const bool y) {
+inline void WeightedDataset::addExample(instance& x, const bool y) {
 
   data[y].push_back(x);
 
@@ -84,7 +80,7 @@ inline void WeightedDataset::newExample(rIter beg_row, rIter end_row,
       data[y].back().set(x - beg_row);
   }
 
-  // std::vector<int> example(beg_sample, end_sample);
+  // std::vector<int> example(beg_instance, end_instance);
   // data[y].push_back(example);
 }
 
@@ -137,8 +133,8 @@ template <class Algo> inline void WeightedDataset::toInc(Algo &algo) {
     if (algo.options.verbosity >= DTOptions::NORMAL)
       cout << "d sorttime=" << cpu_time() - t << endl;
 
-    vector<sample>::iterator x[2] = {data[0].begin(), data[1].begin()};
-    vector<sample>::iterator end[2] = {data[0].end(), data[1].end()};
+    vector<instance>::iterator x[2] = {data[0].begin(), data[1].begin()};
+    vector<instance>::iterator end[2] = {data[0].end(), data[1].end()};
 
     int weight[2] = {1, 1};
     while (x[0] != end[0] and x[1] != end[1]) {

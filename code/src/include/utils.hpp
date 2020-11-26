@@ -13,7 +13,7 @@
 #define PRINTTRACE false
 // (options.verbosity >= DTOptions::YACKING and search_size % 100000 < 10)
 
-namespace primer {
+namespace blossom {
 
 int log2_64(uint64_t value);
 

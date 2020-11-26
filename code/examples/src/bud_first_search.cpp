@@ -25,15 +25,13 @@ along with minicsp.  If not, see <http://www.gnu.org/licenses/>.
 #include "Backtrack.hpp"
 #include "CSVReader.hpp"
 #include "CmdLine.hpp"
-#include "DL8.hpp"
-#include "DataSet.hpp"
 #include "TXTReader.hpp"
 #include "Tree.hpp"
 #include "TypedDataSet.hpp"
 #include "WeightedDataset.hpp"
 
 using namespace std;
-using namespace primer;
+using namespace blossom;
 
 template <typename Algo_t>
 void read_non_binary(Algo_t &A, DTOptions &opt) {

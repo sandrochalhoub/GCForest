@@ -12,7 +12,7 @@
 
 using namespace std;
 
-namespace primer {
+namespace blossom {
 
 class Part
 {
