@@ -14,7 +14,7 @@ namespace csv
 // template<  >
 template <typename header_declaration, typename data_declaration>
 void read(const std::string &fn, header_declaration notify_header,
-          data_declaration notify_data, std::string delimeter = ",") {
+          data_declaration notify_data, std::string delimeter = ",; |\t") {
   using std::cerr;
   try {
     std::ifstream ifs(fn);
@@ -47,7 +47,7 @@ void read(const std::string &fn, header_declaration notify_header,
 
 template <typename data_declaration>
 void read_binary(const std::string &fn, data_declaration notify_data,
-                 std::string delimeter = ",") {
+                 std::string delimeter = ",; |\t") {
   using std::cerr;
   try {
     std::ifstream ifs(fn);

@@ -4,7 +4,11 @@
 #include <vector>
 #include <algorithm>
 
+#include "CmdLine.hpp"
 #include "typedef.hpp"
+#include "utils.hpp"
+
+using namespace std;
 
 namespace blossom {
 
@@ -17,14 +21,18 @@ public:
 	
   void addExample(instance& x, const bool y);
 
-  template <class rIter>
-  void newExample(rIter beg_row, rIter end_row, const bool y);
+  // template <class rIter>
+  // void newExample(rIter beg_row, rIter end_row, const bool y);
 
   template <class Algo> void toInc(Algo &algo);
 
   // template <class Algo> void to(Algo &algo);
 
   size_t example_count() const { return data[0].size() + data[1].size(); }
+
+  void printDatasetToTextFile(ostream &outfile, const bool first = true) const;
+  void printDatasetToCSVFile(ostream &outfile, const string &delimiter = ",",
+                             const bool first = false) const;
 
 private:
   std::vector<instance> data[2];
@@ -57,58 +65,6 @@ inline void WeightedDataset::addExample(rIter beg_row, rIter end_row,
   // std::vector<int> example(beg_instance, end_instance);
   // data[y].push_back(example);
 }
-
-inline void WeightedDataset::addExample(instance& x, const bool y) {
-
-  data[y].push_back(x);
-
-}
-
-template <class rIter>
-inline void WeightedDataset::newExample(rIter beg_row, rIter end_row,
-                                        const bool y) {
-
-  if (data[y].size() == data[y].capacity()) {
-    data[y].reserve(2 * data[y].capacity());
-  }
-  data[y].resize(data[y].size() + 1);
-  data[y].back().resize(end_row - beg_row);
-
-  for (auto x{beg_row}; x != end_row; ++x) {
-    // assert(*x == 0 or *x == 1);
-    if (*x)
-      data[y].back().set(x - beg_row);
-  }
-
-  // std::vector<int> example(beg_instance, end_instance);
-  // data[y].push_back(example);
-}
-
-// template <class Algo> inline void WeightedDataset::to(Algo &algo) {
-//   int dup_count = 0; // for statistics
-//
-//   for (int y = 0; y < 2; ++y) {
-//     auto &subset = data[y];
-//
-//     std::sort(subset.begin(), subset.end());
-//
-//     for (size_t i{0}; i < subset.size(); ++i) {
-//
-//       if (i == subset.size() - 1 || subset[i] != subset[i+1]) {
-//         algo.addBitsetExample(subset[i], y, 1);
-//       }
-//       else {
-//         dup_count++;
-//       }
-//     }
-//   }
-//
-//   // print stats
-//   if (algo.options.verbosity >= DTOptions::NORMAL)
-//     std::cout << "d duplicate=" << dup_count
-//               << " dratio=" << float(dup_count) / example_count() <<
-//               std::endl;
-// }
 
 template <class Algo> inline void WeightedDataset::toInc(Algo &algo) {
 

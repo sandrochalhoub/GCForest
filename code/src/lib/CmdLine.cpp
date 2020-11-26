@@ -257,10 +257,22 @@ DTOptions blossom::parse_dt(int argc, char *argv[]) {
 
   cmd.add<SwitchArg>(opt.progress, "", "progress", "print progress", false);
 
-  // cmd.add<ValueArg<int>>(
-  //     opt.target, "", "target",
-  //     "target feature (use column <target % #columns> as target class)", false,
-  //     0, "int");
+  cmd.add<ValueArg<int>>(opt.intarget, "", "intarget",
+                         "target feature when writing (use column <target % "
+                         "#columns> as target class)",
+                         false, 0, "int");
+
+  cmd.add<ValueArg<int>>(opt.outtarget, "", "outtarget",
+                         "target feature when writing can only be first (0) or "
+                         "last (-1)",
+                         false, 1, "int");
+
+  cmd.add<ValueArg<string>>(opt.delimiter, "", "delimiter",
+                            "delimiter used when writing a csv file", false,
+                            ",", "string");
+  // cmd.add<ValueArg<string>>(opt.delimiter, "", "delimiter",
+  //                           "delimiter used when writing a csv file", false,
+  //                           ",", "string");
 
   cmd.parse(argc, argv);
   return opt;

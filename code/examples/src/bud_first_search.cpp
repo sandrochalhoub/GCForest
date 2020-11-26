@@ -33,14 +33,17 @@ along with minicsp.  If not, see <http://www.gnu.org/licenses/>.
 using namespace std;
 using namespace blossom;
 
-template <typename Algo_t>
-void read_non_binary(Algo_t &A, DTOptions &opt) {
+// template <typename Algo_t>
+void read_non_binary(WeightedDataset &base, DTOptions &opt) {
 
   TypedDataSet input;
 
   string ext{opt.instance_file.substr(opt.instance_file.find_last_of(".") + 1)};
 
   auto target_column{-1};
+
+  if (opt.format != "guess")
+    target_column = opt.intarget;
 
   if (opt.format == "csv" or (opt.format == "guess" and ext == "csv"))
     csv::read(opt.instance_file,
@@ -61,20 +64,23 @@ void read_non_binary(Algo_t &A, DTOptions &opt) {
     });
   }
 
-	WeightedDataset base;
+  // WeightedDataset base;
 
   input.binarize(base);
-	
-	base.toInc(A);
+
+  // base.toInc(A);
 }
 
-
-template <typename Algo_t> void read_binary(Algo_t &A, DTOptions &opt) {
-  WeightedDataset input;
+// template <typename Algo_t>
+void read_binary(WeightedDataset &input, DTOptions &opt) {
+  // WeightedDataset input;
 
   string ext{opt.instance_file.substr(opt.instance_file.find_last_of(".") + 1)};
 
   auto target_column{-1};
+
+  if (opt.format != "guess")
+    target_column = opt.intarget;
 
   if (opt.format == "csv" or (opt.format == "guess" and ext == "csv")) {
     csv::read_binary(opt.instance_file, [&](vector<int> &data) {
@@ -91,7 +97,7 @@ template <typename Algo_t> void read_binary(Algo_t &A, DTOptions &opt) {
     });
   }
 
-  input.toInc(A);
+  // input.toInc(A);
 }
 
 template <template <typename> class ErrorPolicy = CardinalityError,
@@ -101,30 +107,52 @@ int run_algorithm(DTOptions &opt) {
 
   BacktrackingAlgorithm<ErrorPolicy, E_t> A(yallen, opt);
 
+  WeightedDataset input;
+
   if (opt.binarize) {
 
-    read_non_binary(A, opt);
+    read_non_binary(input, opt);
 
   } else {
 
-    read_binary(A, opt);
-
-  } 
-
-  if (opt.print_ins) {
-    if (opt.nosolve) {
-      // A.setReverse();
-      if (opt.output != "") {
-        ofstream outfile(opt.output.c_str(), ofstream::out);
-        A.printDatasetToFile(outfile);
-      } else {
-        A.printDatasetToFile(cout);
-      }
-    } else {
-      cout << "d examples=" << A.numExample() << " features=" << A.numFeature()
-           << endl;
-    }
+    read_binary(input, opt);
   }
+
+  if (opt.print_ins and opt.nosolve) {
+
+    // ostream* out{&cout};
+
+    string ext{opt.output.substr(opt.output.find_last_of(".") + 1)};
+
+    if (opt.output != "") {
+			
+			// cout << "here\n";
+
+			ofstream outfile(opt.output.c_str(), ofstream::out);
+      // out = &outfile;
+			
+	    if (ext == "csv")
+	      input.printDatasetToCSVFile(outfile, opt.delimiter, opt.outtarget == 0);
+	    else
+	      input.printDatasetToTextFile(outfile, opt.outtarget != -1);
+    
+		} else
+			input.printDatasetToTextFile(cout, opt.outtarget!=-1);
+
+
+    // } else {
+    //   input.printDatasetToTextFile(cout, opt.outtarget!=-1);
+    // }
+  }
+
+  if (opt.nosolve)
+    return 1;
+
+  input.toInc(A);
+
+  if (opt.print_ins)
+    cout << "d examples=" << A.numExample() << " features=" << A.numFeature()
+         << endl;
 
   // if (not opt.preprocessing and opt.verbosity >= DTOptions::NORMAL)
   cout << "d readtime=" << cpu_time() << endl;
@@ -159,7 +187,7 @@ int run_algorithm(DTOptions &opt) {
            << A.error() << ")" << endl;
     }
   }
-  return 0;
+  return 1;
 }
 
 

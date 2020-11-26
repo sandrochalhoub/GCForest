@@ -1801,48 +1801,48 @@ std::ostream &BacktrackingAlgorithm<ErrorPolicy, E_t>::display(std::ostream &os)
   return os;
 }
 
-template <template <typename> class ErrorPolicy, typename E_t>
-void BacktrackingAlgorithm<ErrorPolicy, E_t>::printDatasetToFile(
-    ostream &outfile) const {
-
-  // // cout << 11 << endl;
-  //
-  // vector<int> sorted_examples[2];
-  // vector<int> sorted_features;
-  //
-  // sorted_features.reserve(numFeature());
-  // for (auto f{0}; f < numFeature(); ++f)
-  //   sorted_features.push_back(f);
-  // sort(sorted_features.begin(), sorted_features.end(),
-  //      [&](const int a, const int b) {
-  //        return reverse_dataset[0][a] < reverse_dataset[0][b] or
-  //               (reverse_dataset[0][a] == reverse_dataset[0][b] and
-  //                reverse_dataset[1][a] <= reverse_dataset[1][b]);
-  //      });
-
-  for (auto y{0}; y < 2; ++y) {
-
-    // sorted_examples[y].reserve(example[y].size());
-    // for (auto x{0}; x < example[y].size(); ++x)
-    //   sorted_examples[y].push_back(x);
-    //
-    // sort(sorted_examples[y].begin(), sorted_examples[y].end(),
-    //      [&](const int a, const int b) {
-    //        return dataset[y][a] <= dataset[y][b];
-    //      });
-
-    // for (auto x : sorted_examples[y]) {
-    for (auto x{0}; x < example[y].size(); ++x) {
-      outfile << y;
-      // for (auto f : sorted_features) {
-      for (auto f{0}; f < numFeature(); ++f) {
-        outfile << " " << dataset[y][x][f];
-      }
-      outfile << endl;
-    }
-  }
-  // outfile.close();
-}
+// template <template <typename> class ErrorPolicy, typename E_t>
+// void BacktrackingAlgorithm<ErrorPolicy, E_t>::printDatasetToFile(
+//     ostream &outfile) const {
+//
+//   // // cout << 11 << endl;
+//   //
+//   // vector<int> sorted_examples[2];
+//   // vector<int> sorted_features;
+//   //
+//   // sorted_features.reserve(numFeature());
+//   // for (auto f{0}; f < numFeature(); ++f)
+//   //   sorted_features.push_back(f);
+//   // sort(sorted_features.begin(), sorted_features.end(),
+//   //      [&](const int a, const int b) {
+//   //        return reverse_dataset[0][a] < reverse_dataset[0][b] or
+//   //               (reverse_dataset[0][a] == reverse_dataset[0][b] and
+//   //                reverse_dataset[1][a] <= reverse_dataset[1][b]);
+//   //      });
+//
+//   for (auto y{0}; y < 2; ++y) {
+//
+//     // sorted_examples[y].reserve(example[y].size());
+//     // for (auto x{0}; x < example[y].size(); ++x)
+//     //   sorted_examples[y].push_back(x);
+//     //
+//     // sort(sorted_examples[y].begin(), sorted_examples[y].end(),
+//     //      [&](const int a, const int b) {
+//     //        return dataset[y][a] <= dataset[y][b];
+//     //      });
+//
+//     // for (auto x : sorted_examples[y]) {
+//     for (auto x{0}; x < example[y].size(); ++x) {
+//       outfile << y;
+//       // for (auto f : sorted_features) {
+//       for (auto f{0}; f < numFeature(); ++f) {
+//         outfile << " " << dataset[y][x][f];
+//       }
+//       outfile << endl;
+//     }
+//   }
+//   // outfile.close();
+// }
 
 template <template<typename> class ErrorPolicy, typename E_t>
 std::ostream &operator<<(std::ostream &os, const BacktrackingAlgorithm<ErrorPolicy, E_t> &x) {
