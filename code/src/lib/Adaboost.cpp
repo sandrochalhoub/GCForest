@@ -88,12 +88,12 @@ namespace primer {
       WeightedDataset filter;
 
       for (int y = 0; y < 2; ++y) {
-        for (int i = 0; i < dataset[y].size(); ++i) {
-          filter.addExample(dataset[y][i].begin(), dataset[y][i].end(), y);
+        for (int i = 0; i < bitsets[y].size(); ++i) {
+          filter.addExample(bitsets[y][i], y);
         }
 
         bitsets[y].clear();
-        dataset[y].clear();
+        // dataset[y].clear();
       }
 
       filter.toInc(*this);
@@ -114,13 +114,13 @@ namespace primer {
       auto test_size = size_t(split_value * size);
       auto train_size = size - test_size;
 
-      for (int i = 0; i < train_size; ++i) {
-        std::vector<int> example;
-        for (int j = 0; j < bitsets[y][i].size(); ++j) {
-          example.push_back(bitsets[y][i][j] ? 1 : 0);
-        }
-        dataset[y][i] = example;
-      }
+      // for (int i = 0; i < train_size; ++i) {
+      //   std::vector<int> example;
+      //   for (int j = 0; j < bitsets[y][i].size(); ++j) {
+      //     example.push_back(bitsets[y][i][j] ? 1 : 0);
+      //   }
+      //   dataset[y][i] = example;
+      // }
 
       for (int i = 0; i < test_size; ++i) {
         auto test_example = bitsets[y][train_size + i];
@@ -128,7 +128,7 @@ namespace primer {
       }
 
       bitsets[y].resize(train_size);
-      dataset[y].resize(train_size);
+      // dataset[y].resize(train_size);
 
       std::cout << "Split: y=" << y << ", test size=" << test_size << ", train size=" << train_size << std::endl;
     }
@@ -175,11 +175,11 @@ namespace primer {
     double m = example_count(bitsets);
 
     for (int y = 0; y < 2; ++y) {
-      int count = dataset[y].size();
+      int count = bitsets[y].size();
 
       for (int i = 0; i < count; ++i) {
-        auto &sample = dataset[y][i];
-        current_algo.addExample(sample.begin(), sample.end(), y, 1 / m);
+        // auto &sample = dataset[y][i];
+        current_algo.addBitsetExample(bitsets[y][i], y, 1 / m);
       }
     }
   }
@@ -197,10 +197,10 @@ namespace primer {
     double alpha = last_clf.weight;
 
     for (int y = 0; y < 2; ++y) {
-      int count = dataset[y].size();
+      int count = bitsets[y].size();
 
       for (int i = 0; i < count; ++i) {
-        auto &sample = dataset[y][i];
+        // auto &sample = dataset[y][i];
         auto &bsample = bitsets[y][i];
 
         double u = y == 0 ? -1 : 1;
@@ -209,7 +209,7 @@ namespace primer {
         double d = last_algo.error_policy.get_weight(y, i);
         double dnext = d * exp(- alpha * u * upred) / (2 * sqrt(err * (1 - err)));
 
-        current_algo.addExample(sample.begin(), sample.end(), y, dnext);
+        current_algo.addBitsetExample(bsample, y, dnext);
       }
     }
   }

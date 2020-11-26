@@ -420,7 +420,7 @@ DTOptions parse_dt(int argc, char *argv[]) {
   cmd.add<ValueArg<int>>(opt.node_strategy, "", "node_strategy",
                          "node selection strategy 0:first, 1:random, 2:max. "
                          "error 3:max. reduction",
-                         false, 2, "int");
+                         false, 0, "int");
 
   cmd.add<ValueArg<int>>(opt.feature_strategy, "", "feature_strategy",
                          "feature selection strategy 0:min error, 1:min "
@@ -441,6 +441,11 @@ DTOptions parse_dt(int argc, char *argv[]) {
                      "switch sample preprocessing off", true);
 
   cmd.add<SwitchArg>(opt.progress, "", "progress", "print progress", false);
+
+  cmd.add<ValueArg<int>>(
+      opt.target, "", "target",
+      "target feature (use column <target % #columns> as target class)", false,
+      0, "int");
 
   cmd.parse(argc, argv);
   return opt;

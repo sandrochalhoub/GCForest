@@ -7,7 +7,7 @@
 #include <boost/dynamic_bitset.hpp>
 #include <boost/lexical_cast.hpp>
 
-#include "DataSet.hpp"
+#include "WeightedDataset.hpp"
 
 #ifndef _PRIMER_TYPEDDATASET_HPP
 #define _PRIMER_TYPEDDATASET_HPP
@@ -381,33 +381,47 @@ public:
   size_t size() const { return label.size(); }
   size_t numFeature() const { return feature_label.size(); }
   bool typed() const { return feature_type.size() == numFeature(); }
-  template <typename RandomIt> void setFeatures(RandomIt beg, RandomIt end) {
-    auto n_feature = (end - beg);
+  template <typename RandomIt>
+  void setFeatures(RandomIt beg, RandomIt end, const int target) {
+    auto width{end - beg};
+    auto n_feature = (width - 1);
+    auto column{(width + target) % width};
+
     feature_label.reserve(n_feature);
     for (auto f{beg}; f != end; ++f) {
-      string feat{*f};
-      boost::algorithm::trim(feat);
-      addFeature(feat);
+      if (f - beg != column) {
+        string feat{*f};
+        boost::algorithm::trim(feat);
+        addFeature(feat);
+      }
     }
   }
   void addFeature(string &f) { feature_label.push_back(f); }
 
   template <typename RandomIt>
-  void addExample(RandomIt beg, RandomIt end, string &l) {
-    auto n_feature = (end - beg);
+  void addExample(RandomIt beg, RandomIt end, const int target) {
+    auto n_feature = (end - beg - 1);
     // assert(n_feature = numFeature());
     while (n_feature > numFeature()) {
       string s("f" + to_string(numFeature() + 1));
       addFeature(s);
     }
 
+    auto width{end - beg};
+    auto column{(width + target) % width};
+
     if (!typed())
       for (auto f{beg}; f != end; ++f) {
-        typeFeature(*f);
+        if (f - beg != column)
+          typeFeature(*f);
       }
 
+    int j{0};
     for (auto f{beg}; f != end; ++f) {
-      auto j{f - beg};
+      if (f - beg == column)
+        continue;
+
+      // auto j{f - beg};
       std::stringstream convert(*f);
       switch (feature_type[j]) {
       case INTEGER:
@@ -424,7 +438,11 @@ public:
         symb_value[feature_rank[j]].push_back(*f);
         break;
       }
+
+      ++j;
     }
+
+    auto l{*(beg + column)};
 
     boost::algorithm::trim(l);
     label.push_back(l);
@@ -447,7 +465,8 @@ public:
     }
   }
 
-  void binarize(DataSet &bin) {
+  // void binarize(DataSet &bin) {
+	void binarize(WeightedDataset &bin) {
     auto int_symbolic{0};
     for (auto f{0}; f < numFeature(); ++f)
       if (feature_type[f] == SYMBOL)
@@ -550,15 +569,14 @@ public:
             binf += symb_encoder[r]->getLabel(bin_feature_count++ - ref);
           }
 
-          // std::to_string(binex.size() - bin_feature_count++)};
-          bin.addFeature(binf);
+          // bin.addFeature(binf);
         }
       }
 
-      // binex.resize(2 * binex.size());
-      word db;
-      bin.duplicate_format(binex, db);
-      bin.add(db, label[i] != min_label);
+      // word db;
+      // bin.duplicate_format(binex, db);
+      // bin.add(db, label[i] != min_label);
+			bin.addExample(binex, label[i] != min_label);
     }
 
   }

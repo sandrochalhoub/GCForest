@@ -327,7 +327,7 @@ public:
   /*!@name Constructors*/
   //@{
   explicit BacktrackingAlgorithm(Wood &w, DTOptions &o);
-  void setData(const DataSet &data);
+  // void setData(const DataSet &data);
   void setReverse();
   void seed(const int s);
   //@}
@@ -372,14 +372,14 @@ public:
 
   E_t error() const;
 
-  template <class rIter>
-  void addExample(rIter beg_sample, rIter end_sample, const bool y,
-                  const E_t weight = 1);
+  // template <class rIter>
+  // void addExample(rIter beg_row, rIter end_row, const int target_column,
+  //                 const E_t weight = 1);
 
   void addBitsetExample(const dynamic_bitset<> &sample, const bool y,
                   const E_t weight = 1);
 
-  void addExample(const std::vector<int> &example, const E_t weight = 1);
+  // void addExample(const std::vector<int> &example, const E_t weight = 1);
 
   /** Removes all the examples to free memory. The error and the model
    * still can be retrieved.  */
@@ -483,45 +483,53 @@ inline void WeightedError<E_t>::add_example(const int y, const size_t i,
   weights[y][i] = weight;
 }
 
-template <template <typename> class ErrorPolicy, typename E_t>
-template <class rIter>
-inline void BacktrackingAlgorithm<ErrorPolicy, E_t>::addExample(
-    rIter beg_sample, rIter end_sample, const bool y, const E_t weight) {
-  int n{static_cast<int>(end_sample - beg_sample)};
-
-  if (n > num_feature) {
-    num_feature = n;
-    // auto m{num_feature};
-    f_error.resize(num_feature, 1);
-    f_entropy.resize(num_feature, 1);
-    f_gini.resize(num_feature, 1);
-    // f_gini_d.resize(m, 1);
-  }
-
-  dataset[y].resize(dataset[y].size() + 1);
-  example[y].resize(example[y].size() + 1);
-  dataset[y].back().resize(num_feature, false);
-
-  int k{0};
-  for (auto x{beg_sample}; x != end_sample; ++x) {
-    if (*x) {
-
-      if (*x != 1) {
-        cout << "e the dataset is not binary, rerun with --binarize\n";
-        exit(1);
-      }
-
-      dataset[y].back().set(k);
-      example[y].back().push_back(k);
-
-      // cout << " " << k;
-    }
-    ++k;
-  }
-
-  error_policy.add_example(y, example[y].size() - 1, weight);
-  // cout << endl;
-}
+// template <template <typename> class ErrorPolicy, typename E_t>
+// template <class rIter>
+// inline void BacktrackingAlgorithm<ErrorPolicy, E_t>::addExample(
+//     rIter beg_row, rIter end_row, const int target, const E_t weight) {
+//   int width{static_cast<int>(end_row - beg_row)};
+//   int n{width - 1};
+//   int column{(target + width) % width};
+//   auto y{*(beg_row + column)};
+//
+//   if (n > num_feature) {
+//     num_feature = n;
+//     // auto m{num_feature};
+//     f_error.resize(num_feature, 1);
+//     f_entropy.resize(num_feature, 1);
+//     f_gini.resize(num_feature, 1);
+//     // f_gini_d.resize(m, 1);
+//   }
+//
+//   dataset[y].resize(dataset[y].size() + 1);
+//   example[y].resize(example[y].size() + 1);
+//   dataset[y].back().resize(num_feature, false);
+//
+//   int k{0};
+//   int f{0};
+//   for (auto x{beg_row}; x != end_row; ++x) {
+//     if (k != column) {
+//
+//       if (*x) {
+//
+//         if (*x != 1) {
+//           cout << "e the dataset is not binary, rerun with --binarize\n";
+//           exit(1);
+//         }
+//
+//         dataset[y].back().set(f);
+//         example[y].back().push_back(f);
+//       }
+//
+//       ++f;
+//     }
+//
+//     ++k;
+//   }
+//
+//   error_policy.add_example(y, example[y].size() - 1, weight);
+//   // cout << endl;
+// }
 
 template <template <typename> class ErrorPolicy, typename E_t>
 inline void BacktrackingAlgorithm<ErrorPolicy, E_t>::addBitsetExample(
@@ -530,40 +538,19 @@ inline void BacktrackingAlgorithm<ErrorPolicy, E_t>::addBitsetExample(
 
   if (n > num_feature) {
     num_feature = n;
-    // auto m{num_feature};
     f_error.resize(num_feature, 1);
     f_entropy.resize(num_feature, 1);
     f_gini.resize(num_feature, 1);
-    // f_gini_d.resize(m, 1);
   }
 
   dataset[y].push_back(sample);
   example[y].resize(example[y].size() + 1);
-  // dataset[y].back().resize(num_feature, false);
 
   for (auto x{0}; x < n; ++x)
     if (sample[x])
       example[y].back().push_back(x);
 
-  // int k{0};
-  // for (auto x{beg_sample}; x != end_sample; ++x) {
-  //   if (*x) {
-  //
-  //     if (*x != 1) {
-  //       cout << "e the dataset is not binary, rerun with --binarize\n";
-  //       exit(1);
-  //     }
-  //
-  //     dataset[y].back().set(k);
-  //     example[y].back().push_back(k);
-  //
-  //     // cout << " " << k;
-  //   }
-  //   ++k;
-  // }
-
   error_policy.add_example(y, example[y].size() - 1, weight);
-  // cout << endl;
 }
 
 template <template<typename> class ErrorPolicy, typename E_t>

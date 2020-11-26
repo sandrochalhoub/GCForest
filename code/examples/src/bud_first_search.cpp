@@ -36,111 +36,64 @@ using namespace std;
 using namespace primer;
 
 template <typename Algo_t>
-void read_binary(Algo_t &A, DTOptions &opt) {
-
-  string ext{opt.instance_file.substr(opt.instance_file.find_last_of(".") + 1)};
-
-  if (opt.format == "csv" or (opt.format == "guess" and ext == "csv")) {
-    csv::read_binary(opt.instance_file, [&](vector<int> &data) {
-      A.addExample(data.begin(), data.end() - 1, data.back());
-    });
-  } else if (opt.format == "dl8" or (opt.format == "guess" and ext == "dl8")) {
-    txt::read_binary(opt.instance_file, [&](vector<int> &data) {
-      auto y = *data.begin();
-      A.addExample(data.begin() + 1, data.end(), y);
-    });
-  } else {
-    if (opt.format != "txt" and ext != "txt")
-      cout << "p Warning, unrecognized format, trying txt\n";
-    txt::read_binary(opt.instance_file, [&](vector<int> &data) {
-      A.addExample(data.begin(), data.end() - 1, data.back());
-    });
-  }
-}
-
-template <typename Algo_t>
 void read_non_binary(Algo_t &A, DTOptions &opt) {
 
   TypedDataSet input;
 
   string ext{opt.instance_file.substr(opt.instance_file.find_last_of(".") + 1)};
 
-  // cout << "here\n" ;
+  auto target_column{-1};
 
   if (opt.format == "csv" or (opt.format == "guess" and ext == "csv"))
-    csv::read(
-        opt.instance_file,
-        [&](vector<string> &f) { input.setFeatures(f.begin(), f.end() - 1); },
-        [&](vector<string> &data) {
-          auto y = data.back();
-          data.pop_back();
-          input.addExample(data.begin(), data.end(), y);
-        });
-  else if (opt.format == "dl8" or (opt.format == "guess" and ext == "dl8")) {
-    txt::read(opt.instance_file, [&](vector<string> &data) {
-      auto y = *data.begin();
-      input.addExample(data.begin() + 1, data.end(), y);
-    });
-  } else if (opt.format == "train" or
-             (opt.format == "guess" and ext == "train")) {
-    txt::read(opt.instance_file, [&](vector<string> &data) {
-      auto y = *data.begin();
-      input.addExample(data.begin() + 1, data.end() - 1, y);
-    });
-  } else if (opt.format == "tst" or (opt.format == "guess" and ext == "tst")) {
-    txt::read(opt.instance_file, [&](vector<string> &data) {
-      auto y = *data.rbegin();
-      if (opt.reference_class != " " and opt.reference_class != y)
-        y = ("not" + opt.reference_class);
-      input.addExample(data.begin(), data.end() - 1, y);
-    });
-  } else {
-    if (opt.format != "txt" and ext != "txt")
-      cout << "p Warning, unrecognized format, trying txt\n";
+    csv::read(opt.instance_file,
+              [&](vector<string> &f) {
+                input.setFeatures(f.begin(), f.end(), target_column);
+              },
+              [&](vector<string> &data) {
+                input.addExample(data.begin(), data.end(), target_column);
+              });
+  else {
+
+    if (opt.format == "dl8" or (opt.format == "guess" and ext == "dl8")) {
+      target_column = 0;
+    }
 
     txt::read(opt.instance_file, [&](vector<string> &data) {
-      auto y = data.back();
-      data.pop_back();
-      input.addExample(data.begin(), data.end(), y);
+      input.addExample(data.begin(), data.end(), target_column);
     });
   }
 
-  DataSet base;
+	WeightedDataset base;
 
   input.binarize(base);
-
-  // cout << base << endl;
-
-  A.setData(base);
+	
+	base.toInc(A);
 }
 
-template <typename Algo_t>
-void read_weighted(Algo_t &A, DTOptions &opt) {
+
+template <typename Algo_t> void read_binary(Algo_t &A, DTOptions &opt) {
   WeightedDataset input;
 
   string ext{opt.instance_file.substr(opt.instance_file.find_last_of(".") + 1)};
 
+  auto target_column{-1};
+
   if (opt.format == "csv" or (opt.format == "guess" and ext == "csv")) {
     csv::read_binary(opt.instance_file, [&](vector<int> &data) {
-      input.addExample(data.begin(), data.end() - 1, data.back());
-    });
-  } else if (opt.format == "dl8" or (opt.format == "guess" and ext == "dl8")) {
-    txt::read_binary(opt.instance_file, [&](vector<int> &data) {
-      auto y = *data.begin();
-      input.addExample(data.begin() + 1, data.end(), y);
+      input.addExample(data.begin(), data.end(), target_column);
     });
   } else {
-    if (opt.format != "txt" and ext != "txt")
-      cout << "p Warning, unrecognized format, trying txt\n";
+
+    if (opt.format == "dl8" or (opt.format == "guess" and ext == "dl8")) {
+      target_column = 0;
+    }
+
     txt::read_binary(opt.instance_file, [&](vector<int> &data) {
-      input.addExample(data.begin(), data.end() - 1, data.back());
+      input.addExample(data.begin(), data.end(), target_column);
     });
   }
 
-  // if (opt.preprocessin)
   input.toInc(A);
-  // else
-  // input.to(A);
 }
 
 template <template <typename> class ErrorPolicy = CardinalityError,
@@ -154,17 +107,15 @@ int run_algorithm(DTOptions &opt) {
 
     read_non_binary(A, opt);
 
-  } else if (opt.preprocessing) {
-
-    read_weighted(A, opt);
-
   } else {
 
     read_binary(A, opt);
-  }
+
+  } 
 
   if (opt.print_ins) {
     if (opt.nosolve) {
+      // A.setReverse();
       if (opt.output != "") {
         ofstream outfile(opt.output.c_str(), ofstream::out);
         A.printDatasetToFile(outfile);
@@ -177,8 +128,8 @@ int run_algorithm(DTOptions &opt) {
     }
   }
 
-  if (not opt.preprocessing and opt.verbosity >= DTOptions::NORMAL)
-    cout << "d readtime=" << cpu_time() << endl;
+  // if (not opt.preprocessing and opt.verbosity >= DTOptions::NORMAL)
+  cout << "d readtime=" << cpu_time() << endl;
 
   if (not opt.nosolve) {
     if (opt.mindepth) {

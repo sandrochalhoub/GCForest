@@ -173,6 +173,8 @@ public:
 
   bool progress;
 
+  int target;
+
   DTOptions(){};
   DTOptions(const DTOptions &opt)
       : cmdline(opt.cmdline), instance_file(opt.instance_file),
@@ -189,7 +191,8 @@ public:
         split(opt.split), ada_it(opt.ada_it), ada_stop(opt.ada_stop),
         nosolve(opt.nosolve), reference_class(opt.reference_class),
         mindepth(opt.mindepth), minsize(opt.minsize),
-        preprocessing(opt.preprocessing), progress(opt.progress) {}
+        preprocessing(opt.preprocessing), progress(opt.progress),
+        target(opt.target) {}
 
   ostream &display(ostream &os);
 };
