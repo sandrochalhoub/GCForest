@@ -6,6 +6,8 @@
 
 using namespace std;
 
+using namespace blossom;
+
 struct argbase {
   virtual ~argbase() {}
   virtual void assign() = 0;
@@ -102,195 +104,8 @@ public:
   virtual ~RangeConstraint() { ; }
 };
 
-PrimerOptions parse_primer(int argc, char *argv[]) {
-  using namespace TCLAP;
-  // using namespace string_literals;
-  cmdline cmd("primer", ' ');
 
-  PrimerOptions opt;
-  opt.cmdline =
-      accumulate(argv, argv + argc, ""s,
-                 [&](string acc, const char *arg) { return acc + " " + arg; });
-
-  cmd.add<UnlabeledValueArg<std::string>>(opt.instance_file, "file",
-                                          "instance file", true, "", "string");
-
-  cmd.add<ValueArg<string>>(opt.debug, "", "debug", "debug file", false, "",
-                            "string");
-
-  cmd.add<ValueArg<string>>(opt.output, "o", "output", "output file", false, "",
-                            "string");
-
-  cmd.add<ValueArg<string>>(opt.delimiter, "", "delimiter",
-                            "csv format delimiter", false, ", ", "string");
-
-  cmd.add<ValueArg<string>>(opt.wildcard, "", "wildcard", "csv format wildcard",
-                            false, "*", "string");
-
-  cmd.add<SwitchArg>(opt.original, "", "original",
-                     "output with original feature names", false);
-
-  cmd.add<SwitchArg>(opt.reduced, "", "reduced", "output in list format",
-                     false);
-
-  cmd.add<ValueArg<string>>(opt.format, "", "format",
-                            "input format (csv or txt)", false, "csv",
-                            "string");
-
-  cmd.add<ValueArg<string>>(opt.caption, "", "caption", "caption file", false,
-                            "", "string");
-
-  cmd.add<ValueArg<int>>(
-      opt.verbosity, "v", "verbosity",
-      "verbosity level (0:silent,1:quiet,2:improvements only,3:verbose", false,
-      2, "int");
-
-  cmd.add<ValueArg<int>>(opt.class_policy, "", "class_policy",
-                         "policy for selecting the class\n 0:negative\n "
-                         "1:positive\n 2:smallest\n 3:largest\n 4:alternate\n "
-                         "5:random uniform\n 6:biased\n 7:anti",
-                         false, 7, "int");
-
-  cmd.add<ValueArg<int>>(opt.example_policy, "", "example_policy",
-                         "policy for selecting the example\n X<-1:random "
-                         "between the -X with lowest probability\n -1:lowest "
-                         "probability\n 0:first\n 1:random\n 2:highest "
-                         "probability\n X>2:random between the X-1 with "
-                         "highest probability",
-                         false, 10, "int");
-
-  cmd.add<ValueArg<int>>(opt.feature_policy, "", "feature_policy",
-                         "policy for selecting the feature (0:min,1:lowest "
-                         "entropy,2:highest entropy)",
-                         false, 1, "int");
-
-  cmd.add<SwitchArg>(opt.bayesian, "", "bayesian",
-                     "use Bayesian probabilities instead", false);
-
-  cmd.add<ValueArg<int>>(opt.max_iteration, "", "max_iteration",
-                         "max number of comprime iterations", false, 1000,
-                         "int");
-
-  cmd.add<SwitchArg>(opt.mapping, "", "mapping", "add legend to output", false);
-
-  cmd.add<ValueArg<int>>(opt.seed, "s", "seed", "random seed", false, 12345,
-                         "int");
-
-  cmd.add<SwitchArg>(opt.print_sol, "", "print_sol",
-                     "print the best found schedule", false);
-
-  cmd.add<SwitchArg>(opt.print_par, "", "print_par", "print the paramters",
-                     false);
-
-  cmd.add<SwitchArg>(opt.print_mod, "", "print_mod", "print the model", false);
-
-  cmd.add<SwitchArg>(opt.print_ins, "", "print_ins", "print the instance",
-                     false);
-
-  cmd.add<SwitchArg>(opt.print_sta, "", "print_sta", "print the statistics",
-                     false);
-
-  cmd.add<SwitchArg>(opt.print_cmd, "", "print_cmd", "print the command-line",
-                     false);
-
-  cmd.add<SwitchArg>(opt.verified, "", "noverification",
-                     "switch tree verification off", false);
-
-  cmd.add<SwitchArg>(opt.verified, "", "verified",
-                     "switch tree verification on", false);
-
-  // ValueArg (const std::string &flag, const std::string &name, const
-  // std::string &desc, bool req, T value, Constraint< T > *constraint, Visitor
-  // *v=NULL)
-
-  // Constraint<double> *range = new RangeConstraint<double>(0, 1);
-  cmd.add<ValueArg<double>>(opt.sample, "", "sample", "sampling ratio", false,
-                            1.0, "double");
-
-  cmd.add<ValueArg<int>>(opt.width, "", "width",
-                         "number of tied features for random selection", false,
-                         1, "int");
-
-  cmd.add<ValueArg<double>>(opt.focus, "", "focus",
-                            "probability of choosing the best feature", false,
-                            .9, "int");
-
-  // cmd.add<ValueArg<int>>(opt.max_size, "", "max_size",
-  //                        "maximum number of nodes in the tree", false,
-  //                        numeric_limits<int>::max(), "int");
-
-  cmd.add<ValueArg<int>>(opt.max_depth, "", "max_depth",
-                         "maximum depth of the tree", false,
-                         numeric_limits<int>::max(), "int");
-
-  cmd.add<ValueArg<int>>(opt.restart_base, "", "restart_base",
-                         "number of backtracks before first restart", false, -1,
-                         "int");
-
-  cmd.add<ValueArg<double>>(opt.restart_factor, "", "restart_factor",
-                            "geometric factor", false, 1, "double");
-
-  cmd.parse(argc, argv);
-  return opt;
-}
-
-ostream &PrimerOptions::display(ostream &os) {
-  os << setw(20) << left << "p data file:" << setw(30) << right << instance_file
-     << endl
-     << setw(20) << left << "p seed:" << setw(30) << right << seed << endl
-     << setw(20) << left << "p sample:" << setw(30) << right << sample << endl
-     << setw(20) << left << "p verbosity:" << setw(30) << right
-     << (verbosity == SILENT
-             ? "silent"
-             : (verbosity == QUIET
-                    ? "quiet"
-                    : (verbosity == NORMAL ? "normal" : "yacking")))
-     << endl
-     << setw(20) << left << "p class policy:" << setw(30) << right
-     << (class_policy == NEGATIVE
-             ? "negative"
-             : (class_policy == POSITIVE
-                    ? "positive"
-                    : (class_policy == ALTERNATE
-                           ? "alternate"
-                           : (class_policy == UNIFORM
-                                  ? "uniform"
-                                  : (class_policy == LARGEST
-                                         ? "largest"
-                                         : (class_policy == SMALLEST
-                                                ? "smallest"
-                                                : (class_policy == ANTI
-                                                       ? "anti"
-                                                       : "biased")))))))
-     << endl
-     << setw(20) << left << "p example policy:" << setw(30) << right;
-
-  if (example_policy <= LOWEST_PROBABILITY) {
-    auto k{LOWEST_PROBABILITY - example_policy};
-    os << "lowest probability";
-    if (k > 1)
-      os << " (" << k << ")";
-    os << endl;
-  } else if (example_policy >= HIGHEST_PROBABILITY) {
-    auto k{example_policy - HIGHEST_PROBABILITY};
-    os << "highest " << (bayesian ? "Bayesian " : "") << "probability";
-    if (k > 1)
-      os << " (" << k << ")";
-    os << endl;
-  } else
-    os << (example_policy == FIRST ? "first" : "random") << endl;
-
-  os << setw(20) << left << "p feature policy:" << setw(30) << right
-     << (feature_policy == MIN ? "mininum" : (feature_policy == LOWEST_ENTROPY
-                                                  ? "lowest entropy"
-                                                  : "highest entropy"))
-     << endl
-     << setw(20) << left << "p verified:" << setw(30) << right
-     << (verified ? "yes" : "no") << endl;
-  return os;
-}
-
-DTOptions parse_dt(int argc, char *argv[]) {
+DTOptions blossom::parse_dt(int argc, char *argv[]) {
   using namespace TCLAP;
   // using namespace string_literals;
   cmdline cmd("dt", ' ');
@@ -375,6 +190,11 @@ DTOptions parse_dt(int argc, char *argv[]) {
   cmd.add<SwitchArg>(opt.minsize, "", "depthonly", "switch size objective off",
                      true);
 
+  cmd.add<SwitchArg>(opt.nosolve, "", "nosolve", "switch solving off", false);
+
+  cmd.add<ValueArg<string>>(opt.reference_class, "", "class", "reference class",
+                            false, "", "string");
+
   // ValueArg (const std::string &flag, const std::string &name, const
   // std::string &desc, bool req, T value, Constraint< T > *constraint, Visitor
   // *v=NULL)
@@ -415,7 +235,7 @@ DTOptions parse_dt(int argc, char *argv[]) {
   cmd.add<ValueArg<int>>(opt.node_strategy, "", "node_strategy",
                          "node selection strategy 0:first, 1:random, 2:max. "
                          "error 3:max. reduction",
-                         false, 2, "int");
+                         false, 0, "int");
 
   cmd.add<ValueArg<int>>(opt.feature_strategy, "", "feature_strategy",
                          "feature selection strategy 0:min error, 1:min "
@@ -436,6 +256,23 @@ DTOptions parse_dt(int argc, char *argv[]) {
                      "switch sample preprocessing off", true);
 
   cmd.add<SwitchArg>(opt.progress, "", "progress", "print progress", false);
+
+  cmd.add<ValueArg<int>>(opt.intarget, "", "intarget",
+                         "target feature when writing (use column <target % "
+                         "#columns> as target class)",
+                         false, 0, "int");
+
+  cmd.add<ValueArg<int>>(opt.outtarget, "", "outtarget",
+                         "target feature when writing can only be first (0) or "
+                         "last (-1)",
+                         false, 1, "int");
+
+  cmd.add<ValueArg<string>>(opt.delimiter, "", "delimiter",
+                            "delimiter used when writing a csv file", false,
+                            ",", "string");
+  // cmd.add<ValueArg<string>>(opt.delimiter, "", "delimiter",
+  //                           "delimiter used when writing a csv file", false,
+  //                           ",", "string");
 
   cmd.parse(argc, argv);
   return opt;

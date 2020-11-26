@@ -12,8 +12,8 @@ namespace txt
 
 // template<  >
 template <typename data_declaration>
-void read(const std::string &fn, 
-          data_declaration notify_data, std::string delimeter = " ") {
+void read(const std::string &fn, data_declaration notify_data,
+          std::string delimeter = "\t ") {
   using std::cerr;
   try {
     std::ifstream ifs(fn);
@@ -36,11 +36,19 @@ void read(const std::string &fn,
 			if(emptyline)
 				continue;
 
-			
-      row.clear();
-      boost::algorithm::split(row, line, boost::is_any_of(delimeter));
-			
-      notify_data(row);
+                        int start = 0;
+                        while (line[start] == ' ')
+                          ++start;
+
+                        if (start > 0)
+                          line = line.substr(start, line.size());
+
+                        row.clear();
+                        boost::algorithm::split(row, line,
+                                                boost::is_any_of(delimeter),
+                                                boost::token_compress_on);
+
+                        notify_data(row);
     }
 
   } catch (std::exception &e) {

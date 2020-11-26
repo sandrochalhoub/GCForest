@@ -7,7 +7,7 @@
 #include <boost/dynamic_bitset.hpp>
 #include <boost/lexical_cast.hpp>
 
-#include "DataSet.hpp"
+#include "WeightedDataset.hpp"
 
 #ifndef _PRIMER_TYPEDDATASET_HPP
 #define _PRIMER_TYPEDDATASET_HPP
@@ -15,15 +15,15 @@
 using namespace boost;
 
 typedef int dtype;
-typedef dynamic_bitset<> word;
+// typedef dynamic_bitset<> word;
 
 #define INTEGER 0
 #define FLOAT 1
 #define SYMBOL 2
 
-static const word nothing{word()};
+static const instance nothing{instance()};
 
-namespace primer {
+namespace blossom {
 
 template <typename T> bool is(const std::string &someString) {
   using boost::lexical_cast;
@@ -39,9 +39,9 @@ template <typename T> bool is(const std::string &someString) {
 }
 
 // concatenate w1 and w2
-word concatenate(const word &w1, const word &w2) {
-  word wa{w1};
-  word wb{w2};
+instance concatenate(const instance &w1, const instance &w2) {
+  instance wa{w1};
+  instance wb{w2};
   auto sz{w1.size() + w2.size()};
   wa.resize(sz);
   wb.resize(sz);
@@ -50,7 +50,7 @@ word concatenate(const word &w1, const word &w2) {
   return wa;
 }
 
-// encoding from type T to binary words
+// encoding from type T to binary instances
 template <typename T> class Encoding {
 
 public:
@@ -60,8 +60,8 @@ public:
   virtual void encode(typename std::vector<T>::iterator beg,
                       typename std::vector<T>::iterator end) = 0;
 
-  // returns the word associated to value x
-  virtual const word &getEncoding(T &x) const = 0;
+  // returns the instance associated to value x
+  virtual const instance &getEncoding(T &x) const = 0;
 
   virtual size_t size() const = 0;
 	
@@ -77,12 +77,12 @@ public:
   // const bool test()
 };
 
-// encoding from type T to binary words
+// encoding from type T to binary instances
 template <typename T> class TrivialEncoding : public Encoding<T> {
 
 protected:
   vector<T> value_set;
-  vector<word> lit;
+  vector<instance> lit;
 
 public:
 	// virtual ~TrivialEncoding() {}
@@ -99,8 +99,8 @@ public:
     lit.push_back(dynamic_bitset<>(1, true));
   }
 
-  // returns the word associated to value x
-  virtual const word &getEncoding(T &x) const {
+  // returns the instance associated to value x
+  virtual const instance &getEncoding(T &x) const {
     return lit[(x == value_set[1])];
   }
 	
@@ -124,11 +124,11 @@ public:
   // const bool test()
 };
 
-// encoding from type T to binary words
+// encoding from type T to binary instances
 template <typename T> class ClassicEncoding : public Encoding<T> {
 
 protected:
-  map<T, word> encoding_map;
+  map<T, instance> encoding_map;
   vector<T> value_set;
 
 public:
@@ -143,8 +143,8 @@ public:
       value_set.push_back(*it);
   }
 
-  // returns the word associated to value x
-  const word &getEncoding(T &x) const {
+  // returns the instance associated to value x
+  const instance &getEncoding(T &x) const {
     auto it = encoding_map.find(x);
     if (it != encoding_map.end()) {
       return it->second;
@@ -381,33 +381,47 @@ public:
   size_t size() const { return label.size(); }
   size_t numFeature() const { return feature_label.size(); }
   bool typed() const { return feature_type.size() == numFeature(); }
-  template <typename RandomIt> void setFeatures(RandomIt beg, RandomIt end) {
-    auto n_feature = (end - beg);
+  template <typename RandomIt>
+  void setFeatures(RandomIt beg, RandomIt end, const int target) {
+    auto width{end - beg};
+    auto n_feature = (width - 1);
+    auto column{(width + target) % width};
+
     feature_label.reserve(n_feature);
     for (auto f{beg}; f != end; ++f) {
-      string feat{*f};
-      boost::algorithm::trim(feat);
-      addFeature(feat);
+      if (f - beg != column) {
+        string feat{*f};
+        boost::algorithm::trim(feat);
+        addFeature(feat);
+      }
     }
   }
   void addFeature(string &f) { feature_label.push_back(f); }
 
   template <typename RandomIt>
-  void addExample(RandomIt beg, RandomIt end, string &l) {
-    auto n_feature = (end - beg);
+  void addExample(RandomIt beg, RandomIt end, const int target) {
+    auto n_feature = (end - beg - 1);
     // assert(n_feature = numFeature());
     while (n_feature > numFeature()) {
       string s("f" + to_string(numFeature() + 1));
       addFeature(s);
     }
 
+    auto width{end - beg};
+    auto column{(width + target) % width};
+
     if (!typed())
       for (auto f{beg}; f != end; ++f) {
-        typeFeature(*f);
+        if (f - beg != column)
+          typeFeature(*f);
       }
 
+    int j{0};
     for (auto f{beg}; f != end; ++f) {
-      auto j{f - beg};
+      if (f - beg == column)
+        continue;
+
+      // auto j{f - beg};
       std::stringstream convert(*f);
       switch (feature_type[j]) {
       case INTEGER:
@@ -424,7 +438,11 @@ public:
         symb_value[feature_rank[j]].push_back(*f);
         break;
       }
+
+      ++j;
     }
+
+    auto l{*(beg + column)};
 
     boost::algorithm::trim(l);
     label.push_back(l);
@@ -447,7 +465,8 @@ public:
     }
   }
 
-  void binarize(DataSet &bin) {
+  // void binarize(DataSet &bin) {
+	void binarize(WeightedDataset &bin) {
     auto int_symbolic{0};
     for (auto f{0}; f < numFeature(); ++f)
       if (feature_type[f] == SYMBOL)
@@ -526,7 +545,7 @@ public:
 
     auto bin_feature_count{0};
     for (auto i{0}; i < size(); ++i) {
-      word binex;
+      instance binex;
       for (auto f{0}; f < numFeature(); ++f) {
         auto r{feature_rank[f]};
         if (feature_type[f] == INTEGER) {
@@ -550,15 +569,14 @@ public:
             binf += symb_encoder[r]->getLabel(bin_feature_count++ - ref);
           }
 
-          // std::to_string(binex.size() - bin_feature_count++)};
-          bin.addFeature(binf);
+          // bin.addFeature(binf);
         }
       }
 
-      // binex.resize(2 * binex.size());
-      word db;
-      bin.duplicate_format(binex, db);
-      bin.add(db, label[i] != min_label);
+      // instance db;
+      // bin.duplicate_format(binex, db);
+      // bin.add(db, label[i] != min_label);
+			bin.addExample(binex, label[i] != min_label);
     }
 
   }

@@ -7,7 +7,7 @@
 
 using namespace std;
 
-namespace primer {
+namespace blossom {
 
 Tree::Tree(Wood *w, const int node) : wood(w), idx(node) {}
 

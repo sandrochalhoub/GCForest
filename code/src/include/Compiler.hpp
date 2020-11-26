@@ -4,7 +4,7 @@
 #include <random>
 #include <vector>
 
-#include "DataSet.hpp"
+#include "CmdLine.hpp"
 #include "Partition.hpp"
 #include "SparseSet.hpp"
 #include "Tree.hpp"
@@ -19,7 +19,7 @@
 using namespace boost;
 using namespace std;
 
-namespace primer {
+namespace blossom {
 
 int lbLeaf(const uint64_t P, const int E);
 
@@ -173,7 +173,7 @@ public:
   /*!@name Constructors*/
   //@{
   explicit Compiler(DTOptions &o);
-  void setData(const DataSet &data);
+  // void setData(const DataSet &data);
   void setReverse();
   template <class rIter>
   void addExample(rIter beg_sample, rIter end_sample, const bool y,

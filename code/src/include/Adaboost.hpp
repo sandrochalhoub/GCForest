@@ -6,7 +6,7 @@
 
 #include "Backtrack.hpp"
 
-namespace primer {
+namespace blossom {
 
   struct WeakClassifier {
     Wood wood;
@@ -65,7 +65,7 @@ namespace primer {
   private:
     size_t max_it;
     size_t hist_lookup = 0;
-    std::vector<std::vector<int>> dataset[2];
+    // std::vector<std::vector<int>> dataset[2];
     std::vector<instance> bitsets[2];
 
     std::vector<instance> test_bitsets[2];
@@ -105,18 +105,21 @@ namespace primer {
 
   template <class rIter>
   inline void Adaboost::addExample(rIter beg_sample, rIter end_sample, const bool y) {
-    // Add vector
-    std::vector<int> sample(beg_sample, end_sample);
-    dataset[y].push_back(sample);
+    // // Add vector
+    // std::vector<int> sample(beg_sample, end_sample);
+    // dataset[y].push_back(sample);
 
     // Add bitset
-    instance bsample(sample.size());
+    instance bsample(end_sample - beg_sample, 0);
+		for(auto i{beg_sample}; i!=end_sample; ++i)
+			if(*i)
+				bsample.set(i - beg_sample);
 
-    for (size_t i = 0; i < sample.size(); ++i) {
-      if (sample[i] == 1) {
-        bsample.set(i);
-      }
-    }
+    // for (size_t i = 0; i < sample.size(); ++i) {
+    //   if (sample[i] == 1) {
+    //     bsample.set(i);
+    //   }
+    // }
 
     bitsets[y].push_back(bsample);
   }
@@ -124,7 +127,7 @@ namespace primer {
   inline void Adaboost::addBitsetExample(const dynamic_bitset<> &sample, const bool y,
 	                  const size_t weight) {
     // Add vector
-		std::vector<int> vsample(sample.size(), 0);
+		// std::vector<int> vsample(sample.size(), 0);
 		
 		for (size_t i = 0; i < weight; ++i) {
    	 bitsets[y].push_back(sample);
@@ -132,15 +135,15 @@ namespace primer {
     // Add bitset
     // instance bsample(sample.size());
 
-    for (size_t i = 0; i < sample.size(); ++i) {
-      if (sample[i]) {
-        vsample[i] = 1;
-      }
-    }
-
-		for (size_t i = 0; i < weight; ++i) {
-		dataset[y].push_back(vsample); 
-		}   
+		//     for (size_t i = 0; i < sample.size(); ++i) {
+		//       if (sample[i]) {
+		//         vsample[i] = 1;
+		//       }
+		//     }
+		//
+		// for (size_t i = 0; i < weight; ++i) {
+		// dataset[y].push_back(vsample);
+		// }
   }
 
   template <class rIter>
