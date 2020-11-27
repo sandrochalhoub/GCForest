@@ -162,7 +162,7 @@
 	%\SetKwFunction{grow}{grow}
 	\SetKwFunction{branch}{branch}
 	\SetKwFunction{select}{select\&remove}
-	\SetKwFunction{budalg}{Bud-first-search}
+	\SetKwFunction{budalg}{Blossom}
 	\SetKwFunction{dynprog}{DynProg}
 	\SetKwFunction{dleight}{DL8.5}
 	\SetKwFunction{olddleight}{DL8}
@@ -173,6 +173,7 @@
 	\SetKwFunction{idthree}{ID3}
 	\SetKwFunction{cfour}{C4.5}
 	\SetKwFunction{cp}{CP}
+	\SetKwFunction{binoct}{binOCT}
 	
 	
 	
@@ -1010,7 +1011,7 @@ The procedure $\dominated{\abranch}$ can therefore simply check, for all parent 
 
 	\begin{figure}
 	\begin{center}
-\subfloat[upper bounds] {
+% \subfloat[upper bounds] {
 		\scalebox{1}{
 			\begin{forest}
 				for tree={%
@@ -1019,19 +1020,25 @@ The procedure $\dominated{\abranch}$ can therefore simply check, for all parent 
 					node options={shape=rectangle, minimum width=10pt, inner sep=1pt, font=\footnotesize},
 		  		edge={-latex, shorten >=1pt, shorten <=1pt},
 				}
-				[{$b:50$}
-					[{$a:22$}, edge={very thick}, edge label={node[midway,fill=white,inner sep=2pt,font=\scriptsize]{$b$}}
-					 [{$.$}, edge label={node[midway,fill=white,inner sep=2pt,font=\scriptsize]{$a$}}
+				[{$b:[50,50]$}
+					[{$a:[19,22]$}, edge={very thick}, edge label={node[midway,fill=white,inner sep=2pt,font=\scriptsize]{$b$}}
+					 [{$h:15$}, edge label={node[midway,fill=white,inner sep=2pt,font=\scriptsize]{$a$}}
+					 	 [{$e:10^*$}, edge label={node[midway,fill=white,inner sep=2pt,font=\scriptsize]{$\bar{h}$}}
+					 	 ]
+						 [{$c:3$}, edge label={node[midway,fill=white,inner sep=2pt,font=\scriptsize]{$h$}}
+						 	[{$d:0^*$}, edge label={node[midway,fill=white,inner sep=2pt,font=\scriptsize]{$c$}}]
+							[{$f:3^*$}, edge label={node[midway,fill=white,inner sep=2pt,font=\scriptsize]{$\bar{c}$}}]
+						 ]
 					 ]
-					 [{$c:17$}, edge={very thick}, edge label={node[midway,fill=white,inner sep=2pt,font=\scriptsize]{$\bar{a}$}}
+					 [{$c:[19,17]$}, edge={very thick}, edge label={node[midway,fill=white,inner sep=2pt,font=\scriptsize]{$\bar{a}$}}
 					 	[{$f:15^*$}, edge label={node[midway,fill=white,inner sep=2pt,font=\scriptsize]{$c$}}
 							% [$\posclass$, edge label={node[midway,fill=white,inner sep=2pt,font=\scriptsize]{$f$}}]
 							% [$\negclass$, edge label={node[midway,fill=white,inner sep=2pt,font=\scriptsize]{$\bar{f}$}}]
 						]
-						[{$g:\infty$}, edge={very thick}, edge label={node[midway,fill=white,inner sep=2pt,font=\scriptsize]{$\bar{c}$}}
-							[., edge={very thick}, edge label={node[midway,fill=white,inner sep=2pt,font=\scriptsize]{$g$}}
+						[{$g:[3,\infty]$}, edge={very thick}, edge label={node[midway,fill=white,inner sep=2pt,font=\scriptsize]{$\bar{c}$}}
+							[{$e:0$}, edge={very thick}, edge label={node[midway,fill=white,inner sep=2pt,font=\scriptsize]{$g$}}
 							]
-							[{$h:3^*$}, edge label={node[midway,fill=white,inner sep=2pt,font=\scriptsize]{$\bar{g}$}}]
+							[{$h:4^*$}, edge label={node[midway,fill=white,inner sep=2pt,font=\scriptsize]{$\bar{g}$}}]
 					 	]
 					 ]
 					]
@@ -1040,40 +1047,40 @@ The procedure $\dominated{\abranch}$ can therefore simply check, for all parent 
 				]
 			\end{forest}
 		}
-		}
-		\subfloat[lower bounds w.r.t. $\{b,\bar{a},c,\bar{g}\}$] {
-		\scalebox{1}{
-			\begin{forest}
-				for tree={%
-					l sep=25pt,
-					s sep=10pt,
-					node options={shape=rectangle, minimum width=10pt, inner sep=1pt, font=\footnotesize},
-		  		edge={-latex, shorten >=1pt, shorten <=1pt},
-				}
-				[{$b,[49,50]$}
-					[{$a,[18,22]$}, edge={very thick}, edge label={node[midway,fill=white,inner sep=2pt,font=\scriptsize]{$b$}}
-					 [{$.$}, edge label={node[midway,fill=white,inner sep=2pt,font=\scriptsize]{$a$}}
-					 ]
-					 [{$c,[18,17]$}, edge={very thick}, edge label={node[midway,fill=white,inner sep=2pt,font=\scriptsize]{$\bar{a}$}}
-					 	[{$f,15^*$}, edge label={node[midway,fill=white,inner sep=2pt,font=\scriptsize]{$c$}}
-							% [$\posclass$, edge label={node[midway,fill=white,inner sep=2pt,font=\scriptsize]{$f$}}]
-							% [$\negclass$, edge label={node[midway,fill=white,inner sep=2pt,font=\scriptsize]{$\bar{f}$}}]
-						]
-						[{$g,[3,\infty]$}, edge={very thick}, edge label={node[midway,fill=white,inner sep=2pt,font=\scriptsize]{$\bar{c}$}}
-							[., edge={very thick}, edge label={node[midway,fill=white,inner sep=2pt,font=\scriptsize]{$g$}}
-							]
-							[{$h,3^*$}, edge label={node[midway,fill=white,inner sep=2pt,font=\scriptsize]{$\bar{g}$}}]
-					 	]
-					 ]
-					]
-					[{$d:31^*$}, edge label={node[midway,fill=white,inner sep=2pt,font=\scriptsize]{$\bar{b}$}}
-					]
-				]
-			\end{forest}
-		}
-		}
+		% }
+		% \subfloat[lower bounds w.r.t. $\{b,\bar{a},c,\bar{g}\}$] {
+		% \scalebox{1}{
+		% 	\begin{forest}
+		% 		for tree={%
+		% 			l sep=25pt,
+		% 			s sep=10pt,
+		% 			node options={shape=rectangle, minimum width=10pt, inner sep=1pt, font=\footnotesize},
+		%   		edge={-latex, shorten >=1pt, shorten <=1pt},
+		% 		}
+		% 		[{$b,[49,50]$}
+		% 			[{$a,[18,22]$}, edge={very thick}, edge label={node[midway,fill=white,inner sep=2pt,font=\scriptsize]{$b$}}
+		% 			 [{$.$}, edge label={node[midway,fill=white,inner sep=2pt,font=\scriptsize]{$a$}}
+		% 			 ]
+		% 			 [{$c,[18,17]$}, edge={very thick}, edge label={node[midway,fill=white,inner sep=2pt,font=\scriptsize]{$\bar{a}$}}
+		% 			 	[{$f,15^*$}, edge label={node[midway,fill=white,inner sep=2pt,font=\scriptsize]{$c$}}
+		% 					% [$\posclass$, edge label={node[midway,fill=white,inner sep=2pt,font=\scriptsize]{$f$}}]
+		% 					% [$\negclass$, edge label={node[midway,fill=white,inner sep=2pt,font=\scriptsize]{$\bar{f}$}}]
+		% 				]
+		% 				[{$g,[3,\infty]$}, edge={very thick}, edge label={node[midway,fill=white,inner sep=2pt,font=\scriptsize]{$\bar{c}$}}
+		% 					[., edge={very thick}, edge label={node[midway,fill=white,inner sep=2pt,font=\scriptsize]{$g$}}
+		% 					]
+		% 					[{$h,3^*$}, edge label={node[midway,fill=white,inner sep=2pt,font=\scriptsize]{$\bar{g}$}}]
+		% 			 	]
+		% 			 ]
+		% 			]
+		% 			[{$d:31^*$}, edge label={node[midway,fill=white,inner sep=2pt,font=\scriptsize]{$\bar{b}$}}
+		% 			]
+		% 		]
+		% 	\end{forest}
+		% }
+		% }
 	\end{center}
-	\caption{\label{fig:lowerbound} Example of lower bound computation.}
+	\caption{\label{fig:lowerbound} Example of lower bound computation w.r.t. the branch }
 	%\caption{\label{fig:searchtree} The search tree for decision trees. \dynprog explores it depth first, whereas \budalg explores branches in the order given below the leaves.}
 	\end{figure}
 
@@ -1125,10 +1132,10 @@ $$
 $$
 We can use the weighted version to handle noisy data, by merging duplicated datapoints and suppressing inconsistent datapoints.
 
-Let $\weight_{\negclass}$ (resp. $\weight_{\posclass}$) denote the number of occurrences of $x$ in $\setex{\negclass}$ (resp. $\setex{\posclass}$). We use the weight function $\weight[x] = |\weight_{\negclass}(x) - \weight_{\posclass}(x)|$. Then, for any datapoint $x$, we remove all but one of its occurrences, in $\setex{\negclass}$ if $\weight_{\negclass}>\weight_{\posclass}$, in $\setex{\posclass}$ if $\weight_{\posclass}>\weight_{\negclass}$, and suppress it completely if $\weight_{\posclass}=\weight_{\negclass}$.
+Let $\weight^{\negclass}$ (resp. $\weight^{\posclass}$) denote the number of occurrences of $x$ in $\setex{\negclass}$ (resp. $\setex{\posclass}$). We use the weight function $\weight[x] = |\weight^{\negclass}(x) - \weight^{\posclass}(x)|$. Then, for any datapoint $x$, we remove all but one of its occurrences, in $\setex{\negclass}$ if $\weight^{\negclass}>\weight^{\posclass}$, in $\setex{\posclass}$ if $\weight^{\posclass}>\weight^{\negclass}$, and suppress it completely if $\weight^{\posclass}=\weight^{\negclass}$.
 The reported error will then need to be offset by the number of pair of suppressed inconsistant datapoints, that is:
 $
-\sum_{x \in \allex}\min(\weight_{\negclass}(x), \weight_{\posclass}(x))
+\sum_{x \in \allex}\min(\weight^{\negclass}(x), \weight^{\posclass}(x))
 $.
 Reducing the number of datapoints in the data set has a non-null, although tiny impact on efficiency. However, suppressing inconsistent datapoints is very important. In particular, proving optimality when the minimum error is positive basically requires to exhaust the search space and is therefore extremely costly. On the other hand, when there exists a perfect tree within the maximum depth, we can stop as soon as we find it. This preprocessing allows to benefit from that when we find a tree whose error is equal to the number of pair of inconsistent datapoints in the original data set.
 This preprocessing can be done in $O(\numfeat \numex \log \numex)$ by ordering the datapoints in lexicographic order and then processing them in sequence.
@@ -1189,6 +1196,16 @@ instead of absolute values, we provide the average relative difference in error 
 \begin{footnotesize}
 \tabcolsep=1.7pt
 \input{src/tables/summaryacc.tex}
+\end{footnotesize}
+\end{center}
+\caption{\label{tab:summaryacc} Comparison with the state of the art: computing optimal trees}
+\end{table}
+
+\begin{table}[htbp]
+\begin{center}
+\begin{footnotesize}
+\tabcolsep=1.7pt
+\input{src/tables/summaryaccother.tex}
 \end{footnotesize}
 \end{center}
 \caption{\label{tab:summaryacc} Comparison with the state of the art: computing optimal trees}
