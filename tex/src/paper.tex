@@ -1212,6 +1212,17 @@ instead of absolute values, we provide the average relative difference in error 
 \end{table}
 
 
+\begin{table}[htbp]
+\begin{center}
+\begin{footnotesize}
+\tabcolsep=1.7pt
+\input{src/tables/summaryaccall.tex}
+\end{footnotesize}
+\end{center}
+\caption{\label{tab:summaryacc} Comparison with the state of the art: computing optimal trees}
+\end{table}
+
+
 \subsection{Computing deep classifiers}
 
 Next, we shift our focus to how fast can we obtain accurate trees and how fast can we improve the accuracy over basic solutions found by heuristics.
@@ -1245,17 +1256,17 @@ We can see in those graphs that \murtree finds an initial tree extremely quickly
 
 
 
-
-\begin{figure}
-	\subfloat[depth=3]{\input{src/tables/scerror3.tex}}
-	\subfloat[depth=5]{\input{src/tables/scerror5.tex}}
-	\subfloat[depth=7]{\input{src/tables/scerror7.tex}}
-
-	\subfloat[depth=8]{\input{src/tables/scerror8.tex}}
-	\subfloat[depth=9]{\input{src/tables/scerror9.tex}}
-	\subfloat[depth=10]{\input{src/tables/scerror10.tex}}
-	\caption{\label{fig:cactus}Accuracy over time}
-\end{figure}
+%
+% \begin{figure}
+% 	\subfloat[depth=3]{\input{src/tables/scerror3.tex}}
+% 	\subfloat[depth=5]{\input{src/tables/scerror5.tex}}
+% 	\subfloat[depth=7]{\input{src/tables/scerror7.tex}}
+%
+% 	\subfloat[depth=8]{\input{src/tables/scerror8.tex}}
+% 	\subfloat[depth=9]{\input{src/tables/scerror9.tex}}
+% 	\subfloat[depth=10]{\input{src/tables/scerror10.tex}}
+% 	\caption{\label{fig:cactus}Accuracy over time}
+% \end{figure}
 
 \subsection{Factor analysis}
 
@@ -1306,34 +1317,44 @@ This algorithm is considerably more efficient than state-of-the-art exact algori
 
 \section*{Appendix}
 
-\renewcommand{\arraystretch}{.955}
+\renewcommand{\arraystretch}{.9}
 
 \begin{table}[htbp]%
 \begin{center}%
-\begin{scriptsize}%
+\begin{footnotesize}%
+\tabcolsep=10pt%
+\input{src/tables/datasetinfo.tex}%
+\end{footnotesize}%
+\end{center}%
+\caption{\label{tab:info} Benchmark and preprocessing data}%
+\end{table}%
+
+\begin{table}[htbp]%
+\begin{center}%
+\begin{footnotesize}%
 \tabcolsep=2pt%
 \input{src/tables/allopt3.tex}%
-\end{scriptsize}%
+\end{footnotesize}%
 \end{center}%
 \caption{\label{tab:all3} Comparison with state of the art: depth 3}%
 \end{table}%
 
 \begin{table}[htbp]
 \begin{center}
-\begin{scriptsize}
+\begin{footnotesize}
 \tabcolsep=2pt
 \input{src/tables/allopt4.tex}
-\end{scriptsize}
+\end{footnotesize}
 \end{center}
 \caption{\label{tab:all4} Comparison with state of the art: depth 4}
 \end{table}
 
 \begin{table}[htbp]
 \begin{center}
-\begin{scriptsize}
+\begin{footnotesize}
 \tabcolsep=2pt
 \input{src/tables/allopt5.tex}
-\end{scriptsize}
+\end{footnotesize}
 \end{center}
 \caption{\label{tab:all5} Comparison with state of the art: depth 5}
 \end{table}
@@ -1341,50 +1362,50 @@ This algorithm is considerably more efficient than state-of-the-art exact algori
 
 \begin{table}[htbp]
 \begin{center}
-\begin{scriptsize}
+\begin{footnotesize}
 \tabcolsep=2pt
 \input{src/tables/allopt6.tex}
-\end{scriptsize}
+\end{footnotesize}
 \end{center}
 \caption{\label{tab:all6} Comparison with state of the art: depth 6}
 \end{table}
 
 \begin{table}[htbp]
 \begin{center}
-\begin{scriptsize}
+\begin{footnotesize}
 \tabcolsep=2pt
 \input{src/tables/allopt7.tex}
-\end{scriptsize}
+\end{footnotesize}
 \end{center}
 \caption{\label{tab:all7} Comparison with state of the art: depth 7}
 \end{table}
 
 \begin{table}[htbp]
 \begin{center}
-\begin{scriptsize}
+\begin{footnotesize}
 \tabcolsep=2pt
 \input{src/tables/allopt8.tex}
-\end{scriptsize}
+\end{footnotesize}
 \end{center}
 \caption{\label{tab:all8} Comparison with state of the art: depth 8}
 \end{table}
 
 \begin{table}[htbp]
 \begin{center}
-\begin{scriptsize}
+\begin{footnotesize}
 \tabcolsep=2pt
 \input{src/tables/allopt9.tex}
-\end{scriptsize}
+\end{footnotesize}
 \end{center}
 \caption{\label{tab:all9} Comparison with state of the art: depth 9}
 \end{table}
 
 \begin{table}[htbp]
 \begin{center}
-\begin{scriptsize}
+\begin{footnotesize}
 \tabcolsep=2pt
 \input{src/tables/allopt10.tex}
-\end{scriptsize}
+\end{footnotesize}
 \end{center}
 \caption{\label{tab:all10} Comparison with state of the art: depth 10}
 \end{table}
@@ -1394,80 +1415,80 @@ This algorithm is considerably more efficient than state-of-the-art exact algori
 
 \begin{table}[htbp]%
 \begin{center}%
-\begin{scriptsize}%
+\begin{footnotesize}%
 \tabcolsep=2pt%
 \input{src/tables/allfact3.tex}%
-\end{scriptsize}%
+\end{footnotesize}%
 \end{center}%
 \caption{\label{tab:fact3} Factor analysis: depth 3}%
 \end{table}%
 
 \begin{table}[htbp]
 \begin{center}
-\begin{scriptsize}
+\begin{footnotesize}
 \tabcolsep=2pt
 \input{src/tables/allfact4.tex}
-\end{scriptsize}
+\end{footnotesize}
 \end{center}
 \caption{\label{tab:fact4} Factor analysis: depth 4}
 \end{table}
 
 \begin{table}[htbp]
 \begin{center}
-\begin{scriptsize}
+\begin{footnotesize}
 \tabcolsep=2pt
 \input{src/tables/allfact5.tex}
-\end{scriptsize}
+\end{footnotesize}
 \end{center}
 \caption{\label{tab:fact5} Factor analysis: depth 5}
 \end{table}
 
 \begin{table}[htbp]
 \begin{center}
-\begin{scriptsize}
+\begin{footnotesize}
 \tabcolsep=2pt
 \input{src/tables/allfact6.tex}
-\end{scriptsize}
+\end{footnotesize}
 \end{center}
 \caption{\label{tab:fact6} Factor analysis: depth 6}
 \end{table}
 
 \begin{table}[htbp]
 \begin{center}
-\begin{scriptsize}
+\begin{footnotesize}
 \tabcolsep=2pt
 \input{src/tables/allfact7.tex}
-\end{scriptsize}
+\end{footnotesize}
 \end{center}
 \caption{\label{tab:fact7} Factor analysis: depth 7}
 \end{table}
 
 \begin{table}[htbp]
 \begin{center}
-\begin{scriptsize}
+\begin{footnotesize}
 \tabcolsep=2pt
 \input{src/tables/allfact8.tex}
-\end{scriptsize}
+\end{footnotesize}
 \end{center}
 \caption{\label{tab:fact8} Factor analysis: depth 8}
 \end{table}
 
 \begin{table}[htbp]
 \begin{center}
-\begin{scriptsize}
+\begin{footnotesize}
 \tabcolsep=2pt
 \input{src/tables/allfact9.tex}
-\end{scriptsize}
+\end{footnotesize}
 \end{center}
 \caption{\label{tab:fact9} Factor analysis: depth 9}
 \end{table}
 
 \begin{table}[htbp]
 \begin{center}
-\begin{scriptsize}
+\begin{footnotesize}
 \tabcolsep=2pt
 \input{src/tables/allfact10.tex}
-\end{scriptsize}
+\end{footnotesize}
 \end{center}
 \caption{\label{tab:fact10} Factor analysis: depth 10}
 \end{table}
