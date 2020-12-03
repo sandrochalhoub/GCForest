@@ -1023,7 +1023,7 @@ As long as these choices of feature tests stand (i.e., as long as $\abranch$ bel
 \begin{example}[Lower bound reasoning]
 	\label{ex:lb}
 	
-	Figure~\ref{fig:lowerbound} shows a snapshot of the excution of \budalg. Every node is labelled with the feature test on that node, and with the values of $\best[\abranch]$ for the branch $\abranch$ ending on that node. When all subtrees of a branch $\abranch$ have been explored (hence $\opt[\abranch]=1$), this is marked by a ``$^*$''. We assume that the branch considered at Line~\ref{line:fail} is $\abranch = \{r, \bar{a}, \bar{c}, g\}$. For instance, we can suppose that a tree rooted at $\abranch$ with feature $e$ was found (misclassifying 2 data points). Then, search moves to the sibling branch $\{r, \bar{a}, \bar{c}, g\}$, which is eventually optimized with a total error of $4$. For all branches $\abranch'$ of $\abranch$, we give the values of $\lb{\abranch',\abranch}$ and $\best[\abranch']$ between brackets. Since there exists $\abranch'$ such that $\lb{\abranch',\abranch} \geq \best[\abranch']$, we know that $\abranch$ cannot belong to an improving solution, and hence there is no need to try to extend it further. 
+	Figure~\ref{fig:lowerbound} shows a snapshot of the excution of \budalg. Every node is labelled with the feature test on that node, and with the values of $\best[\abranch]$ for the branch $\abranch$ ending on that node. When all subtrees of a branch $\abranch$ have been explored (hence $\opt[\abranch]=1$), this is marked by a ``$^*$''. We assume that the branch considered at Line~\ref{line:fail} is $\abranch = \{r, \bar{a}, \bar{c}, g\}$. For instance, we can suppose that a tree rooted at $\abranch$ with feature $e$ has been found (misclassifying 2 data points). Then, search moved to the sibling branch $\{r, \bar{a}, \bar{c}, g\}$, which was eventually optimized with a total error of $4$, and now the pair $(\abranch,e)$ is popped out of \sequence. For all branches $\abranch'$ of $\abranch$, we give the values of $\lb{\abranch',\abranch}$ and $\best[\abranch']$ between brackets. Since there exists $\abranch'$ such that $\lb{\abranch',\abranch} \geq \best[\abranch']$ (e.g., $\emptyset$ and $\{r, \bar{a}\}$), we know that $\abranch$ cannot belong to an improving solution, and hence there is no need to try to extend it further. 
 	
 	 % the current best classifier cannot be improved as long as
 
@@ -1054,7 +1054,7 @@ As long as these choices of feature tests stand (i.e., as long as $\abranch$ bel
 							% [$\posclass$, edge label={node[midway,fill=white,inner sep=2pt,font=\scriptsize]{$f$}}]
 							% [$\negclass$, edge label={node[midway,fill=white,inner sep=2pt,font=\scriptsize]{$\bar{f}$}}]
 						]
-						[{$g:[4,\infty]$}, edge={very thick}, edge label={node[midway,fill=white,inner sep=2pt,font=\scriptsize]{$\bar{c}$}}
+						[{$g:[4,6]$}, edge={very thick}, edge label={node[midway,fill=white,inner sep=2pt,font=\scriptsize]{$\bar{c}$}}
 							[{$e:2$}, edge={very thick}, edge label={node[midway,fill=white,inner sep=2pt,font=\scriptsize]{$g$}}
 							]
 							[{$h:4^*$}, edge label={node[midway,fill=white,inner sep=2pt,font=\scriptsize]{$\bar{g}$}}]
