@@ -115,7 +115,7 @@ namespace blossom {
 	public:
 	  WeightedDataset();
 
-	  void addExample(const std::vector<int>::iterator beg_row, const std::vector<int>::iterator end_row, const int target);
+	  void addExample(std::vector<int>::iterator beg_row, std::vector<int>::iterator end_row, const int target);
 /*	  void addExample(instance& x, const bool y);*/
 	  template <class Algo> void toInc(Algo &algo);
 	  size_t example_count() const { return data[0].size() + data[1].size(); }
