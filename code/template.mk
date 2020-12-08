@@ -40,7 +40,7 @@ PLIBOBJ = $(patsubst $(SRC)/%, $(OBJ)/%, $(PLIBAUX))
 #------------------------------------------------------------
 
 
-default: $(BIN)/bud_first_search wrapper adaboost
+default: $(BIN)/blossom wrapper adaboost
 
 all: lib $(BINS)
 
