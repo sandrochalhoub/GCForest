@@ -5,7 +5,7 @@
 
 namespace blossom {
 
-void WeightedDataset::addExample(instance &x, const bool y) {
+void WeightedDataset::addBitsetExample(instance &x, const bool y) {
 
   data[y].push_back(x);
 }

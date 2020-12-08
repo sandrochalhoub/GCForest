@@ -89,7 +89,7 @@ namespace blossom {
 
       for (int y = 0; y < 2; ++y) {
         for (int i = 0; i < bitsets[y].size(); ++i) {
-          filter.addExample(bitsets[y][i], y);
+          filter.addBitsetExample(bitsets[y][i], y);
         }
 
         bitsets[y].clear();

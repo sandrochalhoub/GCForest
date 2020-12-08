@@ -576,7 +576,7 @@ public:
       // instance db;
       // bin.duplicate_format(binex, db);
       // bin.add(db, label[i] != min_label);
-			bin.addExample(binex, label[i] != min_label);
+			bin.addBitsetExample(binex, label[i] != min_label);
     }
 
   }

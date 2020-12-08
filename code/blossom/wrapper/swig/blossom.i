@@ -117,7 +117,7 @@ namespace blossom {
 
 	  template <class rIter>
 	  void addExample(rIter beg_row, rIter end_row, const int target);
-	  void addExample(instance& x, const bool y);
+/*	  void addExample(instance& x, const bool y);*/
 	  template <class Algo> void toInc(Algo &algo);
 	  size_t example_count() const { return data[0].size() + data[1].size(); }
 	  void printDatasetToTextFile(ostream &outfile, const bool first = true) const;

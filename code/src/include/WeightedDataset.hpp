@@ -19,14 +19,9 @@ public:
   template <class rIter>
   void addExample(rIter beg_row, rIter end_row, const int target);
 	
-  void addExample(instance& x, const bool y);
-
-  // template <class rIter>
-  // void newExample(rIter beg_row, rIter end_row, const bool y);
+  void addBitsetExample(instance& x, const bool y);
 
   template <class Algo> void toInc(Algo &algo);
-
-  // template <class Algo> void to(Algo &algo);
 
   size_t example_count() const { return data[0].size() + data[1].size(); }
 
