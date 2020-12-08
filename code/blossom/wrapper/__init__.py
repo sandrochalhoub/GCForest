@@ -1,3 +1,3 @@
-from . import _budFirstSearch
+from . import _blossom
 
-from .budFirstSearch import *
+from .blossom import *

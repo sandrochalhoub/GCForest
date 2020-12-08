@@ -1,19 +1,23 @@
 import sys
-import bud_first_search as bfs
+import blossom 
 
-opt = bfs.parse(bfs.to_str_vec(sys.argv))
+opt = blossom.parse(bfs.to_str_vec(sys.argv))
 filename = str(opt.instance_file)
 
-wood = bfs.Wood()
-algo = bfs.BacktrackingAlgo(wood, opt)
+wood = blossom.Wood()
+dataset = blossom.WeightedDataset()
+algo = blossom.BacktrackingAlgo(wood, opt)
 
 if filename == "":
     print("No input file!")
     sys.exit(-1)
 else:
-    bfs.read_binary(algo, opt)
+    blossom.read_binary(dataset, opt)
+
+
+dataset.toInc(algo)
 
 algo.minimize_error()
 tree = algo.getSolution()
-nodes, edges = bfs.read_tree(tree)
+nodes, edges = blossom.read_tree(tree)
 print("nodes:", nodes,"\n\nedges: ", edges)
