@@ -144,6 +144,7 @@ namespace blossom {
   };
 	
 	
+	template <template<typename> class ErrorPolicy, typename E_t>
 	class WeightedDataset {
 	public:
 	  WeightedDataset();
@@ -151,7 +152,6 @@ namespace blossom {
 	  void addExample(std::vector<int>::iterator beg_row, std::vector<int>::iterator end_row, const int target);
 /*	  void addExample(instance& x, const bool y);*/
 		
-		template <template<typename> class ErrorPolicy, typename E_t>
 		void toInc(BacktrackingAlgorithm<ErrorPolicy, E_t> &algo);
 		
 /*	  void toInc(BacktrackingAlgorithm<CardinalityError, int> &algo);
