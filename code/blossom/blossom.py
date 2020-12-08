@@ -152,14 +152,16 @@ class BlossomClassifier:
             for x, y, w in zip(Xb, Yb, sample_weight):
                 # scikit learn classes start at 1
                 # self.algo.addExample(to_int_vec(list(x) + [y]), w)
-                self.dataset.addExample(to_int_vec(list(x) + [y]), w) 
+                sample = to_int_vec(list(x) + [y])
+                self.dataset.addExample(sample.begin(), sample.end(), w) 
         else:
             self.algo = wrapper.BacktrackingAlgo(self.wood, self.opt)
 
             for x, y in zip(Xb, Yb):
                 # scikit learn classes & features start at 1
                 # self.algo.addExample(to_int_vec(list(x) + [y]))
-                self.dataset.addExample(to_int_vec(list(x) + [y]), 1)
+                sample = to_int_vec(list(x) + [y])
+                self.dataset.addExample(sample.begin(), sample.end(), 1)
                 
         self.dataset.toInc(self.algo)     
 
