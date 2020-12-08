@@ -29,10 +29,10 @@ wrapper/_blossom.so: $(PWRAPOBJ) $(PWRAPSWIGOBJ)
 $(OBJ)/blossom.o: $(SRC)/blossom.cpp
 	$(CCC) $(CFLAGS) -c $(SRC)/blossom.cpp -o $@
 
-$(OBJ)/budFirstSearch_wrap.o: $(SWIG)/blossom_wrap.cxx
+$(OBJ)/blossom_wrap.o: $(SWIG)/blossom_wrap.cxx
 	$(CCC) $(CFLAGS) -c $(SWIG)/blossom_wrap.cxx -o $@
 
-$(SWIG)/budFirstSearch_wrap.cxx: $(SWIG)/blossom.i
+$(SWIG)/blossom_wrap.cxx: $(SWIG)/blossom.i
 	swig -c++ -python -py3 -outdir wrapper $(SWIG)/blossom.i
 
 clean:
