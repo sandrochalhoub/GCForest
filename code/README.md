@@ -21,12 +21,12 @@ bin/bud_first_search <datafile> --verbosity 0 --binarize --nosolve --print_ins [
 - High level API (Sklearn estimator)
 
 ```python
-from bud_first_search import BudFirstSearch
+import blossom
 
 test_X = [[0, 0], [0, 1]]
 test_Y = [0, 1]
 
-clf = BudFirstSearchClassifier()
+clf = BlossomClassifier()
 clf.fit(test_X, test_Y)
 
 print(clf.nodes)
