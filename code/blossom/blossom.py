@@ -50,9 +50,9 @@ def read_tree(tree):
     add_node(tree, tree.idx)
     return nodes, edges
 
-class BudFirstSearchClassifier:
+class BlossomClassifier:
     """
-    Scikit learn-compatible estimator to use BudFirstSearch with Scikit Learn
+    Scikit learn-compatible estimator to use Blossom with Scikit Learn
     meta-algorithms (like Adaboost)
     """
 
