@@ -113,7 +113,7 @@ namespace blossom {
 	
 	class WeightedDataset {
 	public:
-	  WeightedDataset() = delete;
+	  WeightedDataset();
 
 	  template <class rIter>
 	  void addExample(rIter beg_row, rIter end_row, const int target);

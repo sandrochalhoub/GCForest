@@ -26,7 +26,7 @@ import blossom
 test_X = [[0, 0], [0, 1]]
 test_Y = [0, 1]
 
-clf = BlossomClassifier()
+clf = blossom.BlossomClassifier()
 clf.fit(test_X, test_Y)
 
 print(clf.nodes)
