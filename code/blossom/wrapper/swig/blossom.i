@@ -6,8 +6,8 @@
 #include "blossom.h"
 %}
 
-extern DTOptions parse(std::vector<std::string> params);
-extern void read_binary(blossom::WeightedDataset &input, DTOptions &opt);
+extern blossom::DTOptions parse(std::vector<std::string> params);
+extern void read_binary(blossom::WeightedDataset &input, blossom::DTOptions &opt);
 
 namespace std {
   %template(int_vec) vector<int>;

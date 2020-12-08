@@ -30,7 +30,7 @@ void addNode(Tree &tree, int node, Results &res) {
 }
 */
 
-DTOptions parse(std::vector<std::string> params) {
+blossom::DTOptions parse(std::vector<std::string> params) {
   std::vector<char*> cparams;
   for (auto &param : params) {
     cparams.push_back(const_cast<char*>(param.c_str()));
