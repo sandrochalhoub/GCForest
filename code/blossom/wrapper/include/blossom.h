@@ -9,5 +9,5 @@
 
 #define SWIG_FILE_WITH_INIT
 
-extern DTOptions parse(std::vector<std::string> params);
+extern blossom::DTOptions parse(std::vector<std::string> params);
 extern void read_binary(blossom::WeightedDataset &input, blossom::DTOptions &opt);
