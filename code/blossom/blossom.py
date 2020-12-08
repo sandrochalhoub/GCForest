@@ -85,6 +85,8 @@ class BlossomClassifier:
 
         self.classes_ = np.array([0, 1])
         self.n_classes_ = 2
+        
+        self.dataset = None
 
     def get_param_names(self):
         # TODO add useful parameters
@@ -143,18 +145,23 @@ class BlossomClassifier:
 
         Xb, Yb = X, Y # self._binarize_data(X, Y)
 
+        self.dataset = wrapper.WeightedDataset()
         if sample_weight is not None:
             self.algo = wrapper.WeightedBacktrackingAlgod(self.wood, self.opt)
 
             for x, y, w in zip(Xb, Yb, sample_weight):
                 # scikit learn classes start at 1
-                self.algo.addExample(to_int_vec(list(x) + [y]), w)
+                # self.algo.addExample(to_int_vec(list(x) + [y]), w)
+                self.dataset.addExample(to_int_vec(list(x) + [y]), w) 
         else:
             self.algo = wrapper.BacktrackingAlgo(self.wood, self.opt)
 
             for x, y in zip(Xb, Yb):
                 # scikit learn classes & features start at 1
-                self.algo.addExample(to_int_vec(list(x) + [y]))
+                # self.algo.addExample(to_int_vec(list(x) + [y]))
+                self.dataset.addExample(to_int_vec(list(x) + [y]), 1)
+                
+        self.dataset.toInc(self.algo)     
 
         if self.opt.mindepth:
             if self.opt.minsize:
