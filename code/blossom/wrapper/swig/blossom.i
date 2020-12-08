@@ -167,16 +167,16 @@ namespace blossom {
 	  void addExample(std::vector<int>::iterator beg_row, std::vector<int>::iterator end_row, const int target);
 /*	  void addExample(instance& x, const bool y);*/
 		
-		template <template<typename> class ErrorPolicy, typename E_t>
-		void toInc(BacktrackingAlgorithm<ErrorPolicy, E_t> &algo);
-/*	  
-void toInc(BacktrackingAlgorithm<CardinalityError, int> &algo);
+/*		template <template<typename> class ErrorPolicy, typename E_t>
+		void toInc(BacktrackingAlgorithm<ErrorPolicy, E_t> &algo);*/
+	  
+		void toInc(BacktrackingAlgorithm<CardinalityError, int> &algo);
 		void toInc(BacktrackingAlgorithm<CardinalityError, unsigned long> &algo);
 		void toInc(BacktrackingAlgorithm<WeightedError, int> &algo);
 		void toInc(BacktrackingAlgorithm<WeightedError, float> &algo);
 		void toInc(BacktrackingAlgorithm<WeightedError, double> &algo);
 		void toInc(BacktrackingAlgorithm<WeightedError, unsigned long> &algo);
-	  size_t example_count() const { return data[0].size() + data[1].size(); }*/
+	  /* size_t example_count() const { return data[0].size() + data[1].size(); }*/
 	  void printDatasetToTextFile(ostream &outfile, const bool first = true) const;
 	  void printDatasetToCSVFile(ostream &outfile, const string &delimiter = ",",
 	                             const bool first = false) const;
