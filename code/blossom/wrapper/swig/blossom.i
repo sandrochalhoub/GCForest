@@ -1,9 +1,9 @@
-%module budFirstSearch
+%module blossom
 %include "std_vector.i"
 %include "std_string.i"
 
 %{
-#include "budFirstSearch.h"
+#include "blossom.h"
 %}
 
 extern DTOptions parse(std::vector<std::string> params);
