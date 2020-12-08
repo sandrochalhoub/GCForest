@@ -1,55 +1,55 @@
-\begin{tabular}{lccrrrrrrrrrrrrrr}
+\begin{tabular}{lrrrrrrrrrrrr}
 \toprule
-\multirow{2}{*}{}& && \multicolumn{3}{c}{\budalg} & \multicolumn{3}{c}{\murtree} & \multicolumn{3}{c}{\dleight} & \multicolumn{3}{c}{\cp} & \multicolumn{2}{c}{\cart}\\
-\cmidrule(rr){4-6}\cmidrule(rr){7-9}\cmidrule(rr){10-12}\cmidrule(rr){13-15}\cmidrule(rr){16-17}
-&\multirow{1}{*}{$\#ex.$} & \multirow{1}{*}{\#feat.} &  \multicolumn{1}{c}{error} & \multicolumn{1}{c}{cpu} & \multicolumn{1}{c}{opt.} & \multicolumn{1}{c}{error} & \multicolumn{1}{c}{cpu} & \multicolumn{1}{c}{opt.} & \multicolumn{1}{c}{error} & \multicolumn{1}{c}{cpu} & \multicolumn{1}{c}{opt.} & \multicolumn{1}{c}{error} & \multicolumn{1}{c}{cpu} & \multicolumn{1}{c}{opt.} & \multicolumn{1}{c}{error} & \multicolumn{1}{c}{cpu} \\
+\multirow{2}{*}{}&  \multicolumn{2}{c}{\budalg} & \multicolumn{2}{c}{\murtree} & \multicolumn{2}{c}{\dleight} & \multicolumn{2}{c}{\cp} & \multicolumn{2}{c}{binoct} & \multicolumn{2}{c}{\cart}\\
+\cmidrule(rr){2-3}\cmidrule(rr){4-5}\cmidrule(rr){6-7}\cmidrule(rr){8-9}\cmidrule(rr){10-11}\cmidrule(rr){12-13}
+& \multicolumn{1}{c}{error} & \multicolumn{1}{c}{cpu} & \multicolumn{1}{c}{error} & \multicolumn{1}{c}{cpu} & \multicolumn{1}{c}{error} & \multicolumn{1}{c}{cpu} & \multicolumn{1}{c}{error} & \multicolumn{1}{c}{cpu} & \multicolumn{1}{c}{error} & \multicolumn{1}{c}{cpu} & \multicolumn{1}{c}{error} & \multicolumn{1}{c}{cpu} \\
 \midrule
 
-\texttt{adult\_discretized} & \multicolumn{1}{r}{30299} & \multicolumn{1}{r}{59}  & \textbf{4148} & 449.9 & 0 & 4198 & 3557.1 & 0 & 4957 & 3600.0 & 0 & 7511 & 3600.0 & 0 & 4399 & \textbf{0.1}\\
-\texttt{anneal} & \multicolumn{1}{r}{812} & \multicolumn{1}{r}{93}  & \textbf{36} & 2221.2 & 0 & 40 & 1199.1 & 0 & - & - & 0 & 187 & 3600.0 & 0 & 88 & \textbf{0.0}\\
-\texttt{audiology} & \multicolumn{1}{r}{216} & \multicolumn{1}{r}{148}  & 0 & \textbf{0.0} & 1 & 0 & 0.0 & 1 & 0 & 0.0 & 1 & 0 & 0.3 & 1 & 0 & 0.0\\
-\texttt{australian-credit} & \multicolumn{1}{r}{653} & \multicolumn{1}{r}{125}  & 0 & 12.9 & 1 & 0 & 23.1 & 1 & - & - & 0 & 296 & 3600.0 & 0 & 33 & \textbf{0.0}\\
-\texttt{bank} & \multicolumn{1}{r}{45211} & \multicolumn{1}{r}{9531}  & \textbf{3709} & 1815.2 & 0 & 4127 & 982.4 & 0 & 4810 & 3604.9 & 0 & 5289 & 3600.3 & 0 & 3814 & \textbf{72.9}\\
-\texttt{breast-cancer} & \multicolumn{1}{r}{683} & \multicolumn{1}{r}{89}  & 0 & 25.4 & 1 & 0 & 10.2 & 1 & 0 & 13.5 & 1 & 1 & 3600.0 & 0 & 4 & \textbf{0.0}\\
-\texttt{breast-wisconsin} & \multicolumn{1}{r}{683} & \multicolumn{1}{r}{120}  & 0 & \textbf{0.0} & 1 & 0 & 0.0 & 1 & 0 & 402.0 & 1 & 0 & 51.0 & 1 & 0 & 0.0\\
-\texttt{car} & \multicolumn{1}{r}{1728} & \multicolumn{1}{r}{21}  & 0 & 404.4 & 1 & 0 & 62.9 & 1 & 0 & 13.3 & 1 & 3 & 3600.0 & 0 & 36 & \textbf{0.0}\\
-\texttt{compas\_discretized} & \multicolumn{1}{r}{6167} & \multicolumn{1}{r}{25}  & 1832 & 1461.5 & 1 & 1832 & 3310.7 & 1 & 1832 & 1637.8 & 1 & 1841 & 3600.0 & 0 & 1904 & \textbf{0.0}\\
-\texttt{diabetes} & \multicolumn{1}{r}{768} & \multicolumn{1}{r}{112}  & 0 & 219.5 & 1 & 0 & 715.8 & 1 & - & - & 0 & 268 & 3600.0 & 0 & 79 & \textbf{0.0}\\
-\texttt{forest-fires} & \multicolumn{1}{r}{517} & \multicolumn{1}{r}{989}  & 137 & 189.5 & 0 & \textbf{130} & 2905.2 & 0 & - & - & 0 & 247 & 3600.1 & 0 & 157 & \textbf{0.0}\\
-\texttt{german-credit} & \multicolumn{1}{r}{1000} & \multicolumn{1}{r}{112}  & \textbf{23} & 2235.2 & 0 & 27 & 3238.5 & 0 & - & - & 0 & 254 & 3600.0 & 0 & 117 & \textbf{0.0}\\
-\texttt{heart-cleveland} & \multicolumn{1}{r}{296} & \multicolumn{1}{r}{95}  & 0 & \textbf{0.0} & 1 & 0 & 0.0 & 1 & - & - & 0 & 0 & 0.7 & 1 & 2 & 0.0\\
-\texttt{hepatitis} & \multicolumn{1}{r}{137} & \multicolumn{1}{r}{68}  & 0 & \textbf{0.0} & 1 & 0 & 0.0 & 1 & 0 & 0.6 & 1 & 0 & 1.0 & 1 & 0 & 0.0\\
-\texttt{hypothyroid} & \multicolumn{1}{r}{3247} & \multicolumn{1}{r}{88}  & 17 & 99.2 & 1 & 17 & 1149.0 & 0 & - & - & 0 & 277 & 3600.0 & 0 & 38 & \textbf{0.0}\\
-\texttt{ionosphere} & \multicolumn{1}{r}{351} & \multicolumn{1}{r}{445}  & 0 & \textbf{0.0} & 1 & 0 & 0.2 & 1 & - & - & 0 & 0 & 68.9 & 1 & 3 & 0.0\\
-\texttt{kr-vs-kp} & \multicolumn{1}{r}{3196} & \multicolumn{1}{r}{73}  & \textbf{13} & 2736.5 & 0 & 14 & 1799.8 & 0 & - & - & 0 & 35 & 3600.0 & 0 & 48 & \textbf{0.0}\\
-\texttt{letter} & \multicolumn{1}{r}{20000} & \multicolumn{1}{r}{224}  & \textbf{24} & 297.5 & 0 & 111 & 672.2 & 0 & 601 & 3600.0 & 0 & 813 & 3600.0 & 0 & 94 & \textbf{0.4}\\
-\texttt{lymph} & \multicolumn{1}{r}{148} & \multicolumn{1}{r}{68}  & 0 & \textbf{0.0} & 1 & 0 & 0.0 & 1 & 0 & 0.0 & 1 & 0 & 0.4 & 1 & 0 & 0.0\\
-\texttt{mnist\_0} & \multicolumn{1}{r}{60000} & \multicolumn{1}{r}{784}  & \textbf{788} & 1983.0 & 0 & 1242 & 518.3 & 0 & - & - & 0 & 5923 & 3600.0 & 0 & 991 & \textbf{7.0}\\
-\texttt{mnist\_1} & \multicolumn{1}{r}{60000} & \multicolumn{1}{r}{784}  & \textbf{565} & 1177.0 & 0 & 1190 & 1461.7 & 0 & 4548 & 3600.3 & 0 & 6742 & 3600.0 & 0 & 781 & \textbf{6.5}\\
-\texttt{mnist\_2} & \multicolumn{1}{r}{60000} & \multicolumn{1}{r}{784}  & \textbf{1857} & 291.0 & 0 & 2496 & 2441.1 & 0 & - & - & 0 & 5958 & 3600.1 & 0 & 2234 & \textbf{6.8}\\
-\texttt{mnist\_3} & \multicolumn{1}{r}{60000} & \multicolumn{1}{r}{784}  & \textbf{1436} & 1679.9 & 0 & 2341 & 42.9 & 0 & - & - & 0 & 6131 & 3600.1 & 0 & 1692 & \textbf{5.5}\\
-\texttt{mnist\_4} & \multicolumn{1}{r}{60000} & \multicolumn{1}{r}{784}  & \textbf{1279} & 1521.5 & 0 & 2228 & 2280.0 & 0 & - & - & 0 & 5842 & 3600.1 & 0 & 1662 & \textbf{6.2}\\
-\texttt{mnist\_5} & \multicolumn{1}{r}{60000} & \multicolumn{1}{r}{784}  & \textbf{2519} & 1518.1 & 0 & 2610 & 1997.2 & 0 & - & - & 0 & 5421 & 3600.1 & 0 & 2726 & \textbf{7.2}\\
-\texttt{mnist\_6} & \multicolumn{1}{r}{60000} & \multicolumn{1}{r}{784}  & 1203 & 109.0 & 0 & \textbf{1141} & 1140.2 & 0 & - & - & 0 & 5918 & 3600.1 & 0 & 1356 & \textbf{7.2}\\
-\texttt{mnist\_7} & \multicolumn{1}{r}{60000} & \multicolumn{1}{r}{784}  & \textbf{1429} & 346.7 & 0 & 1753 & 1800.8 & 0 & 4544 & 3600.3 & 0 & 6265 & 3600.0 & 0 & 1538 & \textbf{6.7}\\
-\texttt{mnist\_8} & \multicolumn{1}{r}{60000} & \multicolumn{1}{r}{784}  & \textbf{1192} & 3086.6 & 0 & 2535 & 1761.6 & 0 & - & - & 0 & 5851 & 3600.1 & 0 & 1705 & \textbf{5.3}\\
-\texttt{mnist\_9} & \multicolumn{1}{r}{60000} & \multicolumn{1}{r}{784}  & \textbf{2186} & 2934.0 & 0 & 2639 & 635.9 & 0 & 5254 & 3600.3 & 0 & 5949 & 3600.0 & 0 & 2379 & \textbf{5.9}\\
-\texttt{mushroom} & \multicolumn{1}{r}{8124} & \multicolumn{1}{r}{119}  & 0 & \textbf{0.0} & 1 & 0 & 0.0 & 1 & 0 & 5.4 & 1 & 0 & 0.3 & 1 & 0 & 0.0\\
-\texttt{pendigits} & \multicolumn{1}{r}{7494} & \multicolumn{1}{r}{216}  & 0 & \textbf{0.0} & 1 & 0 & 0.1 & 1 & - & - & 0 & 0 & 4.2 & 1 & 0 & 0.1\\
-\texttt{primary-tumor} & \multicolumn{1}{r}{336} & \multicolumn{1}{r}{31}  & 15 & \textbf{0.0} & 1 & 15 & 1244.4 & 1 & - & - & 0 & 82 & 3600.0 & 0 & 22 & 0.0\\
-\texttt{segment} & \multicolumn{1}{r}{2310} & \multicolumn{1}{r}{235}  & 0 & \textbf{0.0} & 1 & 0 & 0.0 & 1 & 0 & 0.3 & 1 & 0 & 0.5 & 1 & 0 & 0.0\\
-\texttt{soybean} & \multicolumn{1}{r}{630} & \multicolumn{1}{r}{50}  & 2 & 0.1 & 1 & 2 & 56.3 & 0 & - & - & 0 & 92 & 3600.0 & 0 & 8 & \textbf{0.0}\\
-\texttt{splice-1} & \multicolumn{1}{r}{3190} & \multicolumn{1}{r}{287}  & \textbf{24} & 0.5 & 0 & 31 & 1616.9 & 0 & - & - & 0 & 1535 & 3600.0 & 0 & 34 & \textbf{0.0}\\
-\texttt{surgical-deepnet} & \multicolumn{1}{r}{14635} & \multicolumn{1}{r}{6047}  & \textbf{1297} & 65.8 & 0 & 1609 & 156.6 & 0 & - & - & 0 & 3690 & 3600.2 & 0 & 1400 & \textbf{8.5}\\
-\texttt{taiwan\_binarised} & \multicolumn{1}{r}{30000} & \multicolumn{1}{r}{205}  & \textbf{4727} & 3246.2 & 0 & 5172 & 2644.9 & 0 & 5412 & 3600.0 & 0 & 6636 & 3600.0 & 0 & 5043 & \textbf{0.7}\\
-\texttt{tic-tac-toe} & \multicolumn{1}{r}{958} & \multicolumn{1}{r}{27}  & 0 & \textbf{0.0} & 1 & 0 & 0.0 & 1 & 0 & 1.5 & 1 & 0 & 1.4 & 1 & 13 & 0.0\\
-\texttt{titanic} & \multicolumn{1}{r}{887} & \multicolumn{1}{r}{333}  & \textbf{64} & 1499.8 & 0 & 76 & 3153.4 & 0 & - & - & 0 & 342 & 3600.0 & 0 & 105 & \textbf{0.0}\\
-\texttt{vehicle} & \multicolumn{1}{r}{846} & \multicolumn{1}{r}{252}  & 0 & \textbf{0.0} & 1 & 0 & 0.1 & 1 & 0 & 23.9 & 1 & 0 & 617.2 & 1 & 3 & 0.0\\
-\texttt{vote} & \multicolumn{1}{r}{435} & \multicolumn{1}{r}{48}  & 0 & \textbf{0.0} & 1 & 0 & 0.0 & 1 & 0 & 0.0 & 1 & 0 & 2.5 & 1 & 1 & 0.0\\
-\texttt{weather-aus} & \multicolumn{1}{r}{142193} & \multicolumn{1}{r}{4759}  & \textbf{1657} & 2060.5 & 0 & 1709 & 1402.2 & 0 & - & - & 0 & 1761 & 3600.1 & 0 & 1703 & \textbf{21.3}\\
-\texttt{wine1} & \multicolumn{1}{r}{178} & \multicolumn{1}{r}{1276}  & 27 & 42.9 & 0 & \textbf{26} & 305.9 & 0 & - & - & 0 & 33 & 3600.1 & 0 & 30 & \textbf{0.0}\\
-\texttt{wine2} & \multicolumn{1}{r}{178} & \multicolumn{1}{r}{1276}  & 30 & 604.9 & 0 & \textbf{28} & 2238.7 & 0 & - & - & 0 & 33 & 3600.1 & 0 & 35 & \textbf{0.0}\\
-\texttt{wine3} & \multicolumn{1}{r}{178} & \multicolumn{1}{r}{1276}  & 20 & 406.5 & 0 & \textbf{19} & 331.6 & 0 & - & - & 0 & 21 & 3600.1 & 0 & 24 & \textbf{0.0}\\
-\texttt{yeast} & \multicolumn{1}{r}{1484} & \multicolumn{1}{r}{89}  & \textbf{132} & 1681.5 & 0 & 222 & 892.8 & 0 & - & - & 0 & 463 & 3600.0 & 0 & 261 & \textbf{0.0}\\
+\texttt{hepatitis} & 0 & 0.00$^*$ & 0 & 0.01$^*$ & 0 & 0.57$^*$ & 0 & 1.0$^*$ & 4 & 3248 & 0 & 0.00\\
+\texttt{lymph} & 0 & 0.00$^*$ & 0 & 0.00$^*$ & 0 & 0.00$^*$ & 0 & 0.43$^*$ & 0 & 3241$^*$ & 0 & 0.00\\
+\texttt{wine1} & 27 & 43 & \textbf{26} & 306 & - & - & 33 & $\mathsmaller{\geq}1$h & 59 & 0.00 & 30 & 0.01\\
+\texttt{wine2} & 30 & 605 & \textbf{28} & 2239 & - & - & 33 & $\mathsmaller{\geq}1$h & 71 & 0.00 & 35 & 0.01\\
+\texttt{wine3} & 20 & 406 & \textbf{19} & 332 & - & - & 21 & $\mathsmaller{\geq}1$h & 48 & 0.00 & 24 & 0.01\\
+\texttt{audiology} & 0 & 0.00$^*$ & 0 & 0.01$^*$ & 0 & 0.00$^*$ & 0 & 0.28$^*$ & 4 & 3089 & 0 & 0.00\\
+\texttt{heart-cleveland} & 0 & 0.00$^*$ & 0 & 0.02$^*$ & - & - & 0 & 0.73$^*$ & 22 & 3401 & 2 & 0.00\\
+\texttt{primary-tumor} & 15 & 0.00$^*$ & 15 & 1244$^*$ & - & - & 82 & $\mathsmaller{\geq}1$h & 30 & 3270 & 22 & 0.00\\
+\texttt{ionosphere} & 0 & 0.00$^*$ & 0 & 0.21$^*$ & - & - & 0 & 69$^*$ & 54 & 13 & 3 & 0.01\\
+\texttt{vote} & 0 & 0.00$^*$ & 0 & 0.00$^*$ & 0 & 0.00$^*$ & 0 & 2.5$^*$ & 5 & 2917 & 1 & 0.00\\
+\texttt{forest-fires} & 137 & 190 & \textbf{130} & 2905 & - & - & 247 & $\mathsmaller{\geq}1$h & 270 & 0.00 & 157 & 0.02\\
+\texttt{soybean} & 2 & 0.13$^*$ & 2 & 56 & - & - & 92 & $\mathsmaller{\geq}1$h & 36 & 3287 & 8 & 0.00\\
+\texttt{australian-credit} & 0 & 13$^*$ & 0 & 23$^*$ & - & - & 296 & $\mathsmaller{\geq}1$h & 296 & 105 & 33 & 0.01\\
+\texttt{breast-cancer} & 0 & 25$^*$ & 0 & 10$^*$ & 0 & 13$^*$ & 1 & $\mathsmaller{\geq}1$h & 26 & 3506 & 4 & 0.00\\
+\texttt{breast-wisconsin} & 0 & 0.00$^*$ & 0 & 0.02$^*$ & 0 & 402$^*$ & 0 & 51$^*$ & 191 & 1259 & 0 & 0.00\\
+\texttt{diabetes} & 0 & 220$^*$ & 0 & 716$^*$ & - & - & 268 & $\mathsmaller{\geq}1$h & 268 & 492 & 79 & 0.01\\
+\texttt{anneal} & \textbf{36} & 2221 & 40 & 1199 & - & - & 187 & $\mathsmaller{\geq}1$h & 130 & 1022 & 88 & 0.00\\
+\texttt{vehicle} & 0 & 0.00$^*$ & 0 & 0.15$^*$ & 0 & 24$^*$ & 0 & 617$^*$ & 218 & 0.00 & 3 & 0.01\\
+\texttt{titanic} & \textbf{64} & 1500 & 76 & 3153 & - & - & 342 & $\mathsmaller{\geq}1$h & 342 & 0.00 & 105 & 0.01\\
+\texttt{tic-tac-toe} & 0 & 0.00$^*$ & 0 & 0.01$^*$ & 0 & 1.5$^*$ & 0 & 1.4$^*$ & 138 & 3295 & 13 & 0.01\\
+\texttt{german-credit} & \textbf{23} & 2235 & 27 & 3239 & - & - & 254 & $\mathsmaller{\geq}1$h & 298 & 20 & 117 & 0.01\\
+\texttt{yeast} & \textbf{132} & 1682 & 222 & 893 & - & - & 463 & $\mathsmaller{\geq}1$h & 463 & 0.00 & 261 & 0.01\\
+\texttt{car} & 0 & 404$^*$ & 0 & 63$^*$ & 0 & 13$^*$ & 3 & $\mathsmaller{\geq}1$h & 388 & 1508 & 36 & 0.00\\
+\texttt{segment} & 0 & 0.00$^*$ & 0 & 0.01$^*$ & 0 & 0.33$^*$ & 0 & 0.51$^*$ & 330 & 0.00 & 0 & 0.01\\
+\texttt{splice-1} & \textbf{24} & 0.47 & 31 & 1617 & - & - & 1535 & $\mathsmaller{\geq}1$h & 1655 & 0.00 & 34 & 0.05\\
+\texttt{kr-vs-kp} & \textbf{13} & 2736 & 14 & 1800 & - & - & 35 & $\mathsmaller{\geq}1$h & 1669 & 0.00 & 48 & 0.01\\
+\texttt{hypothyroid} & 17 & 99$^*$ & 17 & 1149 & - & - & 277 & $\mathsmaller{\geq}1$h & 2970 & 0.00 & 38 & 0.01\\
+\texttt{compas\_discretized} & 1832 & 1462$^*$ & 1832 & 3311$^*$ & 1832 & 1638$^*$ & 1841 & $\mathsmaller{\geq}1$h & 1955 & 3382 & 1904 & 0.01\\
+\texttt{pendigits} & 0 & 0.00$^*$ & 0 & 0.12$^*$ & - & - & 0 & 4.2$^*$ & - & - & 0 & 0.13\\
+\texttt{mushroom} & 0 & 0.00$^*$ & 0 & 0.02$^*$ & 0 & 5.4$^*$ & 0 & 0.35$^*$ & - & - & 0 & 0.03\\
+\texttt{surgical-deepnet} & \textbf{1297} & 66 & 1609 & 157 & - & - & 3690 & $\mathsmaller{\geq}1$h & - & - & 1400 & 8.5\\
+\texttt{letter} & \textbf{24} & 297 & 111 & 672 & 601 & $\mathsmaller{\geq}1$h & 813 & $\mathsmaller{\geq}1$h & - & - & 94 & 0.43\\
+\texttt{taiwan\_binarised} & \textbf{4727} & 3246 & 5172 & 2645 & 5412 & $\mathsmaller{\geq}1$h & 6636 & $\mathsmaller{\geq}1$h & - & - & 5043 & 0.66\\
+\texttt{adult\_discretized} & \textbf{4148} & 450 & 4198 & 3557 & 4957 & $\mathsmaller{\geq}1$h & 7511 & $\mathsmaller{\geq}1$h & - & - & 4399 & 0.10\\
+\texttt{bank} & \textbf{3709} & 1815 & 4127 & 982 & 4810 & $\mathsmaller{\geq}1$h & 5289 & $\mathsmaller{\geq}1$h & - & - & 3814 & 73\\
+\texttt{mnist\_8} & \textbf{1192} & 3087 & 2535 & 1762 & - & - & 5851 & $\mathsmaller{\geq}1$h & - & - & 1705 & 5.3\\
+\texttt{mnist\_9} & \textbf{2186} & 2934 & 2639 & 636 & 5254 & $\mathsmaller{\geq}1$h & 5949 & $\mathsmaller{\geq}1$h & - & - & 2379 & 5.9\\
+\texttt{mnist\_0} & \textbf{788} & 1983 & 1242 & 518 & - & - & 5923 & $\mathsmaller{\geq}1$h & - & - & 991 & 7.0\\
+\texttt{mnist\_6} & 1203 & 109 & \textbf{1141} & 1140 & - & - & 5918 & $\mathsmaller{\geq}1$h & - & - & 1356 & 7.2\\
+\texttt{mnist\_5} & \textbf{2519} & 1518 & 2610 & 1997 & - & - & 5421 & $\mathsmaller{\geq}1$h & - & - & 2726 & 7.2\\
+\texttt{mnist\_3} & \textbf{1436} & 1680 & 2341 & 43 & - & - & 6131 & $\mathsmaller{\geq}1$h & - & - & 1692 & 5.5\\
+\texttt{mnist\_2} & \textbf{1857} & 291 & 2496 & 2441 & - & - & 5958 & $\mathsmaller{\geq}1$h & - & - & 2234 & 6.8\\
+\texttt{mnist\_4} & \textbf{1279} & 1522 & 2228 & 2280 & - & - & 5842 & $\mathsmaller{\geq}1$h & - & - & 1662 & 6.2\\
+\texttt{mnist\_7} & \textbf{1429} & 347 & 1753 & 1801 & 4544 & $\mathsmaller{\geq}1$h & 6265 & $\mathsmaller{\geq}1$h & - & - & 1538 & 6.7\\
+\texttt{mnist\_1} & \textbf{565} & 1177 & 1190 & 1462 & 4548 & $\mathsmaller{\geq}1$h & 6742 & $\mathsmaller{\geq}1$h & - & - & 781 & 6.5\\
+\texttt{weather-aus} & \textbf{1657} & 2060 & 1709 & 1402 & - & - & 1761 & $\mathsmaller{\geq}1$h & - & - & 1703 & 21\\
 \bottomrule
 \end{tabular}
