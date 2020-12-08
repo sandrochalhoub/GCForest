@@ -45,22 +45,22 @@ namespace blossom {
 
     size_t get_error() const;
 
-    template <class rIter>
-    void addExample(rIter beg_sample, rIter end_sample, const bool y);
-
-    /**
-    * So that Adaboost supports weights, and we can use WeightedDataset on Adaboost,
-    * without any change.
-    */
-    template <class rIter>
-    void addExample(rIter beg_sample, rIter end_sample, const bool y, const size_t weight);
+    // template <class rIter>
+    // void addExample(rIter beg_sample, rIter end_sample, const bool y);
+    //
+    // /**
+    // * So that Adaboost supports weights, and we can use WeightedDataset on Adaboost,
+    // * without any change.
+    // */
+    // template <class rIter>
+    // void addExample(rIter beg_sample, rIter end_sample, const bool y, const size_t weight);
 		
 	  void addBitsetExample(const dynamic_bitset<> &sample, const bool y,
 	                  const size_t weight);
 
-    void addExample(const std::vector<int> &example) {
-        addExample(example.begin(), example.end() - 1, example.back());
-    }
+    // void addExample(const std::vector<int> &example) {
+    //     addExample(example.begin(), example.end() - 1, example.back());
+    // }
 
   private:
     size_t max_it;
@@ -103,26 +103,26 @@ namespace blossom {
     size_t get_correct_count(const std::vector<instance> *bitsets, size_t error_offset = 0) const;
   };
 
-  template <class rIter>
-  inline void Adaboost::addExample(rIter beg_sample, rIter end_sample, const bool y) {
-    // // Add vector
-    // std::vector<int> sample(beg_sample, end_sample);
-    // dataset[y].push_back(sample);
-
-    // Add bitset
-    instance bsample(end_sample - beg_sample, 0);
-		for(auto i{beg_sample}; i!=end_sample; ++i)
-			if(*i)
-				bsample.set(i - beg_sample);
-
-    // for (size_t i = 0; i < sample.size(); ++i) {
-    //   if (sample[i] == 1) {
-    //     bsample.set(i);
-    //   }
-    // }
-
-    bitsets[y].push_back(bsample);
-  }
+  // template <class rIter>
+  // inline void Adaboost::addExample(rIter beg_sample, rIter end_sample, const bool y) {
+  //   // // Add vector
+  //   // std::vector<int> sample(beg_sample, end_sample);
+  //   // dataset[y].push_back(sample);
+  //
+  //   // Add bitset
+  //   instance bsample(end_sample - beg_sample, 0);
+  // 		for(auto i{beg_sample}; i!=end_sample; ++i)
+  // 			if(*i)
+  // 				bsample.set(i - beg_sample);
+  //
+  //   // for (size_t i = 0; i < sample.size(); ++i) {
+  //   //   if (sample[i] == 1) {
+  //   //     bsample.set(i);
+  //   //   }
+  //   // }
+  //
+  //   bitsets[y].push_back(bsample);
+  // }
 	
   inline void Adaboost::addBitsetExample(const dynamic_bitset<> &sample, const bool y,
 	                  const size_t weight) {
@@ -146,15 +146,15 @@ namespace blossom {
 		// }
   }
 
-  template <class rIter>
-  inline void Adaboost::addExample(rIter beg_sample, rIter end_sample, const bool y, const size_t weight) {
-    // TODO add with weights once we have implemented:
-    // - splitting weighted datasets
-    // - Adaboost weights taking weights into account
-    for (size_t i = 0; i < weight; ++i) {
-      addExample(beg_sample, end_sample, y);
-    }
-  }
+  // template <class rIter>
+  // inline void Adaboost::addExample(rIter beg_sample, rIter end_sample, const bool y, const size_t weight) {
+  //   // TODO add with weights once we have implemented:
+  //   // - splitting weighted datasets
+  //   // - Adaboost weights taking weights into account
+  //   for (size_t i = 0; i < weight; ++i) {
+  //     addExample(beg_sample, end_sample, y);
+  //   }
+  // }
 }
 
 #endif // _PRIMER_ADABOOST_HPP

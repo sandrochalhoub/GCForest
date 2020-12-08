@@ -1,0 +1,6 @@
+*.so
+*_wrap.cxx
+*.o
+*.pyc
+__pycache__
+budFirstSearch.py
