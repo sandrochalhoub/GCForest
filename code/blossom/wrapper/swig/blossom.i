@@ -166,7 +166,7 @@ namespace blossom {
     Adaboost(DTOptions &opt);
     void train();
     bool predict(const std::vector<int> &example) const;
-    void addBitsetExample(const std::vector<int> &example);
+	  void addBitsetExample(const dynamic_bitset<> &sample, const bool y, const size_t weight);
   };
 
   template <class ErrorType> class CardinalityError;
