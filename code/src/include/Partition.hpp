@@ -1,6 +1,6 @@
 
 #include <iostream>
-
+#include <assert.h>
 #include <vector>
 
 #ifndef __PARTITION_HPP
