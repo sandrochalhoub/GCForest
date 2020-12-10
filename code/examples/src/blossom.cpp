@@ -120,16 +120,11 @@ int run_algorithm(DTOptions &opt) {
 
   if (opt.print_ins and opt.nosolve) {
 
-    // ostream* out{&cout};
-
     string ext{opt.output.substr(opt.output.find_last_of(".") + 1)};
 
     if (opt.output != "") {
-			
-			// cout << "here\n";
 
 			ofstream outfile(opt.output.c_str(), ofstream::out);
-      // out = &outfile;
 			
 	    if (ext == "csv")
 	      input.printDatasetToCSVFile(outfile, opt.delimiter, opt.outtarget == 0);
@@ -138,11 +133,6 @@ int run_algorithm(DTOptions &opt) {
     
 		} else
 			input.printDatasetToTextFile(cout, opt.outtarget!=-1);
-
-
-    // } else {
-    //   input.printDatasetToTextFile(cout, opt.outtarget!=-1);
-    // }
   }
 
   if (opt.nosolve)

@@ -10,8 +10,7 @@
 
 // #define DEBUG_MODE
 
-#define PRINTTRACE false
-// (options.verbosity >= DTOptions::YACKING and search_size % 100000 < 10)
+#define PRINTTRACE (options.verbosity >= DTOptions::YACKING) // and search_size % 100000 < 10)
 
 namespace blossom {
 

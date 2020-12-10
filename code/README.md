@@ -23,15 +23,15 @@ bin/bud_first_search <datafile> --verbosity 0 --binarize --nosolve --print_ins [
 ```python
 import blossom
 
-test_X = [[0, 0], [0, 1]]
-test_Y = [0, 1]
+X = [[0, 0], [0, 1]]
+Y = [0, 1]
 
 clf = blossom.BlossomClassifier()
-clf.fit(test_X, test_Y)
+clf.fit(X, Y)
 
 print(clf.nodes)
 print(clf.edges)
-print(clf.predict(test_X))
+print(clf.predict(X))
 ```
 
 - Direct C++ wrapping : see file `code/examples/adaboost.py`

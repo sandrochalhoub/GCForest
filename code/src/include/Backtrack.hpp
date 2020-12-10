@@ -536,8 +536,6 @@ inline void BacktrackingAlgorithm<ErrorPolicy, E_t>::addBitsetExample(
     const dynamic_bitset<> &sample, const bool y, const E_t weight) {
   int n{static_cast<int>(sample.size())};
 
-cout << y << ": " << sample << endl;
-
   if (n > num_feature) {
     num_feature = n;
     f_error.resize(num_feature, 1);

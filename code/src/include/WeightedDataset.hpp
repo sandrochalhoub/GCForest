@@ -23,7 +23,8 @@ public:
 
   template <class Algo> void toInc(Algo &algo);
 
-  size_t example_count() const { return data[0].size() + data[1].size(); }
+  size_t count(const bool c) const { return data[c].size(); }
+  size_t example_count() const { return count(0) + count(1); }
 
   void printDatasetToTextFile(ostream &outfile, const bool first = true) const;
   void printDatasetToCSVFile(ostream &outfile, const string &delimiter = ",",
@@ -141,11 +142,13 @@ template <class Algo> inline void WeightedDataset::toInc(Algo &algo) {
     algo.setErrorOffset(sup_count);
 
     // print stats
-    std::cout << "d duplicate=" << dup_count << " suppressed=" << sup_count
-              << " ratio=" << float(dup_count + sup_count) / example_count()
-              << " count=" << example_count()
-              << " final_count=" << example_count() - (dup_count + sup_count)
-              << std::endl;
+    if (algo.options.verbosity >= DTOptions::NORMAL)
+      std::cout << "d duplicate=" << dup_count << " suppressed=" << sup_count
+                << " ratio=" << float(dup_count + sup_count) / example_count()
+                << " count=" << example_count() << " negative=" << count(0)
+                << " positive=" << count(1)
+                << " final_count=" << example_count() - (dup_count + sup_count)
+                << std::endl;
   }
 
   if (algo.options.verbosity >= DTOptions::NORMAL)
