@@ -12,8 +12,8 @@ SWIG=$(WRAPRDIR)/wrapper/swig
 MAININC=$(MAINDIR)/src/include
 
 PYFLAGS = `python3-config --cflags`
-CFLAGS = -std=c++11 -fPIC -I$(INC) -I$(MAININC) -I$(BOOSTDIR) -I../tools $(PYFLAGS) # -ffloat-store
-LFLAGS = -L$(OBJ) -flto
+CFLAGS = -std=c++11 -fPIC -I$(INC) -I$(MAININC) -I$(BOOSTDIR) -I../tools $(PYFLAGS) -arch x86_64 -Wno-shorten-64-to-32 # -ffloat-store
+LFLAGS = -L$(OBJ) -flto -arch x86_64 -Wno-shorten-64-to-32
 
 PWRAPSRC = $(wildcard $(SRC)/*.cpp)
 PWRAPSWIG = $(wildcard $(SWIG)/*.i)
@@ -24,7 +24,7 @@ PWRAPSWIGOBJ = $(patsubst $(SWIG)/%, $(OBJ)/%, $(PWRAPSWIGAUX))
 PLIBOBJ=$(wildcard $(MAINDIR)/src/obj/*.o)
 
 wrapper/_blossom.so: $(PWRAPOBJ) $(PWRAPSWIGOBJ)
-	$(CCC) -std=c++11 -fPIC -shared $(PWRAPOBJ) $(PWRAPSWIGOBJ) $(PLIBOBJ) -o wrapper/_blossom.so
+	$(CCC) -std=c++11 -fPIC -shared $(PWRAPOBJ) $(PWRAPSWIGOBJ) $(PLIBOBJ) -arch x86_64 -Wno-shorten-64-to-32 -o wrapper/_blossom.so
 
 $(OBJ)/blossom.o: $(SRC)/blossom.cpp
 	$(CCC) $(CFLAGS) -c $(SRC)/blossom.cpp -o $@

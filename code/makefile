@@ -17,7 +17,7 @@ INC=$(MAINDIR)/src/include
 DOC=$(MAINDIR)/doc
 TCL=$(MAINDIR)/tools
 
-CFLAGS = -I$(INC) -I$(TCL) -Wall -I$(BOOSTDIR) # -ffloat-store
+CFLAGS = -I$(INC) -I$(TCL) -Wall -I$(BOOSTDIR) -fPIC # -ffloat-store
 LFLAGS = -L$(OBJ) -flto #--static
 
 

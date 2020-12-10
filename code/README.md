@@ -34,11 +34,11 @@ print(clf.edges)
 print(clf.predict(X))
 ```
 
-- Direct C++ wrapping : see file `code/examples/adaboost.py`
+- Direct C++ wrapping : see file `code/examples/blossom.py`
 
 ## Add wrapped methods
 
 The simplest way to add a method to the python wrapper is to add its definition
-to the file `bud_first_search/wrapper/swig/budFirstSearch.i`
+to the file `blossom/wrapper/swig/blossom.i`
 
 Do the same when you want to add new classes, class fields, constructors, etc.
