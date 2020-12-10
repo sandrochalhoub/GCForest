@@ -7,7 +7,7 @@
 %}
 
 extern blossom::DTOptions parse(std::vector<std::string> params);
-extern void read_binary(blossom::WeightedDataset &input, blossom::DTOptions &opt);
+extern void read_binary(blossom::WeightedDataset<int> &input, blossom::DTOptions &opt);
 
 namespace std {
   %template(int_vec) vector<int>;
@@ -184,8 +184,8 @@ namespace blossom {
 
 	};
 	
-	%template(WeightedDatasetI) WeightedDatasetI<int>;
-	%template(WeightedDatasetD) WeightedDatasetI<double>;
+	%template(WeightedDatasetI) WeightedDataset<int>;
+	%template(WeightedDatasetD) WeightedDataset<double>;
 	
 
   %template(BacktrackingAlgo) BacktrackingAlgorithm<CardinalityError, int>;
