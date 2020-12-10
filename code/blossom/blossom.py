@@ -154,7 +154,7 @@ class BlossomClassifier:
                 # self.algo.addExample(to_int_vec(list(x) + [y]), w)
                 sample = to_int_vec(list(x) + [y])
                 for i in range(w):
-                    self.dataset.addExample(sample.begin(), sample.end(), -1) 
+                    self.dataset.addExample(sample.begin(), sample.end(), -1) 
         else:
             self.algo = wrapper.BacktrackingAlgo(self.wood, self.opt)
 

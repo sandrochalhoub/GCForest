@@ -306,8 +306,8 @@ bool BacktrackingAlgorithm<ErrorPolicy, E_t>::null_entropy(const int node, const
 
 template <template<typename> class ErrorPolicy, typename E_t>
 void BacktrackingAlgorithm<ErrorPolicy, E_t>::separator(const string &msg) const {
-  cout << setfill('-') << setw((96 - msg.size()) / 2) << "-"
-       << "[" << msg << "]" << setw((96 - msg.size()) / 2 + (msg.size() % 2))
+  cout << setfill('-') << setw((82 - msg.size()) / 2) << "-"
+       << "[" << msg << "]" << setw((82 - msg.size()) / 2 + (msg.size() % 2))
        << "-" << endl
        << setfill(' ');
 }
@@ -332,16 +332,16 @@ void BacktrackingAlgorithm<ErrorPolicy, E_t>::print_new_best() {
        << " error=" << setw(4) << ub_error + error_offset
        << " depth=" << setw(3) << actual_depth << " size=" << setw(3) << ub_size
        // << " backtracks=" << setw(9) << num_backtracks
-       << " choices=" << setw(9) << search_size << " restarts=" << setw(4)
-       << num_restarts << " mem=" << setw(3) << wood.size() << " time=" << t
-       << right << endl;
+       << " choices=" << setw(9) << search_size
+       // << " restarts=" << setw(4) << num_restarts
+       << " mem=" << setw(3) << wood.size() << " time=" << t << right << endl;
 }
 
 template <template <typename> class ErrorPolicy, typename E_t>
 void BacktrackingAlgorithm<ErrorPolicy, E_t>::print_progress() {
 	if(not options.progress)
 		return;
-  int width{82};
+  int width{68};
   auto ne{feature[0] - ranked_feature[0].begin() + 1};
   if (ne > num_explored) {
     nb = false;
