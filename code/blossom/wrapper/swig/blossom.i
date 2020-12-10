@@ -184,7 +184,7 @@ namespace blossom {
 	};
 	
 
-  %template(BacktrackingAlgo) BacktrackingAlgorithm<CardinalityError, long>;
-  %template(WeightedBacktrackingAlgo) BacktrackingAlgorithm<WeightedError, long>;
+  %template(BacktrackingAlgo) BacktrackingAlgorithm<CardinalityError, int>;
+  %template(WeightedBacktrackingAlgo) BacktrackingAlgorithm<WeightedError, int>;
   %template(WeightedBacktrackingAlgod) BacktrackingAlgorithm<WeightedError, double>;
 }
