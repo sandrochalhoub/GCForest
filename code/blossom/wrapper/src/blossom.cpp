@@ -60,7 +60,8 @@ blossom::DTOptions parse(std::vector<std::string> params) {
 //   }
 // }
 
-void read_binary(WeightedDataset &input, DTOptions &opt) {
+template <typename E_t>
+void read_binary(WeightedDataset<E_t> &input, DTOptions &opt) {
   // WeightedDataset input;
 
   string ext{opt.instance_file.substr(opt.instance_file.find_last_of(".") + 1)};
