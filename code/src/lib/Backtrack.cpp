@@ -1256,7 +1256,6 @@ void BacktrackingAlgorithm<ErrorPolicy, E_t>::initialise_search() {
     for (int fi{0}; fi < num_feature; ++fi) {
       if (feature_set[fi] and not max_entropy(0, fi)) {
         relevant_features.push_back(fi);
-
         if (options.preprocessing)
           for (int fj{fi + 1}; fj < num_feature; ++fj) {
             if (equal_feature(fi, fj)) {
@@ -1265,7 +1264,6 @@ void BacktrackingAlgorithm<ErrorPolicy, E_t>::initialise_search() {
           }
       }
     }
-
     // if (options.preprocessing) {
     //   sort(relevant_features.begin(), relevant_features.end(),
     //        [&](const int a, const int b) {
@@ -1304,9 +1302,9 @@ void BacktrackingAlgorithm<ErrorPolicy, E_t>::initialise_search() {
 
     // assert(store_new_best());
 
-    // for(auto f : relevant_features)
-    // 	cout << " " << f ;
-    // cout << endl;
+    //for(auto f{feature[0]}; f!=end_feature[0]; ++f)
+    // 	cout << " " << *f << " " << get_feature_frequency(0, 0, *f) << " " << get_feature_frequency(1, 0, *f) << endl ;
+    //cout << endl;
 
     // assert(feature[0] == ranked_feature[0].begin());
     num_level_zero_feature = (end_feature[0] - feature[0]);
