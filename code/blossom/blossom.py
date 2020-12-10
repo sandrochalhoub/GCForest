@@ -60,8 +60,11 @@ class BlossomClassifier:
         self.args = ["blossom.py", "--file", ""] + cmd_line_args
         self.opt = wrapper.parse(to_str_vec(self.args))
 
+        self.preprocessing = True
         for key in kwargs:
             setattr(self.opt, key, kwargs[key])
+            if key == "--nopreprocessing":
+                self.preprocessing = False
 
         """
         # Mimics the sanity check of Scikit learn to understand why it does not pass
@@ -156,7 +159,10 @@ class BlossomClassifier:
                 for i in range(w):
                     self.dataset.addExample(sample.begin(), sample.end(), -1) 
         else:
-            self.algo = wrapper.BacktrackingAlgo(self.wood, self.opt)
+            if self.preprocessing:
+                self.algo = wrapper.WeightedBacktrackingAlgo(self.wood, self.opt)
+            else:
+                self.algo = wrapper.BacktrackingAlgo(self.wood, self.opt)
 
             for x, y in zip(Xb, Yb):
                 # scikit learn classes & features start at 1
