@@ -78,7 +78,7 @@ int main(int argc, char *argv[]) {
   Adaboost A(opt);
   WeightedDataset<int> input;
 	read_binary(input, opt);
-	input.preprocess(A.verbosity >= DTOptions::NORMAL);
+	input.preprocess(opt.verbosity >= DTOptions::NORMAL);
 	input.setup(A);
 	
   // read_binary(A, opt);
