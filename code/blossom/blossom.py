@@ -171,7 +171,7 @@ class BlossomClassifier:
              
              
         if self.opt.preprocessing:
-            self.data.preprocess(self.opt.verbosity>=2)
+            self.dataset.preprocess(self.opt.verbosity>=2)
                
         self.dataset.setup(self.algo)     
 
