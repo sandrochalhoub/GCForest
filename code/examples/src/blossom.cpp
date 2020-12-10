@@ -33,8 +33,8 @@ along with minicsp.  If not, see <http://www.gnu.org/licenses/>.
 using namespace std;
 using namespace blossom;
 
-// template <typename Algo_t>
-void read_non_binary(WeightedDataset &base, DTOptions &opt) {
+template <typename E_t>
+void read_non_binary(WeightedDataset<E_t> &base, DTOptions &opt) {
 
   TypedDataSet input;
 
@@ -71,8 +71,8 @@ void read_non_binary(WeightedDataset &base, DTOptions &opt) {
   // base.toInc(A);
 }
 
-// template <typename Algo_t>
-void read_binary(WeightedDataset &input, DTOptions &opt) {
+template <typename E_t>
+void read_binary(WeightedDataset<E_t> &input, DTOptions &opt) {
   // WeightedDataset input;
 
   string ext{opt.instance_file.substr(opt.instance_file.find_last_of(".") + 1)};
@@ -104,11 +104,11 @@ template <template <typename> class ErrorPolicy = CardinalityError,
           typename E_t = unsigned long>
 int run_algorithm(DTOptions &opt) {
   Wood yallen;
-
   BacktrackingAlgorithm<ErrorPolicy, E_t> A(yallen, opt);
+  WeightedDataset<E_t> input;
 
-  WeightedDataset input;
 
+	////// READING
   if (opt.binarize) {
 
     read_non_binary(input, opt);
@@ -117,7 +117,17 @@ int run_algorithm(DTOptions &opt) {
 
     read_binary(input, opt);
   }
+	
+	if(opt.verbosity >= DTOptions::NORMAL)
+		cout << "d readtime=" << cpu_time() << endl;
+	
+	
+	////// PREPROCESING
+	if(opt.preprocessing)
+		input.preprocess(opt.verbosity >= DTOptions::NORMAL);
+	
 
+	////// PRINTING
   if (opt.print_ins and opt.nosolve) {
 
     string ext{opt.output.substr(opt.output.find_last_of(".") + 1)};
@@ -134,19 +144,25 @@ int run_algorithm(DTOptions &opt) {
 		} else
 			input.printDatasetToTextFile(cout, opt.outtarget!=-1);
   }
-
+	
   if (opt.nosolve)
     return 1;
 
-  input.toInc(A);
+	
+	////// LOAD THE DATA INTO THE ALGORITHM
+	input.setup(A);
+	
+	if(opt.verbosity >= DTOptions::NORMAL)
+		cout << "d inputtime=" << cpu_time() << endl;
 
+
+	////// 
   if (opt.print_ins)
     cout << "d examples=" << A.numExample() << " features=" << A.numFeature()
          << endl;
 
-  // if (not opt.preprocessing and opt.verbosity >= DTOptions::NORMAL)
-  cout << "d readtime=" << cpu_time() << endl;
 
+	////// SOLVING
   if (not opt.nosolve) {
     if (opt.mindepth) {
       if (opt.minsize)

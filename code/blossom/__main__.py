@@ -14,8 +14,8 @@ if filename == "":
 else:
     blossom.read_binary(dataset, opt)
 
-
-dataset.toInc(algo)
+dataset.preprocess()
+dataset.setup(algo)
 
 algo.minimize_error()
 tree = algo.getSolution()

@@ -85,7 +85,7 @@ namespace blossom {
 
     // filter inconsistent examples on training set
     if (options.preprocessing) {
-      WeightedDataset filter;
+      WeightedDataset<int> filter;
 
       for (int y = 0; y < 2; ++y) {
         for (int i = 0; i < bitsets[y].size(); ++i) {
@@ -95,8 +95,10 @@ namespace blossom {
         bitsets[y].clear();
         // dataset[y].clear();
       }
-
-      filter.toInc(*this);
+			
+			filter.preprocess(false);
+			filter.setup(*this);
+      // filter.toInc(*this);
 
       std::cout << "Filter inconsistent: train size=" << bitsets[0].size() + bitsets[1].size() << std::endl;
     }

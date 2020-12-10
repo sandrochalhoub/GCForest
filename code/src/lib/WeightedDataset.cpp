@@ -5,14 +5,16 @@
 
 namespace blossom {
 
-void WeightedDataset::addBitsetExample(instance &x, const bool y) {
+template <typename E_t>
+void WeightedDataset<E_t>::addBitsetExample(instance &x, const bool y) {
 
   data[y].push_back(x);
 }
 
-void WeightedDataset::printDatasetToCSVFile(ostream &outfile,
-                                            const string &delimiter,
-                                            const bool first) const {
+template <typename E_t>
+void WeightedDataset<E_t>::printDatasetToCSVFile(ostream &outfile,
+                                                 const string &delimiter,
+                                                 const bool first) const {
 
   if (first)
     outfile << "label";
@@ -42,8 +44,9 @@ void WeightedDataset::printDatasetToCSVFile(ostream &outfile,
   }
 }
 
-void WeightedDataset::printDatasetToTextFile(ostream &outfile,
-                                             const bool first) const {
+template <typename E_t>
+void WeightedDataset<E_t>::printDatasetToTextFile(ostream &outfile,
+                                                  const bool first) const {
 
   for (auto y{0}; y < 2; ++y) {
     for (auto x{0}; x < data[y].size(); ++x) {
@@ -61,4 +64,9 @@ void WeightedDataset::printDatasetToTextFile(ostream &outfile,
     }
   }
 }
+
+template class WeightedDataset<int>;
+template class WeightedDataset<unsigned long>;
+template class WeightedDataset<float>;
+template class WeightedDataset<double>;
 }

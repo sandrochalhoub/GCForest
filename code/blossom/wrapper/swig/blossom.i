@@ -159,7 +159,7 @@ namespace blossom {
   template <class ErrorType> class WeightedError;
 	
 	
-	
+	template <typename E_t>
 	class WeightedDataset {
 	public:
 	  WeightedDataset();
@@ -170,18 +170,22 @@ namespace blossom {
 /*		template <template<typename> class ErrorPolicy, typename E_t>
 		void toInc(BacktrackingAlgorithm<ErrorPolicy, E_t> &algo);*/
 	  
-		void toInc(BacktrackingAlgorithm<CardinalityError, int> &algo);
-		void toInc(BacktrackingAlgorithm<CardinalityError, unsigned long> &algo);
-		void toInc(BacktrackingAlgorithm<WeightedError, int> &algo);
-		void toInc(BacktrackingAlgorithm<WeightedError, float> &algo);
-		void toInc(BacktrackingAlgorithm<WeightedError, double> &algo);
-		void toInc(BacktrackingAlgorithm<WeightedError, unsigned long> &algo);
+		void setup(BacktrackingAlgorithm<CardinalityError, int> &algo);
+		void setup(BacktrackingAlgorithm<CardinalityError, unsigned long> &algo);
+		void setup(BacktrackingAlgorithm<WeightedError, int> &algo);
+		void setup(BacktrackingAlgorithm<WeightedError, float> &algo);
+		void setup(BacktrackingAlgorithm<WeightedError, double> &algo);
+		void setup(BacktrackingAlgorithm<WeightedError, unsigned long> &algo);
+		void preprocess(const bool verbose=false);
 	  /* size_t example_count() const { return data[0].size() + data[1].size(); }*/
 	  void printDatasetToTextFile(ostream &outfile, const bool first = true) const;
 	  void printDatasetToCSVFile(ostream &outfile, const string &delimiter = ",",
 	                             const bool first = false) const;
 
 	};
+	
+	%template(WeightedDatasetI) WeightedDatasetI<int>;
+	%template(WeightedDatasetD) WeightedDatasetI<double>;
 	
 
   %template(BacktrackingAlgo) BacktrackingAlgorithm<CardinalityError, int>;

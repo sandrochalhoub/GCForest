@@ -466,7 +466,7 @@ public:
   }
 
   // void binarize(DataSet &bin) {
-	void binarize(WeightedDataset &bin) {
+  template <class Dataset> void binarize(Dataset &bin) {
     auto int_symbolic{0};
     for (auto f{0}; f < numFeature(); ++f)
       if (feature_type[f] == SYMBOL)

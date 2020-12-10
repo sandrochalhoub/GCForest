@@ -60,11 +60,8 @@ class BlossomClassifier:
         self.args = ["blossom.py", "--file", ""] + cmd_line_args
         self.opt = wrapper.parse(to_str_vec(self.args))
 
-        self.preprocessing = True
         for key in kwargs:
             setattr(self.opt, key, kwargs[key])
-            if key == "--nopreprocessing":
-                self.preprocessing = False
 
         """
         # Mimics the sanity check of Scikit learn to understand why it does not pass
@@ -93,7 +90,7 @@ class BlossomClassifier:
 
     def get_param_names(self):
         # TODO add useful parameters
-        return {"max_depth", "time", "search", "seed", "mindepth", "minsize"}
+        return {"max_depth", "time", "search", "seed", "mindepth", "minsize", "preprocessing"}
 
     def get_params(self, deep = False):
         params = { key : getattr(self.opt, key) for key in self.get_param_names() }
@@ -148,8 +145,9 @@ class BlossomClassifier:
 
         Xb, Yb = X, Y # self._binarize_data(X, Y)
 
-        self.dataset = wrapper.WeightedDataset()
+        
         if sample_weight is not None:
+            self.dataset = wrapper.WeightedDatasetD()
             self.algo = wrapper.WeightedBacktrackingAlgod(self.wood, self.opt)
 
             for x, y, w in zip(Xb, Yb, sample_weight):
@@ -159,7 +157,8 @@ class BlossomClassifier:
                 for i in range(w):
                     self.dataset.addExample(sample.begin(), sample.end(), -1) 
         else:
-            if self.preprocessing:
+            self.dataset = wrapper.WeightedDatasetI()
+            if self.opt.preprocessing:
                 self.algo = wrapper.WeightedBacktrackingAlgo(self.wood, self.opt)
             else:
                 self.algo = wrapper.BacktrackingAlgo(self.wood, self.opt)
@@ -169,8 +168,12 @@ class BlossomClassifier:
                 # self.algo.addExample(to_int_vec(list(x) + [y]))
                 sample = to_int_vec(list(x) + [y])
                 self.dataset.addExample(sample.begin(), sample.end(), -1)
-                
-        self.dataset.toInc(self.algo)     
+             
+             
+        if self.opt.preprocessing:
+            self.data.preprocess(self.opt.verbosity>=2)
+               
+        self.dataset.setup(self.algo)     
 
         if self.opt.mindepth:
             if self.opt.minsize:
