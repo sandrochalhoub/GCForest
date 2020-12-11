@@ -13,6 +13,8 @@ using namespace std;
 
 namespace blossom {
 
+// template <typename E_t> class DatapointList;
+
 template <typename E_t> class WeightedDataset {
 public:
   WeightedDataset() = default;
@@ -27,20 +29,79 @@ public:
 	template <class Algo> void setup(Algo &algo);
   void preprocess(const bool verbose=false);
 
-  size_t count(const bool c) const { return data[c].size(); }
+  size_t input_count(const bool c) const { return data[c].size(); }
+  size_t input_example_count() const { return input_count(0) + input_count(1); }
+	
+  size_t count(const bool c) const { return examples[c].size(); }
   size_t example_count() const { return count(0) + count(1); }
 
   void printDatasetToTextFile(ostream &outfile, const bool first = true) const;
   void printDatasetToCSVFile(ostream &outfile, const string &delimiter = ",",
                              const bool first = false) const;
 
+  class List {
+  public:
+    List(const WeightedDataset<E_t> &dataset, const int y)
+        : _dataset(dataset), _y(y) {}
+
+    // iterators on the indices of the datapoints with non-null weight
+    std::vector<int>::const_iterator begin() const {
+      return _dataset.examples[_y].begin();
+    }
+    std::vector<int>::const_iterator end() const {
+      return _dataset.examples[_y].end();
+    }
+
+    // accessors
+    const instance &operator[](const int x) const {
+      return _dataset.data[_y][x];
+    }
+    E_t weight(const int x) const { return _dataset.weight[_y][x]; }
+		
+		bool contain(const int x) const { return _dataset.examples[_y].contain(x); }
+
+  private:
+    const WeightedDataset<E_t> &_dataset;
+    const int _y;
+  };
+
+	List operator[](const int y) const { return List(*this, y); } 
+  // List getPositiveDatapoints() { return List(*this, 1); }
+  // List getNegativeDatapoints() { return List(*this, 0); }
+	
+	size_t numInconsistent() const { return suppression_count; }
+
 private:
   vector<instance> data[2];
   vector<E_t> weight[2];
   SparseSet examples[2];
 
-  unsigned long suppression_count;
+  size_t suppression_count{0};
 };
+
+// template <typename E_t> class DatapointList {
+// public:
+//   DatapointList(WeightedDataset<E_t> &dataset, const int y)
+//       : _dataset(dataset), _y(y) {}
+//
+//   // iterators on the indices of the datapoints with non-null weight
+//   std::vector<int>::const_iterator begin() const {
+//     return _dataset.examples[_y].begin();
+//   }
+//   std::vector<int>::const_iterator end() const {
+//     return _dataset.examples[_y].begin();
+//   }
+//
+//   // accessors
+//   const instance &operator[](const int x) const {
+//     return _dataset.data[_y][x];
+//   }
+//   const E_t weight(const int x) const { return _dataset.weight[_y][x]; }
+//
+// private:
+//   WeightedDataset<E_t> &_dataset;
+//   const int _y;
+// };
 
 template <typename E_t>
 template <class rIter>
@@ -266,13 +327,13 @@ template <typename E_t> inline void WeightedDataset<E_t>::preprocess(const bool 
   }
 	
 	
-	auto dup_count{data[0].size() + data[1].size() - examples[0].count() - examples[1].count() - 2 * suppression_count};
+	auto dup_count{input_count(0) + input_count(1) - count(0) - count(1) - 2 * suppression_count};
   if (verbose)
     std::cout << "d duplicate=" << dup_count << " suppressed=" << suppression_count
-              << " ratio=" << float(dup_count + 2 * suppression_count) / example_count()
-              << " count=" << example_count() << " negative=" << count(0)
+              << " ratio=" << float(dup_count + 2 * suppression_count) / input_example_count()
+              << " count=" << input_example_count() << " negative=" << count(0)
               << " positive=" << count(1)
-              << " final_count=" << examples[0].count() + examples[1].count()
+              << " final_count=" << example_count()
               << "\nd preprocesstime=" << cpu_time() - t << endl;
 
   // cout << suppression_count << endl;

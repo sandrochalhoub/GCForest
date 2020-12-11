@@ -5,6 +5,7 @@
 #include <memory>
 
 #include "Backtrack.hpp"
+#include "WeightedDataset.hpp"
 
 namespace blossom {
 
@@ -15,7 +16,6 @@ namespace blossom {
     double weight = 1;
     size_t error;
 
-
     WeakClassifier(DTOptions &opt);
   };
 
@@ -23,10 +23,9 @@ namespace blossom {
   public:
     DTOptions &options;
 
+    Adaboost(WeightedDataset<int> &d, DTOptions &opt);
 
-    Adaboost(DTOptions &opt);
-
-    void setErrorOffset(size_t error_offset);
+    // void setErrorOffset(size_t error_offset);
 
     void train();
 
@@ -41,10 +40,8 @@ namespace blossom {
 
     double get_accuracy() const;
 
-    double get_test_accuracy() const;
-
     size_t get_error() const;
-
+		
     // template <class rIter>
     // void addExample(rIter beg_sample, rIter end_sample, const bool y);
     //
@@ -63,14 +60,16 @@ namespace blossom {
     // }
 
   private:
+    WeightedDataset<int> &dataset;
+
     size_t max_it;
     size_t hist_lookup = 0;
-    // std::vector<std::vector<int>> dataset[2];
+
     std::vector<instance> bitsets[2];
 
     std::vector<instance> test_bitsets[2];
 
-    size_t error_offset = 0;
+    // size_t error_offset = 0;
 
     // internal variables
     size_t it_count;
@@ -96,11 +95,11 @@ namespace blossom {
 
     bool should_stop();
 
-    size_t example_count(const std::vector<instance> *bitsets, size_t error_offset = 0) const;
+    size_t maximum() const; //const std::vector<instance> *bitsets, size_t error_offset = 0) const;
 
-    double get_accuracy(const std::vector<instance> *bitsets, size_t error_offset = 0) const;
-
-    size_t get_correct_count(const std::vector<instance> *bitsets, size_t error_offset = 0) const;
+		size_t _correct_count;
+    size_t get_correct_count() const; //const std::vector<instance> *bitsets, size_t error_offset = 0) const;
+		void compute_correct_count();
   };
 
   // template <class rIter>

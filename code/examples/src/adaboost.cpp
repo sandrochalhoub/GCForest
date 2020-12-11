@@ -75,18 +75,26 @@ int main(int argc, char *argv[]) {
   if (opt.print_par)
     opt.display(cout);
 
-  Adaboost A(opt);
   WeightedDataset<int> input;
-	read_binary(input, opt);
-	input.preprocess(opt.verbosity >= DTOptions::NORMAL);
-	input.setup(A);
+  read_binary(input, opt);
+  input.preprocess(opt.verbosity >= DTOptions::NORMAL);
+
+  // WeightedDataset<int>::List N{input.getNegativeDatapoints()};
+  //
+  // for (auto x : N) {
+  //   cout << N.weight(x) << ": " << N[x] << endl;
+  // }
+
+  
 	
-  // read_binary(A, opt);
+	
+	Adaboost A(input, opt);
+  // input.setup(A);
 
   if (opt.verbosity >= DTOptions::NORMAL)
     cout << "d readtime=" << cpu_time() << endl;
 
-  A.preprocess();
+  // A.split_dataset();
   // TODO choose what to minimize?
   A.train();
 }

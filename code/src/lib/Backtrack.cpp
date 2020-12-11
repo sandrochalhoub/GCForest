@@ -1502,7 +1502,7 @@ void BacktrackingAlgorithm<ErrorPolicy, E_t>::clearExamples() {
 		reverse_dataset[i].clear();
 	}
 
-        error_policy.clear_examples();
+  error_policy.clear_examples();
 }
 
 template <template<typename> class ErrorPolicy, typename E_t>
