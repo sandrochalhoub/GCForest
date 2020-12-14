@@ -14,6 +14,9 @@ void TreePartition::init(const int n) {
   element.reserve(n);
   for (auto e{0}; e < n; ++e)
     element.push_back(e);
+
+  for (auto &p : part)
+    p.reset();
 }
 
 size_t TreePartition::size() const { return part.size(); }
@@ -46,7 +49,9 @@ std::ostream &operator<<(std::ostream &os, const TreePartition &x) {
   return os;
 }
 
-Part::Part(vector<int>& elt) : element(elt) {
+Part::Part(vector<int> &elt) : element(elt) { reset(); }
+
+void Part::reset() {
   begin_idx = 0;
   end_idx = element.size();
 }

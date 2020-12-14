@@ -192,6 +192,8 @@ int run_algorithm(DTOptions &opt) {
            << std::setw(0) << "p solution verified (" << tree_error << " / "
            << A.error() << ")" << endl;
     }
+
+    A.clear();
   }
   return 1;
 }

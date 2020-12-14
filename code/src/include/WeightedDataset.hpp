@@ -60,9 +60,11 @@ public:
 		
 		bool contain(const int x) const { return _dataset.examples[_y].contain(x); }
 
-  private:
-    const WeightedDataset<E_t> &_dataset;
-    const int _y;
+                size_t size() const { return _dataset.examples[_y].count(); }
+
+              private:
+                const WeightedDataset<E_t> &_dataset;
+                const int _y;
   };
 
 	List operator[](const int y) const { return List(*this, y); } 
@@ -240,11 +242,13 @@ inline void WeightedDataset<E_t>::addExample(rIter beg_row, rIter end_row,
 template <typename E_t>
 template <class Algo>
 inline void WeightedDataset<E_t>::setup(Algo &algo) {
-	for (int y = 0; y < 2; ++y)
-		for(auto j : examples[y])
-			algo.addBitsetExample(data[y][j], y, weight[y][j]);
-	
-	algo.setErrorOffset(suppression_count);
+  algo.clearExamples();
+
+  for (int y = 0; y < 2; ++y)
+    for (auto j : examples[y])
+      algo.addBitsetExample(data[y][j], y, weight[y][j]);
+
+  algo.setErrorOffset(suppression_count);
 }
 
 template <typename E_t> inline void WeightedDataset<E_t>::preprocess(const bool verbose) {

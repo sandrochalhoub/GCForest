@@ -68,7 +68,7 @@ template <typename E_t> class WeightedError;
 template <template<typename> class ErrorPolicy = CardinalityError, typename E_t = int>
 class BacktrackingAlgorithm {
 
-private:
+public:
   friend ErrorPolicy<E_t>;
 
   /*!@name Parameters*/
@@ -81,9 +81,9 @@ private:
   // size_t numExample[2];
 
 public:
-  DTOptions &options;
+  DTOptions options;
 
-private:
+public:
   vector<vector<int>> example[2];
 
   vector<int> relevant_features;
@@ -220,7 +220,7 @@ private:
   void resize(const int k);
 
   // current size of the data structures (current node capacity)
-  size_t size();
+  // size_t size();
 
   // return true if all features have been tried feature
   bool no_feature(const int node) const;
@@ -326,7 +326,7 @@ public:
 
   /*!@name Constructors*/
   //@{
-  explicit BacktrackingAlgorithm(Wood &w, DTOptions &o);
+  explicit BacktrackingAlgorithm(Wood &w, const DTOptions &o);
   // void setData(const DataSet &data);
   void setReverse();
   void seed(const int s);
@@ -338,7 +338,7 @@ public:
   // whether
   bool equal_feature(const int f_a, const int f_b);
 
-  void separator(const string &msg) const;
+  void separator(const string &msg, const int width=82) const;
   void print_new_best();
   void print_progress();
 
@@ -369,6 +369,7 @@ public:
   void minimize_error_depth_size();
 
   Tree getSolution() const;
+  Tree saveSolution();
 
   E_t error() const;
 
@@ -384,10 +385,14 @@ public:
   /** Removes all the examples to free memory. The error and the model
    * still can be retrieved.  */
   void clearExamples();
+  /** clear search data structures */
+  void clear();
 
-	void setErrorOffset(const E_t e);
+  void setErrorOffset(const E_t e);
 
-	/*!@name Printing*/
+  void setWeight(const int y, const size_t i, const E_t w);
+
+  /*!@name Printing*/
   //@{
   // std::ostream &toCsv(std::ostream &os) const;
   std::ostream &display(std::ostream &os) const;
@@ -416,6 +421,8 @@ public:
 
   void update_node(const int n) {}
 
+  void set_weight(const int y, const size_t i, const E_t w) {}
+
   E_t get_weight(const int y, const size_t i) const;
 
   E_t node_error(const int i) const;
@@ -426,6 +433,8 @@ public:
   E_t get_total(const int y, const int n) const;
 
   void clear_examples() {}
+
+  void clear() {}
 };
 
 template <typename E_t>
@@ -451,7 +460,7 @@ public:
 
   void update_node(const int n);
 
-  void set_weight(const int y, const size_t i, const E_t weight);
+  void set_weight(const int y, const size_t i, const E_t w);
 
   E_t get_weight(const int y, const size_t i) const;
 
@@ -463,6 +472,8 @@ public:
   E_t get_total(const int y, const int n) const;
 
   void clear_examples();
+
+  void clear();
 };
 
 template <typename E_t>

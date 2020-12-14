@@ -60,11 +60,12 @@ class Wood {
 private:
   vector<int> child[2];
   vector<int> feature;
-  SparseSet available;
 
   void resize(const int k);
 
 public:
+  SparseSet available;
+
   Wood();
 
   Tree operator[](const int i);

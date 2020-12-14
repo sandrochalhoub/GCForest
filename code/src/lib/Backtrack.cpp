@@ -73,8 +73,8 @@ template <typename E_t> void WeightedError<E_t>::update_node(const int n) {
 }
 
 template <typename E_t>
-void WeightedError<E_t>::set_weight(const int y, const size_t i, const E_t weight) {
-  weights[y][i] = weight;
+void WeightedError<E_t>::set_weight(const int y, const size_t i, const E_t w) {
+  weights[y][i] = w;
 }
 
 template <typename E_t>
@@ -102,9 +102,13 @@ E_t WeightedError<E_t>::get_total(const int y, const int n) const {
 
 template <typename E_t> void WeightedError<E_t>::clear_examples() {
   for (int i = 0; i < 2; ++i) {
-    // TODO deleting weights breaks adaboost because it relies on the weights of
-    // the previous iteration.
-    // weights[i].clear();
+    weights[i].clear();
+  }
+}
+
+template <typename E_t> void WeightedError<E_t>::clear() {
+  for (int i = 0; i < 2; ++i) {
+    weight_total[i].clear();
   }
 }
 
@@ -112,15 +116,11 @@ template <typename E_t> void WeightedError<E_t>::clear_examples() {
 // ===== BacktrackingAlgorithm
 
 template <template <typename> class ErrorPolicy, typename E_t>
-BacktrackingAlgorithm<ErrorPolicy, E_t>::BacktrackingAlgorithm(Wood &w,
-                                                               DTOptions &opt)
+BacktrackingAlgorithm<ErrorPolicy, E_t>::BacktrackingAlgorithm(
+    Wood &w, const DTOptions &opt)
     : wood(w), options(opt), error_policy(*this) {
 
-  // start_time = cpu_time();
-
   num_feature = 0;
-  // numExample[0] = 0;
-  // numExample[1] = 0;
 
   // statistics and options
   ub_error = INFTY(E_t); //(numExample());
@@ -142,11 +142,10 @@ BacktrackingAlgorithm<ErrorPolicy, E_t>::BacktrackingAlgorithm(Wood &w,
 
   time_limit = options.time;
 
-  checking_period = 5000;
+  checking_period = 1000;
 
   interrupted = false;
 
-  // use_entropy = options.feature_strategy != DTOptions::MINERROR;
   feature_criterion = options.feature_strategy;
 
   restart_limit = options.restart_base;
@@ -176,37 +175,6 @@ void BacktrackingAlgorithm<ErrorPolicy, E_t>::setReverse() {
         reverse_dataset[y][f].set(i);
 }
 
-// template <template<typename> class ErrorPolicy, typename E_t>
-// void BacktrackingAlgorithm<ErrorPolicy, E_t>::setData(const DataSet &data) {
-//
-//   // cout << "set data\n";
-//
-//   num_feature = static_cast<int>(data.numFeature());
-//
-//   f_error.resize(num_feature, 1);
-//   f_entropy.resize(num_feature, 1);
-//   f_gini.resize(num_feature, 1);
-//
-//   for (int y{0}; y < 2; ++y) {
-//     dataset[y].resize(data.example[y].count());
-//     example[y].resize(data.example[y].count());
-//     auto k{0};
-//     for (auto i : data.example[y]) {
-//       // cout << k << ":";
-//       dataset[y][k].resize(num_feature);
-//       dataset[y][k] = data[i];
-//       for (auto j{0}; j < num_feature; ++j)
-//         if (data.hasFeature(i, j)) {
-//           example[y][k].push_back(j);
-//           // cout << " " << j;
-//         }
-//       ++k;
-//       // cout << endl;
-//       error_policy.add_example(y, i);
-//     }
-//   }
-// }
-
 template <template<typename> class ErrorPolicy, typename E_t>
 E_t BacktrackingAlgorithm<ErrorPolicy, E_t>::error() const { return ub_error; }
 
@@ -217,7 +185,8 @@ bool BacktrackingAlgorithm<ErrorPolicy, E_t>::limit_out() {
   if (time_limit > 0 and (num_backtracks % checking_period) == 0)
     if (cpu_time() >= (time_limit + start_time))
       interrupted = true;
-  interrupted = interrupted or (search_limit and num_backtracks > search_limit);
+  interrupted = interrupted or (search_limit and search_size > search_limit);
+	
   return interrupted;
 }
 
@@ -242,12 +211,7 @@ template <template<typename> class ErrorPolicy, typename E_t>
 void BacktrackingAlgorithm<ErrorPolicy, E_t>::seed(const int s) { random_generator.seed(s); }
 
 template <template<typename> class ErrorPolicy, typename E_t>
-size_t BacktrackingAlgorithm<ErrorPolicy, E_t>::size() { return blossom.size(); }
-
-template <template<typename> class ErrorPolicy, typename E_t>
 void BacktrackingAlgorithm<ErrorPolicy, E_t>::setUbDepth(const size_t u) { ub_depth = u; }
-
-// void BacktrackingAlgorithm<ErrorPolicy, E_t>::setUbNode(const size_t u) { ub_size = u; }
 
 template <template<typename> class ErrorPolicy, typename E_t>
 void BacktrackingAlgorithm<ErrorPolicy, E_t>::setUbError(const E_t u) { ub_error = u; }
@@ -305,9 +269,9 @@ bool BacktrackingAlgorithm<ErrorPolicy, E_t>::null_entropy(const int node, const
 }
 
 template <template<typename> class ErrorPolicy, typename E_t>
-void BacktrackingAlgorithm<ErrorPolicy, E_t>::separator(const string &msg) const {
-  cout << setfill('-') << setw((82 - msg.size()) / 2) << "-"
-       << "[" << msg << "]" << setw((82 - msg.size()) / 2 + (msg.size() % 2))
+void BacktrackingAlgorithm<ErrorPolicy, E_t>::separator(const string &msg, const int width) const {
+  cout << setfill('-') << setw((width - msg.size()) / 2) << "-"
+       << "[" << msg << "]" << setw((width - msg.size()) / 2 + (msg.size() % 2))
        << "-" << endl
        << setfill(' ');
 }
@@ -331,9 +295,7 @@ void BacktrackingAlgorithm<ErrorPolicy, E_t>::print_new_best() {
                static_cast<double>(total))
        << " error=" << setw(4) << ub_error + error_offset
        << " depth=" << setw(3) << actual_depth << " size=" << setw(3) << ub_size
-       // << " backtracks=" << setw(9) << num_backtracks
        << " choices=" << setw(9) << search_size
-       // << " restarts=" << setw(4) << num_restarts
        << " mem=" << setw(3) << wood.size() << " time=" << t << right << endl;
 }
 
@@ -370,6 +332,41 @@ void BacktrackingAlgorithm<ErrorPolicy, E_t>::print_progress() {
   }
 }
 
+template <template <typename> class ErrorPolicy, typename E_t>
+void BacktrackingAlgorithm<ErrorPolicy, E_t>::clear() {
+  for (auto i{blossom.brbegin()}; i != blossom.frend(); ++i)
+    if (best_tree[*i] > 1) {
+      wood.freeNode(best_tree[*i]);
+      best_tree[*i] = -1;
+    }
+
+  if (solution_root > 1)
+    wood.freeNode(solution_root);
+
+  blossom.clear();
+
+  fill(optimal.begin(), optimal.end(), false);
+  // fill(best_tree.begin(), best_tree.end(), -1);
+  fill(depth.begin(), depth.end(), 0);
+  fill(parent.begin(), parent.end(), -1);
+  fill(min_size.begin(), min_size.end(), 0);
+  fill(min_error.begin(), min_error.end(), 0);
+  fill(max_error.begin(), max_error.end(), INFTY(int));
+  fill(max_size.begin(), max_size.end(), INFTY(int));
+  fill(tree_error.begin(), tree_error.end(), INFTY(int));
+  fill(tree_size.begin(), tree_size.end(), INFTY(int));
+  fill(child[0].begin(), child[0].end(), -1);
+  fill(child[1].begin(), child[1].end(), -1);
+
+  ub_error = INFTY(E_t); //(numExample());
+  ub_size = INFTY(size_t);
+  ub_depth = options.max_depth;
+
+  error_policy.clear();
+	
+	interrupted = false;
+}
+
 template <template<typename> class ErrorPolicy, typename E_t>
 void BacktrackingAlgorithm<ErrorPolicy, E_t>::resize(const int k) {
 
@@ -379,7 +376,6 @@ void BacktrackingAlgorithm<ErrorPolicy, E_t>::resize(const int k) {
   end_feature.resize(k);
   blossom.reserve(k);
   depth.resize(k, 0);
-  optimal.resize(k, -2);
   parent.resize(k, -1);
 
   min_size.resize(k, 0);
@@ -393,7 +389,6 @@ void BacktrackingAlgorithm<ErrorPolicy, E_t>::resize(const int k) {
   auto i{ranked_feature.size()};
   ranked_feature.resize(k);
   for (; i < ranked_feature.size(); ++i) {
-    // for (auto f{0}; f < num_feature; ++f)
     for (auto f : relevant_features)
       ranked_feature[i].push_back(f);
     feature[i] = ranked_feature[i].begin();
@@ -428,7 +423,6 @@ int BacktrackingAlgorithm<ErrorPolicy, E_t>::highest_error_reduction() const {
     cout << "select";
 #endif
 
-  // for (auto i{blossom.fbegin()}; i!=blossom.fend(); ++i) {// : blossom) {
   for (auto i : blossom) {
     assert(depth[i] < ub_depth);
     auto err{node_error(i)};
@@ -459,8 +453,6 @@ int BacktrackingAlgorithm<ErrorPolicy, E_t>::highest_error_reduction() const {
 
   assert(selected_node >= 0);
 
-  // cout << "--> " << selected_node << endl;
-
   return selected_node;
 }
 
@@ -475,7 +467,6 @@ int BacktrackingAlgorithm<ErrorPolicy, E_t>::highest_error() const {
     cout << "select";
 #endif
 
-  // for (auto i{blossom.fbegin()}; i!=blossom.fend(); ++i) {// : blossom) {
   for (auto i : blossom) {
     assert(depth[i] < ub_depth);
     auto err{node_error(i)};
@@ -503,8 +494,6 @@ int BacktrackingAlgorithm<ErrorPolicy, E_t>::highest_error() const {
 
   assert(selected_node >= 0);
 
-  // cout << "--> " << selected_node << endl;
-
   return selected_node;
 }
 
@@ -519,7 +508,6 @@ int BacktrackingAlgorithm<ErrorPolicy, E_t>::lowest_error() const {
     cout << "select";
 #endif
 
-  // for (auto i{blossom.fbegin()}; i!=blossom.fend(); ++i) {// : blossom) {
   for (auto i : blossom) {
     assert(depth[i] < ub_depth);
     auto err{node_error(i)};
@@ -547,8 +535,6 @@ int BacktrackingAlgorithm<ErrorPolicy, E_t>::lowest_error() const {
 
   assert(selected_node >= 0);
 
-  // cout << "--> " << selected_node << endl;
-
   return selected_node;
 }
 
@@ -568,12 +554,6 @@ void BacktrackingAlgorithm<ErrorPolicy, E_t>::random_perturbation(
     }
   }
 }
-
-// void BacktrackingAlgorithm<ErrorPolicy, E_t>::filter_features(const int node) {
-//   for (auto f{end_feature[node] - 1}; f >= feature[node]; --f)
-//     if (max_entropy(node, *f))
-//       swap(*f, *(--end_feature[node]));
-// }
 
 template <template<typename> class ErrorPolicy, typename E_t>
 void BacktrackingAlgorithm<ErrorPolicy, E_t>::sort_features(const int node) {
@@ -609,11 +589,6 @@ void BacktrackingAlgorithm<ErrorPolicy, E_t>::sort_features(const int node) {
       swap(*feature[node], *min_error_f);
     }
   }
-  //
-  //
-  // for(auto f{feature[node]}; f!=end_feature[node]; ++f) {
-  // 	cout << setw(4) << *f << " " << f_gini[*f] << endl;
-  // }
 }
 
 template <template<typename> class ErrorPolicy, typename E_t>
@@ -648,6 +623,13 @@ void BacktrackingAlgorithm<ErrorPolicy, E_t>::cleaning() {
 template <template<typename> class ErrorPolicy, typename E_t>
 Tree BacktrackingAlgorithm<ErrorPolicy, E_t>::getSolution() const { return wood[solution_root]; }
 
+template <template <typename> class ErrorPolicy, typename E_t>
+Tree BacktrackingAlgorithm<ErrorPolicy, E_t>::saveSolution() {
+  auto t{solution_root};
+  solution_root = -1;
+  return wood[t];
+}
+
 template <template<typename> class ErrorPolicy, typename E_t>
 bool BacktrackingAlgorithm<ErrorPolicy, E_t>::store_new_best() {
   if (lt<E_t>(current_error, ub_error) or
@@ -655,29 +637,19 @@ bool BacktrackingAlgorithm<ErrorPolicy, E_t>::store_new_best() {
 
     ++num_solutions;
 
-    // perfect = (ub_error > 0 and current_error == 0);
-
     ub_error = current_error;
     ub_size = current_size;
 
-    // cout << "solution " << wood.count() << " -> ";
-
-    if (solution_root > 1)
+    if (solution_root > 1) {
       wood.freeNode(solution_root);
-
-    // cout << wood.count() << " -> ";
+    }
 
     solution_root = copy_solution(0);
-
-    // improvement = true;
 
     actual_depth = wood.depth(solution_root);
 
     if (options.verbosity > DTOptions::QUIET)
       print_new_best();
-
-    // Tree T{getSolution()};
-    // cout << T << endl;
 
     if (options.verified) {
       if (ub_size != wood.size(solution_root)) {
@@ -697,11 +669,6 @@ bool BacktrackingAlgorithm<ErrorPolicy, E_t>::store_new_best() {
              << ub_error << " != " << actual_error << endl;
       }
     }
-
-    // cout << blossom << endl << wood[solution_root] << endl;
-
-    // cout << wood.count() << endl;
-
     return true;
   }
 
@@ -817,7 +784,7 @@ bool BacktrackingAlgorithm<ErrorPolicy, E_t>::update_upperbound(const int node) 
       (equal<E_t>(err, max_error[node]) and sz < max_size[node])) {
     max_error[node] = err;
     max_size[node] = sz;
-// store_best_tree(node, true);
+
 #ifdef PRINTTRACE
     if (PRINTTRACE)
       cout << "new best for node " << node << ": feat=" << *feature[node]
@@ -841,10 +808,8 @@ bool BacktrackingAlgorithm<ErrorPolicy, E_t>::backtrack() {
   bool dead_end{false};
 
   do {
-
     ++num_backtracks;
 
-    // cout << "backtrack\n";
     if (decision.empty())
       return false;
 
@@ -858,8 +823,6 @@ bool BacktrackingAlgorithm<ErrorPolicy, E_t>::backtrack() {
       cout << "backtrack to " << backtrack_node << endl;
     }
 #endif
-    //
-    // 		current_size -= max_size[backtrack_node];
 
     auto updt{update_upperbound(backtrack_node)};
     if (updt or lt<E_t>(max_error[backtrack_node],tree_error[backtrack_node]) or
@@ -889,8 +852,9 @@ bool BacktrackingAlgorithm<ErrorPolicy, E_t>::backtrack() {
 
       for (auto i{0}; i < 2; ++i)
         if (child[i][backtrack_node] >= 0 and
-            best_tree[child[i][backtrack_node]] > 1)
+            best_tree[child[i][backtrack_node]] > 1) {
           wood.freeNode(best_tree[child[i][backtrack_node]]);
+        }
     }
 
     ++feature[backtrack_node];
@@ -981,22 +945,13 @@ void BacktrackingAlgorithm<ErrorPolicy, E_t>::branch(const int node, const int f
   assert(depth[node] < ub_depth - 1);
 
   // we assume that we branch only on tests with non-null error
-  // assert(get_feature_error(node, f) >= -ErrorPolicy<E_t>::zero);
-
-  if (equal<E_t>(get_feature_error(node, f), 0)) {
-    auto fe{get_feature_error(node, f)};
-
-    cout << fe << " " << (equal<E_t>(f, 0)) << endl;
-  }
-
-  assert(not equal<E_t>(get_feature_error(node, f), 0));
-
   decision.push_back(node);
   blossom.remove_front(node);
 
   // we create two nodes even if one branch is pure, but we'll free it
-  if (blossom.capacity() < blossom.size() + 2)
+  if (blossom.capacity() < blossom.size() + 2) {
     resize(blossom.size() + 2);
+  }
 
   int c[2] = {*blossom.bbegin(), *(blossom.bbegin() + 1)};
 
@@ -1034,18 +989,14 @@ void BacktrackingAlgorithm<ErrorPolicy, E_t>::branch(const int node, const int f
 #ifdef PRINTTRACE
   if (PRINTTRACE and options.verbosity >= DTOptions::SOLVERINFO) {
     cout << "xERROR = " << current_error << " - " << node_error(node) << endl;
-    // cout << "SIZE = " << current_size << " - " << 1 << endl;
   }
 #endif
 
-  // --current_size;
   current_error -= node_error(node);
   for (auto i{0}; i < 2; ++i) {
     auto s{child[i][node]};
     if (s >= 0) {
       grow(s);
-// if(not grow(s))
-// 	child[i][node] = -1 - (P[1][s].count() < P[0][s].count());
 
 #ifdef PRINTTRACE
       if (PRINTTRACE and options.verbosity >= DTOptions::SOLVERINFO) {
@@ -1054,7 +1005,6 @@ void BacktrackingAlgorithm<ErrorPolicy, E_t>::branch(const int node, const int f
       }
 #endif
 
-      // current_size += max_size[s];
       current_error += max_error[s];
     }
 
@@ -1090,11 +1040,6 @@ bool BacktrackingAlgorithm<ErrorPolicy, E_t>::grow(const int node) {
 
   filter_features(node, [&](const int f) { return max_entropy(node, f); });
 
-  // cout << search_size;
-  // for(auto f{feature[node]}; f != end_feature[node]; ++f)
-  // 	cout << " " << *f;
-  // cout << endl;
-
   blossom.add(node);
 
   best_tree[node] =
@@ -1102,7 +1047,6 @@ bool BacktrackingAlgorithm<ErrorPolicy, E_t>::grow(const int node) {
 
   if (feature[node] == end_feature[node]) {
 
-    // assert(false);
     blossom.remove_front(node);
     tree_error[node] = max_error[node] = min_error[node] = node_error(node);
     child[0][node] = -1;
@@ -1146,12 +1090,10 @@ bool BacktrackingAlgorithm<ErrorPolicy, E_t>::grow(const int node) {
 
     } else {
 
-      // best_tree[node] = -1;
       min_error[node] = 0;
       min_size[node] = 5;
       tree_size[node] = max_size[node] = maxSize(ub_depth - depth[node]);
       tree_error[node] = max_error[node] = node_error(node);
-      // max_size[node] =
   }
   }
   return true;
@@ -1182,7 +1124,6 @@ void BacktrackingAlgorithm<ErrorPolicy, E_t>::expend() {
       selected_node = lowest_error();
       break;
     }
-    // selected_node = choose();
 
     if (max_entropy(selected_node, *feature[selected_node])) {
 
@@ -1194,8 +1135,6 @@ void BacktrackingAlgorithm<ErrorPolicy, E_t>::expend() {
     }
 
     assert(not max_entropy(selected_node, *feature[selected_node]));
-
-    // selected_node = blossom[0];
   }
 
   if (options.width > 1)
@@ -1213,24 +1152,38 @@ void BacktrackingAlgorithm<ErrorPolicy, E_t>::expend() {
 template <template<typename> class ErrorPolicy, typename E_t>
 void BacktrackingAlgorithm<ErrorPolicy, E_t>::initialise_search() {
 
-  // if(options.output != "") {
-  // 	printDatasetToFile(options.output);
-  // }
+  assert(num_feature > 0);
 
   num_level_zero_feature = num_feature;
 
   setReverse();
 
   start_time = cpu_time();
+	// search_size = 0;
 
   for (int y{0}; y < 2; ++y)
     P[y].init(example[y].size());
 
+  relevant_features.clear();
   for (auto f{0}; f < num_feature; ++f)
     relevant_features.push_back(f);
 
   // tree must have at least one node (0)
-  resize(1);
+  if (blossom.capacity() == 0)
+    resize(1);
+  else {
+    for (auto i{0}; i < blossom.capacity(); ++i) {
+      for (auto y{0}; y < 2; ++y) {
+        pos_feature_frequency[y][i].clear();
+        pos_feature_frequency[y][i].resize(num_feature, 0);
+      }
+
+      ranked_feature[0].clear();
+      for (auto f : relevant_features)
+        ranked_feature[0].push_back(f);
+      feature[0] = ranked_feature[i].begin();
+    }
+  }
 
   // compute error and sort features for the root node
   for (auto y{0}; y < 2; ++y)
@@ -1247,7 +1200,6 @@ void BacktrackingAlgorithm<ErrorPolicy, E_t>::initialise_search() {
     grow(0);
 
     current_error = max_error[0];
-    // current_size = 1;
 
     backtrack_node = -1;
 
@@ -1264,49 +1216,26 @@ void BacktrackingAlgorithm<ErrorPolicy, E_t>::initialise_search() {
           }
       }
     }
-    // if (options.preprocessing) {
-    //   sort(relevant_features.begin(), relevant_features.end(),
-    //        [&](const int a, const int b) {
-    //          auto pa{get_feature_frequency(1, 0, a)};
-    //          auto pb{get_feature_frequency(1, 0, b)};
-    //          auto na{get_feature_frequency(0, 0, a)};
-    //          auto nb{get_feature_frequency(0, 0, b)};
-    //          if (pa < pb)
-    //            return true;
-    //          if (pa == pb) {
-    //            if (na < nb)
-    //              return true;
-    //            if (na == nb) {
-    //              if (reverse_dataset[0][a] < reverse_dataset[0][b])
-    //                return true;
-    //              if (reverse_dataset[0][a] > reverse_dataset[0][b])
-    //                return false;
-    //              return (reverse_dataset[1][a] <= reverse_dataset[0][b]);
-    //            }
-    //          }
-    //          return false;
-    //        });
-    //
-    //   for (int fi{1}; fi < num_feature; ++fi) {
-    //     if (equal_feature(relevant_features[fi - 1], relevant_features[fi]))
-    //       feature_set.reset(relevant_features[fi]);
-    //   }
-    // }
+
+    for (auto i{1}; i < blossom.capacity(); ++i) {
+      ///// TODO: WE DON't NEED TO DO THAT IF CLEAREXAMPLES HAS NOT BEEN CALLED
+      ///[NOT COSTLY ANYWAY]
+      ranked_feature[i].clear();
+      for (auto f : relevant_features)
+        ranked_feature[i].push_back(f);
+      /////////////////////////////////
+      feature[i] = ranked_feature[i].begin();
+    }
 
     if (options.verbosity >= DTOptions::NORMAL)
-      cout << "d feature=" << num_feature << " feature_reduction="
-           << (num_feature - relevant_features.size()) << endl;
+      cout << "d feature=" << num_feature
+           << " feature_reduction=" << (num_feature - relevant_features.size())
+           << endl;
 
     filter_features(0, [&](const int f) { return not feature_set[f]; });
+
     sort_features(0);
 
-    // assert(store_new_best());
-
-    //for(auto f{feature[0]}; f!=end_feature[0]; ++f)
-    // 	cout << " " << *f << " " << get_feature_frequency(0, 0, *f) << " " << get_feature_frequency(1, 0, *f) << endl ;
-    //cout << endl;
-
-    // assert(feature[0] == ranked_feature[0].begin());
     num_level_zero_feature = (end_feature[0] - feature[0]);
   }
 }
@@ -1343,7 +1272,6 @@ bool BacktrackingAlgorithm<ErrorPolicy, E_t>::search() {
 
 template <template<typename> class ErrorPolicy, typename E_t>
 void BacktrackingAlgorithm<ErrorPolicy, E_t>::singleDecision() {
-  // if(ub_depth <= 1 or current_error == 0) {
   blossom.remove_front(0);
   for (auto branch{0}; branch < 2; ++branch) {
     child[branch][0] =
@@ -1356,7 +1284,6 @@ void BacktrackingAlgorithm<ErrorPolicy, E_t>::singleDecision() {
   current_size = tree_size[0] = max_size[0] = min_size[0] = 3;
   store_best_tree(0, true);
   optimal[0] = true;
-  // } else {
 }
 
 template <template<typename> class ErrorPolicy, typename E_t>
@@ -1393,7 +1320,6 @@ void BacktrackingAlgorithm<ErrorPolicy, E_t>::minimize_error() {
 
   if (options.verbosity > DTOptions::SILENT)
     print_new_best();
-  // cout << "error = " << ub_error << endl;
 }
 
 template <template<typename> class ErrorPolicy, typename E_t>
@@ -1449,7 +1375,6 @@ void BacktrackingAlgorithm<ErrorPolicy, E_t>::minimize_error_depth_size() {
   // auto saved_error{ub_error};
   while (ub_depth > 0 and search() and is_null<E_t>(ub_error)) {
     perfect = true;
-    // saved_error = ub_error;
     ub_error = min_positive<E_t>();
     ub_depth = actual_depth - 1;
 
@@ -1487,12 +1412,6 @@ void BacktrackingAlgorithm<ErrorPolicy, E_t>::minimize_error_depth_size() {
   if (options.verbosity > DTOptions::SILENT)
     print_new_best();
 }
-
-// template <template<typename> class ErrorPolicy, typename E_t>
-// void BacktrackingAlgorithm<ErrorPolicy, E_t>::addExample(const
-// std::vector<int> &example, const E_t weight) {
-//   addExample(example.begin(), example.end() - 1, example.back(), weight);
-// }
 
 template <template<typename> class ErrorPolicy, typename E_t>
 void BacktrackingAlgorithm<ErrorPolicy, E_t>::clearExamples() {
@@ -1560,7 +1479,6 @@ bool BacktrackingAlgorithm<ErrorPolicy, E_t>::fail() {
 
 template <template<typename> class ErrorPolicy, typename E_t>
 int BacktrackingAlgorithm<ErrorPolicy, E_t>::copy_solution(const int node) {
-
   if (node >= 0) {
     if (optimal[node]) {
       auto cn{wood.copyNode(best_tree[node])};
@@ -1593,17 +1511,15 @@ void BacktrackingAlgorithm<ErrorPolicy, E_t>::store_best_tree(const int node, co
   assert(not optimal[node]);
 
   // the previous best tree can be forgotten
-  if (global and best_tree[node] > 1)
+  if (global and best_tree[node] > 1) {
     wood.freeNode(best_tree[node]);
+  }
 
   // grow a new one
   best_tree[node] = wood.grow();
-
-  // assert(child[true][node] < 0 or optimal[child[true][node]]);
-  // assert(child[false][node] < 0 or optimal[child[false][node]]);
-
   wood.setFeature(best_tree[node], *feature[node]);
 
+  // link it to its best subtrees
   for (auto i{0}; i < 2; ++i) {
     if (child[i][node] >= 0) {
       wood.setChild(best_tree[node], i, best_tree[child[i][node]]);
@@ -1611,7 +1527,7 @@ void BacktrackingAlgorithm<ErrorPolicy, E_t>::store_best_tree(const int node, co
     } else {
       wood.setChild(best_tree[node], i, child[i][node] == -1);
     }
-}
+  }
 }
 
 template <template<typename> class ErrorPolicy, typename E_t>
@@ -1657,14 +1573,6 @@ double BacktrackingAlgorithm<ErrorPolicy, E_t>::gini(const int node, const int f
   double p[2];           // = {0,0};
   double gini[2];        // = {0,0};
 
-  // for (auto x{0}; x < 2; ++x) {
-  //
-  //   for (auto y{0}; y < 2; ++y)
-  //     cout << static_cast<double>(get_feature_frequency(y, node, truef[x]))
-  //          << " ";
-  // }
-  // cout << endl;
-
   // conditional to value x for feature
   for (auto x{0}; x < 2; ++x) {
 
@@ -1683,59 +1591,9 @@ double BacktrackingAlgorithm<ErrorPolicy, E_t>::gini(const int node, const int f
       gini[x] -= p[y] * p[y];
   }
 
-  // cout << feature << " " << ((gini[0] / (branch_size[0] * branch_size[0])) - 1)
-  //      << endl
-  //      << ((gini[1] / (branch_size[1] * branch_size[1])) - 1) << endl;
-
   return ((gini[1] / (branch_size[1])) + (gini[0] / (branch_size[0])));
 	// return ((gini[1] / (branch_size[1] * branch_size[1])) + (gini[0] / (branch_size[0] * branch_size[0])));
 }
-
-// template <template<typename> class ErrorPolicy, typename E_t>
-// double BacktrackingAlgorithm<ErrorPolicy, E_t>::gini(const int node, const
-// int feature) {
-//   int not_feature = (feature + num_feature);
-//   int truef[2] = {not_feature, feature};
-//
-//   double branch_size[2]; // = {0,0};
-//   double p[2];           // = {0,0};
-//   double gini[2];        // = {0,0};
-//
-// 	//   for (auto x{0}; x < 2; ++x) {
-// 	//
-// 	//     for (auto y{0}; y < 2; ++y)
-// 	//       cout << static_cast<double>(get_feature_frequency(y, node, truef[x]))
-// 	//            << " ";
-// 	//   }
-// 	//   cout << endl;
-// 	//
-// 	// cout << feature << " " ;
-//
-//   // conditional to value x for feature
-//   for (auto x{0}; x < 2; ++x) {
-//
-//     for (auto y{0}; y < 2; ++y)
-//       p[y] = static_cast<double>(
-//           get_feature_frequency(y, node,
-//                                 truef[x])); // how many class-i samples if f=x
-//
-//     // number of samples falling on this side
-//     branch_size[x] = p[0] + p[1];
-//
-//     // we compute on integers, normalized by n^2
-//     gini[x] = 0;
-// 		// auto tsize{(branch_size[x] * branch_size[x])};
-//
-//     for (auto y{0}; y < 2; ++y)
-//       gini[x] -= (p[y] * p[y]);
-// 		gini[x] /= (branch_size[x] * branch_size[x]);
-//
-// 		// cout << gini[x] << endl;
-//    }
-//
-// 	return 2 - gini[0] - gini[1];
-//   // return ((gini[1] / branch_size[1]) + (gini[0] / branch_size[0]));
-// }
 
 template <template<typename> class ErrorPolicy, typename E_t>
 bool BacktrackingAlgorithm<ErrorPolicy, E_t>::equal_feature(const int f_a, const int f_b) {
@@ -1799,54 +1657,17 @@ std::ostream &BacktrackingAlgorithm<ErrorPolicy, E_t>::display(std::ostream &os)
   return os;
 }
 
-// template <template <typename> class ErrorPolicy, typename E_t>
-// void BacktrackingAlgorithm<ErrorPolicy, E_t>::printDatasetToFile(
-//     ostream &outfile) const {
-//
-//   // // cout << 11 << endl;
-//   //
-//   // vector<int> sorted_examples[2];
-//   // vector<int> sorted_features;
-//   //
-//   // sorted_features.reserve(numFeature());
-//   // for (auto f{0}; f < numFeature(); ++f)
-//   //   sorted_features.push_back(f);
-//   // sort(sorted_features.begin(), sorted_features.end(),
-//   //      [&](const int a, const int b) {
-//   //        return reverse_dataset[0][a] < reverse_dataset[0][b] or
-//   //               (reverse_dataset[0][a] == reverse_dataset[0][b] and
-//   //                reverse_dataset[1][a] <= reverse_dataset[1][b]);
-//   //      });
-//
-//   for (auto y{0}; y < 2; ++y) {
-//
-//     // sorted_examples[y].reserve(example[y].size());
-//     // for (auto x{0}; x < example[y].size(); ++x)
-//     //   sorted_examples[y].push_back(x);
-//     //
-//     // sort(sorted_examples[y].begin(), sorted_examples[y].end(),
-//     //      [&](const int a, const int b) {
-//     //        return dataset[y][a] <= dataset[y][b];
-//     //      });
-//
-//     // for (auto x : sorted_examples[y]) {
-//     for (auto x{0}; x < example[y].size(); ++x) {
-//       outfile << y;
-//       // for (auto f : sorted_features) {
-//       for (auto f{0}; f < numFeature(); ++f) {
-//         outfile << " " << dataset[y][x][f];
-//       }
-//       outfile << endl;
-//     }
-//   }
-//   // outfile.close();
-// }
-
 template <template<typename> class ErrorPolicy, typename E_t>
 std::ostream &operator<<(std::ostream &os, const BacktrackingAlgorithm<ErrorPolicy, E_t> &x) {
   return x.display(os);
 }
 
+template <template <typename> class ErrorPolicy, typename E_t>
+void BacktrackingAlgorithm<ErrorPolicy, E_t>::setWeight(const int y,
+                                                        const size_t i,
+                                                        const E_t w) {
+  error_policy.set_weight(y, i, w);
+}
 
 template <template<typename> class ErrorPolicy, typename E_t>
 void BacktrackingAlgorithm<ErrorPolicy, E_t>::setErrorOffset(const E_t e) {
@@ -2030,11 +1851,6 @@ void BacktrackingAlgorithm<ErrorPolicy, E_t>::do_asserts() {
   assert(current_size == total_size);
 }
 #endif
-
-// // template class CardinalityError<unsigned long>;
-// template class CardinalityError<int>;
-// template class WeightedError<int>;
-// template class WeightedError<double>;
 
 // template class BacktrackingAlgorithm<CardinalityError, unsigned long>;
 template class BacktrackingAlgorithm<CardinalityError, int>;

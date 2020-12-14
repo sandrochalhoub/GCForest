@@ -19,14 +19,6 @@ int Tree::getFeature(const int node) const {
   return wood->getFeature(node);
 }
 
-// int Tree::predict(const DataSet &data) const {
-//   auto error{0};
-//   for (auto y{0}; y < 2; ++y)
-//     for (auto i : data.example[y])
-//       error += (wood->predict(idx, data[i]) != y);
-//   return error;
-// }
-
 bool Tree::predict(const instance &i) const {
   return wood->predict(idx, i);
 }
@@ -42,12 +34,13 @@ std::ostream &Tree::display(std::ostream &os) const {
 
 std::ostream &Wood::display(std::ostream &os, const int node,
                             const int depth) const {
-  // cout << "(" << feature << "|" << child_[0] << "|" << child_[1] << ") ";
 
   if (node <= 1)
     os << "class-" << node << endl;
   else {
-    os << feature[node] << endl;
+    os
+        // << node << ":"
+        << feature[node] << endl;
 
     assert(child[0][node] >= 0 and child[1][node] >= 0);
 
@@ -101,53 +94,25 @@ void Wood::resize(const int k) {
 
 //
 int Wood::grow() {
-
-  // cout << available << " (" << (available.empty() ? "empty" : "not empty") <<
-  // ")\n" ;
-
   if (available.empty())
     resize(feature.size() + 1);
   auto node{*available.begin()};
   available.remove_front(node);
 
-  // cout << "return " << node << endl;
-
 #ifdef DEBUG
   birthday[node] = ++today;
-
-// for(auto i{available.fbegin()}; i!=available.fend(); ++i)
-// 	cout << " " << (today - birthday[*i]);
-// cout << endl;
 #endif
 
   return node;
 }
 
 int Wood::copyNode(const int node) {
-
-  // cout << "copy " << node << endl;
-
   if (node > 1) {
     int root{grow()};
     feature[root] = feature[node];
 
-    // cout << "root: " << root << endl;
-
-    // for (auto i{0}; i < 2; ++i) {
-    //
-    //
-    // 	cout << "child[i][root]: " << child[i][root] << endl;
-    //
-    // 	cout << "  - " << child[i][node] << endl
-    // 		<< "  - " << child[i][node] << endl ;
-    //
-    // }
-
     for (auto i{0}; i < 2; ++i) {
       auto aux{copyNode(child[i][node])};
-
-      // cout << " -> " << aux << endl;
-
       child[i][root] = aux;
     }
     return root;
@@ -162,12 +127,6 @@ void Wood::freeNode(const int node) {
       if (child[i][node] >= 2)
         freeNode(child[i][node]);
   }
-
-  // #ifdef DEBUG
-  // 	++today;
-  // #endif
-
-  // cout << "free (" << node << "): " << available << endl;
 }
 
 bool Wood::predict(const int node, const instance &x) const {
@@ -192,8 +151,6 @@ size_t Wood::depth(const int node) const {
 
 void Wood::setFeature(const int node, const int f) {
   feature[node] = f;
-
-  // cout << "free (" << node << "): " << available << endl;
 }
 
 int Wood::getFeature(const int node) const {
@@ -202,8 +159,6 @@ int Wood::getFeature(const int node) const {
 
 void Wood::setChild(const int node, const int branch, const int orphan) {
   child[branch][node] = orphan;
-
-  // cout << "free (" << node << "): " << available << endl;
 }
 
 int Wood::getChild(const int node, const int branch) const {

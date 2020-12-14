@@ -13,8 +13,8 @@
 #ifndef _PRIMER_COMPILER_HPP
 #define _PRIMER_COMPILER_HPP
 
-// #define PRINT_TRACE
-#define PRINT_TRACE print_trace();
+#define PRINT_TRACE
+// #define PRINT_TRACE print_trace();
 
 using namespace boost;
 using namespace std;

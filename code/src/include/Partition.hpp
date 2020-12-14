@@ -32,6 +32,8 @@ public:
   //@{
   explicit Part(vector<int> &elt);
 
+  void reset();
+
   Part &operator=(const Part &p) noexcept;
 
   size_t count() const;
