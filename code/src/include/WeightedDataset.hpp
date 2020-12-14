@@ -1,12 +1,12 @@
-#ifndef _PRIMER_WEIGHTEDDATASET_HPP
-#define _PRIMER_WEIGHTEDDATASET_HPP
+#ifndef _BLOSSOM_WEIGHTEDDATASET_HPP
+#define _BLOSSOM_WEIGHTEDDATASET_HPP
 
 #include <vector>
 #include <algorithm>
 
+#include "typedef.hpp"
 #include "CmdLine.hpp"
 #include "SparseSet.hpp"
-#include "typedef.hpp"
 #include "utils.hpp"
 
 using namespace std;
@@ -68,8 +68,6 @@ public:
   };
 
 	List operator[](const int y) const { return List(*this, y); } 
-  // List getPositiveDatapoints() { return List(*this, 1); }
-  // List getNegativeDatapoints() { return List(*this, 0); }
 	
 	size_t numInconsistent() const { return suppression_count; }
 
@@ -80,30 +78,6 @@ private:
 
   size_t suppression_count{0};
 };
-
-// template <typename E_t> class DatapointList {
-// public:
-//   DatapointList(WeightedDataset<E_t> &dataset, const int y)
-//       : _dataset(dataset), _y(y) {}
-//
-//   // iterators on the indices of the datapoints with non-null weight
-//   std::vector<int>::const_iterator begin() const {
-//     return _dataset.examples[_y].begin();
-//   }
-//   std::vector<int>::const_iterator end() const {
-//     return _dataset.examples[_y].begin();
-//   }
-//
-//   // accessors
-//   const instance &operator[](const int x) const {
-//     return _dataset.data[_y][x];
-//   }
-//   const E_t weight(const int x) const { return _dataset.weight[_y][x]; }
-//
-// private:
-//   WeightedDataset<E_t> &_dataset;
-//   const int _y;
-// };
 
 template <typename E_t>
 template <class rIter>
@@ -135,109 +109,7 @@ inline void WeightedDataset<E_t>::addExample(rIter beg_row, rIter end_row,
   }
 
   weight[y].push_back(w);
-
-  // std::vector<int> example(beg_instance, end_instance);
-  // data[y].push_back(example);
 }
-
-// template <typename E_t>
-// template <class Algo>
-// inline void WeightedDataset<E_t>::toInc(Algo &algo) {
-//
-//   auto t{cpu_time()};
-//   // if (algo.options.verbosity >= DTOptions::NORMAL)
-//   //   cout << "d readtime=" << t << endl;
-//
-//   if (not algo.options.preprocessing) {
-//     for (auto y{0}; y < 2; ++y) {
-//       for (auto &b : data[y]) {
-//         algo.addBitsetExample(b, y, 1);
-//       }
-//     }
-//   } else {
-//
-//     int dup_count = 0; // for statistics
-//     int sup_count = 0;
-//
-//     for (int y = 0; y < 2; ++y)
-//       std::sort(data[y].begin(), data[y].end());
-//
-//     if (algo.options.verbosity >= DTOptions::NORMAL)
-//       cout << "d sorttime=" << cpu_time() - t << endl;
-//
-//     vector<instance>::iterator x[2] = {data[0].begin(), data[1].begin()};
-//     vector<instance>::iterator end[2] = {data[0].end(), data[1].end()};
-//
-//     int wght[2] = {1, 1};
-//     while (x[0] != end[0] and x[1] != end[1]) {
-//       for (int y = 0; y < 2; ++y)
-//         while (x[y] != (end[y] - 1) and *(x[y]) == *(x[y] + 1)) {
-//           ++wght[y];
-//           ++x[y];
-//         }
-//       if (*x[0] < *x[1]) {
-//         algo.addBitsetExample(*x[0], 0, wght[0]);
-//         dup_count += (wght[0] - 1);
-//         ++x[0];
-//         wght[0] = 1;
-//       } else if (*x[0] > *x[1]) {
-//         algo.addBitsetExample(*x[1], 1, wght[1]);
-//         dup_count += (wght[1] - 1);
-//         ++x[1];
-//         wght[1] = 1;
-//       } else {
-//         if (wght[0] < wght[1]) {
-//           algo.addBitsetExample(*x[1], 1, wght[1] - wght[0]);
-//           sup_count += wght[0];
-// 					dup_count += (wght[1] - wght[0] - 1);
-//         } else if (wght[0] > wght[1]) {
-//           algo.addBitsetExample(*x[0], 0, wght[0] - wght[1]);
-//           sup_count += wght[1];
-// 					dup_count += (wght[0] - wght[1] - 1);
-//         } else {
-//           sup_count += wght[1];
-//         }
-//         for (int y = 0; y < 2; ++y) {
-//           ++x[y];
-//           wght[y] = 1;
-//         }
-//       }
-//     }
-//
-//     for (int y = 0; y < 2; ++y) {
-//       wght[y] = 0;
-//
-//       for (; x[y] != end[y]; ++x[y]) {
-//         assert(x[1 - y] == end[1 - y]);
-//
-//         ++wght[y];
-//
-//         if (x[y] == end[y] - 1 or *x[y] != *(x[y] + 1)) {
-//           algo.addBitsetExample(*x[y], y, wght[y]);
-//           wght[y] = 0;
-//         } else {
-//           dup_count++;
-//         }
-//       }
-//     }
-//
-//     algo.setErrorOffset(sup_count);
-//
-//     // print stats
-//     if (algo.options.verbosity >= DTOptions::NORMAL)
-//       std::cout << "d duplicate=" << dup_count << " suppressed=" << sup_count
-//                 << " ratio=" << float(dup_count + 2 * sup_count) / example_count()
-//                 << " count=" << example_count() << " negative=" << count(0)
-//                 << " positive=" << count(1)
-//                 << " final_count=" << example_count() - (dup_count + 2 * sup_count)
-// 									<< " / " << algo.numExample()
-//                 << std::endl;
-//   }
-//
-//   if (algo.options.verbosity >= DTOptions::NORMAL)
-//     cout << "d preprocesstime=" << cpu_time() - t << endl;
-//
-// }
 
 template <typename E_t>
 template <class Algo>
@@ -342,6 +214,7 @@ template <typename E_t> inline void WeightedDataset<E_t>::preprocess(const bool 
 
   // cout << suppression_count << endl;
 }
+
 }
 
-#endif // _PRIMER_WEIGHTEDDATASET_HPP
+#endif // _BLOSSOM_WEIGHTEDDATASET_HPP

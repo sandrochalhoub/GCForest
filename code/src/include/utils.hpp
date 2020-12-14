@@ -1,8 +1,6 @@
 
-
-
-#ifndef _PRIMER_UTILS_HPP
-#define _PRIMER_UTILS_HPP
+#ifndef _BLOSSOM_UTILS_HPP
+#define _BLOSSOM_UTILS_HPP
 
 #define INFTY(type) static_cast<type>(numeric_limits<type>::max()/2)
 
@@ -20,4 +18,4 @@ int log2_64(uint64_t value);
 double cpu_time(void);
 }
 
-#endif // _PRIMER_UTILS_HPP
+#endif // _BLOSSOM_UTILS_HPP

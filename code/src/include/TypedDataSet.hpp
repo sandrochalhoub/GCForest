@@ -3,16 +3,18 @@
 #include <map>
 #include <vector>
 
+#include "typedef.hpp"
 #include <boost/algorithm/string/trim.hpp>
-#include <boost/dynamic_bitset.hpp>
+// #include <boost/dynamic_bitset.hpp>
 #include <boost/lexical_cast.hpp>
 
-#include "WeightedDataset.hpp"
+// #include "WeightedDataset.hpp"
 
 #ifndef _PRIMER_TYPEDDATASET_HPP
 #define _PRIMER_TYPEDDATASET_HPP
 
 using namespace boost;
+using namespace std;
 
 typedef int dtype;
 // typedef dynamic_bitset<> word;

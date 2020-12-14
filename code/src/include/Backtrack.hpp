@@ -1,4 +1,7 @@
 
+#ifndef _BLOSSOM_BACKTRACK_HPP
+#define _BLOSSOM_BACKTRACK_HPP
+
 #include <iostream>
 #include <random>
 #include <vector>
@@ -15,8 +18,6 @@
 #define PRINT_TRACE
 #define DO_ASSERTS
 
-#ifndef _PRIMER_BACKTRACK_HPP
-#define _PRIMER_BACKTRACK_HPP
 
 
 using namespace boost;
@@ -580,4 +581,4 @@ template <template<typename> class ErrorPolicy, typename E_t>
 std::ostream &operator<<(std::ostream &os, const BacktrackingAlgorithm<ErrorPolicy, E_t> &x);
 }
 
-#endif // _PRIMER_BACKTRACK_HPP
+#endif // _BLOSSOM_BACKTRACK_HPP

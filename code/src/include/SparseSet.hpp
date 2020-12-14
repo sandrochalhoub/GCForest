@@ -1,10 +1,10 @@
 
-#include <iostream>
+#ifndef _BLOSSOM_SPARSESET_HPP
+#define _BLOSSOM_SPARSESET_HPP
 
+#include <iostream>
 #include <vector>
 
-#ifndef _MINISCHEDULER_SPARSESET_HPP
-#define _MINISCHEDULER_SPARSESET_HPP
 
 /**********************************************
  * SparseSet

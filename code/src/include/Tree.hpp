@@ -1,11 +1,9 @@
 
+#ifndef _BLOSSOM_TREE_HPP
+#define _BLOSSOM_TREE_HPP
+
 #include <iostream>
 #include <vector>
-
-
-#ifndef __TREE_HPP
-#define __TREE_HPP
-
 
 #include "typedef.hpp"
 #include "SparseSet.hpp"

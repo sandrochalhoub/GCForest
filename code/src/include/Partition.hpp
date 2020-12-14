@@ -1,10 +1,10 @@
 
+#ifndef _BLOSSOM_PARTITION_HPP
+#define _BLOSSOM_PARTITION_HPP
+
 #include <iostream>
 #include <assert.h>
 #include <vector>
-
-#ifndef __PARTITION_HPP
-#define __PARTITION_HPP
 
 /**********************************************
 * ListTree

@@ -1,4 +1,7 @@
 
+#ifndef _BLOSSOM_COMPILER_HPP
+#define _BLOSSOM_COMPILER_HPP
+
 #include <cmath>
 #include <iostream>
 #include <random>
@@ -9,9 +12,6 @@
 #include "SparseSet.hpp"
 #include "Tree.hpp"
 #include "utils.hpp"
-
-#ifndef _PRIMER_COMPILER_HPP
-#define _PRIMER_COMPILER_HPP
 
 #define PRINT_TRACE
 // #define PRINT_TRACE print_trace();
@@ -266,4 +266,4 @@ template <typename E_t>
 std::ostream &operator<<(std::ostream &os, const Compiler<E_t> &x);
 }
 
-#endif // _PRIMER_COMPILER_HPP
+#endif // _BLOSSOM_COMPILER_HPP

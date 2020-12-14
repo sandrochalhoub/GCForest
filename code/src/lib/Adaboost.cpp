@@ -25,7 +25,8 @@ void Adaboost::train() {
   start_time = cpu_time();
   classifiers.clear();
 	
-	algo.separator("adaboost", 86);
+	if (options.verbosity >= DTOptions::NORMAL)
+		algo.separator("adaboost", 86);
 
   while (!should_stop()) {
     iteration();
@@ -145,20 +146,23 @@ bool Adaboost::should_stop() {
 
   // Stop if the accuracy does not improve for N iterations
   if (options.ada_stop != 0 and classifiers.size() > options.ada_stop and classifiers.size() - best_it >= options.ada_stop) {
-			algo.separator("local optimum", width);
+			if (options.verbosity >= DTOptions::NORMAL)
+				algo.separator("local optimum", width);
       return true;
   }
 
 	// Stop if the accuracy is perfect
   if (!classifiers.empty() and (classifiers.back().self_error < EPSILON or get_correct_count() == maximum())) {
-			algo.separator("perfect", width);
+			if (options.verbosity >= DTOptions::NORMAL)
+				algo.separator("perfect", width);
 			return true;
   }
 
 	// Stop if the limit of iterations has been reached
 	auto stop{classifiers.size() >= options.ada_it};
 	if(stop) {
-		algo.separator("interrupted", width);
+		if (options.verbosity >= DTOptions::NORMAL)
+			algo.separator("interrupted", width);
 	}
   return stop;
 }

@@ -1,6 +1,6 @@
 
-#ifndef _PRIMER_ADABOOST_HPP
-#define _PRIMER_ADABOOST_HPP
+#ifndef _BLOSSOM_ADABOOST_HPP
+#define _BLOSSOM_ADABOOST_HPP
 
 #include <memory>
 
@@ -77,4 +77,4 @@ private:
   };
 }
 
-#endif // _PRIMER_ADABOOST_HPP
+#endif // _BLOSSOM_ADABOOST_HPP
