@@ -10,7 +10,7 @@ class AdaBoostClassifier:
             setattr(self.opt, key, kwargs[key])
 
     def fit(self, X, Y):
-        self.input = wrapper.WeightedDatasetI(self.opt)
+        self.input = wrapper.WeightedDatasetI()
         
         for x, y in zip(X, Y):
             self.input.addExample(x + [y])
