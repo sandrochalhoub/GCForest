@@ -153,7 +153,8 @@ namespace blossom {
 	public:
 	  WeightedDataset();
 
-	  void addExample(std::vector<int>::iterator beg_row, std::vector<int>::iterator end_row, const int target);
+/*	  void addExample(std::vector<int>::iterator beg_row, std::vector<int>::iterator end_row, const int target);*/
+			void addExample(const std::vector<int>& row);
 /*	  void addExample(instance& x, const bool y);*/
 		
 /*		template <template<typename> class ErrorPolicy, typename E_t>
