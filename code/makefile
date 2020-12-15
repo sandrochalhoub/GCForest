@@ -5,7 +5,6 @@ COMPILFLAGS= -std=c++1z -Wno-sign-compare
 
 MAINDIR ?= .
 
-COPTIMIZE ?= -O3
 
 CCC = g++
 
