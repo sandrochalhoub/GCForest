@@ -35,8 +35,11 @@ public:
   int getChild(const int node, const int branch) const;
 
   int getFeature(const int node) const;
-
-  bool predict(const instance &i) const;
+	
+	template<class sample>
+	bool predict(const sample &i) const;
+  //
+  // bool predict(const instance &i) const;
 
   template <typename E_t, class rIter, typename wf_type>
   E_t predict(rIter beg_neg, rIter end_neg, rIter beg_pos, rIter end_pos,
@@ -89,7 +92,9 @@ public:
 
   int getChild(const int node, const int branch) const;
 
-  bool predict(const int node, const instance &x) const;
+	template<class sample>
+	bool predict(const int node, const sample &i) const;
+  // bool predict(const int node, const instance &x) const;
 
   size_t size(const int node) const;
 
@@ -103,6 +108,19 @@ public:
   int today;
 #endif
 };
+
+
+template<class sample>
+bool Tree::predict(const sample &i) const {
+  return wood->predict(idx, i);
+}
+
+template<class sample>
+bool Wood::predict(const int node, const sample &x) const {
+  if (node <= 1)
+    return node;
+  return predict(child[x[feature[node]]][node], x);
+}
 
 std::ostream &operator<<(std::ostream &os, const Tree &x);
 

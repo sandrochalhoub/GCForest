@@ -19,9 +19,10 @@ int Tree::getFeature(const int node) const {
   return wood->getFeature(node);
 }
 
-bool Tree::predict(const instance &i) const {
-  return wood->predict(idx, i);
-}
+// template<class sample>
+// bool Tree::predict(const sample &i) const {
+//   return wood->predict(idx, i);
+// }
 
 size_t Tree::size() const { return wood->size(idx); }
 
@@ -129,11 +130,12 @@ void Wood::freeNode(const int node) {
   }
 }
 
-bool Wood::predict(const int node, const instance &x) const {
-  if (node <= 1)
-    return node;
-  return predict(child[x[feature[node]]][node], x);
-}
+// template<class sample>
+// bool Wood::predict(const int node, const sample &x) const {
+//   if (node <= 1)
+//     return node;
+//   return predict(child[x[feature[node]]][node], x);
+// }
 
 size_t Wood::size(const int node) const {
   if (node <= 1)

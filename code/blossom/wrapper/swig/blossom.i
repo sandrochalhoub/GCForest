@@ -15,7 +15,6 @@ namespace std {
   %template(str_vec) vector<string>;
 };
 
-
 namespace blossom {
 	
 	// DTOptions
@@ -181,7 +180,7 @@ namespace blossom {
     Adaboost() = delete;
     Adaboost(WeightedDataset<int> &d, DTOptions &opt);
     void train();
-    bool predict(const dynamic_bitset<> &example) const;
+    bool predict(const vector<int> &example) const;
 /*	  void addBitsetExample(const dynamic_bitset<> &sample, const bool y, const size_t weight);*/
   };
 	

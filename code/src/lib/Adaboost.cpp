@@ -42,14 +42,23 @@ void Adaboost::train() {
   }
 }
 
-bool Adaboost::predict(const instance &i) const {
-  double pred = 0;
-  for (auto &clf : classifiers) {
-    pred += clf.weight * (clf.T.predict(i) ? 1 : -1);
-  }
+// bool Adaboost::predict(const vector<int> &i) const {
+//   double pred = 0;
+//   for (auto &clf : classifiers) {
+//     pred += clf.weight * (clf.T.predict(i) ? 1 : -1);
+//   }
+//
+//   return pred > 0;
+// }
 
-  return pred > 0;
-}
+// bool Adaboost::predict(const instance &i) const {
+//   double pred = 0;
+//   for (auto &clf : classifiers) {
+//     pred += clf.weight * (clf.T.predict(i) ? 1 : -1);
+//   }
+//
+//   return pred > 0;
+// }
 
 double Adaboost::get_accuracy() const {
   return double(get_correct_count()) / double(dataset.input_example_count());

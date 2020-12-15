@@ -26,6 +26,6 @@ class AdaBoostClassifier:
         Y = []
 
         for x in X:
-            Y.append(self.classifiers.predict(x))
+            Y.append(self.classifiers.predict(to_int_vec(x)))
 
         return Y

@@ -28,7 +28,11 @@ public:
 
   void train();
 
-  bool predict(const instance &i) const;
+	template<class sample>
+  bool predict(const sample &i) const;
+	
+	// // only useful for the python wrapper
+	// bool predict(const vector<int> &i) const;
 
   /** Preprocess dataset according to options (split, remove inconsistent) */
   void preprocess();
@@ -75,6 +79,18 @@ private:
   size_t get_correct_count() const;
   void compute_correct_count();
   };
+	
+	
+	template<class sample>
+	bool Adaboost::predict(const sample &i) const {
+	  double pred = 0;
+	  for (auto &clf : classifiers) {
+	    pred += clf.weight * (clf.T.predict(i) ? 1 : -1);
+	  }
+
+	  return pred > 0;
+	}
+	
 }
 
 #endif // _BLOSSOM_ADABOOST_HPP
