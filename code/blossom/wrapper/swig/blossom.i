@@ -144,16 +144,6 @@ namespace blossom {
   };
 	
 	
-  class Adaboost {
-  public:
-    DTOptions &options;
-
-    Adaboost() = delete;
-    Adaboost(WeightedDataset<int> &d, DTOptions &opt);
-    void train();
-    bool predict(const dynamic_bitset<> &example) const;
-/*	  void addBitsetExample(const dynamic_bitset<> &sample, const bool y, const size_t weight);*/
-  };
 
   template <class ErrorType> class CardinalityError;
   template <class ErrorType> class WeightedError;
@@ -183,6 +173,17 @@ namespace blossom {
 	                             const bool first = false) const;
 
 	};
+	
+  class Adaboost {
+  public:
+    DTOptions &options;
+
+    Adaboost() = delete;
+    Adaboost(WeightedDataset<int> &d, DTOptions &opt);
+    void train();
+    bool predict(const dynamic_bitset<> &example) const;
+/*	  void addBitsetExample(const dynamic_bitset<> &sample, const bool y, const size_t weight);*/
+  };
 	
 	%template(WeightedDatasetI) WeightedDataset<int>;
 	%template(WeightedDatasetD) WeightedDataset<double>;
