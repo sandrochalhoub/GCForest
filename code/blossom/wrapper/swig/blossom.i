@@ -181,7 +181,7 @@ namespace blossom {
     Adaboost() = delete;
     Adaboost(WeightedDataset<int> &d, DTOptions &opt);
     void train();
-    bool predict(const vector<int> &example) const;
+    bool predict(const std::vector<int> &example) const;
 /*	  void addBitsetExample(const dynamic_bitset<> &sample, const bool y, const size_t weight);*/
   };
 	
