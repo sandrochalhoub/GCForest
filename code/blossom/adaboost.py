@@ -10,12 +10,13 @@ class AdaBoostClassifier:
             setattr(self.opt, key, kwargs[key])
 
     def fit(self, X, Y):
-        self.input = wrapper.WeightedDatasetI()
+        self.dataset = wrapper.WeightedDatasetI()
         
         for x, y in zip(X, Y):
-            self.input.addExample(x + [y])
+            sample = to_int_vec(x + [y])
+            self.dataset.addExample(sample.begin(), sample.end(), -1)
         
-        self.classifiers = wrapper.Adaboost(self.input, self.opt)
+        self.classifiers = wrapper.Adaboost(self.dataset, self.opt)
 
         self.classifiers.train()
 
