@@ -23,6 +23,8 @@ public:
   void addExample(rIter beg_row, rIter end_row, const int target,
                   const E_t w = 1);
 
+  void addExample(const vector<int> &x);
+
   void addBitsetExample(instance& x, const bool y);
 
   // template <class Algo> void toInc(Algo &algo);
@@ -78,6 +80,11 @@ private:
 
   size_t suppression_count{0};
 };
+
+template <typename E_t>
+inline void WeightedDataset<E_t>::addExample(const vector<int> &example) {
+  return addExample(example.begin(), example.end(), -1, 1);
+}
 
 template <typename E_t>
 template <class rIter>
