@@ -14,7 +14,8 @@ class AdaBoostClassifier:
         
         for x, y in zip(X, Y):
             sample = to_int_vec(x + [y])
-            self.dataset.addExample(sample.begin(), sample.end(), -1)
+            self.dataset.addExample(sample)
+            # self.dataset.addExample(sample.begin(), sample.end(), -1)
         
         self.classifiers = wrapper.Adaboost(self.dataset, self.opt)
 
