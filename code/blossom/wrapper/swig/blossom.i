@@ -139,8 +139,8 @@ namespace blossom {
     void minimize_error_depth();
     void minimize_error_depth_size();
     Tree getSolution();
-	  void addBitsetExample(const dynamic_bitset<> &sample, const bool y,
-	                  const E_t weight);
+/*	  void addBitsetExample(const dynamic_bitset<> &sample, const bool y,
+	                  const E_t weight);*/
   };
 	
 	
@@ -151,8 +151,8 @@ namespace blossom {
     Adaboost() = delete;
     Adaboost(DTOptions &opt);
     void train();
-    bool predict(const std::vector<int> &example) const;
-	  void addBitsetExample(const dynamic_bitset<> &sample, const bool y, const size_t weight);
+    bool predict(const dynamic_bitset<> &example) const;
+/*	  void addBitsetExample(const dynamic_bitset<> &sample, const bool y, const size_t weight);*/
   };
 
   template <class ErrorType> class CardinalityError;

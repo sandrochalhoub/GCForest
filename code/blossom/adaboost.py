@@ -6,10 +6,12 @@ class AdaBoostClassifier:
         self.opt = wrapper.parse(to_str_vec(["adaboost.py", "file"]))
 
     def fit(self, X, Y):
-        self.algo = wrapper.Adaboost(self.opt)
-
+        self.input = wrapper.WeightedDatasetI(self.opt)
+        
         for x, y in zip(X, Y):
-            self.algo.addExample(x + [y])
+            self.input.addExample(x + [y])
+        
+        self.algo = wrapper.Adaboost(self.input, self.opt)
 
         self.algo.train()
 

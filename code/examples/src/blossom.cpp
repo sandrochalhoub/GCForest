@@ -39,7 +39,6 @@ int run_algorithm(DTOptions &opt) {
   BacktrackingAlgorithm<ErrorPolicy, E_t> A(yallen, opt);
   WeightedDataset<E_t> input;
 
-
 	////// READING
   if (opt.binarize) {
 
