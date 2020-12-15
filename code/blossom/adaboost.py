@@ -2,8 +2,12 @@ from . import wrapper
 from .utils import *
 
 class AdaBoostClassifier:
-    def __init__(self):
-        self.opt = wrapper.parse(to_str_vec(["adaboost.py", "file"]))
+    def __init__(self, cmd_line_args = [], **kwargs):
+        self.args = ["adaboost.py", "--file", ""] + cmd_line_args
+        self.opt = wrapper.parse(to_str_vec(self.args))
+        
+        for key in kwargs:
+            setattr(self.opt, key, kwargs[key])
 
     def fit(self, X, Y):
         self.input = wrapper.WeightedDatasetI(self.opt)
