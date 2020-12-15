@@ -15,14 +15,16 @@ class AdaBoostClassifier:
         for x, y in zip(X, Y):
             self.input.addExample(x + [y])
         
-        self.algo = wrapper.Adaboost(self.input, self.opt)
+        self.classifiers = wrapper.Adaboost(self.input, self.opt)
 
-        self.algo.train()
+        self.classifiers.train()
 
     def predict(self, X):
+        if not self.classifiers:
+            raise ValueError("please call fit before predict!")
         Y = []
 
         for x in X:
-            Y.append(self.algo.predict(x))
+            Y.append(self.classifiers.predict(x))
 
         return Y
