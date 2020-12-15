@@ -155,7 +155,8 @@ class BlossomClassifier:
                 # self.algo.addExample(to_int_vec(list(x) + [y]), w)
                 sample = to_int_vec(list(x) + [y])
                 for i in range(w):
-                    self.dataset.addExample(sample.begin(), sample.end(), -1) 
+                    self.dataset.addExample(sample)
+                    # self.dataset.addExample(sample.begin(), sample.end(), -1)
         else:
             self.dataset = wrapper.WeightedDatasetI()
             if self.opt.preprocessing:
@@ -167,7 +168,8 @@ class BlossomClassifier:
                 # scikit learn classes & features start at 1
                 # self.algo.addExample(to_int_vec(list(x) + [y]))
                 sample = to_int_vec(list(x) + [y])
-                self.dataset.addExample(sample.begin(), sample.end(), -1)
+                # self.dataset.addExample(sample.begin(), sample.end(), -1)
+                self.dataset.addExample(sample)
              
              
         if self.opt.preprocessing:
