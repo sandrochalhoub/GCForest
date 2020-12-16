@@ -157,7 +157,7 @@ class BlossomClassifier:
         else:
             self.dataset = wrapper.WeightedDatasetI()
             if self.opt.preprocessing:
-                self.algo = wrapper.WeightedBacktrackingAlgo(self.wood, self.opt)
+                self.algo = wrapper.WeightedBacktrackingAlgo(self.opt)
             else:
                 self.algo = wrapper.BacktrackingAlgo(self.opt)
 
