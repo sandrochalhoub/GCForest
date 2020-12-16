@@ -149,7 +149,9 @@ namespace blossom {
   class BacktrackingAlgorithm {
   public:
     BacktrackingAlgorithm() = delete;
+		BacktrackingAlgorithm(const DTOptions &o);
     BacktrackingAlgorithm(const WeightedDataset<E_t>& d, const DTOptions &o);
+		void load(const WeightedDataset<E_t> &input);
     void minimize_error();
     void minimize_error_depth();
     void minimize_error_depth_size();

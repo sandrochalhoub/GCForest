@@ -141,14 +141,14 @@ class BlossomClassifier:
 
 
     def fit(self, X, Y, sample_weight=None):
-        self.wood = wrapper.Wood()
+        # self.wood = wrapper.Wood()
 
         Xb, Yb = X, Y # self._binarize_data(X, Y)
 
         
         if sample_weight is not None:
             self.dataset = wrapper.WeightedDatasetD()
-            self.algo = wrapper.WeightedBacktrackingAlgod(self.wood, self.opt)
+            self.algo = wrapper.WeightedBacktrackingAlgod(self.opt)
 
             for x, y, w in zip(Xb, Yb, sample_weight):
                 # scikit learn classes start at 1
@@ -159,7 +159,7 @@ class BlossomClassifier:
             if self.opt.preprocessing:
                 self.algo = wrapper.WeightedBacktrackingAlgo(self.wood, self.opt)
             else:
-                self.algo = wrapper.BacktrackingAlgo(self.wood, self.opt)
+                self.algo = wrapper.BacktrackingAlgo(self.opt)
 
             for x, y in zip(Xb, Yb):
                 # scikit learn classes & features start at 1
@@ -168,8 +168,8 @@ class BlossomClassifier:
              
         if self.opt.preprocessing:
             self.dataset.preprocess(self.opt.verbosity>=2)
-               
-        self.dataset.setup(self.algo)     
+
+        self.algo.load(self.dataset)
 
         if self.opt.mindepth:
             if self.opt.minsize:
