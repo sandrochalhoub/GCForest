@@ -61,6 +61,8 @@ template <typename E_t> class CardinalityError;
 
 template <typename E_t> class WeightedError;
 
+template <typename E_t> class WeightedDataset;
+
 /**********************************************
 * BacktrackingAlgorithm
 **********************************************/
@@ -75,11 +77,8 @@ public:
   /*!@name Parameters*/
   //@{
   /// Argument
-  Wood &wood;
-  // DataSet &data;
+  Wood wood;
   int num_feature;
-  // size_t numExample() const;
-  // size_t numExample[2];
 
 public:
   DTOptions options;
@@ -319,6 +318,8 @@ public:
 
   void noDecision();
 
+  void init();
+
 public:
   ErrorPolicy<E_t> error_policy;
 
@@ -327,7 +328,11 @@ public:
 
   /*!@name Constructors*/
   //@{
-  explicit BacktrackingAlgorithm(Wood &w, const DTOptions &o);
+  explicit BacktrackingAlgorithm(const DTOptions &o);
+  explicit BacktrackingAlgorithm(const WeightedDataset<E_t> &input,
+                                 const DTOptions &o);
+
+  void load(const WeightedDataset<E_t> &input);
   // void setData(const DataSet &data);
   void setReverse();
   void seed(const int s);

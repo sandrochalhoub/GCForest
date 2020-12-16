@@ -16,7 +16,7 @@ WeakClassifier::WeakClassifier(BacktrackingAlgorithm<WeightedError, double> &A)
 // ===== Adaboost
 
 Adaboost::Adaboost(WeightedDataset<int> &d, DTOptions &opt)
-    : options(opt), dataset(d), algo(wood, opt) {
+    : options(opt), dataset(d), algo(opt) {
   algo.options.verbosity = DTOptions::SILENT;
 }
 
@@ -78,19 +78,12 @@ void Adaboost::iteration() {
 
   // Print stuff to evaluate performance
   if (options.verbosity >= DTOptions::QUIET) {
-
-    // total_size += algo.getUbSize();
-
 		double t{fixedwidthfloat(cpu_time() - start_time, 2)};
-    // double t{static_cast<double>(
-    //              static_cast<int>(100.0 * (cpu_time() - start_time))) /
-    //          100.0};
-
     std::cout << std::left << "d iter=" << std::setw(3) << classifiers.size()
               << " accuracy=" << std::setw(7) << fixedwidthfloat(get_accuracy(), 4)
               << " error=" << std::setw(6) << get_error() 
               << " size=" << setw(5) << total_size << " choices=" << setw(9)
-              << algo.search_size << " mem=" << setw(4) << wood.size()
+              << algo.search_size << " mem=" << setw(4) << algo.wood.size()
               << " time=" << t << right << endl;
   }
 

@@ -28,7 +28,7 @@ public:
   void addBitsetExample(instance& x, const bool y);
 
   // template <class Algo> void toInc(Algo &algo);
-	template <class Algo> void setup(Algo &algo);
+  // template <class Algo> void setup(Algo &algo) const;
   void preprocess(const bool verbose=false);
 
   size_t input_count(const bool c) const { return data[c].size(); }
@@ -118,17 +118,17 @@ inline void WeightedDataset<E_t>::addExample(rIter beg_row, rIter end_row,
   weight[y].push_back(w);
 }
 
-template <typename E_t>
-template <class Algo>
-inline void WeightedDataset<E_t>::setup(Algo &algo) {
-  algo.clearExamples();
-
-  for (int y = 0; y < 2; ++y)
-    for (auto j : examples[y])
-      algo.addBitsetExample(data[y][j], y, weight[y][j]);
-
-  algo.setErrorOffset(suppression_count);
-}
+// template <typename E_t>
+// template <class Algo>
+// void WeightedDataset<E_t>::setup(Algo &algo) const {
+//   algo.clearExamples();
+//
+//   for (int y = 0; y < 2; ++y)
+//     for (auto j : examples[y])
+//       algo.addBitsetExample(data[y][j], y, weight[y][j]);
+//
+//   algo.setErrorOffset(suppression_count);
+// }
 
 template <typename E_t> inline void WeightedDataset<E_t>::preprocess(const bool verbose) {
 

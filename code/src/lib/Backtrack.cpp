@@ -1,5 +1,6 @@
 
 #include "Backtrack.hpp"
+#include "WeightedDataset.hpp"
 
 #include <fstream>
 
@@ -116,10 +117,22 @@ template <typename E_t> void WeightedError<E_t>::clear() {
 // ===== BacktrackingAlgorithm
 
 template <template <typename> class ErrorPolicy, typename E_t>
-BacktrackingAlgorithm<ErrorPolicy, E_t>::BacktrackingAlgorithm(
-    Wood &w, const DTOptions &opt)
-    : wood(w), options(opt), error_policy(*this) {
+BacktrackingAlgorithm<ErrorPolicy, E_t>::BacktrackingAlgorithm(const DTOptions &opt)
+    : options(opt), error_policy(*this) {
 
+  init();
+}
+
+template <template <typename> class ErrorPolicy, typename E_t>
+BacktrackingAlgorithm<ErrorPolicy, E_t>::BacktrackingAlgorithm(const WeightedDataset<E_t> &input, const DTOptions &opt)
+    : options(opt), error_policy(*this) {
+
+  init();
+  load(input);
+}
+
+template <template <typename> class ErrorPolicy, typename E_t>
+void BacktrackingAlgorithm<ErrorPolicy, E_t>::init() {
   num_feature = 0;
 
   // statistics and options
@@ -151,6 +164,20 @@ BacktrackingAlgorithm<ErrorPolicy, E_t>::BacktrackingAlgorithm(
   restart_limit = options.restart_base;
 
   restart_base = static_cast<double>(restart_limit);
+}
+
+template <template <typename> class ErrorPolicy, typename E_t>
+void BacktrackingAlgorithm<ErrorPolicy, E_t>::load(
+    const WeightedDataset<E_t> &input) {
+  clearExamples();
+
+  for (int y = 0; y < 2; ++y) {
+    auto X{input[y]};
+    for (auto j : X)
+      addBitsetExample(X[j], y, X.weight(j));
+  }
+
+  setErrorOffset(input.numInconsistent());
 }
 
 template <template<typename> class ErrorPolicy, typename E_t>
@@ -293,8 +320,6 @@ void BacktrackingAlgorithm<ErrorPolicy, E_t>::print_new_best() {
   nb = true;
 
   double t{fixedwidthfloat(cpu_time() - start_time, 2)};
-      // static_cast<double>(static_cast<int>(100.0 * (cpu_time() - start_time))) /
-      // 100.0};
 
   cout << setprecision(5) << left << "d accuracy=" << setw(7)
        << fixedwidthfloat(accuracy(),4)

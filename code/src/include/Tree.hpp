@@ -23,14 +23,14 @@ class Wood;
 
 class Tree {
 private:
-  Wood *wood;
+  const Wood *wood;
 
 public:
   int idx;
 
   Tree() = default;
 
-  Tree(Wood *w, const int i);
+  Tree(const Wood *w, const int i);
 
   int getChild(const int node, const int branch) const;
 
@@ -69,7 +69,7 @@ public:
 
   Wood();
 
-  Tree operator[](const int i);
+  Tree operator[](const int i) const;
   // const Tree &operator[](const int i) const;
 
   size_t size();

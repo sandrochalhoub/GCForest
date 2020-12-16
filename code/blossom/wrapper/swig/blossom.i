@@ -122,10 +122,26 @@ namespace blossom {
     int idx;
 
     Tree() = delete;
-    Tree(Wood*, int i);
+    Tree(const Wood*, int i);
     int getChild(int node, int branch);
     int getFeature(int node);
   };
+
+
+	// WeightedDataset
+
+	template <typename E_t>
+	class WeightedDataset {
+	public:
+	  WeightedDataset();
+
+		void addExample(const std::vector<int>& row);
+		void preprocess(const bool verbose=false);
+	  void printDatasetToTextFile(ostream &outfile, const bool first = true) const;
+	  void printDatasetToCSVFile(ostream &outfile, const string &delimiter = ",",
+	                             const bool first = false) const;
+
+	};
 
   // BacktrackingAlgorithm
 
@@ -133,7 +149,7 @@ namespace blossom {
   class BacktrackingAlgorithm {
   public:
     BacktrackingAlgorithm() = delete;
-    BacktrackingAlgorithm(Wood &w, DTOptions &o);
+    BacktrackingAlgorithm(const WeightedDataset<E_t>& d, const DTOptions &o);
     void minimize_error();
     void minimize_error_depth();
     void minimize_error_depth_size();
@@ -147,32 +163,6 @@ namespace blossom {
   template <class ErrorType> class CardinalityError;
   template <class ErrorType> class WeightedError;
 	
-	
-	template <typename E_t>
-	class WeightedDataset {
-	public:
-	  WeightedDataset();
-
-/*	  void addExample(std::vector<int>::iterator beg_row, std::vector<int>::iterator end_row, const int target);*/
-			void addExample(const std::vector<int>& row);
-/*	  void addExample(instance& x, const bool y);*/
-		
-/*		template <template<typename> class ErrorPolicy, typename E_t>
-		void toInc(BacktrackingAlgorithm<ErrorPolicy, E_t> &algo);*/
-	  
-		void setup(BacktrackingAlgorithm<CardinalityError, int> &algo);
-		void setup(BacktrackingAlgorithm<CardinalityError, unsigned long> &algo);
-		void setup(BacktrackingAlgorithm<WeightedError, int> &algo);
-		void setup(BacktrackingAlgorithm<WeightedError, float> &algo);
-		void setup(BacktrackingAlgorithm<WeightedError, double> &algo);
-		void setup(BacktrackingAlgorithm<WeightedError, unsigned long> &algo);
-		void preprocess(const bool verbose=false);
-	  /* size_t example_count() const { return data[0].size() + data[1].size(); }*/
-	  void printDatasetToTextFile(ostream &outfile, const bool first = true) const;
-	  void printDatasetToCSVFile(ostream &outfile, const string &delimiter = ",",
-	                             const bool first = false) const;
-
-	};
 	
   class Adaboost {
   public:

@@ -9,7 +9,7 @@ using namespace std;
 
 namespace blossom {
 
-Tree::Tree(Wood *w, const int node) : wood(w), idx(node) {}
+Tree::Tree(const Wood *w, const int node) : wood(w), idx(node) {}
 
 int Tree::getChild(const int node, const int branch) const {
   return wood->getChild(node, branch);
@@ -75,7 +75,7 @@ size_t Wood::size() { return feature.size(); }
 
 size_t Wood::count() { return size() - available.count(); }
 
-Tree Wood::operator[](const int i) {
+Tree Wood::operator[](const int i) const {
   Tree t(this, i);
   return t;
 }

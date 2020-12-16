@@ -35,8 +35,7 @@ using namespace blossom;
 template <template <typename> class ErrorPolicy = CardinalityError,
           typename E_t = unsigned long>
 int run_algorithm(DTOptions &opt) {
-  Wood yallen;
-  BacktrackingAlgorithm<ErrorPolicy, E_t> A(yallen, opt);
+
   WeightedDataset<E_t> input;
 
 	////// READING
@@ -81,13 +80,15 @@ int run_algorithm(DTOptions &opt) {
 
 	
 	////// LOAD THE DATA INTO THE ALGORITHM
-	input.setup(A);
-	
-	if(opt.verbosity >= DTOptions::NORMAL)
-		cout << "d inputtime=" << cpu_time() << endl;
+  // input.setup(A);
+  // Wood yallen;
+  BacktrackingAlgorithm<ErrorPolicy, E_t> A(input, opt);
+  // A.load(input);
 
+  if (opt.verbosity >= DTOptions::NORMAL)
+    cout << "d inputtime=" << cpu_time() << endl;
 
-	////// 
+  //////
   if (opt.print_ins)
     cout << "d examples=" << A.numExample() << " features=" << A.numFeature()
          << endl;

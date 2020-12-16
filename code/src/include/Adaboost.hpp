@@ -33,9 +33,6 @@ public:
 	
 	template<class sample>
   double guess(const sample &i) const;
-	
-	// // only useful for the python wrapper
-	// bool predict(const vector<int> &i) const;
 
   /** Preprocess dataset according to options (split, remove inconsistent) */
   void preprocess();
@@ -51,7 +48,7 @@ private:
   std::vector<double> weight[2];
 
   // what trees are made of
-  Wood wood;
+  // Wood wood;
   // the algorithm
   BacktrackingAlgorithm<WeightedError, double> algo;
 
