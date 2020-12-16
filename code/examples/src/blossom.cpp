@@ -79,20 +79,16 @@ int run_algorithm(DTOptions &opt) {
     return 1;
 
 	
-	////// LOAD THE DATA INTO THE ALGORITHM
-  // input.setup(A);
-  // Wood yallen;
+	////// CREATING THE ALGORITHM
   BacktrackingAlgorithm<ErrorPolicy, E_t> A(input, opt);
-  // A.load(input);
 
   if (opt.verbosity >= DTOptions::NORMAL)
     cout << "d inputtime=" << cpu_time() << endl;
 
-  //////
+  ////// PRINTING DATA INFO
   if (opt.print_ins)
     cout << "d examples=" << A.numExample() << " features=" << A.numFeature()
          << endl;
-
 
 	////// SOLVING
   if (not opt.nosolve) {
@@ -124,8 +120,6 @@ int run_algorithm(DTOptions &opt) {
            << std::setw(0) << "p solution verified (" << tree_error << " / "
            << A.error() << ")" << endl;
     }
-
-    A.clear();
   }
   return 1;
 }
