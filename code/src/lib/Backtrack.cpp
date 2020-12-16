@@ -265,6 +265,12 @@ template <template<typename> class ErrorPolicy, typename E_t>
 size_t BacktrackingAlgorithm<ErrorPolicy, E_t>::getUbSize() const { return ub_size; }
 
 template <template<typename> class ErrorPolicy, typename E_t>
+size_t BacktrackingAlgorithm<ErrorPolicy, E_t>::getTreeMemory() const { return wood.size(); }
+
+template <template<typename> class ErrorPolicy, typename E_t>
+size_t BacktrackingAlgorithm<ErrorPolicy, E_t>::getSearchSize() const { return search_size; }
+
+template <template<typename> class ErrorPolicy, typename E_t>
 E_t BacktrackingAlgorithm<ErrorPolicy, E_t>::node_error(const int i) const {
   return error_policy.node_error(i);
 }
@@ -319,14 +325,15 @@ void BacktrackingAlgorithm<ErrorPolicy, E_t>::print_new_best() {
     cout << endl;
   nb = true;
 
-  double t{fixedwidthfloat(cpu_time() - start_time, 2)};
+  double t{cpu_time() - start_time};
 
-  cout << setprecision(5) << left << "d accuracy=" << setw(7)
-       << fixedwidthfloat(accuracy(),4)
-       << " error=" << setw(4) << ub_error + error_offset
-       << " depth=" << setw(3) << actual_depth << " size=" << setw(3) << ub_size
-       << " choices=" << setw(9) << search_size
-       << " mem=" << setw(3) << wood.size() << " time=" << t << right << endl;
+  cout << left << "d accuracy=" << setw(6) << setprecision(4)
+       << fixedwidthfloat(accuracy(), 4) << " error=" << setw(4)
+       << ub_error + error_offset << " depth=" << setw(3) << actual_depth
+       << " size=" << setw(3) << ub_size << " choices=" << setw(9)
+       << search_size << " mem=" << setw(3) << wood.size()
+       << " time=" << setprecision(max(4, static_cast<int>(log10(t))))
+       << fixedwidthfloat(t, 3) << right << endl;
 }
 
 template <template <typename> class ErrorPolicy, typename E_t>
@@ -343,12 +350,13 @@ void BacktrackingAlgorithm<ErrorPolicy, E_t>::print_progress() {
     double p{static_cast<double>(num_explored) * 100.0 /
              static_cast<double>(num_level_zero_feature)};
 
-    double t{static_cast<double>(
-                 static_cast<int>(100.0 * (cpu_time() - start_time))) /
-             100.0};
+    double t{fixedwidthfloat(cpu_time() - start_time, 2)};
+
     cout << setw(width + 16) << setfill('\b') << "\b" << setw(5)
          << setprecision(3) << setfill(' ') << p << "%"
-         << " t=" << left << setprecision(3) << setw(5) << t << right << "[";
+         << " t=" << left
+         << setprecision(max(2, static_cast<int>(log10(t)) + 1)) << setw(5) << t
+         << right << "[";
     if (k > 0)
       cout << setw(k) << setfill('=') << "=";
     if (k < width)

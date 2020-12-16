@@ -83,7 +83,7 @@ void Adaboost::iteration() {
               << " accuracy=" << std::setw(7) << fixedwidthfloat(get_accuracy(), 4)
               << " error=" << std::setw(6) << get_error() 
               << " size=" << setw(5) << total_size << " choices=" << setw(9)
-              << algo.search_size << " mem=" << setw(4) << algo.wood.size()
+              << algo.getSearchSize() << " mem=" << setw(4) << algo.getTreeMemory()
               << " time=" << t << right << endl;
   }
 

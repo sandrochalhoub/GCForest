@@ -108,12 +108,13 @@ int run_algorithm(DTOptions &opt) {
 
     if (opt.verified) {
 
-      E_t tree_error = sol.predict<E_t>(
-          A.dataset[0].begin(), A.dataset[0].end(), A.dataset[1].begin(),
-          A.dataset[1].end(), [&](const int y, const size_t i) {
-            return A.error_policy.get_weight(y, i);
-          });
-
+      E_t tree_error = 0;
+			for(auto y{0}; y<2; ++y) {
+				auto X{input[y]};
+				for(auto i : X)
+					tree_error += (sol.predict(X[i]) != y) * X.weight(i);
+			}
+			
       assert(tree_error == A.error());
 
       cout << std::setprecision(std::numeric_limits<long double>::digits10 + 1)

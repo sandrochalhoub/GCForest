@@ -72,9 +72,9 @@ public:
   Tree operator[](const int i) const;
   // const Tree &operator[](const int i) const;
 
-  size_t size();
+  size_t size() const;
 
-  size_t count();
+  size_t count() const;
 
   // allocate memory for a new node and returns its index
   int grow();
@@ -125,15 +125,15 @@ bool Wood::predict(const int node, const sample &x) const {
 std::ostream &operator<<(std::ostream &os, const Tree &x);
 
 
-template<typename E_t, class rIter, typename wf_type>
-E_t Tree::predict(rIter beg_neg, rIter end_neg, rIter beg_pos, rIter end_pos, wf_type weight_function) const {
-  E_t error{0};
-  for (auto i{beg_neg}; i != end_neg; ++i)
-    error += weight_function(0, (i - beg_neg)) * (wood->predict(idx, *i) != 0);
-  for (auto i{beg_pos}; i != end_pos; ++i)
-    error += weight_function(1, (i - beg_pos)) * (wood->predict(idx, *i) != 1);
-  return error;
-}
+// template<typename E_t, class rIter, typename wf_type>
+// E_t Tree::predict(rIter beg_neg, rIter end_neg, rIter beg_pos, rIter end_pos, wf_type weight_function) const {
+//   E_t error{0};
+//   for (auto i{beg_neg}; i != end_neg; ++i)
+//     error += weight_function(0, (i - beg_neg)) * (wood->predict(idx, *i) != 0);
+//   for (auto i{beg_pos}; i != end_pos; ++i)
+//     error += weight_function(1, (i - beg_pos)) * (wood->predict(idx, *i) != 1);
+//   return error;
+// }
 
 }
 

@@ -72,6 +72,9 @@ template <template<typename> class ErrorPolicy = CardinalityError, typename E_t 
 class BacktrackingAlgorithm {
 
 public:
+  DTOptions options;
+
+private:
   friend ErrorPolicy<E_t>;
 
   /*!@name Parameters*/
@@ -80,10 +83,6 @@ public:
   Wood wood;
   int num_feature;
 
-public:
-  DTOptions options;
-
-public:
   vector<vector<int>> example[2];
 
   vector<int> relevant_features;
@@ -199,6 +198,12 @@ public:
   int num_level_zero_feature;
   int num_explored{0};
   bool nb{true};
+	
+	
+  ErrorPolicy<E_t> error_policy;
+
+  vector<instance> dataset[2];
+  vector<dynamic_bitset<>> reverse_dataset[2];
 
 
   void cleaning();
@@ -321,10 +326,6 @@ public:
   void init();
 
 public:
-  ErrorPolicy<E_t> error_policy;
-
-  vector<instance> dataset[2];
-  vector<dynamic_bitset<>> reverse_dataset[2];
 
   /*!@name Constructors*/
   //@{
@@ -361,6 +362,10 @@ public:
   size_t getUbDepth() const;
 
   size_t getUbSize() const;
+	
+	size_t getTreeMemory() const;
+	
+	size_t getSearchSize() const;
 
   void setTimeLimit(const double t);
 

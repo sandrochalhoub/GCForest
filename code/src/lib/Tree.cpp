@@ -71,9 +71,9 @@ Wood::Wood() {
     grow();
 }
 
-size_t Wood::size() { return feature.size(); }
+size_t Wood::size() const { return feature.size(); }
 
-size_t Wood::count() { return size() - available.count(); }
+size_t Wood::count() const { return size() - available.count(); }
 
 Tree Wood::operator[](const int i) const {
   Tree t(this, i);
