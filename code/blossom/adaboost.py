@@ -16,6 +16,9 @@ class AdaBoostClassifier:
             sample = to_int_vec(x + [y])
             self.dataset.addExample(sample)
         
+        if self.opt.preprocessing:
+            self.dataset.preprocess(self.opt.verbosity>=2)
+        
         self.classifiers = wrapper.Adaboost(self.dataset, self.opt)
 
         self.classifiers.train()
