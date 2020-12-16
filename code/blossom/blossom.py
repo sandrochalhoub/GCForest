@@ -184,7 +184,6 @@ class BlossomClassifier:
 
         # free memory
         del self.algo
-        del self.wood
 
     def predict(self, X):
         if not self.tree:
