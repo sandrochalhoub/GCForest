@@ -25,7 +25,6 @@ using namespace std;
 
 
 
-
 namespace blossom {
 
 /// this needs to be templated with "T" and should be 0 for integral types
@@ -72,7 +71,84 @@ template <template<typename> class ErrorPolicy = CardinalityError, typename E_t 
 class BacktrackingAlgorithm {
 
 public:
+
+  /*!@name Constructors*/
+  //@{
+  explicit BacktrackingAlgorithm(const DTOptions &o);
+  explicit BacktrackingAlgorithm(const WeightedDataset<E_t> &input,
+                                 const DTOptions &o);
+
+  void load(const WeightedDataset<E_t> &input);
+  void seed(const int s);
+  //@}
+
+  size_t numExample() const;
+  size_t numFeature() const;
+
+  // whether feature f_a is equivalent to feature f_b
+  bool equal_feature(const int f_a, const int f_b);
+
+  void separator(const string &msg, const int width=82) const;
+  void print_new_best();
+  void print_progress();
+
+  void setUbDepth(const size_t u);
+
+  void setUbError(const E_t u);
+
+  void addSizeObjective();
+
+  E_t getUbError() const;
+
+  size_t getUbDepth() const;
+
+  size_t getUbSize() const;
+	
+	size_t getTreeMemory() const;
+	
+	size_t getSearchSize() const;
+
+  void setTimeLimit(const double t);
+
+  void setSearchLimit(const size_t t);
+
+  bool search();
+
+  void minimize_error();
+
+  void minimize_error_depth();
+
+  void minimize_error_depth_size();
+
+  Tree getSolution() const;
+  Tree saveSolution();
+
+  E_t error() const;
+  double accuracy() const;
+
+  void addBitsetExample(const dynamic_bitset<> &sample, const bool y,
+                  const E_t weight = 1);
+
+  /** Removes all the examples to free memory. The error and the model
+   * still can be retrieved.  */
+  void clearExamples();
+	
+  /** clear search data structures */
+  void clear();
+
+  void setErrorOffset(const E_t e);
+
+  void setWeight(const int y, const size_t i, const E_t w);
+
+  /*!@name Printing*/
+  //@{
+  std::ostream &display(std::ostream &os) const;
+  //@}
+	
+  /*!@name Parameters*/
+  //@{
   DTOptions options;
+	//@}
 
 private:
   friend ErrorPolicy<E_t>;
@@ -205,6 +281,7 @@ private:
   vector<instance> dataset[2];
   vector<dynamic_bitset<>> reverse_dataset[2];
 
+  void setReverse();
 
   void cleaning();
 
@@ -324,93 +401,6 @@ private:
   void noDecision();
 
   void init();
-
-public:
-
-  /*!@name Constructors*/
-  //@{
-  explicit BacktrackingAlgorithm(const DTOptions &o);
-  explicit BacktrackingAlgorithm(const WeightedDataset<E_t> &input,
-                                 const DTOptions &o);
-
-  void load(const WeightedDataset<E_t> &input);
-  // void setData(const DataSet &data);
-  void setReverse();
-  void seed(const int s);
-  //@}
-
-  size_t numExample() const;
-  size_t numFeature() const;
-
-  // whether
-  bool equal_feature(const int f_a, const int f_b);
-
-  void separator(const string &msg, const int width=82) const;
-  void print_new_best();
-  void print_progress();
-
-  void setUbDepth(const size_t u);
-
-  // void setUbNode(const size_t u);
-
-  void setUbError(const E_t u);
-
-  void addSizeObjective();
-
-  E_t getUbError() const;
-
-  size_t getUbDepth() const;
-
-  size_t getUbSize() const;
-	
-	size_t getTreeMemory() const;
-	
-	size_t getSearchSize() const;
-
-  void setTimeLimit(const double t);
-
-  void setSearchLimit(const size_t t);
-
-  bool search();
-
-  void minimize_error();
-
-  void minimize_error_depth();
-
-  void minimize_error_depth_size();
-
-  Tree getSolution() const;
-  Tree saveSolution();
-
-  E_t error() const;
-  double accuracy() const;
-
-  // template <class rIter>
-  // void addExample(rIter beg_row, rIter end_row, const int target_column,
-  //                 const E_t weight = 1);
-
-  void addBitsetExample(const dynamic_bitset<> &sample, const bool y,
-                  const E_t weight = 1);
-
-  // void addExample(const std::vector<int> &example, const E_t weight = 1);
-
-  /** Removes all the examples to free memory. The error and the model
-   * still can be retrieved.  */
-  void clearExamples();
-  /** clear search data structures */
-  void clear();
-
-  void setErrorOffset(const E_t e);
-
-  void setWeight(const int y, const size_t i, const E_t w);
-
-  /*!@name Printing*/
-  //@{
-  // std::ostream &toCsv(std::ostream &os) const;
-  std::ostream &display(std::ostream &os) const;
-
-  // void printDatasetToFile(ostream &outfile) const;
-  //@}
 	
 	
 };
