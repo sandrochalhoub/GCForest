@@ -12,7 +12,7 @@ namespace blossom {
 struct WeakClassifier {
   Tree T;
   double self_error;
-  double weight;
+  double alpha;
 
   size_t global_error{0};
 
@@ -30,6 +30,9 @@ public:
 
 	template<class sample>
   bool predict(const sample &i) const;
+	
+	template<class sample>
+  double guess(const sample &i) const;
 	
 	// // only useful for the python wrapper
 	// bool predict(const vector<int> &i) const;
@@ -83,12 +86,17 @@ private:
 	
 	template<class sample>
 	bool Adaboost::predict(const sample &i) const {
-	  double pred = 0;
+	  return guess(i) > 0;
+	}
+	
+	template<class sample>
+	double Adaboost::guess(const sample &i) const {
+	  double g = 0;
 	  for (auto &clf : classifiers) {
-	    pred += clf.weight * (clf.T.predict(i) ? 1 : -1);
+	    g += clf.alpha * (clf.T.predict(i) ? 1 : -1);
 	  }
 
-	  return pred > 0;
+	  return g;
 	}
 	
 }

@@ -179,6 +179,15 @@ template <template<typename> class ErrorPolicy, typename E_t>
 E_t BacktrackingAlgorithm<ErrorPolicy, E_t>::error() const { return ub_error; }
 
 template <template<typename> class ErrorPolicy, typename E_t>
+double BacktrackingAlgorithm<ErrorPolicy, E_t>::accuracy() const { 
+  E_t total = error_policy.get_total(0, 0) + error_policy.get_total(1, 0) +
+              2 * error_offset;
+	return (1.0 -
+           static_cast<double>(error_offset + ub_error) /
+               static_cast<double>(total));
+};
+
+template <template<typename> class ErrorPolicy, typename E_t>
 bool BacktrackingAlgorithm<ErrorPolicy, E_t>::limit_out() {
   ++search_size;
 
@@ -282,17 +291,13 @@ void BacktrackingAlgorithm<ErrorPolicy, E_t>::print_new_best() {
   if (not nb)
     cout << endl;
   nb = true;
-  E_t total = error_policy.get_total(0, 0) + error_policy.get_total(1, 0) +
-              2 * error_offset;
 
   double t{
       static_cast<double>(static_cast<int>(100.0 * (cpu_time() - start_time))) /
       100.0};
 
   cout << setprecision(5) << left << "d accuracy=" << setw(7)
-       << (1.0 -
-           static_cast<double>(error_offset + ub_error) /
-               static_cast<double>(total))
+       << accuracy()
        << " error=" << setw(4) << ub_error + error_offset
        << " depth=" << setw(3) << actual_depth << " size=" << setw(3) << ub_size
        << " choices=" << setw(9) << search_size

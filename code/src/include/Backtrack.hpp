@@ -31,7 +31,7 @@ namespace blossom {
 /// this needs to be templated with "T" and should be 0 for integral types
 /// (e.g., static_cast<T>(1.e-9) should work)
 // #define FLOAT_PRECISION std::numeric_limits<T>::epsilon()
-#define FLOAT_PRECISION static_cast<T>(1.e-9)
+#define FLOAT_PRECISION static_cast<T>(1.e-6)
 
 template <typename T>
 typename std::enable_if<std::is_integral<T>::value, bool>::type
@@ -373,6 +373,7 @@ public:
   Tree saveSolution();
 
   E_t error() const;
+  double accuracy() const;
 
   // template <class rIter>
   // void addExample(rIter beg_row, rIter end_row, const int target_column,

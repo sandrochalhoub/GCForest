@@ -9,8 +9,8 @@
 namespace blossom {
 
 WeakClassifier::WeakClassifier(BacktrackingAlgorithm<WeightedError, double> &A)
-    : T(A.saveSolution()), self_error(A.error()),
-      weight(self_error >= EPSILON ? .5 * log((1. - self_error) / self_error)
+    : T(A.saveSolution()), self_error(1-A.accuracy()),
+      alpha(self_error >= EPSILON ? .5 * log((1. - self_error) / self_error)
                                    : 1e10) {}
 
 // ===== Adaboost
@@ -42,24 +42,6 @@ void Adaboost::train() {
   }
 }
 
-// bool Adaboost::predict(const vector<int> &i) const {
-//   double pred = 0;
-//   for (auto &clf : classifiers) {
-//     pred += clf.weight * (clf.T.predict(i) ? 1 : -1);
-//   }
-//
-//   return pred > 0;
-// }
-
-// bool Adaboost::predict(const instance &i) const {
-//   double pred = 0;
-//   for (auto &clf : classifiers) {
-//     pred += clf.weight * (clf.T.predict(i) ? 1 : -1);
-//   }
-//
-//   return pred > 0;
-// }
-
 double Adaboost::get_accuracy() const {
   return double(get_correct_count()) / double(dataset.input_example_count());
 }
@@ -74,10 +56,7 @@ void Adaboost::iteration() {
   if (classifiers.size() == 0) {
     initialize_weights();
   } else {
-    // total_size = classifiers.back().global_size;
     update_weights();
-		
-		// algo.options.verbosity = 7;
   }
 
   algo.minimize_error();
@@ -119,12 +98,11 @@ void Adaboost::iteration() {
 }
 
 void Adaboost::initialize_weights() {
-  double m = dataset.example_count();
-
   for (int y = 0; y < 2; ++y) {
     auto X{dataset[y]};
+
     for (auto x : X) {
-      weight[y].push_back(double(X.weight(x)) / m);
+      weight[y].push_back(double(X.weight(x)));
       algo.addBitsetExample(X[x], y, weight[y].back());
     }
   }
@@ -132,17 +110,19 @@ void Adaboost::initialize_weights() {
 
 void Adaboost::update_weights() {
   auto last_tree = classifiers.back().T;
-  double err = classifiers.back().self_error;
-  double alpha = classifiers.back().weight;
-
+  double alpha = classifiers.back().alpha;
+	double err = classifiers.back().self_error;
+	
   for (int y = 0; y < 2; ++y) {
     auto X{dataset[y]};
 
     auto i{0};
     for (auto xi : X) {
-      double u = y == 0 ? -1 : 1;
-      double upred = last_tree.predict(X[xi]) ? 1 : -1;
-      weight[y][i] *= exp(-alpha * u * upred) / (2 * sqrt(err * (1 - err)));
+      double u = (y == 0 ? -1 : 1);
+			double upred = alpha * (last_tree.predict(X[xi]) ? 1 : -1);
+			
+			weight[y][i] *= (exp(-u * upred) 
+				/ (2 * sqrt(err * (1 - err)))); // I'm not sur what this is yet
       algo.setWeight(y, i, weight[y][i]);
 
       ++i;
