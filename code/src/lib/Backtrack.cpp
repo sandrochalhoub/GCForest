@@ -292,12 +292,12 @@ void BacktrackingAlgorithm<ErrorPolicy, E_t>::print_new_best() {
     cout << endl;
   nb = true;
 
-  double t{
-      static_cast<double>(static_cast<int>(100.0 * (cpu_time() - start_time))) /
-      100.0};
+  double t{fixedwidthfloat(cpu_time() - start_time, 2)};
+      // static_cast<double>(static_cast<int>(100.0 * (cpu_time() - start_time))) /
+      // 100.0};
 
   cout << setprecision(5) << left << "d accuracy=" << setw(7)
-       << accuracy()
+       << fixedwidthfloat(accuracy(),4)
        << " error=" << setw(4) << ub_error + error_offset
        << " depth=" << setw(3) << actual_depth << " size=" << setw(3) << ub_size
        << " choices=" << setw(9) << search_size
