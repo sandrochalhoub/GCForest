@@ -169,6 +169,8 @@ public:
 
   void initialise_search();
 
+  bool is_optimal(const int node, const int f) const;
+
 public:
   /*!@name Constructors*/
   //@{

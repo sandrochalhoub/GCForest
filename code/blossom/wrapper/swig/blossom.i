@@ -71,7 +71,6 @@ namespace blossom {
 	  int ada_it;
 	  int ada_stop;
 
-	  bool filter;
 	  string reference_class;
 
 	  bool mindepth;

@@ -361,6 +361,15 @@ template <typename E_t> bool Compiler<E_t>::fail() {
   return false;
 }
 
+template <typename E_t>
+bool Compiler<E_t>::is_optimal(const int node, const int f) const {
+  auto count{get_feature_frequency(node, f)};
+	
+	
+	
+  return count == 0 or count == P[node].count();
+}
+
 template <typename E_t> bool Compiler<E_t>::backtrack() {
   bool dead_end{false};
 
@@ -400,12 +409,13 @@ template <typename E_t> bool Compiler<E_t>::backtrack() {
 
     assert(not no_feature(node));
 
-    ++feature[node];
+    // ++feature[node];
 
     for (auto i{0}; i < 2; ++i)
       prune(child[i][node]);
 
-    dead_end = (no_feature(node) or best[node] == lb[node]);
+    dead_end = (is_optimal(node, *feature[node]++) or no_feature(node) or
+                best[node] == lb[node]);
 
     if (!dead_end) {
       blossom.add(node);

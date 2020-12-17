@@ -32,33 +32,6 @@ along with minicsp.  If not, see <http://www.gnu.org/licenses/>.
 using namespace std;
 using namespace blossom;
 
-// template <typename Algo_t>
-// void read(Algo_t &A, DTOptions &opt) {
-//   WeightedDataset input;
-//
-//   string ext{opt.instance_file.substr(opt.instance_file.find_last_of(".") +
-//   1)};
-//
-//   if (opt.format == "csv" or (opt.format == "guess" and ext == "csv")) {
-//     csv::read_binary(opt.instance_file, [&](vector<int> &data) {
-//       input.addExample(data.begin(), data.end() - 1, data.back());
-//     });
-//   } else if (opt.format == "dl8" or (opt.format == "guess" and ext == "dl8"))
-//   {
-//     txt::read_binary(opt.instance_file, [&](vector<int> &data) {
-//       auto y = *data.begin();
-//       input.addExample(data.begin() + 1, data.end(), y);
-//     });
-//   } else {
-//     if (opt.format != "txt" and ext != "txt")
-//       cout << "p Warning, unrecognized format, trying txt\n";
-//     txt::read_binary(opt.instance_file, [&](vector<int> &data) {
-//       input.addExample(data.begin(), data.end() - 1, data.back());
-//     });
-//   }
-//
-//   input.to(A);
-// }
 
 template <typename E_t = int>
 int run_algorithm(DTOptions &opt) {
@@ -94,6 +67,8 @@ int run_algorithm(DTOptions &opt) {
       cout << X[i] << endl;
     }
   }
+
+  exit(1);
 
   if (opt.verbosity >= DTOptions::NORMAL)
     cout << "d readtime=" << cpu_time() << endl;
