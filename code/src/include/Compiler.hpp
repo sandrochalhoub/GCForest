@@ -13,8 +13,8 @@
 #include "Tree.hpp"
 #include "utils.hpp"
 
-#define PRINT_TRACE
-// #define PRINT_TRACE print_trace();
+// #define PRINT_TRACE
+#define PRINT_TRACE print_trace();
 
 using namespace boost;
 using namespace std;
@@ -175,10 +175,7 @@ public:
   explicit Compiler(DTOptions &o);
   // void setData(const DataSet &data);
   void setReverse();
-  template <class rIter>
-  void addExample(rIter beg_sample, rIter end_sample, const bool y,
-                  const E_t weight = 1);
-  void addExample(const std::vector<int> &example, const E_t weight = 1);
+  void addExample(const instance &x);
   //@}
 
   size_t numExample() const;
@@ -187,8 +184,6 @@ public:
   void separator(const string &msg) const;
   void print_new_best();
   void print_progress();
-
-  // int getUbSize() const;
 
   void search();
 
@@ -213,43 +208,22 @@ public:
 };
 
 template <typename E_t>
-template <class rIter>
-inline void Compiler<E_t>::addExample(rIter beg_sample, rIter end_sample,
-                                      const bool y, const E_t weight) {
-
-  if (y != 0) {
-    return;
-  }
-
-  int n{static_cast<int>(end_sample - beg_sample)};
+void Compiler<E_t>::addExample(const dynamic_bitset<> &sample) {
+  int n{static_cast<int>(sample.size())};
 
   if (n > num_feature) {
     num_feature = n;
     branch_features.resize(n, 0);
-    f_gini.resize(num_feature, 1);
-    f_entropy.resize(num_feature, 1);
     f_error.resize(num_feature, 1);
+    f_entropy.resize(num_feature, 1);
+    f_gini.resize(num_feature, 1);
   }
 
-  // dataset.resize(dataset[y].size() + 1);
   example.resize(example.size() + 1);
-  // dataset.back().resize(num_feature, false);
 
-  int k{0};
-  for (auto x{beg_sample}; x != end_sample; ++x) {
-    if (*x) {
-
-      if (*x != 1) {
-        cout << "e the dataset is not binary, "
-                "rerun with --binarize\n";
-        exit(1);
-      }
-
-      // dataset[y].back().set(k);
-      example.back().push_back(k);
-    }
-    ++k;
-  }
+  for (auto f{0}; f < n; ++f)
+    if (sample[f])
+      example.back().push_back(f);
 }
 
 template <typename E_t>

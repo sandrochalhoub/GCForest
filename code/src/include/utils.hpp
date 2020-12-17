@@ -12,7 +12,8 @@
 
 // #define DEBUG_MODE
 
-// #define PRINTTRACE (options.verbosity >= DTOptions::YACKING) // and search_size % 100000 < 10)
+#define PRINTTRACE                                                             \
+  (options.verbosity >= DTOptions::YACKING) // and search_size % 100000 < 10)
 // #define REPRINTTRACE (algo.options.verbosity >= DTOptions::YACKING)
 
 namespace blossom {

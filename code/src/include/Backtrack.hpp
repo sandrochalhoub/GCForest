@@ -113,6 +113,7 @@ public:
   void setSearchLimit(const size_t t);
 
   bool search();
+  void initialise_search();
 
   void minimize_error();
 
@@ -126,7 +127,7 @@ public:
   E_t error() const;
   double accuracy() const;
 
-  void addBitsetExample(const dynamic_bitset<> &sample, const bool y,
+  void addExample(const dynamic_bitset<> &sample, const bool y,
                   const E_t weight = 1);
 
   /** Removes all the examples to free memory. The error and the model
@@ -139,6 +140,8 @@ public:
   void setErrorOffset(const E_t e);
 
   void setWeight(const int y, const size_t i, const E_t w);
+
+  bool isRelevant(const int f) const { return feature_set[f]; };
 
   /*!@name Printing*/
   //@{
@@ -390,8 +393,6 @@ private:
 
   bool limit_out();
 
-  void initialise_search();
-
   size_t computeSize(const int node) const;
 
   size_t maxSize(const int depth) const;
@@ -547,7 +548,7 @@ inline void WeightedError<E_t>::add_example(const int y, const size_t i,
 // }
 
 template <template <typename> class ErrorPolicy, typename E_t>
-inline void BacktrackingAlgorithm<ErrorPolicy, E_t>::addBitsetExample(
+inline void BacktrackingAlgorithm<ErrorPolicy, E_t>::addExample(
     const dynamic_bitset<> &sample, const bool y, const E_t weight) {
   int n{static_cast<int>(sample.size())};
 

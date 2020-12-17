@@ -97,7 +97,7 @@ void Adaboost::initialize_weights() {
 
     for (auto x : X) {
       weight[y].push_back(double(X.weight(x)));
-      algo.addBitsetExample(X[x], y, weight[y].back());
+      algo.addExample(X[x], y, weight[y].back());
     }
   }
 }

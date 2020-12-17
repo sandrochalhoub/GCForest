@@ -6,13 +6,13 @@ namespace blossom {
 
 template <typename E_t> Compiler<E_t>::Compiler(DTOptions &opt) : options(opt) {
   num_feature = 0;
-	num_leaf = 0;
-        // depth necessary
-        // min_depth =
-        // ub_size = INFTY(int);
-        search_size = 0;
+  num_leaf = 0;
+  // depth necessary
+  // min_depth =
+  // ub_size = INFTY(int);
+  search_size = 0;
 
-        min_depth_backtrack = INFTY(int);
+  min_depth_backtrack = INFTY(int);
 }
 
 int lbLeaf2(const uint64_t P, const int E) {
@@ -272,14 +272,13 @@ template <typename E_t> void Compiler<E_t>::prune(const int node) {
     --num_leaf;
   else {
     if (not blossom.contain(node)) {
-			if(best[node] < INFTY(int))
-				num_leaf -= best[node];
+      if (best[node] < INFTY(int))
+        num_leaf -= best[node];
       // since it was in the "used" pool, add it to move it to the "free" pool
       blossom.add(node);
     }
     blossom.remove_back(node);
   }
-
 }
 
 template <typename E_t> bool Compiler<E_t>::solutionFound() {
@@ -332,34 +331,34 @@ template <typename E_t> void Compiler<E_t>::updateBest(const int node) {
 
 // returns a lower bound on the size that one can get without changing any decision of the current branch (of the DT!!!)
 template <typename E_t> bool Compiler<E_t>::fail() {
-	
-	if(decision.empty())
-		return lb[0] >= best[0];
-		
-	auto node{decision.back()};
-	
-	auto LB{minLeaf(child[0][node]) + minLeaf(child[1][node])};
 
-        // cout << "\nLB=" << LB << "/" << best[node] << " (" << node << ")\n";
+  if (decision.empty())
+    return lb[0] >= best[0];
 
-        while (node > 0) {
-          auto c{node};
-          node = parent[node];
+  auto node{decision.back()};
 
-          LB += minLeaf(child[child[0][node] == c][node]);
+  auto LB{minLeaf(child[0][node]) + minLeaf(child[1][node])};
 
-          // cout << "LB=" << LB << "/" << best[node] << " (" << node <<
-          // ")\n";
+  // cout << "\nLB=" << LB << "/" << best[node] << " (" << node << ")\n";
 
-          if (LB > best[node] or (node == 0 and LB >= best[node])) {
-            // cout << "fail?\n";
-            return true;
-          }
+  while (node > 0) {
+    auto c{node};
+    node = parent[node];
 
-          //
-        }
+    LB += minLeaf(child[child[0][node] == c][node]);
 
-        return false;
+    // cout << "LB=" << LB << "/" << best[node] << " (" << node <<
+    // ")\n";
+
+    if (LB > best[node] or (node == 0 and LB >= best[node])) {
+      // cout << "fail?\n";
+      return true;
+    }
+
+    //
+  }
+
+  return false;
 }
 
 template <typename E_t> bool Compiler<E_t>::backtrack() {
@@ -392,14 +391,14 @@ template <typename E_t> bool Compiler<E_t>::backtrack() {
 
 #ifdef PRINTTRACE
     if (PRINTTRACE) {
-			// cout << setw(3) << decision.size();
-			//       for (auto i{0}; i < decision.size(); ++i)
-			//         cout << "   ";
+      // cout << setw(3) << decision.size();
+      //       for (auto i{0}; i < decision.size(); ++i)
+      //         cout << "   ";
       cout << "backtrack on " << node << " = " << *feature[node] << endl;
     }
 #endif
 
-		assert(not no_feature(node));
+    assert(not no_feature(node));
 
     ++feature[node];
 
@@ -444,7 +443,7 @@ template <typename E_t> bool Compiler<E_t>::purePositive(const int node) const {
 
 template <typename E_t>
 bool Compiler<E_t>::setChild(const int node, const bool branch, const int c) {
-	
+
   parent[c] = node;
   depth[c] = depth[node] + 1;
 
@@ -482,34 +481,33 @@ void Compiler<E_t>::branch(const int node, const int f) {
     resize(blossom.size() + 2);
 
   int c[2] = {*blossom.bbegin(), *(blossom.bbegin() + 1)};
-	
-	branch_features.resize(num_feature);
-	branch_features.reset();
-	
-	auto p=node;
-	
-	while(p>0) {
-		p = parent[p];
-		branch_features.set(*feature[p]);
-	} //while(p > 0);
 
-	// cout << endl << branch_features << endl;
-	// for (int f{0}; f < num_feature; ++f)
-	// 	cout << (f%10);
-	// cout << endl;
-	//   for (auto x : P[node]) {
-	//     for (int f{0}; f < num_feature; ++f)
-	// 		if(not branch_features[f])
-	// 			cout << reverse_dataset[f][x];
-	// 		else
-	// 			cout << " ";
-	//     cout << endl;
-	//   }
-	//   cout << endl;
+  branch_features.resize(num_feature);
+  branch_features.reset();
+
+  auto p = node;
+
+  while (p > 0) {
+    p = parent[p];
+    branch_features.set(*feature[p]);
+  } // while(p > 0);
+
+  // cout << endl << branch_features << endl;
+  // for (int f{0}; f < num_feature; ++f)
+  // 	cout << (f%10);
+  // cout << endl;
+  //   for (auto x : P[node]) {
+  //     for (int f{0}; f < num_feature; ++f)
+  // 		if(not branch_features[f])
+  // 			cout << reverse_dataset[f][x];
+  // 		else
+  // 			cout << " ";
+  //     cout << endl;
+  //   }
+  //   cout << endl;
 
   P.branch(node, c[0], c[1],
            [&](const int x) { return reverse_dataset[f][x]; });
-
 
   // for (auto i{0}; i < 2; ++i) {
   //   cout << 1-i << endl;
@@ -533,20 +531,20 @@ void Compiler<E_t>::branch(const int node, const int f) {
 
   deduce_from_sibling(node, c[1 - smallest], c[smallest]);
 
-	bool pseudo_leaf{true};
+  bool pseudo_leaf{true};
   for (auto i{0}; i < 2; ++i)
     if (setChild(node, i, c[i]))
       pseudo_leaf &= grow(c[i]);
     else
       ++num_leaf;
-		
-		if(pseudo_leaf) {
-			updateBest(node);
-		}
-		
-	// for(auto i{0}; i < 2; ++i)
-	// 	if(child[i][node]>=0)
-	// 		updateBest(child[i][node]);
+
+  if (pseudo_leaf) {
+    updateBest(node);
+  }
+
+// for(auto i{0}; i < 2; ++i)
+// 	if(child[i][node]>=0)
+// 		updateBest(child[i][node]);
 
 #ifdef PRINTTRACE
   if (PRINTTRACE) {
@@ -580,13 +578,12 @@ template <typename E_t> bool Compiler<E_t>::grow(const int node) {
         ranked_feature[node].push_back(f);
       feature[node] = ranked_feature[node].begin();
     }
-		
   }
 
   feature[node] = ranked_feature[node].begin();
   end_feature[node] = ranked_feature[node].end();
-	
-	assert(not ranked_feature[node].empty());
+
+  assert(not ranked_feature[node].empty());
 
   sort_features(node);
 
@@ -610,16 +607,16 @@ template <typename E_t> bool Compiler<E_t>::grow(const int node) {
         child[1 - i][node] = -2;
         blossom.remove_front(node);
         best[node] = 2;
-				// best[node] = INFTY(int);
+        // best[node] = INFTY(int);
         num_leaf += 2;
-				// updateBest(node);
+        // updateBest(node);
 
         return true;
       }
     }
   }
-	
-	return false;
+
+  return false;
 }
 
 template <typename E_t> void Compiler<E_t>::expend() {
@@ -650,7 +647,7 @@ template <typename E_t> void Compiler<E_t>::initialise_search() {
   setReverse();
 
   start_time = cpu_time();
-	
+
   P.init(example.size());
 
   // tree must have at least one node (0)
@@ -668,30 +665,20 @@ template <typename E_t> void Compiler<E_t>::initialise_search() {
 template <typename E_t> void Compiler<E_t>::search() {
 
   while (true) {
-		
-		++search_size;
 
-                PRINT_TRACE;
+    ++search_size;
 
-                // if(blossom.empty())
-                // 	cout << "tree (" << num_leaf << ")\n";
+    PRINT_TRACE;
 
-                if (blossom.empty() or fail()) {
-                  if (not backtrack())
-                    break;
+    if (blossom.empty() or fail()) {
+      if (not backtrack())
+        break;
     } else {
       expend();
     }
-  }
-	
-	cout << "search_size = " << search_size << endl;
-	
 }
 
-template <typename E_t>
-void Compiler<E_t>::addExample(const std::vector<int> &example,
-                               const E_t weight) {
-  addExample(example.begin(), example.end() - 1, example.back(), weight);
+cout << "search_size = " << search_size << endl;
 }
 
 #ifdef PRINTTRACE
@@ -761,12 +748,12 @@ template <typename E_t> void Compiler<E_t>::print_trace() {
       cout << endl << "featu: ";
       for (auto d{blossom.fbegin()}; d != blossom.fend(); ++d) {
         cout << setw(4) << *feature[*d] << " ";
-				assert(feature[*d] < end_feature[*d]);
+        assert(feature[*d] < end_feature[*d]);
       }
       cout << "  ";
       for (auto b : blossom) {
         cout << setw(4) << *feature[b] << " ";
-				assert(feature[b] < end_feature[b]);
+        assert(feature[b] < end_feature[b]);
       }
       cout << endl << "error: ";
       cout.flush();

@@ -36,10 +36,24 @@ public:
 	
   size_t count(const bool c) const { return examples[c].size(); }
   size_t example_count() const { return count(0) + count(1); }
+	
+	size_t numFeature() const { return data[0].empty() ? 0 : data[0][0].size(); }
 
-  void printDatasetToTextFile(ostream &outfile, const bool first = true) const;
-  void printDatasetToCSVFile(ostream &outfile, const string &delimiter = ",",
-                             const bool first = false) const;
+  template <class selector>
+  void printDatasetToFile(ostream &outfile, const string &delimiter,
+                          selector not_redundant, const bool first = true,
+                          const bool header = false) const;
+
+  // void printDatasetToTextFile(ostream &outfile, const bool first = true)
+  // const;
+  // template <class selector>
+  // void printDatasetToTextFile(ostream &outfile, selector s,
+  //                             const bool first) const;
+  // void printDatasetToCSVFile(ostream &outfile, const string &delimiter = ",",
+  //                            const bool first = false) const;
+  // template <class selector>
+  // void printDatasetToCSVFile(ostream &outfile, const string &delimiter = ",",
+  //                            const bool first = false) const;
 
   class List {
   public:
@@ -222,6 +236,45 @@ template <typename E_t> inline void WeightedDataset<E_t>::preprocess(const bool 
   // cout << suppression_count << endl;
 }
 
+template <typename E_t>
+template <class selector>
+void WeightedDataset<E_t>::printDatasetToFile(ostream &outfile,
+                                              const string &delimiter,
+                                              selector not_redundant,
+                                              const bool first,
+                                              const bool header) const {
+
+  if (header) {
+    if (first)
+      outfile << "label";
+    for (auto x{0}; x < data[0][0].size(); ++x) {
+      if (first)
+        outfile << delimiter << "f" << (x + 1);
+      else
+        outfile << "f" << (x + 1) << delimiter;
+    }
+    if (not first)
+      outfile << "target\n";
+  }
+
+  for (auto y{0}; y < 2; ++y) {		
+    for (auto x : examples[y]) {
+      if (first)
+        outfile << y;
+      for (auto f{0}; f < data[y][x].size(); ++f) {
+        if (not_redundant(f)) {
+          if (first)
+            outfile << delimiter << data[y][x][f];
+          else
+            outfile << data[y][x][f] << delimiter;
+        }
+      }
+      if (not first)
+        outfile << y;
+      outfile << endl;
+    }
+  }
+}
 }
 
 #endif // _BLOSSOM_WEIGHTEDDATASET_HPP

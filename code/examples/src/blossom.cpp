@@ -31,14 +31,13 @@ along with minicsp.  If not, see <http://www.gnu.org/licenses/>.
 using namespace std;
 using namespace blossom;
 
-
 template <template <typename> class ErrorPolicy = CardinalityError,
           typename E_t = unsigned long>
 int run_algorithm(DTOptions &opt) {
 
   WeightedDataset<E_t> input;
 
-	////// READING
+  ////// READING
   if (opt.binarize) {
 
     read_non_binary(input, opt);
@@ -47,39 +46,15 @@ int run_algorithm(DTOptions &opt) {
 
     read_binary(input, opt);
   }
-	
-	if(opt.verbosity >= DTOptions::NORMAL)
-		cout << "d readtime=" << cpu_time() << endl;
-	
-	
-	////// PREPROCESING
-	if(opt.preprocessing)
-		input.preprocess(opt.verbosity >= DTOptions::NORMAL);
-	
 
-	////// PRINTING
-  if (opt.print_ins and opt.nosolve) {
+  if (opt.verbosity >= DTOptions::NORMAL)
+    cout << "d readtime=" << cpu_time() << endl;
 
-    string ext{opt.output.substr(opt.output.find_last_of(".") + 1)};
+  ////// PREPROCESING
+  if (opt.preprocessing)
+    input.preprocess(opt.verbosity >= DTOptions::NORMAL);
 
-    if (opt.output != "") {
-
-			ofstream outfile(opt.output.c_str(), ofstream::out);
-			
-	    if (ext == "csv")
-	      input.printDatasetToCSVFile(outfile, opt.delimiter, opt.outtarget == 0);
-	    else
-	      input.printDatasetToTextFile(outfile, opt.outtarget != -1);
-    
-		} else
-			input.printDatasetToTextFile(cout, opt.outtarget!=-1);
-  }
-	
-  if (opt.nosolve)
-    return 1;
-
-	
-	////// CREATING THE ALGORITHM
+  ////// CREATING THE ALGORITHM
   BacktrackingAlgorithm<ErrorPolicy, E_t> A(input, opt);
 
   if (opt.verbosity >= DTOptions::NORMAL)
@@ -90,37 +65,35 @@ int run_algorithm(DTOptions &opt) {
     cout << "d examples=" << A.numExample() << " features=" << A.numFeature()
          << endl;
 
-	////// SOLVING
-  if (not opt.nosolve) {
-    if (opt.mindepth) {
-      if (opt.minsize)
-        A.minimize_error_depth_size();
-      else
-        A.minimize_error_depth();
-    } else
-      A.minimize_error();
+  ////// SOLVING
+  if (opt.mindepth) {
+    if (opt.minsize)
+      A.minimize_error_depth_size();
+    else
+      A.minimize_error_depth();
+  } else
+    A.minimize_error();
 
-    Tree sol = A.getSolution();
+  Tree sol = A.getSolution();
 
-    if (opt.print_sol) {
-      cout << sol << endl;
+  if (opt.print_sol) {
+    cout << sol << endl;
+  }
+
+  if (opt.verified) {
+
+    E_t tree_error = 0;
+    for (auto y{0}; y < 2; ++y) {
+      auto X{input[y]};
+      for (auto i : X)
+        tree_error += (sol.predict(X[i]) != y) * X.weight(i);
     }
 
-    if (opt.verified) {
+    assert(tree_error == A.error());
 
-      E_t tree_error = 0;
-			for(auto y{0}; y<2; ++y) {
-				auto X{input[y]};
-				for(auto i : X)
-					tree_error += (sol.predict(X[i]) != y) * X.weight(i);
-			}
-			
-      assert(tree_error == A.error());
-
-      cout << std::setprecision(std::numeric_limits<long double>::digits10 + 1)
-           << std::setw(0) << "p solution verified (" << tree_error << " / "
-           << A.error() << ")" << endl;
-    }
+    cout << std::setprecision(std::numeric_limits<long double>::digits10 + 1)
+         << std::setw(0) << "p solution verified (" << tree_error << " / "
+         << A.error() << ")" << endl;
   }
   return 1;
 }

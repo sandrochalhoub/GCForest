@@ -157,9 +157,6 @@ DTOptions blossom::parse_dt(int argc, char *argv[]) {
   cmd.add<SwitchArg>(opt.verified, "", "noverification",
                      "switch tree verification on", true);
 
-  cmd.add<SwitchArg>(opt.filter, "", "filter", "remove contradictory examples",
-                     false);
-
   cmd.add<SwitchArg>(opt.bounding, "", "bounding", "switch bound reasoning on",
                      false);
 
@@ -190,7 +187,11 @@ DTOptions blossom::parse_dt(int argc, char *argv[]) {
   cmd.add<SwitchArg>(opt.minsize, "", "depthonly", "switch size objective off",
                      true);
 
-  cmd.add<SwitchArg>(opt.nosolve, "", "nosolve", "switch solving off", false);
+  cmd.add<SwitchArg>(opt.filter, "", "filter",
+                     "remove redundant features before solving", false);
+
+  cmd.add<SwitchArg>(opt.filter, "", "nofilter",
+                     "switch off the removal of redundant features", true);
 
   cmd.add<ValueArg<string>>(opt.reference_class, "", "class", "reference class",
                             false, "", "string");
@@ -241,13 +242,6 @@ DTOptions blossom::parse_dt(int argc, char *argv[]) {
                          "feature selection strategy 0:min error, 1:min "
                          "entropy, 2:min gini impurity ",
                          false, 2, "int");
-
-  // cmd.add<SwitchArg>(opt.use_weights, "", "use_weights",
-  //                       "activate weighted version of the algorithm",
-  //                       false);
-  //
-  // cmd.add<SwitchArg>(opt.filter_inconsistent, "", "filter_inconsistent",
-  //                    "suppress inconsistent samples", false);
 
   cmd.add<SwitchArg>(opt.preprocessing, "", "preprocessing",
                      "switch sample preprocessing oon", false);

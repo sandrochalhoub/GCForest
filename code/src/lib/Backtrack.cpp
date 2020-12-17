@@ -174,7 +174,7 @@ void BacktrackingAlgorithm<ErrorPolicy, E_t>::load(
   for (int y = 0; y < 2; ++y) {
     auto X{input[y]};
     for (auto j : X)
-      addBitsetExample(X[j], y, X.weight(j));
+      addExample(X[j], y, X.weight(j));
   }
 
   setErrorOffset(input.numInconsistent());
@@ -1244,14 +1244,18 @@ void BacktrackingAlgorithm<ErrorPolicy, E_t>::initialise_search() {
     relevant_features.clear();
     feature_set.resize(num_feature, true);
     for (int fi{0}; fi < num_feature; ++fi) {
-      if (feature_set[fi] and not max_entropy(0, fi)) {
-        relevant_features.push_back(fi);
-        if (options.preprocessing)
-          for (int fj{fi + 1}; fj < num_feature; ++fj) {
-            if (equal_feature(fi, fj)) {
-              feature_set.reset(fj);
+      if (feature_set[fi]) {
+        if (max_entropy(0, fi))
+          feature_set.reset(fi);
+        else {
+          relevant_features.push_back(fi);
+          if (options.filter)
+            for (int fj{fi + 1}; fj < num_feature; ++fj) {
+              if (equal_feature(fi, fj)) {
+                feature_set.reset(fj);
+              }
             }
-          }
+        }
       }
     }
 
@@ -1270,7 +1274,10 @@ void BacktrackingAlgorithm<ErrorPolicy, E_t>::initialise_search() {
            << " feature_reduction=" << (num_feature - relevant_features.size())
            << endl;
 
-    filter_features(0, [&](const int f) { return not feature_set[f]; });
+    cout << feature_set.size() << " " << feature_set.count() << " " << feature_set << endl;
+
+    if (options.filter)
+      filter_features(0, [&](const int f) { return not feature_set[f]; });
 
     sort_features(0);
 

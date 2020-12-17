@@ -1,11 +1,10 @@
 #ifndef __BLOSSOM_READER_HH
 #define __BLOSSOM_READER_HH
 
-
-#include "TypedDataSet.hpp"
 #include "CSVReader.hpp"
 #include "TXTReader.hpp"
-
+#include "TypedDataSet.hpp"
+#include "WeightedDataset.hpp"
 
 namespace blossom
 {

@@ -39,13 +39,12 @@ public:
 
   int width;
   double focus;
-  // int max_size;
   int max_depth;
 
   int restart_base;
   double restart_factor;
 
-  bool filter;
+  bool filterfeature;
 
   double time;
 
@@ -64,14 +63,14 @@ public:
   int ada_it;
   int ada_stop;
 
-  bool nosolve;
+  bool filter;
   string reference_class;
 
   bool mindepth;
   bool minsize;
 
   bool preprocessing;
-  // bool filter_inconsistent;
+  // bool filterfeature_inconsistent;
 
   bool progress;
 
@@ -89,11 +88,11 @@ public:
         verified(opt.verified), sample(opt.sample), width(opt.width),
         focus(opt.focus), max_depth(opt.max_depth),
         restart_base(opt.restart_base), restart_factor(opt.restart_factor),
-        filter(opt.filter), time(opt.time), search(opt.search),
-        bounding(opt.bounding), node_strategy(opt.node_strategy),
+        time(opt.time), search(opt.search), bounding(opt.bounding),
+        node_strategy(opt.node_strategy),
         feature_strategy(opt.feature_strategy), binarize(opt.binarize),
         split(opt.split), ada_it(opt.ada_it), ada_stop(opt.ada_stop),
-        nosolve(opt.nosolve), reference_class(opt.reference_class),
+        filter(opt.filter), reference_class(opt.reference_class),
         mindepth(opt.mindepth), minsize(opt.minsize),
         preprocessing(opt.preprocessing), progress(opt.progress),
         delimiter(opt.delimiter), intarget(opt.intarget),

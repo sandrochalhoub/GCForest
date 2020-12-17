@@ -1,4 +1,4 @@
-# Bud First Search
+# Blossom Decisiont Tree Learner
 
 Install by running
 
@@ -12,11 +12,11 @@ from the `code` directory.
 
 - Command line
 
-bin/bud_first_search <datafile> [options]
+bin/blossom <datafile> [options]
 
 to binarize a non-binary dataset:
 
-bin/bud_first_search <datafile> --verbosity 0 --binarize --nosolve --print_ins [--output filename]
+bin/blossom <datafile> --verbosity 0 --binarize --nosolve --print_ins [--output filename]
 
 - High level API (Sklearn estimator)
 

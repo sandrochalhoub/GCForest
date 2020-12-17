@@ -156,8 +156,6 @@ namespace blossom {
     void minimize_error_depth();
     void minimize_error_depth_size();
     Tree getSolution();
-/*	  void addBitsetExample(const dynamic_bitset<> &sample, const bool y,
-	                  const E_t weight);*/
   };
 	
 	
