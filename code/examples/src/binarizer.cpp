@@ -38,13 +38,13 @@ void printToFile(WeightedDataset<E_t> &input, DTOptions &opt) {
 
   std::function<bool(const int f)> relevant = [](const int f) { return true; };
 
+	BacktrackingAlgorithm<WeightedError, E_t> A(opt);
+
   if (opt.filter) {
-    BacktrackingAlgorithm<WeightedError, E_t> A(input, opt);
+		A.load(input);
     A.initialise_search();
     relevant = [&](const int f) { return A.isRelevant(f); };
   }
-	
-	cout << input.numFeature() << endl;
 
   string ext{opt.output.substr(opt.output.find_last_of(".") + 1)};
 

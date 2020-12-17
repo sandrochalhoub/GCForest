@@ -1274,8 +1274,6 @@ void BacktrackingAlgorithm<ErrorPolicy, E_t>::initialise_search() {
            << " feature_reduction=" << (num_feature - relevant_features.size())
            << endl;
 
-    cout << feature_set.size() << " " << feature_set.count() << " " << feature_set << endl;
-
     if (options.filter)
       filter_features(0, [&](const int f) { return not feature_set[f]; });
 
