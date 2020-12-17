@@ -71,14 +71,13 @@ namespace blossom {
 	  int ada_it;
 	  int ada_stop;
 
-	  bool nosolve;
+	  bool filter;
 	  string reference_class;
 
 	  bool mindepth;
 	  bool minsize;
 
 	  bool preprocessing;
-	  // bool filter_inconsistent;
 
 	  bool progress;
 
@@ -87,8 +86,8 @@ namespace blossom {
 	  int outtarget;
 
 	  DTOptions(){};
-	  DTOptions(const DTOptions &opt)
-	      : cmdline(opt.cmdline), instance_file(opt.instance_file),
+	  DTOptions(const DTOptions &opt);
+/*	      : cmdline(opt.cmdline), instance_file(opt.instance_file),
 	        debug(opt.debug), output(opt.output), format(opt.format),
 	        verbosity(opt.verbosity), seed(opt.seed), print_sol(opt.print_sol),
 	        print_par(opt.print_par), print_ins(opt.print_ins),
@@ -100,11 +99,11 @@ namespace blossom {
 	        bounding(opt.bounding), node_strategy(opt.node_strategy),
 	        feature_strategy(opt.feature_strategy), binarize(opt.binarize),
 	        split(opt.split), ada_it(opt.ada_it), ada_stop(opt.ada_stop),
-	        nosolve(opt.nosolve), reference_class(opt.reference_class),
+	        filter(opt.filter), reference_class(opt.reference_class),
 	        mindepth(opt.mindepth), minsize(opt.minsize),
 	        preprocessing(opt.preprocessing), progress(opt.progress),
 	        delimiter(opt.delimiter), intarget(opt.intarget),
-	        outtarget(opt.outtarget) {}
+	        outtarget(opt.outtarget) {}*/
 
 	  ostream &display(ostream &os);
 	};
@@ -137,9 +136,9 @@ namespace blossom {
 
 		void addExample(const std::vector<int>& row);
 		void preprocess(const bool verbose=false);
-	  void printDatasetToTextFile(ostream &outfile, const bool first = true) const;
+/*	  void printDatasetToTextFile(ostream &outfile, const bool first = true) const;
 	  void printDatasetToCSVFile(ostream &outfile, const string &delimiter = ",",
-	                             const bool first = false) const;
+	                             const bool first = false) const;*/
 
 	};
 
