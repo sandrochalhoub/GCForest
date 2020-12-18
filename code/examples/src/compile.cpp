@@ -40,11 +40,8 @@ int run_algorithm(DTOptions &opt) {
 
   ////// READING
   if (opt.binarize) {
-
     read_non_binary(input, opt);
-
   } else {
-
     read_binary(input, opt);
   }
 
@@ -64,11 +61,9 @@ int run_algorithm(DTOptions &opt) {
     cout << "d examples=" << A.numExample() << " features=" << A.numFeature()
          << endl;
     for (auto i : X) {
-      cout << X[i] << endl;
+      cout << setw(3) << i << ": " << X[i] << endl;
     }
   }
-
-  exit(1);
 
   if (opt.verbosity >= DTOptions::NORMAL)
     cout << "d readtime=" << cpu_time() << endl;

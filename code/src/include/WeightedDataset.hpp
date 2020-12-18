@@ -96,6 +96,11 @@ private:
 };
 
 template <typename E_t>
+void WeightedDataset<E_t>::addBitsetExample(instance &x, const bool y) {
+  data[y].push_back(x);
+}
+
+template <typename E_t>
 inline void WeightedDataset<E_t>::addExample(const vector<int> &example) {
   return addExample(example.begin(), example.end(), -1, 1);
 }
