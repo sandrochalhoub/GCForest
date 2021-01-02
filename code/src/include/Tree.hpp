@@ -59,6 +59,7 @@ public:
 class Wood {
 
 private:
+  vector<int> parent;
   vector<int> child[2];
   vector<int> feature;
 
@@ -92,8 +93,9 @@ public:
 
   int getChild(const int node, const int branch) const;
 
-	template<class sample>
-	bool predict(const int node, const sample &i) const;
+  bool isRoot(const int node) const;
+
+  template <class sample> bool predict(const int node, const sample &i) const;
   // bool predict(const int node, const instance &x) const;
 
   size_t size(const int node) const;
@@ -101,7 +103,7 @@ public:
   size_t depth(const int node) const;
 
   std::ostream &display(std::ostream &os, const int node,
-                        const int depth) const;
+                        const int depth = 0) const;
 
 #ifdef DEBUG
   vector<int> birthday;

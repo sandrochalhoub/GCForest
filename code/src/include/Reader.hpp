@@ -40,25 +40,24 @@ namespace blossom
 	    });
 	  }
 
-	  // WeightedDataset base;
+          cout << input << endl;
 
-	  input.binarize(base);
+          input.binarize(base);
+        }
 
-	  // base.toInc(A);
-	}
+        template <typename E_t>
+        void read_binary(WeightedDataset<E_t> &input, DTOptions &opt) {
+          // WeightedDataset input;
 
-	template <typename E_t>
-	void read_binary(WeightedDataset<E_t> &input, DTOptions &opt) {
-	  // WeightedDataset input;
+          string ext{opt.instance_file.substr(
+              opt.instance_file.find_last_of(".") + 1)};
 
-	  string ext{opt.instance_file.substr(opt.instance_file.find_last_of(".") + 1)};
+          auto target_column{-1};
 
-	  auto target_column{-1};
+          if (opt.format != "guess")
+            target_column = opt.intarget;
 
-	  if (opt.format != "guess")
-	    target_column = opt.intarget;
-
-	  if (opt.format == "csv" or (opt.format == "guess" and ext == "csv")) {
+          if (opt.format == "csv" or (opt.format == "guess" and ext == "csv")) {
 	    csv::read_binary(opt.instance_file, [&](vector<int> &data) {
 	      input.addExample(data.begin(), data.end(), target_column);
 	    });

@@ -7,37 +7,19 @@ namespace blossom {
 template <typename E_t> Compiler<E_t>::Compiler(DTOptions &opt) : options(opt) {
   num_feature = 0;
   num_leaf = 0;
-  // depth necessary
-  // min_depth =
-  // ub_size = INFTY(int);
   search_size = 0;
 
   min_depth_backtrack = INFTY(int);
 }
 
 int lbLeaf2(const uint64_t P, const int E) {
-  // int E = num_feature - depth[node]; // the total number of examples is 2^E
-  // int P = P[node].count(); // there are P positive examples and 2^E - P
-  // negative examples
-
-  // cout << "lbLeaf2(" << P << "," << E << ")\n";
-
   assert(P >= 0 and E >= 0);
-  // exit(1);
 
   // base cases are P==0, P==2^E and P==2^(E-1):
   if (P == 0)
     return 1;
 
-  //
-
   if (E + 1 < 8 * sizeof(int)) {
-
-    // if (2 * H < P) {
-    //   cout << 2 * H << " < " << P << endl;
-    //   exit(1);
-    // }
-
     auto H{(1 << (E - 1))};
 
     if (P == 2 * H)
@@ -60,8 +42,9 @@ template <typename E_t> void Compiler<E_t>::count_by_example(const int node) {
   pos_feature_frequency[node].resize(num_feature, 0);
 
   for (auto i : P[node]) {
-    for (auto f : example[i])
+    for (auto f : example[i]) {
       ++pos_feature_frequency[node][f];
+    }
   }
 }
 
@@ -82,17 +65,6 @@ E_t Compiler<E_t>::get_feature_frequency(const int n, const int f) const {
 
 template <typename E_t>
 E_t Compiler<E_t>::get_feature_error(const int n, const int f) const {
-
-  // auto left_error{pos_feature_frequency[n][f]};
-  // if(halfsize(n) < 2 * left_error)
-  // 	left_error = halfsize(n) - left_error;
-  //
-  // auto right_error{P[n].count() - pos_feature_frequency[n][f]};
-  // if(halfsize(n) < 2 * right_error)
-  // 	right_error = halfsize(n) - right_error;
-  //
-  // return
-
   return std::min(static_cast<int>(P[n].count()) - pos_feature_frequency[n][f],
                   pos_feature_frequency[n][f]);
 }
@@ -109,26 +81,6 @@ template <typename E_t> int Compiler<E_t>::numFeature() const {
   return num_feature;
 }
 
-// template <typename E_t> void Compiler<E_t>::setData(const DataSet &data) {
-//
-//   num_feature = static_cast<int>(data.numFeature());
-//
-//   f_error.resize(num_feature, 1);
-//   f_entropy.resize(num_feature, 1);
-//   f_gini.resize(num_feature, 1);
-//
-//   example.resize(data.example[0].count());
-//   auto k{0};
-//   for (auto i : data.example[0]) {
-//     for (auto j{0}; j < num_feature; ++j)
-//       if (data.hasFeature(i, j)) {
-//         example[k].push_back(j);
-//       }
-//     ++k;
-//   }
-//   setReverse();
-// }
-
 template <typename E_t> void Compiler<E_t>::setReverse() {
 
   reverse_dataset.resize(num_feature);
@@ -142,30 +94,27 @@ template <typename E_t> void Compiler<E_t>::setReverse() {
 
 template <typename E_t> size_t Compiler<E_t>::size() { return blossom.size(); }
 
-// template <typename E_t> int Compiler<E_t>::getUbSize() const { return
-// ub_size; }
-
 template <typename E_t> bool Compiler<E_t>::no_feature(const int node) const {
   return feature[node] == end_feature[node];
 }
 
 template <typename E_t> void Compiler<E_t>::separator(const string &msg) const {
-  cout << setfill('-') << setw((96 - msg.size()) / 2) << "-"
-       << "[" << msg << "]" << setw((96 - msg.size()) / 2 + (msg.size() % 2))
+  cout << setfill('-') << setw((54 - msg.size()) / 2) << "-"
+       << "[" << msg << "]" << setw((54 - msg.size()) / 2 + (msg.size() % 2))
        << "-" << endl
        << setfill(' ');
 }
 
 template <typename E_t> void Compiler<E_t>::print_new_best() {
-  double t{fixedwidthfloat(cpu_time() - start_time, 2)};
-  cout << " size = " << left << setw(3) << ub_size() << " choices = " << setw(9)
-       << search_size << " depth = " << min_depth_backtrack << " time = " << t
-       << right << endl;
+  double t{fixedwidthfloat(cpu_time() - start_time, 3)};
+  cout << " size = " << left << setw(5) << ub_size() << " choices = " << setw(9)
+       << search_size << " depth = " << setw(3) << min_depth_backtrack
+       << " mem = " << setw(4) << wood.size() << " time = " << t << right
+       << endl;
 }
 
 template <typename E_t> void Compiler<E_t>::resize(const int k) {
 
-  // optimal.resize(k, false);
   feature.resize(k);
   end_feature.resize(k);
   blossom.reserve(k);
@@ -176,6 +125,8 @@ template <typename E_t> void Compiler<E_t>::resize(const int k) {
 
   best.resize(k, INFTY(int));
   lb.resize(k, 1);
+  tree.resize(k, -1);
+  saved_tree.resize(k, -1);
 
   auto i{ranked_feature.size()};
 
@@ -238,29 +189,6 @@ template <typename E_t> void Compiler<E_t>::sort_features(const int node) {
   sort(feature[node], end_feature[node],
        [&](const int a, const int b) { return (f_error[a] < f_error[b]); });
 
-  // switch (feature_criterion) {
-  // case DTOptions::MINERROR:
-  //   for (auto f{feature[node]}; f != end_feature[node]; ++f)
-  //     f_error[*f] = error_policy.get_feature_error(node, *f);
-  //   sort(feature[node], end_feature[node], [&](const int a, const int b) {
-  //     return f_error[a] < f_error[b];
-  //   });
-  //   break;
-  // case DTOptions::ENTROPY:
-  //   for (auto f{feature[node]}; f != end_feature[node]; ++f)
-  //     f_entropy[*f] = entropy(node, *f);
-  //   sort(feature[node], end_feature[node], [&](const int a, const int b) {
-  //     return f_entropy[a] < f_entropy[b];
-  //   });
-  //   break;
-  // case DTOptions::GINI:
-  //   for (auto f{feature[node]}; f != end_feature[node]; ++f)
-  //     f_gini[*f] = gini(node, *f);
-  //   sort(feature[node], end_feature[node], [&](const int a, const int b) {
-  //     return (f_gini[a] < f_gini[b]);
-  //   });
-  //   break;
-  // }
 }
 
 template <typename E_t> void Compiler<E_t>::prune(const int node) {
@@ -275,35 +203,93 @@ template <typename E_t> void Compiler<E_t>::prune(const int node) {
       blossom.add(node);
     }
     blossom.remove_back(node);
+    wood.freeNode(tree[node]);
   }
 }
 
-template <typename E_t> bool Compiler<E_t>::solutionFound() {
+// template <typename E_t> void Compiler<E_t>::propagateDown(const int node) {
+//   auto bl{numLeaf(child[0][node])};
+//   auto br{numLeaf(child[1][node])};
+//
+//   if (bl < INFTY(int) and br < INFTY(int)) {
+//     auto new_best{bl + br};
+//     if (new_best < best[node]) {
+//       best[node] = new_best;
+//       if (node == 0 and options.verbosity > DTOptions::QUIET) {
+//         if (decision.size() > 0)
+//           min_depth_backtrack =
+//               std::min(min_depth_backtrack, depth[decision.back()]);
+//         print_new_best();
+//       }
+//
+//       if (node)
+//         propagateDown(parent[node]);
+//     }
+//   }
+// }
 
-  return blossom.empty();
+template <typename E_t> void Compiler<E_t>::storeSolution() {
 
-  // if(blossom.empty()) {
-  //   // auto current_size{currentSize()};
-  //
-  // 	// assert(current_size > 0);
-  //
-  //   // if (current_size < ub_size) {
-  // 	if(num_leaf < ub_size()) {
-  //     ub_size = currentSize();
-  //     if (options.verbosity > DTOptions::QUIET)
-  //       print_new_best();
-  //   }
-  // 	return true;
-  // }
-  //
-  // return false;
+if (solution_root > 1) {
+  wood.freeNode(solution_root);
 }
 
+solution_root = buildTree(0);
+}
 
-template <typename E_t> void Compiler<E_t>::updateBest(const int node) {
+template <typename E_t> int Compiler<E_t>::buildTree(const int node) {
 
-  // cout << "UPDATE BEST (" << node << "): " << best[node] << " / " <<
-  // numLeaf(child[0][node]) << " + " << numLeaf(child[1][node]) << endl;
+	// assert(node >= 0);
+
+	int root = (node == -1);
+	
+	if(node >= 0) {
+	  if (tree[node] >= 0) {
+	    root = wood.copyNode(tree[node]);
+	  } else {
+	    root = wood.grow();
+
+	    wood.setFeature(root, *feature[node]);
+	    for (int i{0}; i < 2; ++i) {
+	      auto c{buildTree(child[i][node])};
+	      wood.setChild(root, i, c);
+	    }
+	  }
+	}
+	
+	return root;
+}
+
+template <typename E_t> void Compiler<E_t>::updateTree(const int node) {
+  // this is a terminal node, free current tree if it exists and grow a
+  // new tree
+  if (tree[node] > 1) {
+    // cout << endl << " free tree[" << node << "]\n";
+    // wood.display(cout, tree[node]);
+    wood.freeNode(tree[node]);
+  }
+  tree[node] = wood.grow();
+
+  // new best tree
+  wood.setFeature(tree[node], *feature[node]);
+  for (auto i{0}; i < 2; ++i) {
+    if (child[i][node] < 0)
+      wood.setChild(tree[node], i, child[i][node] == -1);
+    else {
+      wood.setChild(tree[node], i, tree[child[i][node]]);
+      tree[child[i][node]] = -1;
+    }
+  }
+
+  // //
+  // cout << endl << " save tree[" << node << "]\n";
+  // wood.display(cout, tree[node], depth[node]);
+}
+
+template <typename E_t>
+void Compiler<E_t>::updateBest(const int node, const bool terminal) {
+
+  // cout << "update(" << node << ")\n";
 
   auto bl{numLeaf(child[0][node])};
   auto br{numLeaf(child[1][node])};
@@ -313,30 +299,34 @@ template <typename E_t> void Compiler<E_t>::updateBest(const int node) {
     if (new_best < best[node]) {
       best[node] = new_best;
 
+      if (terminal) {
+        updateTree(node);
+      }
+
       if (node == 0 and options.verbosity > DTOptions::QUIET) {
         if (decision.size() > 0)
           min_depth_backtrack =
               std::min(min_depth_backtrack, depth[decision.back()]);
+
         print_new_best();
+
+        storeSolution();
+				
+				// wood.display(cout, solution_root);
       }
 
       if (node)
-        updateBest(parent[node]);
+        updateBest(parent[node], false);
     }
   }
 }
 
-// returns a lower bound on the size that one can get without changing any decision of the current branch (of the DT!!!)
 template <typename E_t> bool Compiler<E_t>::fail() {
-
   if (decision.empty())
     return lb[0] >= best[0];
-
   auto node{decision.back()};
 
   auto LB{minLeaf(child[0][node]) + minLeaf(child[1][node])};
-
-  // cout << "\nLB=" << LB << "/" << best[node] << " (" << node << ")\n";
 
   while (node > 0) {
     auto c{node};
@@ -344,15 +334,9 @@ template <typename E_t> bool Compiler<E_t>::fail() {
 
     LB += minLeaf(child[child[0][node] == c][node]);
 
-    // cout << "LB=" << LB << "/" << best[node] << " (" << node <<
-    // ")\n";
-
     if (LB > best[node] or (node == 0 and LB >= best[node])) {
-      // cout << "fail?\n";
       return true;
     }
-
-    //
   }
 
   return false;
@@ -361,9 +345,6 @@ template <typename E_t> bool Compiler<E_t>::fail() {
 template <typename E_t>
 bool Compiler<E_t>::is_optimal(const int node, const int f) const {
   auto count{get_feature_frequency(node, f)};
-	
-	
-	
   return count == 0 or count == P[node].count();
 }
 
@@ -378,7 +359,8 @@ template <typename E_t> bool Compiler<E_t>::backtrack() {
     auto node{decision.back()};
     decision.pop_back();
 
-    updateBest(node);
+    // cout << "bkt\n";
+    // updateBest(node);
 
     if (depth[node] < min_depth_backtrack) {
       min_depth_backtrack = depth[node];
@@ -386,9 +368,9 @@ template <typename E_t> bool Compiler<E_t>::backtrack() {
 
 #ifdef PRINTTRACE
     if (PRINTTRACE) {
-      // cout << setw(3) << decision.size();
-      //       for (auto i{0}; i < decision.size(); ++i)
-      //         cout << "   ";
+      cout << setw(3) << decision.size();
+      for (auto i{0}; i < decision.size(); ++i)
+        cout << "   ";
       cout << "backtrack on " << node << " = " << *feature[node] << " ("
            << (end_feature[node] - feature[node]) << ")" << endl;
     }
@@ -396,18 +378,19 @@ template <typename E_t> bool Compiler<E_t>::backtrack() {
 
     assert(not no_feature(node));
 
-    // ++feature[node];
-
     for (auto i{0}; i < 2; ++i)
       prune(child[i][node]);
 
-    dead_end = (
-        is_optimal(node, *feature[node]++) or
-        no_feature(node) or best[node] == lb[node]);
+    dead_end = (is_optimal(node, *feature[node]++) or no_feature(node) or
+                best[node] == lb[node]);
 
-    blossom.add(node);
-    if (dead_end) {
-      blossom.remove_back(node);
+    if (not dead_end) {
+      // branch on the next feature
+      blossom.add(node);
+    } else {
+      // this node is optimal (either from lb reasoning or because the search
+      // space was exhausted). it remains in the tree as long as its parent's
+      // test has not changed
       if (best[node] < INFTY(int)) {
         num_leaf += best[node];
         lb[node] = best[node];
@@ -420,13 +403,6 @@ template <typename E_t> bool Compiler<E_t>::backtrack() {
 }
 
 template <typename E_t> bool Compiler<E_t>::purePositive(const int node) const {
-
-  // return P[node].count() == usize(node);
-  //
-  //
-  // P[node].count() == 2^(m - d);
-  //
-
   return (log_size(node) < 8 * sizeof(size_t) and
           P[node].count() == usize(node));
 }
@@ -457,9 +433,9 @@ void Compiler<E_t>::branch(const int node, const int f) {
 
     assert(*feature[node] == f);
 
-    // cout << setw(3) << decision.size();
-    // for (auto i{0}; i < decision.size(); ++i)
-    //   cout << "   ";
+    cout << setw(3) << decision.size();
+    for (auto i{0}; i < decision.size(); ++i)
+      cout << "   ";
     cout << "branch on " << node << " (" << P[node].count() << "/2^"
          << log_size(node) << "-" << P[node].count() << ") with " << f << " ("
          << (end_feature[node] - feature[node]) << ")";
@@ -532,14 +508,6 @@ void Compiler<E_t>::branch(const int node, const int f) {
     else
       ++num_leaf;
 
-  if (pseudo_leaf) {
-    updateBest(node);
-  }
-
-// for(auto i{0}; i < 2; ++i)
-// 	if(child[i][node]>=0)
-// 		updateBest(child[i][node]);
-
 #ifdef PRINTTRACE
   if (PRINTTRACE) {
     // cout << setw(3) << decision.size()-1;
@@ -553,6 +521,15 @@ void Compiler<E_t>::branch(const int node, const int f) {
          << ")" << endl;
   }
 #endif
+
+  if (pseudo_leaf) {
+    // cout << "psd\n";
+    updateBest(node);
+  }
+
+  // for(auto i{0}; i < 2; ++i)
+  // 	if(child[i][node]>=0)
+  // 		updateBest(child[i][node]);
 }
 
 // returns true if this is a pseudo-leaf
@@ -585,13 +562,12 @@ template <typename E_t> bool Compiler<E_t>::grow(const int node) {
 
   best[node] = INFTY(int);
 
-  // cout << endl
-  //      << "minleaf " << node << " " << num_feature << " " << depth[node]
-  //      << endl;
   lb[node] = lbLeaf2(P[node].count(), num_feature - depth[node]);
 
-  // assert(lb[node] == lbLeaf2(P[node].count(), num_feature - depth[node]));
+  tree[node] = -1;
+  saved_tree[node] = -1;
 
+  // cout << "\ngrow " << node << endl;
   if (P[node].count() == halfsize(node)) {
     int f[2] = {*feature[node] + numFeature(), *feature[node]};
     for (auto i{0}; i < 2; ++i) {
@@ -601,9 +577,16 @@ template <typename E_t> bool Compiler<E_t>::grow(const int node) {
         child[1 - i][node] = -2;
         blossom.remove_front(node);
         best[node] = 2;
-        // best[node] = INFTY(int);
         num_leaf += 2;
-        // updateBest(node);
+
+        saved_tree[node] = tree[node] = wood.grow();
+        wood.setFeature(tree[node], *feature[node]);
+        wood.setChild(tree[node], i, 1);
+        wood.setChild(tree[node], 1 - i, 0);
+
+        // cout << endl << " new tree[" << node << "]\n";
+        // wood.display(cout, tree[node], depth[node]);
+        // // cout << " - tree = " << tree[node] << endl;
 
         return true;
       }
@@ -658,15 +641,15 @@ template <typename E_t> void Compiler<E_t>::initialise_search() {
 
 template <typename E_t> void Compiler<E_t>::search() {
 
+  separator("search");
+
   while (true) {
 
     ++search_size;
 
     PRINT_TRACE;
 
-    if (blossom.empty()
-        // or fail()
-        ) {
+    if (blossom.empty() or fail()) {
       if (not backtrack())
         break;
     } else {
@@ -674,7 +657,11 @@ template <typename E_t> void Compiler<E_t>::search() {
     }
 }
 
-cout << "search_size = " << search_size << endl;
+separator("optimal");
+print_new_best();
+
+auto T{wood[solution_root]};
+cout << T << endl;
 }
 
 #ifdef PRINTTRACE
@@ -743,14 +730,10 @@ template <typename E_t> void Compiler<E_t>::print_trace() {
       }
       cout << endl << "featu: ";
       for (auto d{blossom.fbegin()}; d != blossom.fend(); ++d) {
-        cout << setw(4) << *feature[*d] << " ";
-
-        if (feature[*d] >= end_feature[*d]) {
-          cout << " last feature!\n";
-          exit(1);
-        }
-
-        assert(feature[*d] < end_feature[*d]);
+        if (feature[*d] >= end_feature[*d])
+          cout << "   * ";
+        else
+          cout << setw(4) << *feature[*d] << " ";
       }
       cout << "  ";
       for (auto b : blossom) {
@@ -792,8 +775,12 @@ template <typename E_t> void Compiler<E_t>::print_trace() {
       for (auto b : blossom) {
         cout << setw(4) << lb[b] << " ";
       }
+      cout << endl << "tree:  ";
+      cout.flush();
+      for (auto d{blossom.fbegin()}; d != blossom.fend(); ++d) {
+        cout << setw(4) << tree[*d] << " ";
+      }
       cout << endl;
-      ;
     }
   }
 }

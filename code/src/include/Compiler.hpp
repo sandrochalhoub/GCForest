@@ -34,7 +34,8 @@ public:
   /*!@name Parameters*/
   //@{
   /// Memory management for storing trees
-  // Wood &wood;
+  Wood wood;
+	int solution_root{-1};
 
   /// Command line options
   DTOptions &options;
@@ -43,7 +44,6 @@ public:
 
   // data set
   vector<vector<int>> example;
-  // vector<instance> dataset[N];
   vector<dynamic_bitset<>> reverse_dataset;
 
   /// structure to partition the examples in the tree
@@ -59,20 +59,6 @@ public:
   int numLeaf(const int node) const { return (node >= 0 ? best[node] : 1); }
 	int minLeaf(const int node) const { return (node >= 0 ? lb[node] : 1); }
   int currentSize() const { return 2 * (num_leaf + 3 * blossom.count()) - 1; }
-
-  // int minLeaf(const int node) ;
-  // {
-  //   assert(blossom.contain(node));
-  // 		// should look only to the features with max and min counts
-  //   for (auto f{feature[node]}; f != end_feature[node]; ++f) {
-  //     auto count{pos_feature_frequency[node][*f]};
-  //     if (count >= P[node].count() or count == 0 or count == halfsize(node)
-  //     or
-  //         count == (P[node].count() - halfsize(node)))
-  //       return 3;
-  //   }
-  //   return 4;
-  // }
 
   /// store the children of node i
   vector<int> child[2];
@@ -100,11 +86,14 @@ public:
   vector<int> best;
   vector<int> lb;
 
+  // root of the best tree for this node so far
+  vector<int> tree;
+  vector<int> saved_tree;
+
   double start_time;
 
   int min_depth_backtrack;
 
-  // int ub_size;
   int ub_size() const { return best[0]; }
 
   size_t search_size;
@@ -144,17 +133,18 @@ public:
   // remove the node and its descendants from the tree
   void prune(const int node);
 
-  // as name suggests
-  bool solutionFound();
-
   // undo the last decision and remove the previous feature as possible choice
   bool backtrack();
 	
   // computes a lower bound on the size that one can get without changing any decision of the current branch (of the DT!!!)
   bool fail();
-	
-	// change the best (minimum) tree size below node, and recursively update parents
-	void updateBest(const int node);
+
+  // change the best (minimum) tree size below node, and recursively update
+  // parents
+  void updateTree(const int node);
+  void updateBest(const int node, const bool terminal = true);
+  int buildTree(const int node);
+  void storeSolution();
 
   // branch on node by testing f
   void branch(const int node, const int f);
@@ -224,8 +214,9 @@ void Compiler<E_t>::addExample(const dynamic_bitset<> &sample) {
   example.resize(example.size() + 1);
 
   for (auto f{0}; f < n; ++f)
-    if (sample[f])
+    if (sample[f]) {
       example.back().push_back(f);
+    }
 }
 
 template <typename E_t>

@@ -833,9 +833,9 @@ bool BacktrackingAlgorithm<ErrorPolicy, E_t>::update_upperbound(const int node) 
     if (node > 0) {
       assert(parent[node] >= 0);
       update_upperbound(parent[node]);
-  }
+    }
 
-  return true;
+    return true;
   }
 
   return false;

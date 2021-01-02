@@ -39,9 +39,7 @@ std::ostream &Wood::display(std::ostream &os, const int node,
   if (node <= 1)
     os << "class-" << node << endl;
   else {
-    os
-        // << node << ":"
-        << feature[node] << endl;
+    os << node << (isRoot(node) ? "*" : "") << ":" << feature[node] << endl;
 
     assert(child[0][node] >= 0 and child[1][node] >= 0);
 
@@ -87,6 +85,7 @@ void Wood::resize(const int k) {
   feature.resize(k, -1);
   child[0].resize(k, -1);
   child[1].resize(k, -1);
+  parent.resize(k, -1);
 
 #ifdef DEBUG
   birthday.resize(k, today);
@@ -99,10 +98,13 @@ int Wood::grow() {
     resize(feature.size() + 1);
   auto node{*available.begin()};
   available.remove_front(node);
+  parent[node] = -1;
 
 #ifdef DEBUG
   birthday[node] = ++today;
 #endif
+
+  // cout << "grow " << node << endl;
 
   return node;
 }
@@ -115,6 +117,7 @@ int Wood::copyNode(const int node) {
     for (auto i{0}; i < 2; ++i) {
       auto aux{copyNode(child[i][node])};
       child[i][root] = aux;
+      parent[aux] = root;
     }
     return root;
   }
@@ -123,6 +126,12 @@ int Wood::copyNode(const int node) {
 
 void Wood::freeNode(const int node) {
   if (node > 1) {
+
+    // cout << "free " << node << endl;
+
+    assert(node < available.size() and not available.contain(node));
+
+    // parent[node] = -1
     available.add(node);
     for (auto i{0}; i < 2; ++i)
       if (child[i][node] >= 2)
@@ -161,11 +170,14 @@ int Wood::getFeature(const int node) const {
 
 void Wood::setChild(const int node, const int branch, const int orphan) {
   child[branch][node] = orphan;
+  parent[orphan] = node;
 }
 
 int Wood::getChild(const int node, const int branch) const {
   return child[branch][node];
 }
+
+bool Wood::isRoot(const int node) const { return parent[node] == -1; }
 
 std::ostream &operator<<(std::ostream &os, const Tree &x) {
   x.display(os);

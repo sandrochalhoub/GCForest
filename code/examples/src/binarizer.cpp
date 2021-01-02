@@ -46,6 +46,12 @@ void printToFile(WeightedDataset<E_t> &input, DTOptions &opt) {
     relevant = [&](const int f) { return A.isRelevant(f); };
   }
 
+  auto numRelevantFeature{0};
+  for (auto f{0}; f < input.numFeature(); ++f)
+    numRelevantFeature += A.isRelevant(f);
+  cerr << numRelevantFeature << " x " << input.count(0) << " | "
+       << input.count(1) << endl;
+
   string ext{opt.output.substr(opt.output.find_last_of(".") + 1)};
 
   if (opt.output != "") {
