@@ -156,8 +156,9 @@ template <typename E_t> inline void WeightedDataset<E_t>::preprocess(const bool 
   suppression_count = 0;
   // unsigned long dup_count = 0; // for statistics
 
-  for (int y = 0; y < 2; ++y)
+  for (int y = 0; y < 2; ++y) {
     std::sort(data[y].begin(), data[y].end());
+	}
 	
   if (verbose)
     cout << "d sorttime=" << cpu_time() - t << endl;
@@ -169,16 +170,23 @@ template <typename E_t> inline void WeightedDataset<E_t>::preprocess(const bool 
 
   int i[2] = {0, 0};
   E_t wght[2] = {weight[0][i[0]], weight[1][i[1]]};
+	
+	cout << endl << setw(3) << data[0].size() << " " << setw(3) << data[1].size() << endl;
 
   while (x[0] != end[0] and x[1] != end[1]) {
+		
+		cout << endl << setw(3) << i[0] << " " << setw(3) << i[1] << endl;
 
     for (int y = 0; y < 2; ++y)
       while (x[y] != (end[y] - 1) and *(x[y]) == *(x[y] + 1)) {
+				cout << "remove (" << y << ") " << i[y] << endl; 
         examples[y].remove_back(i[y]);
         ++x[y];
         ++i[y];
         wght[y] += weight[y][i[y]];
       }
+			
+		cout << setw(3) << i[0] << " " << setw(3) << i[1] << endl;
 
     if (*x[0] < *x[1]) {
       weight[0][i[0]] = wght[0];
@@ -193,26 +201,39 @@ template <typename E_t> inline void WeightedDataset<E_t>::preprocess(const bool 
     } else {
       if (wght[0] < wght[1]) {
         weight[1][i[1]] = wght[1] - wght[0];
+				
+				cout << "remove0 " << i[0] << endl; 
         examples[0].remove_back(i[0]);
         suppression_count += wght[0];
       } else if (wght[0] > wght[1]) {
         weight[0][i[0]] = wght[0] - wght[1];
+				
+				cout << "remove1 " << i[1] << endl; 
         examples[1].remove_back(i[1]);
         suppression_count += wght[1];
       } else {
         suppression_count += wght[1];
+				
+				cout << "remove " << i[0] << " and " << i[1] << endl; 
+				
         examples[0].remove_back(i[0]);
         examples[1].remove_back(i[1]);
       }
       for (int y = 0; y < 2; ++y) {
         ++x[y];
         ++i[y];
+				
+				assert(i[y] < weight[y].size());
+				
         wght[y] = weight[y][i[y]];
       }
     }
   }
 
   for (int y = 0; y < 2; ++y) {
+		
+		cout << "wght[y]: " << wght[y] << endl;
+		
     wght[y] = 0;
 
     for (; x[y] != end[y]; ++x[y]) {
@@ -221,10 +242,15 @@ template <typename E_t> inline void WeightedDataset<E_t>::preprocess(const bool 
       wght[y] += weight[y][i[y]];
 
       if (x[y] == end[y] - 1 or *x[y] != *(x[y] + 1)) {
+				weight[y][i[y]] = wght[y];
         wght[y] = 0;
       } else {
+				
+				cout << "remove end " << i[y] << endl; 
+				
         examples[y].remove_back(i[y]);
       }
+			++i[y];
     }
   }
 	
@@ -238,6 +264,34 @@ template <typename E_t> inline void WeightedDataset<E_t>::preprocess(const bool 
               << " final_count=" << example_count()
               << "\nd preprocesstime=" << cpu_time() - t << endl;
 
+
+	for(auto i : examples[0]) {
+		cout << i << " " << weight[0][i] << endl;
+	}
+
+	
+	for(auto y{0}; y<2; ++y) {
+		for(auto i{0}; i<data[y].size(); ++i) {
+			if(not examples[y].contain(i))
+				continue;
+			
+			int j{i+1};
+			while(j < data[y].size() and not examples[y].contain(j)) {
+				++j;
+			}
+			if(j >= data[y].size())
+				break;
+			
+			if(data[y][i] == data[y][j]) {
+				cout << y << " " << i << " " << j << endl;
+			}
+			// cout << examples[y][i-1] << " " << examples[y][i] << " " << data[y][examples[y][i-1]] << endl;
+			// if(data[y][examples[y][i-1]] == data[y][examples[y][i]]) {
+			// 	cout << examples[y][i-1] << " " << examples[y][i] << " " << data[y][examples[y][i]] << endl;
+			// }
+			assert(data[y][i] != data[y][j]);
+		}
+	}
   // cout << suppression_count << endl;
 }
 

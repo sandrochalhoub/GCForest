@@ -48,10 +48,11 @@ int run_algorithm(DTOptions &opt) {
   // in compilation, noise and duplicates must be removed (we should probably
   // remove redundant features as well, though it makes sense only for
   // encodings)
-  input.preprocess();
+  input.preprocess(opt.verbosity>=DTOptions::NORMAL);
 
   Compiler<E_t> A(opt);
 
+	
   auto X{input[0]};
   for (auto i : X) {
     A.addExample(X[i]);

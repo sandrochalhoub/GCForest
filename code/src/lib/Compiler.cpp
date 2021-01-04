@@ -509,6 +509,9 @@ void Compiler<E_t>::branch(const int node, const int f) {
   count_by_example(c[smallest]);
 
   deduce_from_sibling(node, c[1 - smallest], c[smallest]);
+	
+	
+	assert(P[c[0]].count() + P[c[1]].count() == P[node].count());
 
   bool pseudo_leaf{true};
   for (auto i{0}; i < 2; ++i)
@@ -562,6 +565,63 @@ template <typename E_t> bool Compiler<E_t>::grow(const int node) {
 
   feature[node] = ranked_feature[node].begin();
   end_feature[node] = ranked_feature[node].end();
+
+
+	vector<bool> positive(numFeature(),false);
+	vector<bool> negative(numFeature(),false);
+	if(ranked_feature[node].empty()) {
+		auto n_i{node};
+		
+		while(n_i) {
+			
+			auto p_i{parent[n_i]};
+			auto dir{child[0][p_i]==n_i};
+			auto s_i = child[dir][p_i];
+			
+			if(dir) {
+				positive[*feature[p_i]] = true;
+			} else {
+				negative[*feature[p_i]] = true;
+			}
+				
+			
+			cout << n_i << ": " << P[n_i].count() ;
+			
+			if(s_i >= 0)
+				cout << "/ " << s_i << ": " << P[s_i].count() ;
+			else
+				cout << "/ x" ;
+			
+			cout << endl;
+			
+
+			
+			
+			n_i = p_i;
+		}
+		
+		for(auto f{0}; f<numFeature(); ++f) {
+			if(positive[f]) {
+				assert(not negative[f]);
+				cout << "+";
+			} else if(negative[f]) {
+				cout << "-";
+			} else {
+				cout << "?";
+			}
+		}
+		cout << endl;
+		
+		// if(P[node].count() < 4) {
+			for(auto x : P[node]) {
+				for(auto f{0}; f<numFeature(); ++f)
+					cout << reverse_dataset[f][x] ; 
+				cout << endl;
+			}
+		// }
+		
+	}
+
 
   assert(not ranked_feature[node].empty());
 
