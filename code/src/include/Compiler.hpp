@@ -29,8 +29,6 @@ int lbLeaf(const uint64_t P, const int E);
 template <typename E_t> class Compiler {
 
 public:
-  // friend ErrorPolicy<E_t>;
-
   /*!@name Parameters*/
   //@{
   /// Memory management for storing trees
@@ -109,8 +107,13 @@ public:
   bool purePositive(const int node) const;
 
   E_t halfsize(const int node) const {
-    return 1 << (num_feature - depth[node] - 1);
+		E_t p{1};
+    return p << (log_size(node) - 1);
   }
+	
+	bool smallEnough(const int node) const {
+		return (log_size(node) - 1) < std::numeric_limits<E_t>::digits;
+	}
   //@}
 
   // resize the data structures for up to k nodes

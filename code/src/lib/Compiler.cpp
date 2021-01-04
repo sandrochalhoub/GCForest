@@ -327,14 +327,21 @@ template <typename E_t> bool Compiler<E_t>::fail() {
   auto node{decision.back()};
 
   auto LB{minLeaf(child[0][node]) + minLeaf(child[1][node])};
+	
+	// cout << LB << " (" << node << ")" << endl;
 
   while (node > 0) {
     auto c{node};
     node = parent[node];
 
     LB += minLeaf(child[child[0][node] == c][node]);
+		
+		// cout << LB << " / " << best[node] << " (" << node << ")" << endl;
 
     if (LB > best[node] or (node == 0 and LB >= best[node])) {
+			
+			// cout << "FAIL!\n" ;
+			
       return true;
     }
   }
@@ -398,6 +405,9 @@ template <typename E_t> bool Compiler<E_t>::backtrack() {
     }
 
   } while (dead_end);
+	
+	
+	// exit(1);
 
   return true;
 }
@@ -415,8 +425,7 @@ bool Compiler<E_t>::setChild(const int node, const bool branch, const int c) {
 
   if (P[c].count() == 0) {
     child[branch][node] = -1;
-    // } else if (P[c].count() == usize(c)) {
-  } else if (purePositive(c)) {
+  } else if (smallEnough(c) and purePositive(c)) {
     child[branch][node] = -2;
   } else {
     child[branch][node] = c;
@@ -567,8 +576,8 @@ template <typename E_t> bool Compiler<E_t>::grow(const int node) {
   tree[node] = -1;
   saved_tree[node] = -1;
 
-  // cout << "\ngrow " << node << endl;
-  if (P[node].count() == halfsize(node)) {
+  // cout << "\ngrow " << node << " " << (num_feature - depth[node] - 1) << " < " << std::numeric_limits<E_t>::digits << endl;
+  if (smallEnough(node) and P[node].count() == halfsize(node)) {
     int f[2] = {*feature[node] + numFeature(), *feature[node]};
     for (auto i{0}; i < 2; ++i) {
       if (get_feature_frequency(node, f[i]) == P[node].count()) {
