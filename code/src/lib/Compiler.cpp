@@ -124,9 +124,10 @@ template <typename E_t> void Compiler<E_t>::resize(const int k) {
   child[1].resize(k, -1);
 
   best.resize(k, INFTY(int));
+	best_feature.resize(k, -1);
   lb.resize(k, 1);
   tree.resize(k, -1);
-  saved_tree.resize(k, -1);
+  // saved_tree.resize(k, -1);
 
   auto i{ranked_feature.size()};
 
@@ -204,6 +205,7 @@ template <typename E_t> void Compiler<E_t>::prune(const int node) {
     }
     blossom.remove_back(node);
     wood.freeNode(tree[node]);
+    tree[node] = -1;
   }
 }
 
@@ -234,30 +236,79 @@ if (solution_root > 1) {
   wood.freeNode(solution_root);
 }
 
-solution_root = buildTree(0);
+// cout << "\nHERE\n";
+solution_root = buildTree(0, 0);
+
+// wood.display(cout, solution_root);
+// cout << endl;
 }
 
-template <typename E_t> int Compiler<E_t>::buildTree(const int node) {
+template <typename E_t>
+int Compiler<E_t>::buildTree(const int node, const int depth) {
 
-	// assert(node >= 0);
+  // assert(node >= 0);
 
-	int root = (node == -1);
-	
-	if(node >= 0) {
-	  if (tree[node] >= 0) {
-	    root = wood.copyNode(tree[node]);
-	  } else {
-	    root = wood.grow();
+  // if (depth > numFeature()) {
+  //   cout << "parent[4504]: " << parent[4504] << endl;
+  //   cout << "parent[4506]: " << parent[4506] << endl;
+  //   cout << "parent[4502]: " << parent[4502] << endl;
+  //
+  //   cout << "child[0][4504]: " << child[0][4504] << endl;
+  //   cout << "child[0][4506]: " << child[0][4506] << endl;
+  //   cout << "child[0][4502]: " << child[0][4502] << endl;
+  //
+  //   cout << "child[1][4504]: " << child[1][4504] << endl;
+  //   cout << "child[1][4506]: " << child[1][4506] << endl;
+  //   cout << "child[1][4502]: " << child[1][4502] << endl;
+  //
+  // 		cout << 11 << endl;
+  // 		ptrace();
+  // 		cout << 22 << endl;
+  //
+  // 		int n{4502};
+  // 		while(n) {
+  // 			n = parent[n];
+  // 			cout << n << endl;
+  // 		}
+  // }
 
-	    wood.setFeature(root, *feature[node]);
-	    for (int i{0}; i < 2; ++i) {
-	      auto c{buildTree(child[i][node])};
-	      wood.setChild(root, i, c);
-	    }
-	  }
-	}
-	
-	return root;
+  // if (depth > numFeature())
+    
+
+  // assert(depth <= numFeature());
+  // for(auto i{0}; i<depth; ++i) {
+  // 	cout << " ";
+  // }
+  // cout << node << endl;
+
+  int root = (node == -1);
+
+  if (node >= 0) {
+
+    assert(not blossom.contain(node));
+
+    if (tree[node] >= 0) {
+      root = wood.copyNode(tree[node]);
+    } else {
+      root = wood.grow();
+
+      wood.setFeature(root, *feature[node]);
+      for (int i{0}; i < 2; ++i) {
+
+        assert(node >= 0);
+        assert(node < child[i].size());
+        assert(node != child[i][node]);
+
+        // cout << node << " / " << child[i].size() << endl;
+        // cout << child[i][node] << endl;
+
+        auto c{buildTree(child[i][node], depth + 1)};
+        wood.setChild(root, i, c);
+      }
+    }
+  }
+
+  return root;
 }
 
 template <typename E_t> void Compiler<E_t>::updateTree(const int node) {
@@ -298,10 +349,11 @@ void Compiler<E_t>::updateBest(const int node, const bool terminal) {
     auto new_best{bl + br};
     if (new_best < best[node]) {
       best[node] = new_best;
+			best_feature[node] = *feature[node];
 
-      if (terminal) {
-        updateTree(node);
-      }
+      // if (terminal) {
+      //   updateTree(node);
+      // }
 
       if (node == 0 and options.verbosity > DTOptions::QUIET) {
         if (decision.size() > 0)
@@ -368,6 +420,7 @@ template <typename E_t> bool Compiler<E_t>::backtrack() {
 
     // cout << "bkt\n";
     // updateBest(node);
+		
 
     if (depth[node] < min_depth_backtrack) {
       min_depth_backtrack = depth[node];
@@ -382,8 +435,19 @@ template <typename E_t> bool Compiler<E_t>::backtrack() {
            << (end_feature[node] - feature[node]) << ")" << endl;
     }
 #endif
+		
+		if(best_feature[node] == *feature[node]) {
+			updateTree(node);
+			// cout << "NEW BEST TREE " << node << "\n" ;
+			// wood.display(cout, tree[node]);
+			// cout << endl;
+		}
 
     assert(not no_feature(node));
+
+
+		// assert(child[0][node] < 0 or tree[child[0][node]] >= 0);
+		// assert(child[1][node] < 0 or tree[child[1][node]] >= 0);
 
     for (auto i{0}; i < 2; ++i)
       prune(child[i][node]);
@@ -566,62 +630,60 @@ template <typename E_t> bool Compiler<E_t>::grow(const int node) {
   feature[node] = ranked_feature[node].begin();
   end_feature[node] = ranked_feature[node].end();
 
-
-	vector<bool> positive(numFeature(),false);
-	vector<bool> negative(numFeature(),false);
-	if(ranked_feature[node].empty()) {
-		auto n_i{node};
-		
-		while(n_i) {
-			
-			auto p_i{parent[n_i]};
-			auto dir{child[0][p_i]==n_i};
-			auto s_i = child[dir][p_i];
-			
-			if(dir) {
-				positive[*feature[p_i]] = true;
-			} else {
-				negative[*feature[p_i]] = true;
-			}
-				
-			
-			cout << n_i << ": " << P[n_i].count() ;
-			
-			if(s_i >= 0)
-				cout << "/ " << s_i << ": " << P[s_i].count() ;
-			else
-				cout << "/ x" ;
-			
-			cout << endl;
-			
-
-			
-			
-			n_i = p_i;
-		}
-		
-		for(auto f{0}; f<numFeature(); ++f) {
-			if(positive[f]) {
-				assert(not negative[f]);
-				cout << "+";
-			} else if(negative[f]) {
-				cout << "-";
-			} else {
-				cout << "?";
-			}
-		}
-		cout << endl;
-		
-		// if(P[node].count() < 4) {
-			for(auto x : P[node]) {
-				for(auto f{0}; f<numFeature(); ++f)
-					cout << reverse_dataset[f][x] ; 
-				cout << endl;
-			}
-		// }
-		
-	}
-
+  // vector<bool> positive(numFeature(),false);
+  // vector<bool> negative(numFeature(),false);
+  // if(ranked_feature[node].empty()) {
+  // 	auto n_i{node};
+  //
+  // 	while(n_i) {
+  //
+  // 		auto p_i{parent[n_i]};
+  // 		auto dir{child[0][p_i]==n_i};
+  // 		auto s_i = child[dir][p_i];
+  //
+  // 		if(dir) {
+  // 			positive[*feature[p_i]] = true;
+  // 		} else {
+  // 			negative[*feature[p_i]] = true;
+  // 		}
+  //
+  //
+  // 		cout << n_i << ": " << P[n_i].count() ;
+  //
+  // 		if(s_i >= 0)
+  // 			cout << "/ " << s_i << ": " << P[s_i].count() ;
+  // 		else
+  // 			cout << "/ x" ;
+  //
+  // 		cout << endl;
+  //
+  //
+  //
+  //
+  // 		n_i = p_i;
+  // 	}
+  //
+  // 	for(auto f{0}; f<numFeature(); ++f) {
+  // 		if(positive[f]) {
+  // 			assert(not negative[f]);
+  // 			cout << "+";
+  // 		} else if(negative[f]) {
+  // 			cout << "-";
+  // 		} else {
+  // 			cout << "?";
+  // 		}
+  // 	}
+  // 	cout << endl;
+  //
+  // 	// if(P[node].count() < 4) {
+  // 		for(auto x : P[node]) {
+  // 			for(auto f{0}; f<numFeature(); ++f)
+  // 				cout << reverse_dataset[f][x] ;
+  // 			cout << endl;
+  // 		}
+  // 	// }
+  //
+  // }
 
   assert(not ranked_feature[node].empty());
 
@@ -630,11 +692,13 @@ template <typename E_t> bool Compiler<E_t>::grow(const int node) {
   blossom.add(node);
 
   best[node] = INFTY(int);
+	
+	best_feature[node] = -1;
 
   lb[node] = lbLeaf2(P[node].count(), num_feature - depth[node]);
 
   tree[node] = -1;
-  saved_tree[node] = -1;
+  // saved_tree[node] = -1;
 
   // cout << "\ngrow " << node << " " << (num_feature - depth[node] - 1) << " < " << std::numeric_limits<E_t>::digits << endl;
   if (smallEnough(node) and P[node].count() == halfsize(node)) {
@@ -648,7 +712,7 @@ template <typename E_t> bool Compiler<E_t>::grow(const int node) {
         best[node] = 2;
         num_leaf += 2;
 
-        saved_tree[node] = tree[node] = wood.grow();
+        tree[node] = wood.grow();
         wood.setFeature(tree[node], *feature[node]);
         wood.setChild(tree[node], i, 1);
         wood.setChild(tree[node], 1 - i, 0);
@@ -718,6 +782,30 @@ template <typename E_t> void Compiler<E_t>::search() {
 
     PRINT_TRACE;
 
+			//     for (auto d{blossom.fbegin()}; d != blossom.fend(); ++d) {
+			//       auto node{*d};
+			//       assert(not node or (parent[node] != child[0][node] and
+			//                           parent[node] != child[1][node]));
+			//
+			// if((child[0][node] < 0 or blossom.isback(child[0][node])) and (child[1][node] < 0 or blossom.isback(child[1][node]))) {
+			//
+			//
+			// 		auto p{node};
+			// 		while(p) {
+			// 			if(tree[p] >= 0)
+			// 				break;
+			// 			p = parent[p];
+			// 		}
+			//
+			// 		if(tree[p] < 0) {
+			//
+			// 		cout << "NODE " << node << endl;
+			// 		exit(1);
+			//
+			// 	}
+			// }
+			//     }
+
     if (blossom.empty() or fail()) {
       if (not backtrack())
         break;
@@ -738,121 +826,135 @@ cout << T << endl;
 template <typename E_t> void Compiler<E_t>::print_trace() {
 
   if (PRINTTRACE) {
-
-    // cout << setw(3) << decision.size();
-    // for (auto i{0}; i < decision.size(); ++i)
-    //   cout << "   ";
-    cout << "#leaves = " << num_leaf
-         // << "; size = " << currentSize()
-         << "/";
-    if (ub_size() < INFTY(int))
-      cout << ub_size();
-    else
-      cout << "inf";
-    cout << "; search=" << search_size << "; depth=" << min_depth_backtrack
-         << endl;
-
-    if (options.verbosity >= DTOptions::SOLVERINFO) {
-      cout << "nodes: ";
-      for (auto d{blossom.fbegin()}; d != blossom.fend(); ++d) {
-        cout << setw(4) << *d << " ";
-      }
-      cout << "| ";
-      for (auto b : blossom) {
-        cout << setw(4) << b << " ";
-      }
-      cout << "| ";
-      for (auto d{blossom.bbegin()}; d != blossom.bend(); ++d) {
-        cout << setw(4) << *d << " ";
-      }
-      cout << endl << "parent ";
-      for (auto d{blossom.fbegin()}; d != blossom.fend(); ++d) {
-        cout << setw(4) << parent[*d] << " ";
-      }
-      cout << "  ";
-      for (auto b : blossom) {
-        cout << setw(4) << parent[b] << " ";
-      }
-      cout << endl << " left: ";
-      for (auto d{blossom.fbegin()}; d != blossom.fend(); ++d) {
-        cout << setw(4) << child[0][*d] << " ";
-      }
-      cout << "  ";
-      for (auto b : blossom) {
-        cout << setw(4) << child[0][b] << " ";
-      }
-      cout << endl << "right: ";
-      for (auto d{blossom.fbegin()}; d != blossom.fend(); ++d) {
-        cout << setw(4) << child[1][*d] << " ";
-      }
-      cout << "  ";
-      for (auto b : blossom) {
-        cout << setw(4) << child[1][b] << " ";
-      }
-      cout << endl << "depth: ";
-      for (auto d{blossom.fbegin()}; d != blossom.fend(); ++d) {
-        cout << setw(4) << depth[*d] << " ";
-      }
-      cout << "  ";
-      for (auto b : blossom) {
-        cout << setw(4) << depth[b] << " ";
-      }
-      cout << endl << "featu: ";
-      for (auto d{blossom.fbegin()}; d != blossom.fend(); ++d) {
-        if (feature[*d] >= end_feature[*d])
-          cout << "   * ";
-        else
-          cout << setw(4) << *feature[*d] << " ";
-      }
-      cout << "  ";
-      for (auto b : blossom) {
-        cout << setw(4) << *feature[b] << " ";
-        assert(feature[b] < end_feature[b]);
-      }
-      cout << endl << "error: ";
-      cout.flush();
-      for (auto d{blossom.fbegin()}; d != blossom.fend(); ++d) {
-        cout << setw(4) << node_error(*d) << " ";
-      }
-      cout << "  ";
-      for (auto b : blossom) {
-        cout << setw(4) << node_error(b) << " ";
-      }
-      cout << endl << "best:  ";
-      for (auto d{blossom.fbegin()}; d != blossom.fend(); ++d) {
-        cout << setw(4);
-        if (best[*d] < INFTY(int))
-          cout << best[*d];
-        else
-          cout << "inf";
-        cout << " ";
-      }
-      cout << "  ";
-      for (auto b : blossom) {
-        cout << setw(4);
-        if (best[b] < INFTY(int))
-          cout << best[b];
-        else
-          cout << "inf";
-        cout << " ";
-      }
-      cout << endl << "lb:    ";
-      for (auto d{blossom.fbegin()}; d != blossom.fend(); ++d) {
-        cout << setw(4) << lb[*d] << " ";
-      }
-      cout << "  ";
-      for (auto b : blossom) {
-        cout << setw(4) << lb[b] << " ";
-      }
-      cout << endl << "tree:  ";
-      cout.flush();
-      for (auto d{blossom.fbegin()}; d != blossom.fend(); ++d) {
-        cout << setw(4) << tree[*d] << " ";
-      }
-      cout << endl;
-    }
+		if (options.verbosity >= DTOptions::SOLVERINFO) {
+    ptrace();
+	}
   }
 }
+
+template <typename E_t> void Compiler<E_t>::ptrace() {
+
+  // cout << setw(3) << decision.size();
+  // for (auto i{0}; i < decision.size(); ++i)
+  //   cout << "   ";
+  cout << "#leaves = " << num_leaf
+       // << "; size = " << currentSize()
+       << "/";
+  if (ub_size() < INFTY(int))
+    cout << ub_size();
+  else
+    cout << "inf";
+  cout << "; search=" << search_size << "; depth=" << min_depth_backtrack
+       << endl;
+
+  
+    cout << "nodes: ";
+    for (auto d{blossom.fbegin()}; d != blossom.fend(); ++d) {
+      cout << setw(4) << *d << " ";
+    }
+    cout << "| ";
+    for (auto b : blossom) {
+      cout << setw(4) << b << " ";
+    }
+    cout << "| ";
+    for (auto d{blossom.bbegin()}; d != blossom.bend(); ++d) {
+      cout << setw(4) << *d << " ";
+    }
+    cout << endl << "parent ";
+    for (auto d{blossom.fbegin()}; d != blossom.fend(); ++d) {
+      cout << setw(4) << parent[*d] << " ";
+    }
+    cout << "  ";
+    for (auto b : blossom) {
+      cout << setw(4) << parent[b] << " ";
+    }
+    cout << endl << " left: ";
+    for (auto d{blossom.fbegin()}; d != blossom.fend(); ++d) {
+      cout << setw(4) << child[0][*d] << " ";
+    }
+    cout << "  ";
+    for (auto b : blossom) {
+      cout << setw(4) << child[0][b] << " ";
+    }
+    cout << endl << "right: ";
+    for (auto d{blossom.fbegin()}; d != blossom.fend(); ++d) {
+      cout << setw(4) << child[1][*d] << " ";
+    }
+    cout << "  ";
+    for (auto b : blossom) {
+      cout << setw(4) << child[1][b] << " ";
+    }
+    cout << endl << "depth: ";
+    for (auto d{blossom.fbegin()}; d != blossom.fend(); ++d) {
+      cout << setw(4) << depth[*d] << " ";
+    }
+    cout << "  ";
+    for (auto b : blossom) {
+      cout << setw(4) << depth[b] << " ";
+    }
+    cout << endl << "featu: ";
+    for (auto d{blossom.fbegin()}; d != blossom.fend(); ++d) {
+      if (feature[*d] >= end_feature[*d])
+        cout << "   * ";
+      else
+        cout << setw(4) << *feature[*d] << " ";
+    }
+    cout << "  ";
+    for (auto b : blossom) {
+      cout << setw(4) << *feature[b] << " ";
+      assert(feature[b] < end_feature[b]);
+    }
+    cout << endl << "error: ";
+    cout.flush();
+    for (auto d{blossom.fbegin()}; d != blossom.fend(); ++d) {
+      cout << setw(4) << node_error(*d) << " ";
+    }
+    cout << "  ";
+    for (auto b : blossom) {
+      cout << setw(4) << node_error(b) << " ";
+    }
+    cout << endl << "best:  ";
+    for (auto d{blossom.fbegin()}; d != blossom.fend(); ++d) {
+      cout << setw(4);
+      if (best[*d] < INFTY(int))
+        cout << best[*d];
+      else
+        cout << "inf";
+      cout << " ";
+    }
+    cout << "  ";
+    for (auto b : blossom) {
+      cout << setw(4);
+      if (best[b] < INFTY(int))
+        cout << best[b];
+      else
+        cout << "inf";
+      cout << " ";
+    }
+    cout << endl << "lb:    ";
+    for (auto d{blossom.fbegin()}; d != blossom.fend(); ++d) {
+      cout << setw(4) << lb[*d] << " ";
+    }
+    cout << "  ";
+    for (auto b : blossom) {
+      cout << setw(4) << lb[b] << " ";
+    }
+    cout << endl << "tree:  ";
+    cout.flush();
+    for (auto d{blossom.fbegin()}; d != blossom.fend(); ++d) {
+      cout << setw(4) << tree[*d] << " ";
+    }
+		cout << "  ";
+    for (auto b : blossom) {
+      cout << setw(4) << tree[b] << " ";
+    }
+		cout << "  ";
+    for (auto d{blossom.bbegin()}; d != blossom.bend(); ++d) {
+      cout << setw(4) << tree[*d] << " ";
+    }
+    cout << endl;
+  
+  }
 
 #endif
 

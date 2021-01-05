@@ -37,6 +37,8 @@ public:
   //@{
   bool safe_contain(const int elt) const;
   bool contain(const int elt) const;
+	bool isback(const int elt) const;
+	bool isfront(const int elt) const;
 
   size_t capacity() const;
 	size_t count() const;

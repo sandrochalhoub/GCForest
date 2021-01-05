@@ -39,6 +39,10 @@ bool SparseSet::safe_contain(const int elt) const {
 
 bool SparseSet::contain(const int elt) const { return index_[elt] < size_ and index_[elt] >= start_; }
 
+bool SparseSet::isfront(const int elt) const { return index_[elt] < start_; }
+
+bool SparseSet::isback(const int elt) const { return index_[elt] >= size_; }
+
 size_t SparseSet::count() const { return size_ - start_; }
 
 size_t SparseSet::size() const { return size_; }
