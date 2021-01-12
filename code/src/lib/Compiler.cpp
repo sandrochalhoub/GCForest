@@ -241,6 +241,8 @@ template <typename E_t> int Compiler<E_t>::buildTree(const int node) {
 
 	// assert(node >= 0);
 
+	cout << node << endl;
+
 	int root = (node == -1);
 	
 	if(node >= 0) {
