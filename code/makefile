@@ -1,6 +1,6 @@
 include ./boost_home
 
-COPTIMIZE= -g #-O3 -fno-omit-frame-pointer -flto
+COPTIMIZE= -O3 -fno-omit-frame-pointer -flto
 COMPILFLAGS= -std=c++1z -Wno-sign-compare
 
 MAINDIR ?= .

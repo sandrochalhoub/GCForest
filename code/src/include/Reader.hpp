@@ -29,9 +29,32 @@ namespace blossom
 	              [&](vector<string> &data) {
 	                input.addExample(data.begin(), data.end(), target_column);
 	              });
-	  else {
 
-	    if (opt.format == "dl8" or (opt.format == "guess" and ext == "dl8")) {
+          else if (opt.format == "data" or
+                   (opt.format == "guess" and ext == "data")) {
+
+            cout << "data file\n";
+
+            auto names = opt.instance_file.substr(
+                             0, opt.instance_file.find_last_of("/") + 1) +
+                         string("names");
+
+            cout << names << endl;
+
+            csv::read(names,
+                      [&](vector<string> &f) {
+                        input.setFeatures(f.begin(), f.end(), target_column);
+                      },
+                      [&](vector<string> &data) {});
+
+            cout << input << endl;
+            // names::read()
+
+            exit(1);
+
+          } else {
+
+            if (opt.format == "dl8" or (opt.format == "guess" and ext == "dl8")) {
 	      target_column = 0;
 	    }
 

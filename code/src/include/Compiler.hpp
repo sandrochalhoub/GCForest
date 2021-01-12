@@ -83,10 +83,10 @@ public:
   // smallest tree under that branch so far
   vector<int> best;
   vector<int> lb;
+	vector<int> best_feature;
 
   // root of the best tree for this node so far
   vector<int> tree;
-  vector<int> saved_tree;
 
   double start_time;
 
@@ -146,7 +146,7 @@ public:
   // parents
   void updateTree(const int node);
   void updateBest(const int node, const bool terminal = true);
-  int buildTree(const int node);
+  int buildTree(const int node, const int depth);
   void storeSolution();
 
   // branch on node by testing f
@@ -198,6 +198,7 @@ public:
 
 #ifdef PRINTTRACE
   void print_trace();
+  void ptrace();
 #endif
   //@}
 };

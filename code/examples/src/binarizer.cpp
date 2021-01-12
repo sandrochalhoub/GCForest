@@ -38,6 +38,8 @@ void printToFile(WeightedDataset<E_t> &input, DTOptions &opt) {
 
   std::function<bool(const int f)> relevant = [](const int f) { return true; };
 
+
+	
 	BacktrackingAlgorithm<WeightedError, E_t> A(opt);
 
   if (opt.filter) {
@@ -47,27 +49,35 @@ void printToFile(WeightedDataset<E_t> &input, DTOptions &opt) {
   }
 
   auto numRelevantFeature{0};
-  for (auto f{0}; f < input.numFeature(); ++f)
-    numRelevantFeature += A.isRelevant(f);
-  cerr << numRelevantFeature << " x " << input.count(0) << " | "
-       << input.count(1) << endl;
+  for (auto f{0}; f < input.numFeature(); ++f) {
+    numRelevantFeature += relevant(f);
+	}
 
   string ext{opt.output.substr(opt.output.find_last_of(".") + 1)};
+  string dir{opt.output.substr(0, opt.output.find_last_of("/") + 1)};
 
   if (opt.output != "") {
 
     ofstream outfile(opt.output.c_str(), ofstream::out);
 
     if (ext == "csv")
-      input.printDatasetToFile(outfile, opt.delimiter, relevant,
+      input.printDatasetToFile(outfile, opt.delimiter, string(""), relevant,
                                opt.outtarget == 0, true);
-    else
-      input.printDatasetToFile(outfile, string(" "), relevant,
+
+    else if (ext == "data") {
+      input.printDatasetToFile(outfile, string(","), string("."), relevant,
+                               false, false);
+      ofstream namesfile(dir + "names", ofstream::out);
+      namesfile << "0,1." << endl;
+      input.printHeader(namesfile, string(":.\n"), string(""), string(""),
+                        relevant, false);
+    } else
+      input.printDatasetToFile(outfile, string(" "), string(""), relevant,
                                opt.outtarget != -1, false);
 
   } else
-    input.printDatasetToFile(cout, string(" "), relevant, opt.outtarget != -1,
-                             false);
+    input.printDatasetToFile(cout, string(" "), string(""), relevant,
+                             opt.outtarget != -1, false);
 }
 
 int main(int argc, char *argv[]) {
@@ -83,7 +93,13 @@ int main(int argc, char *argv[]) {
   } else {
 
     read_binary(input, opt);
+		
   }
+	
+	// std::function<bool(const int f)> relevant = [](const int f) { return true; };
+	//   input.printDatasetToFile(cout, string(" "), string(""), relevant,
+	//                            opt.outtarget != -1, false);
+	// // cout << input << endl;
 
   ////// PREPROCESING
   if (opt.preprocessing)
