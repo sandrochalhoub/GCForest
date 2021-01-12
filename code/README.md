@@ -16,7 +16,7 @@ bin/blossom <datafile> [options]
 
 to binarize a non-binary dataset:
 
-bin/blossom <datafile> --verbosity 0 --binarize --nosolve --print_ins [--output filename]
+bin/binarizer <datafile> --print_ins [--output filename]
 
 - High level API (Sklearn estimator)
 

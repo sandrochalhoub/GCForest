@@ -25,34 +25,43 @@ public:
 
   void addExample(const vector<int> &x);
 
-  void addBitsetExample(instance& x, const bool y);
+  void addBitsetExample(instance &x, const bool y);
 
   // template <class Algo> void toInc(Algo &algo);
   // template <class Algo> void setup(Algo &algo) const;
-  void preprocess(const bool verbose=false);
+  void preprocess(const bool verbose = false);
 
   size_t input_count(const bool c) const { return data[c].size(); }
   size_t input_example_count() const { return input_count(0) + input_count(1); }
-	
+
   size_t count(const bool c) const { return examples[c].size(); }
   size_t example_count() const { return count(0) + count(1); }
-	
-	size_t numFeature() const { return data[0].empty() ? 0 : data[0][0].size(); }
+
+  size_t numFeature() const { return data[0].empty() ? 0 : data[0][0].size(); }
 
   template <class selector>
   void printDatasetToFile(ostream &outfile, const string &delimiter,
-                          selector not_redundant, const bool first = true,
+                          const string &endline, selector not_redundant,
+                          const bool first = true,
                           const bool header = false) const;
 
-  // void printDatasetToTextFile(ostream &outfile, const bool first = true)
+  template <class selector>
+  void printHeader(ostream &outfile, const string &delimiter,
+                   const string &endline, const string &label,
+                   selector not_redundant, const bool first = true) const;
+
+  // void printDatasetToTextFile(ostream &outfile, const bool first =
+  // true)
   // const;
   // template <class selector>
   // void printDatasetToTextFile(ostream &outfile, selector s,
   //                             const bool first) const;
-  // void printDatasetToCSVFile(ostream &outfile, const string &delimiter = ",",
+  // void printDatasetToCSVFile(ostream &outfile, const string &delimiter
+  // = ",",
   //                            const bool first = false) const;
   // template <class selector>
-  // void printDatasetToCSVFile(ostream &outfile, const string &delimiter = ",",
+  // void printDatasetToCSVFile(ostream &outfile, const string &delimiter
+  // = ",",
   //                            const bool first = false) const;
 
   class List {
@@ -73,19 +82,19 @@ public:
       return _dataset.data[_y][x];
     }
     E_t weight(const int x) const { return _dataset.weight[_y][x]; }
-		
-		bool contain(const int x) const { return _dataset.examples[_y].contain(x); }
 
-                size_t size() const { return _dataset.examples[_y].count(); }
+    bool contain(const int x) const { return _dataset.examples[_y].contain(x); }
 
-              private:
-                const WeightedDataset<E_t> &_dataset;
-                const int _y;
+    size_t size() const { return _dataset.examples[_y].count(); }
+
+  private:
+    const WeightedDataset<E_t> &_dataset;
+    const int _y;
   };
 
-	List operator[](const int y) const { return List(*this, y); } 
-	
-	size_t numInconsistent() const { return suppression_count; }
+  List operator[](const int y) const { return List(*this, y); }
+
+  size_t numInconsistent() const { return suppression_count; }
 
 private:
   vector<instance> data[2];
@@ -151,15 +160,15 @@ inline void WeightedDataset<E_t>::addExample(rIter beg_row, rIter end_row,
 
 template <typename E_t> inline void WeightedDataset<E_t>::preprocess(const bool verbose) {
 
-	auto t{cpu_time()};
+  auto t{cpu_time()};
 
   suppression_count = 0;
   // unsigned long dup_count = 0; // for statistics
 
   for (int y = 0; y < 2; ++y) {
     std::sort(data[y].begin(), data[y].end());
-	}
-	
+  }
+
   if (verbose)
     cout << "d sorttime=" << cpu_time() - t << endl;
 
@@ -170,23 +179,24 @@ template <typename E_t> inline void WeightedDataset<E_t>::preprocess(const bool 
 
   int i[2] = {0, 0};
   E_t wght[2] = {weight[0][i[0]], weight[1][i[1]]};
-	
-	// cout << endl << setw(3) << data[0].size() << " " << setw(3) << data[1].size() << endl;
+
+  // cout << endl << setw(3) << data[0].size() << " " << setw(3) <<
+  // data[1].size() << endl;
 
   while (x[0] != end[0] and x[1] != end[1]) {
-		
-		// cout << endl << setw(3) << i[0] << " " << setw(3) << i[1] << endl;
+
+    // cout << endl << setw(3) << i[0] << " " << setw(3) << i[1] << endl;
 
     for (int y = 0; y < 2; ++y)
       while (x[y] != (end[y] - 1) and *(x[y]) == *(x[y] + 1)) {
-				// cout << "remove (" << y << ") " << i[y] << endl;
+        // cout << "remove (" << y << ") " << i[y] << endl;
         examples[y].remove_back(i[y]);
         ++x[y];
         ++i[y];
         wght[y] += weight[y][i[y]];
       }
-			
-		// cout << setw(3) << i[0] << " " << setw(3) << i[1] << endl;
+
+    // cout << setw(3) << i[0] << " " << setw(3) << i[1] << endl;
 
     if (*x[0] < *x[1]) {
       weight[0][i[0]] = wght[0];
@@ -197,43 +207,43 @@ template <typename E_t> inline void WeightedDataset<E_t>::preprocess(const bool 
       weight[1][i[1]] = wght[1];
       ++x[1];
       ++i[1];
-			wght[1] = weight[1][i[1]];
+      wght[1] = weight[1][i[1]];
     } else {
       if (wght[0] < wght[1]) {
         weight[1][i[1]] = wght[1] - wght[0];
-				
-				// cout << "remove0 " << i[0] << endl;
+
+        // cout << "remove0 " << i[0] << endl;
         examples[0].remove_back(i[0]);
         suppression_count += wght[0];
       } else if (wght[0] > wght[1]) {
         weight[0][i[0]] = wght[0] - wght[1];
-				
-				// cout << "remove1 " << i[1] << endl;
+
+        // cout << "remove1 " << i[1] << endl;
         examples[1].remove_back(i[1]);
         suppression_count += wght[1];
       } else {
         suppression_count += wght[1];
-				
-				// cout << "remove " << i[0] << " and " << i[1] << endl;
-				
+
+        // cout << "remove " << i[0] << " and " << i[1] << endl;
+
         examples[0].remove_back(i[0]);
         examples[1].remove_back(i[1]);
       }
       for (int y = 0; y < 2; ++y) {
         ++x[y];
         ++i[y];
-				
-				assert(i[y] < weight[y].size());
-				
+
+        assert(i[y] < weight[y].size());
+
         wght[y] = weight[y][i[y]];
       }
     }
   }
 
   for (int y = 0; y < 2; ++y) {
-		
-		// cout << "wght[y]: " << wght[y] << endl;
-		
+
+    // cout << "wght[y]: " << wght[y] << endl;
+
     wght[y] = 0;
 
     for (; x[y] != end[y]; ++x[y]) {
@@ -242,81 +252,94 @@ template <typename E_t> inline void WeightedDataset<E_t>::preprocess(const bool 
       wght[y] += weight[y][i[y]];
 
       if (x[y] == end[y] - 1 or *x[y] != *(x[y] + 1)) {
-				weight[y][i[y]] = wght[y];
+        weight[y][i[y]] = wght[y];
         wght[y] = 0;
       } else {
-				
-				// cout << "remove end " << i[y] << endl;
-				
+
+        // cout << "remove end " << i[y] << endl;
+
         examples[y].remove_back(i[y]);
       }
-			++i[y];
+      ++i[y];
     }
   }
-	
-	
-	auto dup_count{input_count(0) + input_count(1) - count(0) - count(1) - 2 * suppression_count};
+
+  auto dup_count{input_count(0) + input_count(1) - count(0) - count(1) -
+                 2 * suppression_count};
   if (verbose)
-    std::cout << "d duplicate=" << dup_count << " suppressed=" << suppression_count
-              << " ratio=" << float(dup_count + 2 * suppression_count) / input_example_count()
+    std::cout << "d duplicate=" << dup_count
+              << " suppressed=" << suppression_count << " ratio="
+              << float(dup_count + 2 * suppression_count) /
+                     input_example_count()
               << " count=" << input_example_count() << " negative=" << count(0)
-              << " positive=" << count(1)
-              << " final_count=" << example_count()
+              << " positive=" << count(1) << " final_count=" << example_count()
               << "\nd preprocesstime=" << cpu_time() - t << endl;
 
+  // for(auto i : examples[0]) {
+  // 	cout << i << " " << weight[0][i] << endl;
+  // }
 
-	// for(auto i : examples[0]) {
-	// 	cout << i << " " << weight[0][i] << endl;
-	// }
-
-	
-	// for(auto y{0}; y<2; ++y) {
-	// 	for(auto i{0}; i<data[y].size(); ++i) {
-	// 		if(not examples[y].contain(i))
-	// 			continue;
-	//
-	// 		int j{i+1};
-	// 		while(j < data[y].size() and not examples[y].contain(j)) {
-	// 			++j;
-	// 		}
-	// 		if(j >= data[y].size())
-	// 			break;
-	//
-	// 		if(data[y][i] == data[y][j]) {
-	// 			cout << y << " " << i << " " << j << endl;
-	// 		}
-	// 		// cout << examples[y][i-1] << " " << examples[y][i] << " " << data[y][examples[y][i-1]] << endl;
-	// 		// if(data[y][examples[y][i-1]] == data[y][examples[y][i]]) {
-	// 		// 	cout << examples[y][i-1] << " " << examples[y][i] << " " << data[y][examples[y][i]] << endl;
-	// 		// }
-	// 		assert(data[y][i] != data[y][j]);
-	// 	}
-	// }
-	//   // cout << suppression_count << endl;
+  // for(auto y{0}; y<2; ++y) {
+  // 	for(auto i{0}; i<data[y].size(); ++i) {
+  // 		if(not examples[y].contain(i))
+  // 			continue;
+  //
+  // 		int j{i+1};
+  // 		while(j < data[y].size() and not examples[y].contain(j)) {
+  // 			++j;
+  // 		}
+  // 		if(j >= data[y].size())
+  // 			break;
+  //
+  // 		if(data[y][i] == data[y][j]) {
+  // 			cout << y << " " << i << " " << j << endl;
+  // 		}
+  // 		// cout << examples[y][i-1] << " " << examples[y][i] << " " <<
+  // data[y][examples[y][i-1]] << endl;
+  // 		// if(data[y][examples[y][i-1]] == data[y][examples[y][i]]) {
+  // 		// 	cout << examples[y][i-1] << " " << examples[y][i] << " "
+  // <<
+  // data[y][examples[y][i]] << endl;
+  // 		// }
+  // 		assert(data[y][i] != data[y][j]);
+  // 	}
+  // }
+  //   // cout << suppression_count << endl;
 }
 
 template <typename E_t>
 template <class selector>
-void WeightedDataset<E_t>::printDatasetToFile(ostream &outfile,
-                                              const string &delimiter,
-                                              selector not_redundant,
-                                              const bool first,
-                                              const bool header) const {
-
-  if (header) {
-    if (first)
-      outfile << "label";
-    for (auto x{0}; x < data[0][0].size(); ++x) {
+void WeightedDataset<E_t>::printHeader(
+    ostream &outfile, const string &delimiter, const string &endline,
+    const string &label, selector not_redundant, const bool first) const {
+  if (first)
+    outfile << label;
+  for (auto x{0}; x < data[0][0].size(); ++x) {
+    if (not_redundant(x)) {
       if (first)
         outfile << delimiter << "f" << (x + 1);
       else
         outfile << "f" << (x + 1) << delimiter;
     }
-    if (not first)
-      outfile << "target\n";
+  }
+  if (not first)
+    outfile << label;
+  outfile << endline;
+}
+
+template <typename E_t>
+template <class selector>
+void WeightedDataset<E_t>::printDatasetToFile(
+    ostream &outfile, const string &delimiter, const string &endline,
+    selector not_redundant, const bool first, const bool header) const {
+
+  if (header) {
+    printHeader(outfile, delimiter, string(endline + "\n"),
+                (first ? string("label") : string("target")), not_redundant,
+                first);
   }
 
-  for (auto y{0}; y < 2; ++y) {		
+  for (auto y{0}; y < 2; ++y) {
     for (auto x : examples[y]) {
       if (first)
         outfile << y;
@@ -330,7 +353,7 @@ void WeightedDataset<E_t>::printDatasetToFile(ostream &outfile,
       }
       if (not first)
         outfile << y;
-      outfile << endl;
+      outfile << endline << endl;
     }
   }
 }
