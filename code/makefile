@@ -31,7 +31,7 @@ PLIBOBJ = $(patsubst $(SRC)/%, $(OBJ)/%, $(PLIBAUX))
 
 
 ## Compile options
-%.o:			CFLAGS +=$(COPTIMIZE) -fPIC $(COMPILFLAGS) #-ggdb -D DEBUG
+%.o:			CFLAGS +=$(COPTIMIZE) $(COMPILFLAGS) #-ggdb -D DEBUG
 %.op:			CFLAGS +=$(COPTIMIZE) -pg -ggdb -D NDEBUG
 %.od:			CFLAGS +=-O0 -ggdb -D DEBUG -D INVARIANTS #-D_GLIBCXX_DEBUG -D_GLIBCXX_DEBUG_PEDANTIC
 %.or:			CFLAGS +=$(COPTIMIZE) -D NDEBUG

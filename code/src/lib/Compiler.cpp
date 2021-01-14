@@ -245,42 +245,6 @@ solution_root = buildTree(0, 0);
 
 template <typename E_t>
 int Compiler<E_t>::buildTree(const int node, const int depth) {
-
-  // assert(node >= 0);
-
-  // if (depth > numFeature()) {
-  //   cout << "parent[4504]: " << parent[4504] << endl;
-  //   cout << "parent[4506]: " << parent[4506] << endl;
-  //   cout << "parent[4502]: " << parent[4502] << endl;
-  //
-  //   cout << "child[0][4504]: " << child[0][4504] << endl;
-  //   cout << "child[0][4506]: " << child[0][4506] << endl;
-  //   cout << "child[0][4502]: " << child[0][4502] << endl;
-  //
-  //   cout << "child[1][4504]: " << child[1][4504] << endl;
-  //   cout << "child[1][4506]: " << child[1][4506] << endl;
-  //   cout << "child[1][4502]: " << child[1][4502] << endl;
-  //
-  // 		cout << 11 << endl;
-  // 		ptrace();
-  // 		cout << 22 << endl;
-  //
-  // 		int n{4502};
-  // 		while(n) {
-  // 			n = parent[n];
-  // 			cout << n << endl;
-  // 		}
-  // }
-
-  // if (depth > numFeature())
-    
-
-  // assert(depth <= numFeature());
-  // for(auto i{0}; i<depth; ++i) {
-  // 	cout << " ";
-  // }
-  // cout << node << endl;
-
   int root = (node == -1);
 
   if (node >= 0) {
