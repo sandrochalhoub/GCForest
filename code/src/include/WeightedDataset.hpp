@@ -233,9 +233,12 @@ template <typename E_t> inline void WeightedDataset<E_t>::preprocess(const bool 
         ++x[y];
         ++i[y];
 
-        assert(i[y] < weight[y].size());
+        // assert(i[y] < weight[y].size());
 
-        wght[y] = weight[y][i[y]];
+				if(x[y] != end[y])
+					wght[y] = weight[y][i[y]];
+				else
+					wght[y] = 0;
       }
     }
   }
