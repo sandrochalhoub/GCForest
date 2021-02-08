@@ -1513,8 +1513,8 @@ bool BacktrackingAlgorithm<ErrorPolicy, E_t>::fail() {
 #endif
 
         return true;
+      }
     }
-  }
   }
 
   return false;

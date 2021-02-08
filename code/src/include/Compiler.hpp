@@ -157,6 +157,7 @@ public:
 
   // returns true if this is a pseudo-leaf
   bool grow(const int node);
+	
 	// returns true if this is not a leaf
   bool setChild(const int node, const bool branch, const int c);
 
