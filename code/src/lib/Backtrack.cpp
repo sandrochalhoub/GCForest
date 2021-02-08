@@ -910,7 +910,9 @@ bool BacktrackingAlgorithm<ErrorPolicy, E_t>::backtrack() {
         // current_error >= ub_error or
         (lt<E_t>(0,ub_error) and equal<E_t>(max_error[backtrack_node], 0)) or
         no_feature(backtrack_node) or
-        max_entropy(backtrack_node, *feature[backtrack_node]));
+        max_entropy(backtrack_node, *feature[backtrack_node])
+					or ( options.bounding and fail(backtrack_node) )
+					);
 
     // backtrack again
     if (dead_end) {
@@ -1302,9 +1304,9 @@ bool BacktrackingAlgorithm<ErrorPolicy, E_t>::search() {
     if (blossom.empty()) {
       if (not notify_solution(sat))
         break;
-    } else if (options.bounding and sat and fail()) {
-      if (not backtrack())
-        break;
+    // } else if (options.bounding and sat and fail()) {
+    //   if (not backtrack())
+    //     break;
     } else {
       expend();
     }
@@ -1467,54 +1469,79 @@ void BacktrackingAlgorithm<ErrorPolicy, E_t>::clearExamples() {
   error_policy.clear_examples();
 }
 
-template <template<typename> class ErrorPolicy, typename E_t>
-bool BacktrackingAlgorithm<ErrorPolicy, E_t>::fail() {
-  for (auto b : blossom) {
+template <template <typename> class ErrorPolicy, typename E_t>
+bool BacktrackingAlgorithm<ErrorPolicy, E_t>::fail(const int b) const {
 
+#ifdef PRINTTRACE
+  if (PRINTTRACE)
+    cout << "bound from " << b << endl;
+#endif
+
+  E_t lbe{0};
+  auto lbs{0};
+
+  auto p{b};
+  auto c{b};
+  while (p > 0) {
+    c = p;
+    p = parent[c];
+
+    E_t ube{max_error[p]};
+    auto ubs{max_size[p]};
+
+    for (auto i{0}; i < 2; ++i)
+      if (child[i][p] >= 0) {
+        lbe += min_error[child[i][p]];
+        if (child[i][p] != c)
+          lbs += min_size[child[i][p]];
+        ++lbs;
+      }
 #ifdef PRINTTRACE
     if (PRINTTRACE)
-      cout << "bound from " << b << endl;
+      cout << "parent " << p << " (ub=" << ube << "/" << ubs << ", lb=" << lbe
+           << "/" << lbs << ") ["
+           << (child[0][p] >= 0 ? min_error[child[0][p]] : 0) << "/"
+           << (child[1][p] >= 0 ? min_error[child[1][p]] : 0) << " | "
+           << (child[0][p] >= 0 ? min_size[child[0][p]] : 1) << "/"
+           << (child[1][p] >= 0 ? min_size[child[1][p]] : 1) << "]\n";
 #endif
 
-    E_t lbe{0};
-    auto lbs{0};
-
-    auto p{b};
-    auto c{b};
-    while (p > 0) {
-      c = p;
-      p = parent[c];
-
-      E_t ube{max_error[p]};
-      auto ubs{max_size[p]};
-
-      for (auto i{0}; i < 2; ++i)
-        if (child[i][p] >= 0) {
-          lbe += min_error[child[i][p]];
-          if (child[i][p] != c)
-            lbs += min_size[child[i][p]];
-          ++lbs;
-        }
+    if (lt<E_t>(ube, lbe) or
+        (equal<E_t>(lbe, ube) and (lbs >= ubs or not size_matters))) {
 #ifdef PRINTTRACE
       if (PRINTTRACE)
-        cout << "parent " << p << " (ub=" << ube << "/" << ubs << ", lb=" << lbe
-             << "/" << lbs << ") ["
-             << (child[0][p] >= 0 ? min_error[child[0][p]] : 0) << "/"
-             << (child[1][p] >= 0 ? min_error[child[1][p]] : 0) << " | "
-             << (child[0][p] >= 0 ? min_size[child[0][p]] : 1) << "/"
-             << (child[1][p] >= 0 ? min_size[child[1][p]] : 1) << "]\n";
+        cout << "fail!! (" << b << " " << p << " max size = " << max_size[b]
+             << ") b = " << backtrack_node << "\n";
 #endif
 
-      if (lt<E_t>(ube, lbe) or (equal<E_t>(lbe, ube) and (lbs >= ubs or not size_matters))) {
-#ifdef PRINTTRACE
-        if (PRINTTRACE)
-          cout << "fail!! (" << b << " " << p << " max size = " << max_size[b]
-               << ") b = " << backtrack_node << "\n";
-#endif
+      // if (blossom.count() > 1) {
+      //   cout << "fail!! (" << b << " " << parent[b] << " " << p
+      //        << " blossom = " << blossom << ") seq =";
+      //
+      //   for (auto d : decision) {
+      //     cout << " " << d;
+      //   }
+      //
+      //   cout << "\n";
+      //
+      //   if(parent[b] != decision.back()) {
+      //   	assert(fail(decision.back()));
+      //   }
+      // }
 
-        return true;
-      }
+      return true;
     }
+  }
+
+  return false;
+}
+
+template <template <typename> class ErrorPolicy, typename E_t>
+bool BacktrackingAlgorithm<ErrorPolicy, E_t>::fail() const {
+  for (auto b : blossom) {
+
+    if (fail(b))
+      return true;
   }
 
   return false;

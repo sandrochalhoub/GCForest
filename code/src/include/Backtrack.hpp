@@ -364,7 +364,8 @@ private:
   void store_best_tree(const int node, const bool global);
 
   // lower bound, maybe?
-  bool fail();
+  bool fail() const;
+  bool fail(const int b) const;
 
   // as name suggests
   bool notify_solution(bool &improvement);

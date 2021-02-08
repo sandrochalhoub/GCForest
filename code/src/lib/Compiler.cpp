@@ -338,6 +338,7 @@ void Compiler<E_t>::updateBest(const int node, const bool terminal) {
 }
 
 template <typename E_t> bool Compiler<E_t>::fail() {
+
   if (decision.empty())
     return lb[0] >= best[0];
   auto node{decision.back()};
