@@ -32,8 +32,8 @@ public:
   /*!@name Parameters*/
   //@{
   /// Memory management for storing trees
-  Wood wood;
-	int solution_root{-1};
+  Wood<E_t> wood;
+  int solution_root{-1};
 
   /// Command line options
   DTOptions &options;

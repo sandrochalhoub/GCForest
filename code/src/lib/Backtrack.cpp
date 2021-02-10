@@ -647,22 +647,29 @@ void BacktrackingAlgorithm<ErrorPolicy, E_t>::cleaning() {
   if (solution_root < 0) {
     solution_root = wood.grow();
     wood.setFeature(solution_root, *feature[0]);
+
     int f[2] = {*feature[0] + num_feature, *feature[0]};
 
-    for (auto i{0}; i < 2; ++i)
+    for (auto i{0}; i < 2; ++i) {
       wood.setChild(solution_root, i, get_feature_frequency(1, 0, f[i]) >
                                           get_feature_frequency(0, 0, f[i]));
+      // wood.setCount(solution_root, i, P[i][0].count());
+      // wood.setCount(solution_root, i, error_policy.get_total(i,0));
+      wood.setCount(solution_root, i, get_feature_frequency(i, 0, f[1]));
+    }
 
     ub_error = get_feature_error(0, *feature[0]);
     ub_size = 3;
   }
 }
 
-template <template<typename> class ErrorPolicy, typename E_t>
-Tree BacktrackingAlgorithm<ErrorPolicy, E_t>::getSolution() const { return wood[solution_root]; }
+template <template <typename> class ErrorPolicy, typename E_t>
+Tree<E_t> BacktrackingAlgorithm<ErrorPolicy, E_t>::getSolution() {
+  return wood[solution_root];
+}
 
 template <template <typename> class ErrorPolicy, typename E_t>
-Tree BacktrackingAlgorithm<ErrorPolicy, E_t>::saveSolution() {
+Tree<E_t> BacktrackingAlgorithm<ErrorPolicy, E_t>::saveSolution() {
   auto t{solution_root};
   solution_root = -1;
   return wood[t];
@@ -1565,6 +1572,10 @@ int BacktrackingAlgorithm<ErrorPolicy, E_t>::copy_solution(const int node) {
         assert(c >= 0);
 
         wood.setChild(root, i, c);
+
+        // wood.setCount(root, i, P[i][node].count());
+        // wood.setCount(root, i, error_policy.get_total(i,node));
+        wood.setCount(root, i, get_feature_frequency(i, node, *feature[node]));
       }
 
       return root;
@@ -1597,6 +1608,11 @@ void BacktrackingAlgorithm<ErrorPolicy, E_t>::store_best_tree(const int node, co
     } else {
       wood.setChild(best_tree[node], i, child[i][node] == -1);
     }
+
+    // wood.setCount(best_tree[node], i, P[i][node].count());
+    // wood.setCount(best_tree[node], i, error_policy.get_total(i,node));
+    wood.setCount(best_tree[node], i,
+                  get_feature_frequency(i, node, *feature[node]));
   }
 }
 

@@ -10,7 +10,7 @@
 namespace blossom {
 
 struct WeakClassifier {
-  Tree T;
+  Tree<double> T;
   double self_error;
   double alpha;
 

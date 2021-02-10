@@ -78,6 +78,8 @@ public:
   int intarget;
   int outtarget;
 
+  double pruning;
+
   DTOptions(){};
   DTOptions(const DTOptions &opt)
       : cmdline(opt.cmdline), instance_file(opt.instance_file),
@@ -96,7 +98,7 @@ public:
         mindepth(opt.mindepth), minsize(opt.minsize),
         preprocessing(opt.preprocessing), progress(opt.progress),
         delimiter(opt.delimiter), intarget(opt.intarget),
-        outtarget(opt.outtarget) {}
+        outtarget(opt.outtarget), pruning(opt.pruning) {}
 
   ostream &display(ostream &os);
 };

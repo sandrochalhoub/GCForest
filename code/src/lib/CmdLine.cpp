@@ -155,7 +155,7 @@ DTOptions blossom::parse_dt(int argc, char *argv[]) {
                      "switch tree verification on", false);
 
   cmd.add<SwitchArg>(opt.verified, "", "noverification",
-                     "switch tree verification on", true);
+                     "switch tree verification off", true);
 
   cmd.add<SwitchArg>(opt.bounding, "", "bounding", "switch bound reasoning on",
                      false);
@@ -267,6 +267,9 @@ DTOptions blossom::parse_dt(int argc, char *argv[]) {
   // cmd.add<ValueArg<string>>(opt.delimiter, "", "delimiter",
   //                           "delimiter used when writing a csv file", false,
   //                           ",", "string");
+
+  cmd.add<ValueArg<double>>(opt.pruning, "", "pruning", "pruning (maximum)",
+                            false, 0, "double");
 
   cmd.parse(argc, argv);
   return opt;

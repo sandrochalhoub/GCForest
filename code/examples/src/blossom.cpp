@@ -76,10 +76,6 @@ int run_algorithm(DTOptions &opt) {
 
   Tree sol = A.getSolution();
 
-  if (opt.print_sol) {
-    cout << sol << endl;
-  }
-
   if (opt.verified) {
 
     E_t tree_error = 0;
@@ -95,6 +91,44 @@ int run_algorithm(DTOptions &opt) {
          << std::setw(0) << "p solution verified (" << tree_error << " / "
          << A.error() << ")" << endl;
   }
+
+  if (opt.pruning) {
+
+		cout << "p post-pruning (additional error up to " << opt.pruning << ")\n";
+		
+		// cout << sol << endl;
+    
+		size_t total[2] = {input.total(0), input.total(1)};
+    sol.prune(total, static_cast<E_t>(opt.pruning), false);
+
+    E_t tree_error = 0;
+    for (auto y{0}; y < 2; ++y) {
+      auto X{input[y]};
+      for (auto i : X)
+        tree_error += (sol.predict(X[i]) != y) * X.weight(i);
+    }
+		
+	  // double t{cpu_time() - start_time};
+
+		double accuracy{1.0 - static_cast<double>(tree_error + input.numInconsistent())/static_cast<double>(input.input_example_count())};
+		
+
+	  cout << left << "d accuracy=" << setw(6) << setprecision(4)
+	       << fixedwidthfloat(accuracy, 4) << " error=" << setw(4)
+	       << tree_error + input.numInconsistent() << " depth=" << setw(3) << sol.depth()
+	       << " size=" << setw(3) << sol.size() 
+	       // << " time=" << setprecision(max(4, static_cast<int>(log10(t))))
+	       // << fixedwidthfloat(t, 3) << right
+					 << endl;
+
+    // cout << "after pruning: " << tree_error << endl;
+    // cout << sol.size() << " " << sol.depth() << endl;
+  }
+	
+  if (opt.print_sol) {
+    cout << sol << endl;
+  }
+
   return 1;
 }
 

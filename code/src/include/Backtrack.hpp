@@ -121,8 +121,8 @@ public:
 
   void minimize_error_depth_size();
 
-  Tree getSolution() const;
-  Tree saveSolution();
+  Tree<E_t> getSolution();
+  Tree<E_t> saveSolution();
 
   E_t error() const;
   double accuracy() const;
@@ -159,7 +159,7 @@ private:
   /*!@name Parameters*/
   //@{
   /// Argument
-  Wood wood;
+  Wood<E_t> wood;
   int num_feature;
 
   vector<vector<int>> example[2];

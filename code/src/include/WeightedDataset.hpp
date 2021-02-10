@@ -37,6 +37,9 @@ public:
   size_t count(const bool c) const { return examples[c].size(); }
   size_t example_count() const { return count(0) + count(1); }
 
+  E_t total(const bool c) const { return total_weight[c]; }
+  E_t total() const { return total_weight[0] + total_weight[1]; }
+
   size_t numFeature() const { return data[0].empty() ? 0 : data[0][0].size(); }
 
   template <class selector>
@@ -101,12 +104,15 @@ private:
   vector<E_t> weight[2];
   SparseSet examples[2];
 
+  E_t total_weight[2]{0, 0};
+
   size_t suppression_count{0};
 };
 
 template <typename E_t>
 void WeightedDataset<E_t>::addBitsetExample(instance &x, const bool y) {
   data[y].push_back(x);
+  ++total_weight[y];
 }
 
 template <typename E_t>
@@ -122,6 +128,8 @@ inline void WeightedDataset<E_t>::addExample(rIter beg_row, rIter end_row,
   auto width{end_row - beg_row};
   auto column{(width + target) % width};
   auto y{*(beg_row + column)};
+
+  ++total_weight[y];
 
   if (data[y].size() == data[y].capacity()) {
     data[y].reserve(2 * data[y].capacity() + 2 * (data[y].empty()));
@@ -277,6 +285,9 @@ template <typename E_t> inline void WeightedDataset<E_t>::preprocess(const bool 
               << " count=" << input_example_count() << " negative=" << count(0)
               << " positive=" << count(1) << " final_count=" << example_count()
               << "\nd preprocesstime=" << cpu_time() - t << endl;
+
+  for (auto i{0}; i < 2; ++i)
+    total_weight[i] -= suppression_count;
 
   // for(auto i : examples[0]) {
   // 	cout << i << " " << weight[0][i] << endl;
