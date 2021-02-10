@@ -74,7 +74,7 @@ int run_algorithm(DTOptions &opt) {
   } else
     A.minimize_error();
 
-  Tree sol = A.getSolution();
+  Tree<E_t> sol = A.getSolution();
 
   if (opt.verified) {
 
