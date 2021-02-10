@@ -99,7 +99,12 @@ int run_algorithm(DTOptions &opt) {
 		// cout << sol << endl;
     
 		size_t total[2] = {input.total(0), input.total(1)};
-    sol.prune(total, static_cast<E_t>(opt.pruning), false);
+		
+		E_t limit{static_cast<E_t>(opt.pruning) - A.error() - input.numInconsistent()};
+		if(limit < 0)
+			limit = 0;
+		
+    sol.prune(total, limit, false);
 
     E_t tree_error = 0;
     for (auto y{0}; y < 2; ++y) {
