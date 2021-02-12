@@ -31,6 +31,9 @@
 \DeclareMathOperator*{\argmax}{arg\,max}
 \DeclareMathOperator*{\argmin}{arg\,min}
 
+\newcommand*{\Perm}[2]{{}^{#1}\!P_{#2}}%
+\newcommand*{\Comb}[2]{{}^{#1}C_{#2}}%
+
 
 \def\HiLi{\leavevmode\rlap{\hbox to \hsize{\color{yellow!50}\leaders\hrule height .8\baselineskip depth .5ex\hfill}}}
 
@@ -178,6 +181,10 @@
 	\SetKwFunction{binoct}{binOCT}
 	\SetKwFunction{iti}{ITI}
 	\SetKwFunction{bfswee}{Blossom ($3/4$)}
+	\SetKwFunction{bfs}{Blossom}
+	\SetKwFunction{bfss}{Blossom (pruning)}
+	\SetKwFunction{bfsm}{Blossom (pruning)}
+	\SetKwFunction{bfsh}{Blossom (with pruning)}
 	
 	
 	
@@ -205,7 +212,9 @@
 
 
 \begin{abstract}
-	In this paper we introduce a relatively \emph{simple} algorithm: \budalg, that is as memory and time efficient as heuristics, and yet more efficient than most exact methods on most data sets. State-of-the-art exact methods often have poor anytime behavior, and hardly scale to deep trees. In our experiments, we found that they are typically orders of magnitude slower than the propposed algorithm to compute classifiers that significantly improve upon greedy heuristics. 
+	In this paper we introduce a relatively {simple} algorithm to learn optimal decision trees of bounded depth. This algorithm, \budalg, is as memory and time efficient as heuristics, and yet more efficient than most exact methods on most data sets. State-of-the-art exact methods often have poor anytime behavior, and hardly scale to deep trees. In our experiments, we found that they are typically orders of magnitude slower than the proposed algorithm to compute optimally accurate classifiers of a given depth.
+On the other hand, \budalg\ finds, without significant computational overhead, solutions comparable to those returned by standard greedy heuristics, and can quickly improve their accuracy when given more computation time.
+% the first solution found by \budalg\ is comparable to those found by standard greedy heuristics and that significantly improve upon greedy heuristics. On the 
 \end{abstract}
 
 \section{Introduction}
@@ -234,7 +243,7 @@ This algorithm can be seen as an instance of the more general framework introduc
 
 In a nutshell, \budalg emulates the dynamic programming algorithm \dleight~\cite{dl8}, while always expending non-terminal branches (a.k.a ``buds'') before optimizing grown branches. As a result, this algorithm is in a sense strictly better than both the standard dynamic programming approach (because it is anytime and at least as fast) and than classic heuristics (because it emulates them during search, without significant overhead).
 %but explores the search space so as to improve its anytime behaviour.
-Our experimental results show that it outperforms the state of the art, to the exception of \murtree on relatively shallow trees (typically for maximum depth up to 4), for which this its more sophisticated (albeit complex) algorithmic features can pay off.
+Our experimental results show that it outperforms the state of the art, to the exception of \murtree on relatively shallow trees (typically for maximum depth up to 4), for which its more sophisticated (albeit more complex) algorithmic features can pay off.
 In particular, on data sets that \dleight can tackle, \budalg can always find classifiers at least as accurate faster, and when the former can prove optimality, the latter does it orders of magnitude faster.
 
 
@@ -307,7 +316,7 @@ We denote the union of all datapoints by $\allex = \negex \cup \posex$.
 A \emph{binary decision tree} is a tree whose 
 %leaves are labelled with either $\posclass$ or $\negclass$, 
 internal vertices are labelled with features and the two edges exiting a node labelled with $\afeat$ are respectively labelled with $\afeat$ and $\bar{\afeat}$.
-A \emph{branch} of a decision tree can therefore be identified to the set of labels on the corresponding edges.
+A \emph{branch} of a decision tree can therefore be identified to the ordered set of labels on the corresponding edges.
 %To a \emph{branch} of a decision tree we can associate the set of labels on the corresponding edges.
 %conjunction of features which are on the path from the root to a leaf. If the feature vertex is exited by a $1$-edge, the feature is positive in the conjunction, otherwise it is negative.
 
@@ -321,10 +330,10 @@ Given a data set $\langle \negex,\posex \rangle$, we can associate a data set $\
 \end{eqnarray*}
 
 We write $\grow{\abranch}{\afeat}$ as a shortcut for $\abranch \cup \{\afeat\}$.
-The classification error for branch $\abranch$ is $\error[\abranch]=\min(|\negex(\abranch)|, |\posex(\abranch)|)$
-%Let $\error[\abranch]$ be $\min(|\negex(\abranch)|, |\posex(\abranch)|)$, 
-and we write $\error[\abranch,\afeat]$ for $\error[\grow{\abranch}{\afeat}] + \error[\grow{\abranch}{\bar{\afeat}}]$.
-%A branch \abranch\ is said \emph{pure} iff $\error[\abranch]=0$.
+The classification error for branch $\abranch$ is $\error[\abranch]=\min(|\negex(\abranch)|, |\posex(\abranch)|)$.
+% %Let $\error[\abranch]$ be $\min(|\negex(\abranch)|, |\posex(\abranch)|)$,
+% and we write $\error[\abranch,\afeat]$ for $\error[\grow{\abranch}{\afeat}] + \error[\grow{\abranch}{\bar{\afeat}}]$.
+% %A branch \abranch\ is said \emph{pure} iff $\error[\abranch]=0$.
 
 \medskip
 
@@ -376,23 +385,54 @@ The solver DL8.5 is a dynamic programming algorithm for the minimum error bounde
 	Let $\numex = |\posex| + |\negex|$, $\numfeat = |\features|$, and let $\mdepth$ be the maximum depth.
 	We can safely assume $\mdepth \leq \numfeat$ (otherwise all features can be tested on every branch) and $\mdepth \leq \log \numex$ (otherwise we could have one distinct branch per datapoint), and it is often assumed that
 	 $\mdepth \ll \numfeat$ and $\mdepth \ll \log \numex$. 
-	%The number of recursive calls for Algorithm~\ref{alg:dynprog} is $\Theta(2^{\mdepth-1}{\numfeat \choose \mdepth})$, to explore at most ${\numfeat \choose \mdepth}$ combinations of features for at most $2^{\mdepth-1}$ branches. 
-	%The number of recursive calls for Algorithm~\ref{alg:dynprog} is $\Theta(2^{\mdepth}{\numfeat \choose \mdepth})$, to explore $\Theta({\numfeat \choose \mdepth})$ combinations of features for $\Theta(2^{\mdepth})$ branches. 
-	The number of recursive calls for Algorithm~\ref{alg:dynprog} is $\Theta((2\numfeat)^{\mdepth})$. 
-	Moreover, at each call, the data set must be split into two subsets. However, this splitting procedure can be done in time $\Theta(\numex)$ amortised over a given level of a particular decision tree, since the data sets associated to branches up to a given level form a partition of the original data set.
-	Therefore, since Algorithm~\ref{alg:dynprog} independently explores $\Theta({\numfeat \choose \mdepth})$ sets of branches of depth $\mdepth$, it runs in
-	$\Theta((\numex+2^\mdepth){\numfeat \choose \mdepth})$ time (hence $O(\numex\numfeat^\mdepth)$ time, since we suppose $\mdepth \ll \numfeat$ and $\mdepth \ll \log \numex$).
-	
-	Note that this is a significant improvement with respect to the $\Theta(\numfeat^{2^{\mdepth}})$ trees (with redundant branches) explored by a brute-force algorithm.
-	 %
-	 % a brute-force algorithm, since the total number of decision trees of depth $\mdepth$ with $\numfeat$ attributes is $\prod_{x=1}^{\mdepth}(1-x+\numfeat)^{2^{\mdepth}}$. If we assume $\mdepth \in O(1)$, this is $\Theta(\numfeat^{2^{\mdepth}})$ distinct trees.
-	 %
+	 
+	 
+	 Algorithm~\ref{alg:dynprog} explores, in the worst case, $2^{\mdepth}$ branches for each of the $\Perm{\numfeat}{\mdepth}$ permutations of $\mdepth$ features in $\features$ for a total of $\Theta(\Perm{\numfeat}{\mdepth}2^{\mdepth})$ recursive calls.\footnote{More than half of the calls are at depth $\mdepth$ so counting leaves is sufficient.} 
+	 
+	 Note that this is a significant improvement with respect to the $\Theta(\numfeat^{2^{\mdepth}})$ trees (with redundant branches) explored by a brute-force algorithm.
+	 
+	 Moreover, at each call, the data set must be split into two subsets. This takes time linear in the size of the data set. However, consider an ordered set of $\mdepth$ features and the $2^{\mdepth-1}$ branches testing these features in that order. Their corresponding data sets form a partition of the original data set. Therefore, the $\mdepth$-th split can done in $\Theta(\numex)$ time amortized over these $2^{\mdepth-1}$ branches.
+	 It follows that the overall time complexity for splitting the data set is in $\Theta(\Perm{\numfeat}{\mdepth}\numex)$.\footnote{Again, more than half of the splits are at depth $\mdepth$.}
+	 
+	 
+		 %
+	 % for a ``level'' $l \in [1,\mdepth]$, the $2^l$ branches of length $l$ and testing the same feature in the same order (e.g., the branches $\{a,b\}$ Figure~\ref{fig:searchtree}).
+	 % The data sets associated to these branches form a partition of the original data set. Therefore, the $l$-th split is done in $\Theta(\numex)$ time amortized over these $2^l$ branches.
+	 % It follows that the overall time complexity for splitting the data set is in $\Theta(\Perm{\numfeat}{\mdepth}\numex)$.
+	 
+	 Algorithm~\ref{alg:dynprog} therefore runs in $\Theta((\numex+2^\mdepth){\Perm{\numfeat}{\mdepth}}) \subset O((\numex + 2^{\mdepth})\numfeat^\mdepth)$ time. Moreover, with the above assumptions on $\numex,\numfeat$ and $\mdepth$, $O(\numex\numfeat^\mdepth)$ is a good approximation of its worst-case time complexity.
+	 
+	 
+	 \medskip
+	 
+	 Notice that computing an optimal decision tree of bounded depth (for any polynomially computable definition of ``optimal'') is therefore polynomial unless the maximum depth is an input, and is not bounded. 
+	 
+	 
+	 
+	%  However, for a given level $l \in [1,\mdepth]$, this splitting procedure can be done in time $\Theta(\numex)$ amortised over the $2^l$ branches
+	%
+	%  %a given level of a particular decision tree,
+	%  since the data sets associated to branches up to a given level form a partition of the original data set.
+	%
+	%
+	%
+	% %The number of recursive calls for Algorithm~\ref{alg:dynprog} is $\Theta(2^{\mdepth-1}{\numfeat \choose \mdepth})$, to explore at most ${\numfeat \choose \mdepth}$ combinations of features for at most $2^{\mdepth-1}$ branches.
+	% %The number of recursive calls for Algorithm~\ref{alg:dynprog} is $\Theta(2^{\mdepth}{\numfeat \choose \mdepth})$, to explore $\Theta({\numfeat \choose \mdepth})$ combinations of features for $\Theta(2^{\mdepth})$ branches.
+	% The number of recursive calls for Algorithm~\ref{alg:dynprog} is $\Theta(2^{\mdepth}\numfeat^{\mdepth})$.
+	% Moreover, at each call, the data set must be split into two subsets. However, this splitting procedure can be done in time $\Theta(\numex)$ amortised over a given level of a particular decision tree, since the data sets associated to branches up to a given level form a partition of the original data set.
+	% Therefore, since Algorithm~\ref{alg:dynprog} independently explores $\Theta({\numfeat \choose \mdepth})$ sets of branches of depth $\mdepth$, it runs in
+	% $\Theta((\numex+2^\mdepth){\numfeat \choose \mdepth})$ time (hence $O(\numex\numfeat^\mdepth)$ time, since we suppose $\mdepth \ll \numfeat$ and $\mdepth \ll \log \numex$).
+	%
+	% Note that this is a significant improvement with respect to the $\Theta(\numfeat^{2^{\mdepth}})$ trees (with redundant branches) explored by a brute-force algorithm.
+	%  %
+	%  % a brute-force algorithm, since the total number of decision trees of depth $\mdepth$ with $\numfeat$ attributes is $\prod_{x=1}^{\mdepth}(1-x+\numfeat)^{2^{\mdepth}}$. If we assume $\mdepth \in O(1)$, this is $\Theta(\numfeat^{2^{\mdepth}})$ distinct trees.
+	%  %
 
 
 
 \section{An Anytime Algorithm}
 
-In a nutshell the algorithm we propose works as follows:
+In a nutshell the algorithm we propose (Algorithm~\ref{alg:bud}) works as follows:
 
 \medskip
 
@@ -441,7 +481,9 @@ Notice that to simplify the pseudo-code, we use branches to directly index array
 				We show that this is true for Algorithm~\ref{alg:bud} by recursion on the maximum depth $\mdepth$.
 				For $\mdepth = 0$, both algorithm return $\error[\emptyset]=\min(|\negex|, |\posex|)$.
 				
-				Now suppose that for $\mdepth \leq d$ every branch $\abranch$ explored by \dynprog (a recursive call ends on this branch) is also explored by \budalg ($\best[\abranch]$ is set in Line~\ref{line:best}), and let $\mdepth=d+1$. Without loss of generality, we can take an arbitrary branch $\abranch$ of length $d$ and show that the same extentions of $\abranch$ are explored by both algorithms.
+				Now suppose that for $\mdepth \leq d$ \dynprog and \budalg explore exactly the same set of branches: a recursive call of \dynprog ends on the branch $\abranch$ if and only if $\best[\abranch]$ is set in Line~\ref{line:best} of \budalg.
+				%every branch $\abranch$ explored by \dynprog (a recursive call ends on this branch) is also explored by \budalg ($\best[\abranch]$ is set in Line~\ref{line:best}), and 
+				Now, let $\mdepth=d+1$. Without loss of generality, we can take an arbitrary branch $\abranch$ of length $d$ and show that the same extentions of $\abranch$ are explored by both algorithms.
 				If $\error[\abranch]=0$, then no extension of $\abranch$ is explored by either algorithm.
 				Otherwise, if $\afeat \not\in \abranch$ and $\bar{\afeat}\not\in \abranch$, then 
 				\dynprog explores the branches $\grow{\abranch}{\afeat}$ and $\grow{\abranch}{\bar{\afeat}}$.
@@ -960,7 +1002,7 @@ We discuss here only improvements that have an impact on the efficiency of the a
 In order to quickly find highly accurate trees, it is important to follow a heuristic. We experimented with three heuristics based on scores to minimize: \emph{error}, \emph{entropy}~\cite{10.1023/A:1022643204877}, and \emph{Gini impurity}~\cite{breiman1984classification}. 
 Each of these heuristics associates a score to a feature $\afeat$ at a branch $\abranch$:
 \begin{eqnarray}
-	\textrm{error}: & \error[\abranch,\afeat] \\
+	\textrm{error}: & \error[\grow{\abranch}{\afeat}] + \error[\grow{\abranch}{\bar{\afeat}}] \\
 	%\textrm{minimum entropy:} & \sum_{v \in \{\afeat,\bar{\afeat}\}} \frac{|\allex(\abranch \wedge v)|}{|\allex(\abranch)|} \cdot -\sum_{\aclass \in \{\negclass,\posclass\}} \frac{|\setex{\aclass}(\abranch \wedge v)|}{|\setex{\aclass}(\abranch)} \log_{2} \frac{|\setex{\aclass}(\abranch \wedge v)|}{|\setex{\aclass}(\abranch)|} \\
 	\textrm{entropy:} & \sum\limits_{v \in \{\afeat,\bar{\afeat}\}} -p(v,\allex) \sum\limits_{\aclass \in \{\negclass,\posclass\}} p(v,\setex{\aclass}) \log_{2} p(v,\setex{\aclass}) \\
 	\textrm{Gini impurity:} &  \sum\limits_{v \in \{\afeat,\bar{\afeat}\}} p(v,\setex{\aclass})(1 - \sum\limits_{\aclass \in \{\negclass,\posclass\}} p(v,\setex{\aclass})^2)
@@ -972,7 +1014,10 @@ With $p(v,{\cal S}) = \frac{|{\cal S}(\grow{\abranch}{v})|}{|{\cal S}(\abranch)|
 The feature tests at Line~\ref{line:assignment} of Algorithm~\ref{alg:bud} are explored in non-decreasing order with respect to one of the scores above.
 
 
-In the data sets we used, the Gini impurity was significantly better, and hence all reported experiment results are using Gini impurity unless stated otherwise. For branches of length $\mdepth-1$, however, we use the error instead. Indeed, the optimal feature $\afeat$ for a branch $\abranch$ that cannot be extended further is the one minimizing $\error[\abranch,\afeat]$. This means that we actually do not have to try other features for that node. This is implemented by the highlited code at Line~\ref{line:optimal}: since one cannot improve on the first feature for test at depth $\mdepth$, branches of length $\mdepth-1$ do not have to be put back into \bud, and can be backtracked upon.
+In the data sets we used, the Gini impurity was significantly better, and hence all reported experiment results are using Gini impurity unless stated otherwise. For branches of length $\mdepth-1$, however, we use the error instead. Indeed, the optimal feature $\afeat$ for a branch $\abranch$ that cannot be extended further is the one minimizing 
+% $\error[\abranch,\afeat]$. 
+$\error[\grow{\abranch}{\afeat}] + \error[\grow{\abranch}{\bar{\afeat}}]$.
+This means that we actually do not have to try other features for that node. This is implemented by the highlited code at Line~\ref{line:optimal}: since one cannot improve on the first feature for test at depth $\mdepth$, branches of length $\mdepth-1$ do not have to be put back into \bud, and can be backtracked upon.
 
  % which means that we effectively restrict search to branches of length $\mdepth-1$.
 
@@ -1001,7 +1046,10 @@ It is possible to fail early using a lower bound on the error given prior decisi
 First, observe that $\best[\abranch]$ is an upper bound on the classification error for any subtree rooted at $\abranch$, since this value comes from an actual tree (of depth $\mdepth - |\abranch|$ for the data set $\langle \negex(\abranch),\posex(\abranch) \rangle$). It is possible to propagate this upper bound to parent nodes efficiently (in $O(|\branch|)$ time). Here we assume that this is done every time the value $\best[\abranch]$ is actually updated, by recursively applying the same update procedure to the parent.
 
 
-Now, when the condition in Line~\ref{line:optimal} fails for a branch $\abranch$, it means that $\best[\abranch]$ is \emph{optimal}, there is no tree of maximum depth $\mdepth - |\abranch|$ with classification error lower than $\best[\abranch]$. This is true either because every subtree has been explored, or because $\mdepth - |\abranch| = 1$ and the feature $\afeat$ with least $\error[\abranch,\afeat]$ has been chosen. The extra Line~\ref{line:markoptimal} simply store this information in the array $\opt$ which shall be used to compute a lower bound.
+Now, when the condition in Line~\ref{line:optimal} fails for a branch $\abranch$, it means that $\best[\abranch]$ is \emph{optimal}, there is no tree of maximum depth $\mdepth - |\abranch|$ with classification error lower than $\best[\abranch]$. This is true either because every subtree has been explored, or because $\mdepth - |\abranch| = 1$ and the feature $\afeat$ with least 
+%$\error[\abranch,\afeat]$ 
+$\error[\grow{\abranch}{\afeat}] + \error[\grow{\abranch}{\bar{\afeat}}]$
+has been chosen. The extra Line~\ref{line:markoptimal} simply store this information in the array $\opt$ which shall be used to compute a lower bound.
 
 %loop in Line~\ref{line:backtrack} makes two or more iterations, it means that for the penultimate branch $\abranch$ popped out of \sequence, all possible subtrees have been explored, and therefore, $\best[\abranch]$ is also a lower bound on the classification error for any subtree rooted at $\abranch$. Let $\opt[\abranch]$ be 1 if $\abranch$ has been ``backtracked over'' in this way and 0 otherwise.
 
@@ -1329,6 +1377,17 @@ In the variant ``No lower bound'', the lower bound technique described in Sectio
 \end{center}
 \caption{\label{tab:factor} Factor analysis}
 \end{table}
+
+\begin{table}[htbp]
+\begin{center}
+\begin{footnotesize}
+\tabcolsep=5pt
+\input{src/tables/summaryiti.tex}
+\end{footnotesize}
+\end{center}
+\caption{\label{tab:iti} ITI}
+\end{table}
+
 
 \begin{table}[htbp]
 \begin{center}
