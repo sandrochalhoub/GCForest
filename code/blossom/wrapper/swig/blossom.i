@@ -110,11 +110,13 @@ namespace blossom {
 	
   // Tree
 
+	template <typename E_t>
   class Wood {
   public:
     Wood();
   };
 
+	template <typename E_t>
   class Tree {
   public:
     int idx;
@@ -153,7 +155,7 @@ namespace blossom {
     void minimize_error();
     void minimize_error_depth();
     void minimize_error_depth_size();
-    Tree getSolution();
+    Tree<E_t> getSolution();
   };
 	
 	
@@ -172,6 +174,7 @@ namespace blossom {
     bool predict(const std::vector<int> &example) const;
 /*	  void addBitsetExample(const dynamic_bitset<> &sample, const bool y, const size_t weight);*/
   };
+	
 	
 	%template(WeightedDatasetI) WeightedDataset<int>;
 	%template(WeightedDatasetD) WeightedDataset<double>;
