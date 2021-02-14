@@ -175,6 +175,12 @@ namespace blossom {
 /*	  void addBitsetExample(const dynamic_bitset<> &sample, const bool y, const size_t weight);*/
   };
 	
+	%template(WoodI) Wood<int>;
+	%template(WoodD) Wood<double>;
+	
+	%template(TreeI) Tree<int>;
+	%template(TreeD) Tree<double>;
+	
 	
 	%template(WeightedDatasetI) WeightedDataset<int>;
 	%template(WeightedDatasetD) WeightedDataset<double>;
