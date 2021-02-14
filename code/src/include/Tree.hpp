@@ -660,17 +660,7 @@ template <class E_t> int Wood<E_t>::copyNode(const int node) {
 }
 
 template <class E_t> void Wood<E_t>::freeNode(const int node) {
-  if (node > 1) {
-
-    // cout << "free " << node << endl;
-		
-		if(node >= available.size() or available.contain(node)) {
-			cout << "REMOVE " << node << " FROM " << available << endl;
-		}
-
-    assert(node < available.size() and not available.contain(node));
-
-    // parent[node] = -1
+  if (node > 1 and not available.contain(node)) {
     available.add(node);
     for (auto i{0}; i < 2; ++i)
       if (child[i][node] >= 2)
