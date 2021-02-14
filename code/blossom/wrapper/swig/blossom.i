@@ -176,16 +176,14 @@ namespace blossom {
   };
 	
 /*	%template(WoodI) Wood<int>;
-	%template(WoodD) Wood<double>;
+	%template(WoodD) Wood<double>;*/
 
 	%template(TreeI) Tree<int>;
-	%template(TreeD) Tree<double>;*/
-	
+	%template(TreeD) Tree<double>;
 	
 	%template(WeightedDatasetI) WeightedDataset<int>;
 	%template(WeightedDatasetD) WeightedDataset<double>;
 	
-
   %template(BacktrackingAlgo) BacktrackingAlgorithm<CardinalityError, int>;
   %template(WeightedBacktrackingAlgo) BacktrackingAlgorithm<WeightedError, int>;
   %template(WeightedBacktrackingAlgod) BacktrackingAlgorithm<WeightedError, double>;
