@@ -4,9 +4,8 @@ import blossom
 opt = blossom.parse(bfs.to_str_vec(sys.argv))
 filename = str(opt.instance_file)
 
-wood = blossom.Wood()
+# wood = blossom.WoodI()
 dataset = blossom.WeightedDataset()
-algo = blossom.BacktrackingAlgo(wood, opt)
 
 if filename == "":
     print("No input file!")
@@ -15,7 +14,10 @@ else:
     blossom.read_binary(dataset, opt)
 
 dataset.preprocess()
-dataset.setup(algo)
+
+algo = blossom.BacktrackingAlgo(datset, opt)
+
+# dataset.setup(algo)
 
 algo.minimize_error()
 tree = algo.getSolution()
