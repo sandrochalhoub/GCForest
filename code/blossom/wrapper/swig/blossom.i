@@ -122,7 +122,7 @@ namespace blossom {
     int idx;
 
     Tree() = delete;
-    Tree(const Wood<E_t>*, int i);
+    Tree(Wood<E_t>*, int i);
     int getChild(int node, int branch);
     int getFeature(int node);
   };
