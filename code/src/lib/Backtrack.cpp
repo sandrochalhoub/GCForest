@@ -1415,6 +1415,47 @@ void BacktrackingAlgorithm<ErrorPolicy, E_t>::minimize_error_depth() {
 }
 
 
+// template <template<typename> class ErrorPolicy, typename E_t>
+// void BacktrackingAlgorithm<ErrorPolicy, E_t>::minimize_error_size() {
+//
+//   initialise_search();
+//
+//   if (options.verbosity > DTOptions::QUIET)
+//     separator("search");
+//
+//   auto perfect{false};
+//   // auto saved_error{ub_error};
+//   while (search() and is_null<E_t>(ub_error)) {
+//     perfect = true;
+//     // saved_error = ub_error;
+//     ub_error = min_positive<E_t>();
+//     ub_depth = actual_depth - 1;
+//
+//     restart(true);
+//
+//     if (ub_depth == 1)
+//       singleDecision();
+//   }
+//
+//   if (perfect) {
+//     ++ub_depth;
+//     ub_error = 0;
+//   }
+//   // else
+//   //     cleaning();
+//
+//   if (options.verbosity > DTOptions::QUIET) {
+//     if (interrupted)
+//       separator("interrupted");
+//     else
+//       separator("optimal");
+//   }
+//
+//   if (options.verbosity > DTOptions::SILENT)
+//     print_new_best();
+// }
+
+
 template <template<typename> class ErrorPolicy, typename E_t>
 void BacktrackingAlgorithm<ErrorPolicy, E_t>::minimize_error_depth_size() {
 

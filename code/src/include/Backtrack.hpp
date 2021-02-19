@@ -115,6 +115,8 @@ public:
   bool search();
   void initialise_search();
 
+	void set_size_objective() { size_matters = true; }
+
   void minimize_error();
 
   void minimize_error_depth();

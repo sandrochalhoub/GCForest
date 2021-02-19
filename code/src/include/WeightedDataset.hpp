@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <algorithm>
+#include <random>
 
 #include "typedef.hpp"
 #include "CmdLine.hpp"
@@ -30,6 +31,9 @@ public:
   // template <class Algo> void toInc(Algo &algo);
   // template <class Algo> void setup(Algo &algo) const;
   void preprocess(const bool verbose = false);
+	
+	// randomly select ratio * count(c) examples from classes c in {0,1}
+	void sample(const double ratio, const long seed=12345);
 
   size_t input_count(const bool c) const { return data[c].size(); }
   size_t input_example_count() const { return input_count(0) + input_count(1); }
@@ -166,7 +170,20 @@ inline void WeightedDataset<E_t>::addExample(rIter beg_row, rIter end_row,
 //   algo.setErrorOffset(suppression_count);
 // }
 
-template <typename E_t> inline void WeightedDataset<E_t>::preprocess(const bool verbose) {
+template <typename E_t> void WeightedDataset<E_t>::sample(const double ratio, const long seed) {
+	mt19937 random_generator;
+	random_generator.seed(seed);
+
+	for(auto y{0}; y<2; ++y) {
+		size_t target{static_cast<size_t>(static_cast<double>(count(y)) * ratio)};
+		while(count(y) > target) {
+			auto i{random_generator() % count(y)};
+			examples[y].remove_back(examples[y][i]);
+		}
+	}
+}
+
+template <typename E_t> void WeightedDataset<E_t>::preprocess(const bool verbose) {
 
   auto t{cpu_time()};
 

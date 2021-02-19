@@ -101,6 +101,9 @@ int main(int argc, char *argv[]) {
 	//                            opt.outtarget != -1, false);
 	// // cout << input << endl;
 
+	if (opt.sample < 1)
+		input.sample(opt.sample);
+
   ////// PREPROCESING
   if (opt.preprocessing)
     input.preprocess(opt.verbosity >= DTOptions::NORMAL);

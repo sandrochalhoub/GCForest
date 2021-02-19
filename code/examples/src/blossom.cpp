@@ -71,8 +71,11 @@ int run_algorithm(DTOptions &opt) {
       A.minimize_error_depth_size();
     else
       A.minimize_error_depth();
-  } else
+  } else {
+		if (opt.minsize)
+			A.set_size_objective();
     A.minimize_error();
+	}
 
   Tree<E_t> sol = A.getSolution();
 

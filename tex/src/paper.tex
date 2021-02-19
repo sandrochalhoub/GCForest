@@ -24,173 +24,7 @@
 \usepackage{relsize}
 
 
-% \newgeometry{bottom=2cm,top=2cm}
-
-% \newenvironment{proof}{\paragraph{Proof:}}{\hfill$\square$}
-
-\DeclareMathOperator*{\argmax}{arg\,max}
-\DeclareMathOperator*{\argmin}{arg\,min}
-
-\newcommand*{\Perm}[2]{{}^{#1}\!P_{#2}}%
-\newcommand*{\Comb}[2]{{}^{#1}C_{#2}}%
-
-
-\def\HiLi{\leavevmode\rlap{\hbox to \hsize{\color{yellow!50}\leaders\hrule height .8\baselineskip depth .5ex\hfill}}}
-
-
-% \newtheorem{theorem}{Theorem}
-
-
-\newcommand{\tru}[0]{\texttt{true}}
-\newcommand{\fal}[0]{\texttt{false}}
-% \newcommand{\tru}[0]{1}
-% \newcommand{\fal}[0]{0}
-
-
-\newcommand\cactus[5]{%%
-\begin{tikzpicture}[scale=.46]
-	\begin{axis}[scatter/classes={
-		a={mark=square*,blue!50,draw=blue!50!black},%%
-		b={mark=triangle*,red!50,draw=red!50!black},%%
-		c={mark=diamond*,green!50,draw=green!50!black},%%
-		d={mark=*,black!50!white,draw=black},%%
-		e={mark=pentagon*,orange!50,draw=orange!50!black},%%
-		f={mark=10-pointed star,draw=blue!60!black},%%
-		g={mark=x,draw=black,thick},%%
-		h={mark=+,draw=red!50!black},%%
-		i={mark=Mercedes star,draw=green!50!black},%%
-		j={mark=square,draw=orange!50!black},%%
-		k={mark=diamond,draw=red!50!black},%%
-		l={mark=o,draw=blue!50!black},%%
-		m={mark=asterisk,draw=magenta!50!black},%%
-		n={mark=triangle,draw=green!50!black},%%
-		o={mark=pentagon,draw=red!50!black},%%
-		p={mark=asterisk,draw=black},%%
-		q={mark=Mercedes star,draw=magenta!50!black},%%
-		r={mark=pentagon*,blue!50,draw=blue!50!black},%%
-		s={mark=x,draw=green!50!black},%%
-		t={mark=diamond*,red!50,draw=red!50!black}},%%
-		mark size=1.5pt,
-		ymode=log,
-		%xmode=log,
-		ylabel=#2,
-		xlabel=#1,
-		font=\large,
-		{#5}
-		]
-
-		\foreach \bidule in #4 {
-
-		\addplot[scatter, scatter src=explicit symbolic] coordinates {\bidule};
-
-		}
-		\legend{#3}
-	\end{axis}
-\end{tikzpicture}
-}
-
-
-%\def\posclass{\top}
-%\def\negclass{\bot}
-\def\posclass{+}
-\def\negclass{-}
-\def\datasymb{D}
-\newcommand{\setex}[1]{\ensuremath{{\mathcal \datasymb}^{#1}}\xspace}
-\newcommand{\posex}{{\setex{\posclass}}\xspace}
-\newcommand{\negex}{{\setex{\negclass}}\xspace}
-\newcommand{\allex}{{\setex{}}\xspace}
-\newcommand{\setcube}[1]{\ensuremath{{\mathcal C}^{#1}}\xspace}
-\newcommand{\poscube}{{\setcube{1}}\xspace}
-\newcommand{\negcube}{{\setcube{0}}\xspace}
-\newcommand{\features}{\ensuremath{{\mathcal F}}\xspace}
-\newcommand{\feat}{\ensuremath{f}}
-\newcommand{\classifier}{\ensuremath{f}}
-\newcommand{\lit}[1]{\ensuremath{l_{#1}}}
-\newcommand{\var}{\ensuremath{x}}
-\newcommand{\truelit}[1]{\ensuremath{\var_{#1}}}
-\newcommand{\falselit}[1]{\ensuremath{\bar{\var_{#1}}}}
-\newcommand{\ex}{\ensuremath{\var}}
-\newcommand{\cube}{\ensuremath{c}}
-\newcommand{\universe}{\ensuremath{{\mathcal U}}}
-\newcommand{\entropy}[1]{\ensuremath{{H}({#1})}\xspace}
-\newcommand{\probability}[1]{\ensuremath{{Pr}({#1})}\xspace}
-
-
-\newcommand{\lb}[1]{\ensuremath{lb({#1})}}
-
-
-\newcommand{\nodes}[0]{\ensuremath{{\cal N}}}
-\newcommand{\bud}[0]{\ensuremath{{\cal B}}}
-\newcommand{\sequence}[0]{\ensuremath{{\cal S}}}
-
-\newcommand{\maxd}[0]{\ensuremath{k}}
-\newcommand{\anode}[0]{\ensuremath{i}}
-\newcommand{\bnode}[0]{\ensuremath{b}}
-\newcommand{\afeat}[0]{\ensuremath{f}}
-\newcommand{\aclass}[0]{\ensuremath{l}}
-\newcommand{\ub}[0]{\ensuremath{ub}}
-% \newcommand{\error}[0]{\ensuremath{error}}
-% \newcommand{\mdepth}[1][]{\ensuremath{\ifthenelse{\equal{#1}{}}{depth}{depth({#1})}}}
-\newcommand{\weight}[1][]{\ensuremath{\ifthenelse{\equal{#1}{}}{w}{w({#1})}}}
-\newcommand{\test}[1][]{\ensuremath{\ifthenelse{\equal{#1}{}}{test}{test({#1})}}}
-\newcommand{\dom}[1][]{\ensuremath{\ifthenelse{\equal{#1}{}}{dom}{dom({#1})}}}
-\newcommand{\best}[1][]{\ensuremath{\ifthenelse{\equal{#1}{}}{{best}}{{best({#1})}}}}
-\newcommand{\maxe}[1][]{\ensuremath{\ifthenelse{\equal{#1}{}}{{max}}{{max({#1})}}}}
-\newcommand{\opt}[1][]{\ensuremath{\ifthenelse{\equal{#1}{}}{optimal}{optimal({#1})}}}
-\newcommand{\child}[1][]{\ensuremath{\ifthenelse{\equal{#1}{}}{{child}}{{child({{#1}})}}}}
-\newcommand{\error}[1][]{\ensuremath{\ifthenelse{\equal{#1}{}}{{error}}{{error({{#1}})}}}}
-\newcommand{\classlabel}[1][]{\ensuremath{\ifthenelse{\equal{#1}{}}{{y}}{{y({{#1}})}}}}
-
-\newcommand{\abranch}[0]{\ensuremath{b}}
-
-
-\newcommand{\numex}[0]{\ensuremath{n}}
-\newcommand{\numfeat}[0]{\ensuremath{m}}
-\newcommand{\mdepth}[0]{\ensuremath{k}}
-
-
-\newcommand{\grow}[2]{\ensuremath{{#1}\oplus{#2}}}
-
-
-\SetKw{Break}{break}
-	\SetKwFunction{storebest}{storeBest}
-	\SetKwFunction{solution}{solution}
-	\SetKwFunction{deadend}{deadEnd}
-	\SetKwFunction{expend}{expend}
-	\SetKwFunction{backtrack}{backtrack}
-	\SetKwFunction{dt}{BTDT}
-	\SetKwFunction{pop}{pop}
-	\SetKwFunction{back}{back}
-	\SetKwFunction{push}{push}
-	\SetKwFunction{prune}{prune}
-	% \SetKwFunction{error}{error}
-	%\SetKwFunction{grow}{grow}
-	\SetKwFunction{branch}{branch}
-	\SetKwFunction{select}{select\&remove}
-	\SetKwFunction{budalg}{Blossom}
-	\SetKwFunction{dynprog}{DynProg}
-	\SetKwFunction{dleight}{DL8.5}
-	\SetKwFunction{olddleight}{DL8}
-	\SetKwFunction{cart}{CART}
-	\SetKwFunction{greedy}{BudFS (first sol.)}
-  \SetKwFunction{murtree}{Murtree}
-	\SetKwFunction{dominated}{Dominated}
-	\SetKwFunction{idthree}{ID3}
-	\SetKwFunction{cfour}{C4.5}
-	\SetKwFunction{cp}{CP}
-	\SetKwFunction{binoct}{binOCT}
-	\SetKwFunction{iti}{ITI}
-	\SetKwFunction{bfswee}{Blossom ($3/4$)}
-	\SetKwFunction{bfs}{Blossom}
-	\SetKwFunction{bfss}{Blossom (pruning)}
-	\SetKwFunction{bfsm}{Blossom (pruning)}
-	\SetKwFunction{bfsh}{Blossom (with pruning)}
-	
-	
-	
-	\newcommand{\nolb}[0]{No lower bound}
-	\newcommand{\nopreprocessing}[0]{No preprocessing}
-	\newcommand{\noheuristic}[0]{No heuristic}
+\input{src/macros.tex}
 	
 
 \DontPrintSemicolon
@@ -241,7 +75,7 @@ In this paper we introduce a relatively \emph{simple} algorithm (\budalg), that 
 This algorithm can be seen as an instance of the more general framework introduced in \cite{DBLP:journals/corr/abs-2007-12652}, however tuned to have the best scalability to large trees and the best anytime behavior as possible. 
 %As a result, it is comparable to \murtree on shallow trees, while clearly outperforming the state of the art on deep trees.
 
-In a nutshell, \budalg emulates the dynamic programming algorithm \dleight~\cite{dl8}, while always expending non-terminal branches (a.k.a ``buds'') before optimizing grown branches. As a result, this algorithm is in a sense strictly better than both the standard dynamic programming approach (because it is anytime and at least as fast) and than classic heuristics (because it emulates them during search, without significant overhead).
+In a nutshell, \budalg emulates the dynamic programming algorithm \dleight~\cite{dl8}, while always expanding non-terminal branches (a.k.a ``buds'') before optimizing grown branches. As a result, this algorithm is in a sense strictly better than both the standard dynamic programming approach (because it is anytime and at least as fast) and than classic heuristics (because it emulates them during search, without significant overhead).
 %but explores the search space so as to improve its anytime behaviour.
 Our experimental results show that it outperforms the state of the art, to the exception of \murtree on relatively shallow trees (typically for maximum depth up to 4), for which its more sophisticated (albeit more complex) algorithmic features can pay off.
 In particular, on data sets that \dleight can tackle, \budalg can always find classifiers at least as accurate faster, and when the former can prove optimality, the latter does it orders of magnitude faster.
@@ -298,14 +132,14 @@ In particular, on data sets that \dleight can tackle, \budalg can always find cl
 
 \section{Preliminaries}
 
-A binary data set is a pair $\langle \negex,\posex \rangle$ where $\negex$ and $\posex$ are subsets of the feature space $\prod_{\afeat \in \features}\{\afeat,\bar{\afeat}\}$, and are standing, respectively, for negative and positve datapoints.
+A data set on a binary feature set \features is a pair $\langle \negex,\posex \rangle$ where $\negex$ and $\posex$ are subsets of the feature space $\prod_{\afeat \in \features}\{\afeat,\bar{\afeat}\}$, and are standing, respectively, for negative and positive datapoints.
 % $2^{\features}$.
 % It is associated a label function $\classlabel : 2^{\features} \mapsto \{\posclass,\negclass\}$ such that:
 % $$
 % \forall \aclass \in \{\posclass,\negclass\}, \forall \ex \in \setex{\aclass}, \classlabel[\ex] = \aclass
 % $$
 %We denote $\allex$ the 
-We denote the union of all datapoints by $\allex = \negex \cup \posex$.
+We denote the union of all datapoints by $\allex = \negex \cup \posex$ and $\bar{\features} = \{\bar{\afeat} \mid \afeat \in \features\}$ the set of negated features.
 % %$\posclass$ and $\negclass$ are class labels and
 % A datapoint $\ex$ can equivalently be seen as a subset of $\features$, or as the conjunction:
 % $$
@@ -315,8 +149,12 @@ We denote the union of all datapoints by $\allex = \negex \cup \posex$.
 
 A \emph{binary decision tree} is a tree whose 
 %leaves are labelled with either $\posclass$ or $\negclass$, 
-internal vertices are labelled with features and the two edges exiting a node labelled with $\afeat$ are respectively labelled with $\afeat$ and $\bar{\afeat}$.
-A \emph{branch} of a decision tree can therefore be identified to the ordered set of labels on the corresponding edges.
+internal vertices are labelled with features and the two edges exiting a node labelled with $\afeat$ are respectively labelled with the feature $\afeat$ and its negation $\bar{\afeat}$.
+To a \emph{branch} of a decision tree we associate the ordered set of labels on its edges, from root to leaf.
+
+%$\abranch \in 2^{\features \cup \bar{\features}}$ of labels on its edges. Moreover, \abranch\ is naturally ordered from root to leaf.
+
+%can therefore be identified to the ordered set of labels on the corresponding edges.
 %To a \emph{branch} of a decision tree we can associate the set of labels on the corresponding edges.
 %conjunction of features which are on the path from the root to a leaf. If the feature vertex is exited by a $1$-edge, the feature is positive in the conjunction, otherwise it is negative.
 
@@ -328,6 +166,8 @@ Given a data set $\langle \negex,\posex \rangle$, we can associate a data set $\
 \negex(\abranch) = \{\ex \mid \ex \in \negex, \abranch \subseteq \ex\}\\
 \posex(\abranch) = \{\ex \mid \ex \in \posex, \abranch \subseteq \ex\}
 \end{eqnarray*}
+
+% For instance, the branch $\abranch = \{\afeat_i, \bar{\afeat_j}, \bar{\afeat_k}, \afeat_l\}$ has length 4 and
 
 We write $\grow{\abranch}{\afeat}$ as a shortcut for $\abranch \cup \{\afeat\}$.
 The classification error for branch $\abranch$ is $\error[\abranch]=\min(|\negex(\abranch)|, |\posex(\abranch)|)$.
@@ -388,10 +228,12 @@ The solver DL8.5 is a dynamic programming algorithm for the minimum error bounde
 	 
 	 
 	 Algorithm~\ref{alg:dynprog} explores, in the worst case, $2^{\mdepth}$ branches for each of the $\Perm{\numfeat}{\mdepth}$ permutations of $\mdepth$ features in $\features$ for a total of $\Theta(\Perm{\numfeat}{\mdepth}2^{\mdepth})$ recursive calls.\footnote{More than half of the calls are at depth $\mdepth$ so counting leaves is sufficient.} 
-	 
+	% 
 	 Note that this is a significant improvement with respect to the $\Theta(\numfeat^{2^{\mdepth}})$ trees (with redundant branches) explored by a brute-force algorithm.
 	 
-	 Moreover, at each call, the data set must be split into two subsets. This takes time linear in the size of the data set. However, consider an ordered set of $\mdepth$ features and the $2^{\mdepth-1}$ branches testing these features in that order. Their corresponding data sets form a partition of the original data set. Therefore, the $\mdepth$-th split can done in $\Theta(\numex)$ time amortized over these $2^{\mdepth-1}$ branches.
+	 Moreover, at each call, the data set must be split into two subsets. This takes time linear in the size of the data set. However,  %it can be amortized over the $2^{\mdepth-1}$ branches of depth $\mdepth$.
+	 Consider
+	 an ordered set of $\mdepth$ features and the $2^{\mdepth-1}$ branches testing these features in that order. Their corresponding data sets form a partition of the original data set. Therefore, the $\mdepth$-th split can done in $\Theta(\numex)$ time amortized over these $2^{\mdepth-1}$ branches.
 	 It follows that the overall time complexity for splitting the data set is in $\Theta(\Perm{\numfeat}{\mdepth}\numex)$.\footnote{Again, more than half of the splits are at depth $\mdepth$.}
 	 
 	 
@@ -405,7 +247,7 @@ The solver DL8.5 is a dynamic programming algorithm for the minimum error bounde
 	 
 	 \medskip
 	 
-	 Notice that computing an optimal decision tree of bounded depth (for any polynomially computable definition of ``optimal'') is therefore polynomial unless the maximum depth is an input, and is not bounded. 
+	 Notice that computing an optimal decision tree of bounded depth (for any polynomially computable definition of ``optimal'') is therefore polynomial unless the maximum depth is an input, and is not bounded. %Moreover, under the standard assumption that $k \leq \log n$, 
 	 
 	 
 	 
@@ -430,36 +272,139 @@ The solver DL8.5 is a dynamic programming algorithm for the minimum error bounde
 
 
 
+
 \section{An Anytime Algorithm}
 
-In a nutshell the algorithm we propose (Algorithm~\ref{alg:bud}) works as follows:
+Algorithm~\ref{alg:bud} shows the pseudo-code of an iterative, anytime, version of Algorithm~\ref{alg:dynprog} (highlighted code should be ignored for now). This algorithm
+%In a nutshell, Algorithm~\ref{alg:bud} 
+explores the same search space as Algorithm~\ref{alg:dynprog}: the same branch is never explored twice. However, incomplete branches are expanded before trying alternative features for already explored branches. In other words, instead of optimizing the left subtree before exploring the right subtree as Algorithm~\ref{alg:dynprog} does, Algorithm~\ref{alg:bud} first fully expands a decision tree before exploring alternatives for any branch. An illustration of the order in which branches are explored is shown in Figure~\ref{fig:searchtree}.
+
+%For instance, consider a data set with three binary features $\features = \{a,b,c\}$. Figure~\ref{fig:searchtree} shows the branches explored by both Algorithm~\ref{dynprog} and Algorithm~\ref{alg:bud}. Both algorithms explore first the branches $\{a,b\}$ and $\{a,\bar{b}\}$. However, whereas Algorithm~\ref{dynprog} explores next the branches $\{a,c\}$ and $\{a,\bar{c}\}$, Algorithm~\ref{alg:bud} explores next the branches $\{\bar{a},b\}$ and $\{\bar{a},\bar{b}\}$, hence immediately 
+
+
+%For $\mdepth=2$ Algorithm~\ref{dynprog} explores the branches 
+
+
+	\begin{figure}
+	\begin{center}
+		\tabcolsep=0pt
+		\scalebox{1}{
+			\begin{forest}
+				for tree={%
+					l sep=20pt,
+					s sep=3.5pt,
+					node options={shape=rectangle, minimum width=10pt, inner sep=0pt, font=\footnotesize},
+		  		edge={thick, -latex, shorten >=1pt, shorten <=1pt},
+				}
+				[{$\emptyset$}
+					[{$a$}
+						[{\begin{tabular}{c}$b$\\1\end{tabular}}]
+						[{\begin{tabular}{c}$\bar{b}$\\2\end{tabular}}]
+						[{\begin{tabular}{c}$c$\\7\end{tabular}}]
+						[{\begin{tabular}{c}$\bar{c}$\\8\end{tabular}}]
+					]
+					[{$\bar{a}$}
+						[{\begin{tabular}{c}$b$\\3\end{tabular}}]
+						[{\begin{tabular}{c}$\bar{b}$\\4\end{tabular}}]
+						[{\begin{tabular}{c}$c$\\5\end{tabular}}]
+						[{\begin{tabular}{c}$\bar{c}$\\6\end{tabular}}]
+					]
+					[{$b$}
+						[{\begin{tabular}{c}$a$\\9\end{tabular}}]
+						[{\begin{tabular}{c}$\bar{a}$\\10\end{tabular}}]
+						[{\begin{tabular}{c}$c$\\15\end{tabular}}]
+						[{\begin{tabular}{c}$\bar{c}$\\16\end{tabular}}]
+					]
+					[{$\bar{b}$}
+						[{\begin{tabular}{c}$a$\\11\end{tabular}}]
+						[{\begin{tabular}{c}$\bar{a}$\\12\end{tabular}}]
+						[{\begin{tabular}{c}$c$\\13\end{tabular}}]
+						[{\begin{tabular}{c}$\bar{c}$\\14\end{tabular}}]
+					]
+					[{$c$}
+						[{\begin{tabular}{c}$a$\\17\end{tabular}}]
+						[{\begin{tabular}{c}$\bar{a}$\\18\end{tabular}}]
+						[{\begin{tabular}{c}$b$\\23\end{tabular}}]
+						[{\begin{tabular}{c}$\bar{b}$\\24\end{tabular}}]
+					]
+					[{$\bar{c}$}
+						[{\begin{tabular}{c}$a$\\19\end{tabular}}]
+						[{\begin{tabular}{c}$\bar{a}$\\20\end{tabular}}]
+						[{\begin{tabular}{c}$b$\\21\end{tabular}}]
+						[{\begin{tabular}{c}$\bar{b}$\\22\end{tabular}}]
+					]
+				]
+			\end{forest}
+		}
+	\end{center}
+	\caption{\label{fig:searchtree} The search tree for decision trees. \texttt{DynProg} explores it depth first, whereas \texttt{Bud-first-search} explores the leaves in the order given below.}
+	%\caption{\label{fig:searchtree} The search tree for decision trees. \dynprog explores it depth first, whereas \budalg explores branches in the order given below the leaves.}
+	\end{figure}
+
 
 \medskip
 
-We start from a singleton set \bud\ of open branches or \emph{buds}.
-% (open branches are branches of length strictly less than $\maxd$ that are not pure). % The set \nodes\ contains all the nodes of the current tree, open or closed, it is initially equal to \bud. Finally,
-Moreover, we use an initially empty stack of decisions $\sequence$.
+Let $\afeat_i <_{\abranch} \afeat_j$ if and only if feature $\afeat_i$ is selected before feature $\afeat_j$ when expanding branch $\abranch$ at Line~\ref{line:assignment}. Algorithm~\ref{alg:bud} has the following invariants, from which a formal proof of correctness can easily be written:
 
 \begin{itemize}
-	\item As long as there is a bud ($\bud \neq \emptyset$), we pick any one $\abranch \in \bud$ and check if it can be expended in Line~\ref{line:leaves}. If its length is $\mdepth$ the error at this leaf is recorded in $\best[\abranch]$. Otherwise, we pick a feature $\afeat$ marked as \emph{available} for \abranch, add the pair $(\abranch,\afeat)$ to \sequence\ and expend the tree with the two branches $\grow{\abranch}{\afeat}$ and $\grow{\abranch}{\bar{\afeat}}$. 
-	%
-	%
-	%
-	%
-	%  a feature $\afeat$ marked as \emph{available} for \abranch, add the pair $(\abranch,\afeat)$ to \sequence\ and expend the tree with the two branches $\grow{\abranch}{\afeat}$ and $\grow{\abranch}{\bar{\afeat}}$.
-	% %These new nodes are added to $\nodes$.
-	% They are added to $\bud$ if their depth is strictly less than $\maxd-1$ (the last feature test is chosen according to minimum error) and if they are not pure, otherwise they are terminal tests and we record the corresponding error.
+	\item \sequence\ represents the current decision tree: if $(\abranch,\afeat) \in \sequence$, then the current tree tests feature $\afeat$ at the extremity of branch $\abranch$. We say that the branch $\abranch$ is in the current tree, and that feature $\afeat$ is tested on branch $\abranch$.
+	
+	\item If $(\abranch,\afeat) \in \sequence$, then every sub-tree of $\abranch$ starting with a feature test $\aofeat <_{\abranch} \afeat$ has already been explored and $\best[\abranch]$ contains the minimum of their errors. The set $\dom[\abranch]$ contains all \emph{untried} feature tests for branch $\abranch$ ($\dom[\abranch] = \{\aofeat \mid \aofeat \in \features ~\wedge~ \afeat <_{\abranch} \aofeat$).
+	
+	\item If $(\abranch,\afeat) \in \sequence$ but one of its children $\grow{\abranch}{\afeat}$ or $\grow{\abranch}{\afeat}$ (call it $\aobranch$) is not in the current tree, then either:
 
-\item If there is no bud ($\bud = \emptyset$), then the tree is complete: every branch $\abranch$ is such that $|\abranch| = \mdepth$ or $\error[\abranch]=0$. In that case we pop the last assignment $(\abranch,\afeat)$ from \sequence, mark the feature $\afeat$ not available for branch $\abranch$ and update the recorded best error of its subtrees. If there is at least one available feature for branch $\abranch$, we add $\abranch$ to $\bud$. 
-Otherwise, we consider it \emph{terminal} and its error is the sum of the error of its best subtrees. This branch will never be expended anymore since it is not added to $\bud$.
-% and we 
-%store the minimum error recorded for any of the possible features.
-
+	\begin{itemize}
+		\item it is \emph{terminal} ($|\aobranch|=k$ or $\error[\aobranch]=0$), or
+		\item it is a \emph{bud} yet to be expanded ($\aobranch \in \bud$), or
+		\item it is \emph{optimal}: all possible feature tests have been tried for $\aobranch$.
+	\end{itemize}
 \end{itemize}
 
 
-Notice that to simplify the pseudo-code, we use branches to directly index array-like data structures in Algorithm~\ref{alg:bud}. Actually, a set of \emph{indices} (at most $2^{\mdepth}$ of them are necessary) are used as proxy for branches in all contexts. At Line~\ref{line:storebest}, the indices for $\grow{\abranch}{\afeat}$, $\grow{\abranch}{\bar{\afeat}}$ are released, and a free index is marked as used when expending a branch at Line~\ref{line:branching}. Moreover, the pseudo-code in Algorithm~\ref{alg:bud} does show how the best subtrees of terminal branches are recorded, nor how the overall best error is updated.
 
+As long as there is a bud ($\bud \neq \emptyset$), we pick any one $\abranch \in \bud$ at Line~\ref{line:budchoice} and check if it can or need to be expanded in Line~\ref{line:notterminal}. %If its length is $\mdepth$ the error at this leaf is recorded in $\best[\abranch]$. 
+If so, we pick a feature $\afeat$ marked as \emph{untried} for \abranch, unmark it, 
+expand the tree with the test $\afeat$ at branch $\abranch$. The two children $\grow{\abranch}{\afeat}$ and $\grow{\abranch}{\bar{\afeat}}$ can then be added to $\bud$.
+%add the pair $(\abranch,\afeat)$ to \sequence\ and expand the tree with the two branches $\grow{\abranch}{\afeat}$ and $\grow{\abranch}{\bar{\afeat}}$. 
+
+If there is no bud ($\bud = \emptyset$), then the current tree is complete: every branch $\abranch$ is either terminal or optimal. In that case we pop the last assignment $(\abranch,\afeat)$ from \sequence\ 
+%, mark the feature $\afeat$ as tried for branch $\abranch$ 
+and update the best error of its subtrees. If there is at least one untried feature for branch $\abranch$, we add $\abranch$ to $\bud$.
+Otherwise, it is optimal since all features have been tried, and $\best[\abranch]$ contains the minimum error for any sub-tree of branch $\abranch$. 
+%and its error is the sum of the errors of its best subtrees. 
+This branch will never be expanded anymore since it is not added to $\bud$.
+
+When the algorithm ends, $\best[\emptyset]$ contains the minimum error of any decision tree of depth $\mdepth$ on the data set.
+
+
+% Algorithm~\ref{alg:bud} starts from a singleton set \bud\ of open branches or \emph{buds},
+% % (open branches are branches of length strictly less than $\maxd$ that are not pure). % The set \nodes\ contains all the nodes of the current tree, open or closed, it is initially equal to \bud. Finally,
+% and an initially empty stack of decisions $\sequence$.
+%
+% \begin{itemize}
+% 	\item As long as there is a bud ($\bud \neq \emptyset$), we pick any one $\abranch \in \bud$ and check if it can be expanded in Line~\ref{line:leaves}. If its length is $\mdepth$ the error at this leaf is recorded in $\best[\abranch]$. Otherwise, we pick a feature $\afeat$ marked as \emph{untried} for \abranch, add the pair $(\abranch,\afeat)$ to \sequence\ and expand the tree with the two branches $\grow{\abranch}{\afeat}$ and $\grow{\abranch}{\bar{\afeat}}$.
+% 	%
+% 	%
+% 	%
+% 	%
+% 	%  a feature $\afeat$ marked as \emph{available} for \abranch, add the pair $(\abranch,\afeat)$ to \sequence\ and expand the tree with the two branches $\grow{\abranch}{\afeat}$ and $\grow{\abranch}{\bar{\afeat}}$.
+% 	% %These new nodes are added to $\nodes$.
+% 	% They are added to $\bud$ if their depth is strictly less than $\maxd-1$ (the last feature test is chosen according to minimum error) and if they are not pure, otherwise they are terminal tests and we record the corresponding error.
+%
+% \item If there is no bud ($\bud = \emptyset$), then the tree is complete: every branch $\abranch$ is such that $|\abranch| = \mdepth$ or $\error[\abranch]=0$. In that case we pop the last assignment $(\abranch,\afeat)$ from \sequence, mark the feature $\afeat$ as tried for branch $\abranch$ and update the recorded best error of its subtrees. If there is at least one untried feature for branch $\abranch$, we add $\abranch$ to $\bud$.
+% Otherwise, we consider it \emph{terminal} and its error is the sum of the error of its best subtrees. This branch will never be expanded anymore since it is not added to $\bud$.
+% % and we
+% %store the minimum error recorded for any of the possible features.
+%
+% \end{itemize}
+
+
+\medskip
+
+Notice that to simplify the pseudo-code, we use branches to index array-like data structures in Algorithm~\ref{alg:bud} (e.g. $\dom[\abranch]$). Actually, a set of \emph{indices} (at most $2^{\mdepth}$ of them are necessary in the worst case) are used as proxy for branches in all contexts, since the current tree cannot have more than $2^{\mdepth}$ branches. At Line~\ref{line:storebest}, the indices for $\grow{\abranch}{\afeat}$, $\grow{\abranch}{\bar{\afeat}}$ are released, and a free index is marked as used when expanding a branch at Line~\ref{line:branching}. Moreover, the pseudo-code in Algorithm~\ref{alg:bud} does not show how the best subtrees of optimal branches are recorded, nor how the overall best error is updated when completing a new decision tree at Line~\ref{line:else}.
+%The worst case space complexity of the algorithm is therefore in $\Theta(2^{\mdepth}\numfeat)$. Under the standard assumption that $2^{\mdepth} \leq \numex$, this is less than the size of the input.
+
+% where $\sizetree \leq 2^{\mdepth}$ is the maximum size of the explored tree, that is the maximum length of $\sequence$.
 
 
 %The classification error of a tree is equal to the sum of the error of its terminal banches, the algorithm returns the minimum value encountered when exploring the possible decision trees.
@@ -468,37 +413,149 @@ Notice that to simplify the pseudo-code, we use branches to directly index array
 
 
 % \medskip
+
+
+
+
+
 		
 
 		\begin{theorem}
-			The time complexities of Algorithms~\ref{alg:dynprog} and Algorithm~\ref{alg:bud} are equal.
+			The worst case time complexity of Algorithm~\ref{alg:bud} is $\Theta((\numex+2^\mdepth){\Perm{\numfeat}{\mdepth}}) \subset O((\numex + 2^{\mdepth})\numfeat^\mdepth)$ and its worst case space complexity is in $\Theta(2^{\mdepth}\numfeat)$.
 			\end{theorem}
 			
-			\begin{proof}[sketch]
-				The proof follows from the fact that both algorithms explore exactly the same set of branches, albeit not in the same order:
-				they explore every combination of (negated) feature of size $\mdepth$.
+			
+			\begin{proof}
+				From the invariants, we can see that Algorithm~\ref{alg:bud} explores the same set of $\Perm{\numfeat}{\mdepth}2^\mdepth$ branches (i.e., the $2^{\mdepth}$ outcomes of each permutation of ${\mdepth}$ features).
 				
-				We show that this is true for Algorithm~\ref{alg:bud} by recursion on the maximum depth $\mdepth$.
-				For $\mdepth = 0$, both algorithm return $\error[\emptyset]=\min(|\negex|, |\posex|)$.
+				Moreover, the ``yes'' branch of Condition~\ref{line:dive} dominates the time complexity since at most one element is added to $\sequence$, whereas  Loop~\ref{line:backtrack} suppresses exactly one element of $\sequence$ at every iteration (and each of its iterations is in constant time).
 				
-				Now suppose that for $\mdepth \leq d$ \dynprog and \budalg explore exactly the same set of branches: a recursive call of \dynprog ends on the branch $\abranch$ if and only if $\best[\abranch]$ is set in Line~\ref{line:best} of \budalg.
-				%every branch $\abranch$ explored by \dynprog (a recursive call ends on this branch) is also explored by \budalg ($\best[\abranch]$ is set in Line~\ref{line:best}), and 
-				Now, let $\mdepth=d+1$. Without loss of generality, we can take an arbitrary branch $\abranch$ of length $d$ and show that the same extentions of $\abranch$ are explored by both algorithms.
-				If $\error[\abranch]=0$, then no extension of $\abranch$ is explored by either algorithm.
-				Otherwise, if $\afeat \not\in \abranch$ and $\bar{\afeat}\not\in \abranch$, then 
-				\dynprog explores the branches $\grow{\abranch}{\afeat}$ and $\grow{\abranch}{\bar{\afeat}}$.
-				%every branch $\grow{\abranch}{\afeat}$ and $\grow{\abranch}{\bar{\afeat}}$ for $\afeat \in \features \setminus \abranch$. 
-				Since $\abranch$ is explored when $\mdepth = d$ and since $\error[\abranch] \neq 0$, then $\abranch$ will fail the test on Line~\ref{line:leaves} and a feature $\afeat$ such that $\afeat \not\in \abranch$ and $\bar{\afeat}\not\in \abranch$ will be selected, 
-				%for a feature $\afeat \in \features \setminus \abranch$, 
-				the branches $\grow{\abranch}{\afeat}$ and $\grow{\abranch}{\bar{\afeat}}$ will be explored, and the pair $(\abranch, \afeat)$ will be added to $\sequence$. 
-				Moreover, the algorithm will not stop until $\sequence$ is not empty, hence $(\abranch, \afeat)$ will eventually be popped out of $\sequence$, $\afeat$ removed from $\dom[\abranch]$ and $\abranch$ reinserted into $\bud$. Therefore, for every $\afeat \in \features$, such that neither $\afeat \in \abranch$ nor $\bar{\afeat}\in \abranch$,
-				 $\grow{\abranch}{\afeat}$ and $\grow{\abranch}{\bar{\afeat}}$ will eventually be explored exactly once.
-				\hfill$\square$
-			\end{proof}
+				The time complexity is therefore dominated by the splitting procedure whereby $\negex[\grow{\abranch}{\afeat}]$, $\negex[\grow{\abranch}{\bar{\afeat}}]$, $\posex[\grow{\abranch}{\afeat}]$ and $\posex[\grow{\abranch}{\bar{\afeat}}]$ are computed from $\negex[\abranch]$ and $\posex[\abranch]$. As discussed earlier, this takes linear time amortized over the $2^{\mdepth}$ branches sharing the same set of $\mdepth$ features. Therefore, the overall time complexity for the splitting operations is in $\Theta(\Perm{\numfeat}{\mdepth}\numex)$.
+				
+				
+				Since branches can be stored in constant space (an index, the parent branch and the two children),
+				the worst case space complexity $\Theta(2^{\mdepth}\numfeat)$ to record which feature have been tried (the sets $\dom$).
+					\hfill$\square$
+				\end{proof}
+				
+				
+				%
+				%
+				% We say that a branch is \emph{explored} if it is picked and removed from \bud\ at Line~\ref{line:budchoice}, or, equivalently, if it is added \bud\, because since Loop~\ref{line:backtrack} terminates, every added branch will eventually be picked.
+				%
+				%
+				% % We show that every terminal branch is explored exactly once, by recursion of the maximum depth $\mdepth$.
+				% % For $\mdepth=0$, the unique branch is $\emptyset$, it is explored and the algorithm returns immediatly.
+				% %
+				% % Now suppose that for $\mdepth=d$ every terminal branch is explored exactly once. Now, let $\mdepth=d+1$ and consider a terminal branch $\grow{\abranch}{v}$.
+				%
+				% A branch added at Line~\ref{line:right} cannot be terminal, since the pair $(\abranch,\afeat)$ has been popped out of \sequence, witnessing the branches $\grow{\abranch}{\afeat}$ and $\grow{\abranch}{\bar{\afeat}}$.
+				%
+				% Therefore, if a branch $\grow{\abranch}{v}$ is explored more than once, it must be added twice at Line~\ref{line:newbud}. However, $\dom[\abranch]$ forbids that unless $\branch$ was itself added twice at Line~\ref{line:newbud} because $\dom[\abranch]$ is only reset at Line~\ref{line:domain}. This argument can be repeated for the ancestors of $\abranch$ until reaching $\emptyset$ which is explored only once.
+				%
+				% Now we need to show that every terminal branch is explored at least once.
+				% We show that by recursion of the maximum depth $\mdepth$.
+				% For $\mdepth=0$, the unique branch is $\emptyset$, and it is explored.
+				%
+				% Now suppose that for $\mdepth=d$ every terminal branch is explored, let $\mdepth=d+1$ and consider a terminal branch $\grow{\abranch}{v}$. Since increasing $k$ can only increase the number of explored branches, by the recursion hypothesis, $\abranch$ is explored. Moreover, since $|\abranch|<\mdepth$, a feature $\afeat$ will be selected and $\grow{\abranch}{\afeat}$ and $\grow{\abranch}{\bar{\afeat}}$ added to $\bud$. Therefore, if $v=\afeat$ or $v=\bar{afeat}$, then the claim holds.
+				% Otherwise, the pair $(\abranch,\afeat)$ is added to $\sequence$ and it will eventually [TODO, NEED AN ARGUMENT HERE?] be popped out at Line~\ref{line:pop}.
+				% Then, $\afeat$ will be removed from $\dom[\abranch]$ and $\abranch$ reinserted into $\bud$.
+				%
+				%
+				%
+				%
+				% We first show that every terminal branch is explored exactly once, by recursion of the maximum depth $\mdepth$.
+				% For $\mdepth=0$, the unique branch is $\emptyset$, it is explored and the algorithm returns immediatly.
+				%
+				% Now suppose that for $\mdepth=d$ every terminal branch is explored exactly once. Now, let $\mdepth=d+1$ and consider a terminal branch $\grow{\abranch}{v}$.
+				%
+				%
+				%
+				% We first show that a terminal branch is explored
+				%
+				%
+				%
+				%
+				%
+				% The proof follows from the fact that Algorithm~\ref{alg:bud} explores exactly once every permutation of (negated) features of size $\mdepth$.
+				%
+				% Therefore, any branch added to $\bud$ will eventually be picked at Line~\ref{line:budchoice}.
+				% We say that a branch is explored if it is added (and therefore picked from) $\bud$.
+				%
+				% We prove the claim by recursion on $\mdepth$.
+				% For $\mdepth = 0$, the empty branch $\emptyset$ is explored and the algorithm terminates by returning $\error[\emptyset] = \min(|\negex|, |\posex|)$.
+				%
+				% Now suppose that, for $\mdepth \leq d$, every branch of length $\mdepth$ is explored exactly once, and consider the case $\mdepth=d+1$.
+				% Let $\grow{\abranch}{v}$ be a branch of length $d+1$. By the recursion hypothesis, and since the value of $\mdepth$ is only tested at Line~\ref{line:leaves}, $\abranch$ is also explored when $\mdepth=d+1$.
+				% Moreover, since $|\abranch|<\mdepth$, a feature $\afeat$ will be selected and $\grow{\abranch}{\afeat}$ and $\grow{\abranch}{\bar{\afeat}}$ added to $\bud$. Therefore, if $v=\afeat$ or $v=\bar{afeat}$, then the claim holds.
+				% Otherwise, the pair $(\abranch,\afeat)$ is added to $\sequence$ and it will eventually [TODO, NEED AN ARGUMENT HERE?] be popped out at Line~\ref{line:pop}.
+				% Then, $\afeat$ will be removed from $\dom[\abranch]$ and $\abranch$ reinserted into $\bud$.
+				%
+				% Moreover, the algorithm will not stop until $\sequence$ is not empty, hence $(\abranch, \afeat)$ will eventually be popped out of $\sequence$, $\afeat$ removed from $\dom[\abranch]$ and $\abranch$ reinserted into $\bud$. Therefore, for every $\afeat \in \features$, such that neither $\afeat \in \abranch$ nor $\bar{\afeat}\in \abranch$,
+				%  $\grow{\abranch}{\afeat}$ and $\grow{\abranch}{\bar{\afeat}}$ will eventually be explored exactly once.
+				%
+				%
+				% Let $\abranch$ be a branch of length $d$.
+				% By the recursion hypothesis, and since the value of $\mdepth$ is only tested at Line~\ref{line:leaves}, $\abranch$ is also explored when $\mdepth=d+1$. We ignore the case where $\error[\abranch]=0$, since no extension of $\abranch$ need be explored.
+				%
+				% Moreover, since $|\abranch|<\mdepth$, a feature $\afeat$ will be selected and $\grow{\abranch}{\afeat}$ and $\grow{\abranch}{\bar{\afeat}}$ added to $\bud$, and the pair $(\abranch,\afeat)$ added to $\sequence$.
+				%
+				% \medskip
+				%
+				%
+				%  both branches $\grow{\abranch}{\afeat}$
+				%
+				%
+				% Without loss of generality, let $\abranch$ of length $d$ and show that the same extentions of $\abranch$ are explored by both algorithms.
+				%
+				%
+				% both algorithms explore exactly the same set of branches, albeit not in the same order:
+				% they explore every permutation of (negated) feature of size $\mdepth$.
+				%
+				% We show that this is true for Algorithm~\ref{alg:bud} by recursion on the maximum depth $\mdepth$.
+				% For $\mdepth = 0$, both algorithm return $\error[\emptyset]=\min(|\negex|, |\posex|)$.
+				%
+				% Now suppose that, $\mdepth \leq d$, \dynprog and \budalg explore exactly the same set of branches: a recursive call of \dynprog ends on the branch $\abranch$ if and only if $\best[\abranch]$ is set in Line~\ref{line:best} of \budalg.
+				% %every branch $\abranch$ explored by \dynprog (a recursive call ends on this branch) is also explored by \budalg ($\best[\abranch]$ is set in Line~\ref{line:best}), and
+				% Now, let $\mdepth=d+1$. Without loss of generality, we can take an arbitrary branch $\abranch$ of length $d$ and show that the same extentions of $\abranch$ are explored by both algorithms.
+				% If $\error[\abranch]=0$, then no extension of $\abranch$ is explored by either algorithm.
+				% Otherwise, if $\afeat \not\in \abranch$ and $\bar{\afeat}\not\in \abranch$, then
+				% \dynprog explores the branches $\grow{\abranch}{\afeat}$ and $\grow{\abranch}{\bar{\afeat}}$.
+				% %every branch $\grow{\abranch}{\afeat}$ and $\grow{\abranch}{\bar{\afeat}}$ for $\afeat \in \features \setminus \abranch$.
+				% Since $\abranch$ is explored when $\mdepth = d$ and since $\error[\abranch] \neq 0$, then $\abranch$ will fail the test on Line~\ref{line:leaves} and a feature $\afeat$ such that $\afeat \not\in \abranch$ and $\bar{\afeat}\not\in \abranch$ will be selected,
+				% %for a feature $\afeat \in \features \setminus \abranch$,
+				% the branches $\grow{\abranch}{\afeat}$ and $\grow{\abranch}{\bar{\afeat}}$ will be explored, and the pair $(\abranch, \afeat)$ will be added to $\sequence$.
+				% Moreover, the algorithm will not stop until $\sequence$ is not empty, hence $(\abranch, \afeat)$ will eventually be popped out of $\sequence$, $\afeat$ removed from $\dom[\abranch]$ and $\abranch$ reinserted into $\bud$. Therefore, for every $\afeat \in \features$, such that neither $\afeat \in \abranch$ nor $\bar{\afeat}\in \abranch$,
+				%  $\grow{\abranch}{\afeat}$ and $\grow{\abranch}{\bar{\afeat}}$ will eventually be explored exactly once.
+			% 	\hfill$\square$
+			% \end{proof}
+			
+			% \begin{proof}[sketch]
+			% 	The proof follows from the fact that both algorithms explore exactly the same set of branches, albeit not in the same order:
+			% 	they explore every permutation of (negated) feature of size $\mdepth$.
+			%
+			% 	We show that this is true for Algorithm~\ref{alg:bud} by recursion on the maximum depth $\mdepth$.
+			% 	For $\mdepth = 0$, both algorithm return $\error[\emptyset]=\min(|\negex|, |\posex|)$.
+			%
+			% 	Now suppose that, $\mdepth \leq d$, \dynprog and \budalg explore exactly the same set of branches: a recursive call of \dynprog ends on the branch $\abranch$ if and only if $\best[\abranch]$ is set in Line~\ref{line:best} of \budalg.
+			% 	%every branch $\abranch$ explored by \dynprog (a recursive call ends on this branch) is also explored by \budalg ($\best[\abranch]$ is set in Line~\ref{line:best}), and
+			% 	Now, let $\mdepth=d+1$. Without loss of generality, we can take an arbitrary branch $\abranch$ of length $d$ and show that the same extentions of $\abranch$ are explored by both algorithms.
+			% 	If $\error[\abranch]=0$, then no extension of $\abranch$ is explored by either algorithm.
+			% 	Otherwise, if $\afeat \not\in \abranch$ and $\bar{\afeat}\not\in \abranch$, then
+			% 	\dynprog explores the branches $\grow{\abranch}{\afeat}$ and $\grow{\abranch}{\bar{\afeat}}$.
+			% 	%every branch $\grow{\abranch}{\afeat}$ and $\grow{\abranch}{\bar{\afeat}}$ for $\afeat \in \features \setminus \abranch$.
+			% 	Since $\abranch$ is explored when $\mdepth = d$ and since $\error[\abranch] \neq 0$, then $\abranch$ will fail the test on Line~\ref{line:leaves} and a feature $\afeat$ such that $\afeat \not\in \abranch$ and $\bar{\afeat}\not\in \abranch$ will be selected,
+			% 	%for a feature $\afeat \in \features \setminus \abranch$,
+			% 	the branches $\grow{\abranch}{\afeat}$ and $\grow{\abranch}{\bar{\afeat}}$ will be explored, and the pair $(\abranch, \afeat)$ will be added to $\sequence$.
+			% 	Moreover, the algorithm will not stop until $\sequence$ is not empty, hence $(\abranch, \afeat)$ will eventually be popped out of $\sequence$, $\afeat$ removed from $\dom[\abranch]$ and $\abranch$ reinserted into $\bud$. Therefore, for every $\afeat \in \features$, such that neither $\afeat \in \abranch$ nor $\bar{\afeat}\in \abranch$,
+			% 	 $\grow{\abranch}{\afeat}$ and $\grow{\abranch}{\bar{\afeat}}$ will eventually be explored exactly once.
+			% 	\hfill$\square$
+			% \end{proof}
 			
 			\medskip
 			
-			The key difference between Algorithms~\ref{alg:dynprog} and \ref{alg:bud} is the order in which branches are explored (see Figure~\ref{fig:searchtree}). In particular, \dynprog must complete the first recursive call before outputing a full tree. Therefore, the computation time before to find a first tree is $\Theta((\numex+2^{\mdepth-1}){\numfeat-1 \choose \mdepth-1})$, that is $O(\numex(\numfeat-1)^{\mdepth-1})$ time. On the other hand, \budalg finds a first tree in $\Theta(2^{\mdepth}+\numex\numfeat) = \Theta(\numex\numfeat)$ time.
+			The key difference between Algorithms~\ref{alg:dynprog} and \ref{alg:bud} is the order in which branches are explored (see Figure~\ref{fig:searchtree}). In particular, \dynprog must complete the first recursive call before outputing a full tree. Therefore, the computation time for finding a first complete tree is $\Theta((\numex+2^{\mdepth})\Perm{\numfeat-1}{\mdepth-1})$, that is $O(\numex(\numfeat-1)^{\mdepth-1})$ time. On the other hand, \budalg finds a first tree in linear time: $\Theta(2^{\mdepth}+\numex\numfeat) = \Theta(\numex\numfeat)$.
+			Another difference with actual implementations of Algorithm~\ref{alg:dynprog} (\olddleight\ and \dleight) is that the latter methods use a cache structure in order to reduce the number of branches that need to be explored. Indeed, by using memory, it is sufficient to explore every \emph{combination}\footnote{Actually, some combination may be completely avoided using bounds reasoning and subset lookup.} (instead of every permutation) of $\mdepth$ features since the order of the tests does not matter, given a single branch. Our experimental evaluations, however, show that the overhead of cache lookups may not be always beneficial. Moreover, the space complexity of managing the cache may be prohibitive. On the other hand, Algorithms~\ref{alg:dynprog} and \ref{alg:bud} are essentially memoryless, since, under the standard assumption that $2^{\mdepth} \leq \numex$, their worst-case space complexity is less than the size of the input.
 			
 			
 		
@@ -596,46 +653,57 @@ Notice that to simplify the pseudo-code, we use branches to directly index array
 		  \KwResult{The minimum error on $\negex,\posex$ for decision trees of depth $\maxd$}
 		$\sequence \gets []$\;
 		$\bud \gets \{\emptyset\}$\;
-		$\error \gets \min(|\negex|,|\posex|)$\;
+		% $\error \gets \min(|\negex|,|\posex|)$\;
 		% $\dom \gets (\lambda : {2^{\features}} \mapsto \features)$\;
 		% $\best \gets (\lambda : {2^{\features}} \mapsto \infty)$\;
-		$\dom \gets (\lambda : 2^{\features \cup \bar{\features}} \mapsto \features)$\;
-		$\best \gets (\lambda : 2^{\features \cup \bar{\features}} \mapsto \infty)$\;
-		\HiLi $\opt \gets (\lambda : 2^{\features \cup \bar{\features}} \mapsto 0)$\;
+		% $\dom \gets (\lambda : 2^{\features \cup \bar{\features}} \mapsto \features)$\;
+		% $\best \gets (\lambda : 2^{\features \cup \bar{\features}} \mapsto \infty)$\;
+		% \HiLi $\opt \gets (\lambda : 2^{\features \cup \bar{\features}} \mapsto 0)$\;
 		
+	$\dom[\emptyset] \gets \features$\;
+	$\best[\emptyset] \gets \min(\negex, \posex)$\;
+	\HiLi $\opt[\emptyset] \gets \texttt{false}$\;
 		
 		
 		\While{$|\sequence| + |\bud| > 0$}{
-		\lnl{line:dive}\eIf{$\bud \neq \emptyset$}{
+		\lnl{line:dive}\If{$\bud \neq \emptyset$}{
 			%$\abranch \gets \select{\bud}$\;
 			\lnl{line:budchoice}pick and remove $\abranch$ from $\bud$\;
 			
-			\lnl{line:leaves}\eIf{$|\abranch| = \maxd$ or $\error[\abranch] = 0$} {
-				% $\error \gets \error + \error[\abranch,\afeat]$\;
-				\lnl{line:best}$\best[\abranch] \gets \error[\abranch]$\;
-			}{
+			% \lnl{line:leaves}\eIf{$|\abranch| = \maxd$ or $\error[\abranch] = 0$} {
+			% 	% $\error \gets \error + \error[\abranch,\afeat]$\;
+			% 	\lnl{line:best}$\best[\abranch] \gets \error[\abranch]$\;
+			% }{
+			\lnl{line:notterminal}\If{$|\abranch| < \maxd$ and $\best[\abranch] > 0$}{
 			\lnl{line:assignment} pick and remove $\afeat$ from $\dom[\abranch]$\;
 			% $\dom[\abranch] \gets \dom[\abranch] \setminus \{\afeat\}$\;
-			push $(\abranch,\afeat)$ on $\sequence$\; 
-			\lnl{line:branching}\lForEach{$v \in \{\afeat, \bar{\afeat}\}$}{
-						$\bud \gets \bud \cup \{\grow{\abranch}{v}\}$
+			push $(\abranch,\afeat)$ on $\sequence$\;
+			split $\negex(\abranch)$ and $\posex(\abranch)$ w.r.t. $\afeat$\;
+			\lnl{line:branching}\ForEach{$v \in \{\afeat, \bar{\afeat}\}$}{
+						\lnl{line:newbud}$\bud \gets \bud \cup \{\grow{\abranch}{v}\}$\;
+						\lnl{line:domain}$\dom(\grow{\abranch}{v}) \gets \features \setminus \{\afeat \mid \afeat \in \abranch ~\vee~ \bar{\afeat} \in \abranch\}$\;
+						$\best(\grow{\abranch}{v}) \gets \min(\negex[\grow{\abranch}{v}], \posex[\grow{\abranch}{v}])$\;
+						\HiLi $\opt(\grow{\abranch}{v}) \gets \texttt{false}$\;
 					}
 			}
-		}{
+		}
+		\lnl{line:else}\Else {
 			% $\best[\emptyset] \gets \min(\best[\emptyset], \error)$\;
 			\lnl{line:backtrack}\While{$|\sequence| > 0$}{
-				pop $(\abranch,\afeat)$ from $\sequence$\;
+				\lnl{line:pop}pop $(\abranch,\afeat)$ from $\sequence$\;
 				\lnl{line:storebest}$\best[\abranch] \gets \min(\best[\abranch], \best[\grow{\abranch}{\afeat}] +  \best[\grow{\abranch}{\bar{\afeat}}])$\;
 				% $\error \gets \error - \best[\grow{\abranch}{\afeat}] -  \best[\grow{\abranch}{\bar{\afeat}}]$\;
-				\lnl{line:optimal}\eIf{$\dom[\abranch] \neq \emptyset$ \colorbox{yellow!50}{and $|\abranch|<\mdepth$}} {
-					\lnl{line:fail} \HiLi \If{$\forall \abranch' \subseteq \abranch, \lb{\abranch',\abranch} < \best[\abranch']$} {
-					$\bud \gets \bud \cup \{\abranch\}$\;
+				\lnl{line:optimal}\If{$\dom[\abranch] \neq \emptyset$ 
+				\colorbox{yellow!50}{and $|\abranch|<\mdepth$}
+				} {
+					\lnl{line:fail} \HiLi \If{$\forall \abranch' \in \ancestors[\abranch], \lb{\abranch',\abranch} < \best[\abranch']$} {
+					\lnl{line:right}$\bud \gets \bud \cup \{\abranch\}$\;
 					\Break\;
 					}
 					% \lIf{$\opt[\abranch]$}{$\error \gets \error - \best[\abranch]$}
 				} 
-				{
-					\lnl{line:markoptimal}\HiLi $\opt[\abranch] \gets 1$\;
+				\HiLi \lnl{line:markoptimal} \lElse{
+					$\opt[\abranch] \gets \texttt{true}$
 				}
 				% \lElse {
 				% 	$\error \gets \error + \best[\abranch]$%$\error[\abranch,\afeat]$
@@ -727,61 +795,7 @@ Notice that to simplify the pseudo-code, we use branches to directly index array
 	
 	
 	
-	\begin{figure}
-	\begin{center}
-		\tabcolsep=0pt
-		\scalebox{1}{
-			\begin{forest}
-				for tree={%
-					l sep=20pt,
-					s sep=3.5pt,
-					node options={shape=rectangle, minimum width=10pt, inner sep=0pt, font=\footnotesize},
-		  		edge={thick, -latex, shorten >=1pt, shorten <=1pt},
-				}
-				[{$\emptyset$}
-					[{$a$}
-						[{\begin{tabular}{c}$b$\\1\end{tabular}}]
-						[{\begin{tabular}{c}$\bar{b}$\\2\end{tabular}}]
-						[{\begin{tabular}{c}$c$\\7\end{tabular}}]
-						[{\begin{tabular}{c}$\bar{c}$\\8\end{tabular}}]
-					]
-					[{$\bar{a}$}
-						[{\begin{tabular}{c}$b$\\3\end{tabular}}]
-						[{\begin{tabular}{c}$\bar{b}$\\4\end{tabular}}]
-						[{\begin{tabular}{c}$c$\\5\end{tabular}}]
-						[{\begin{tabular}{c}$\bar{c}$\\6\end{tabular}}]
-					]
-					[{$b$}
-						[{\begin{tabular}{c}$a$\\9\end{tabular}}]
-						[{\begin{tabular}{c}$\bar{a}$\\10\end{tabular}}]
-						[{\begin{tabular}{c}$c$\\15\end{tabular}}]
-						[{\begin{tabular}{c}$\bar{c}$\\16\end{tabular}}]
-					]
-					[{$\bar{b}$}
-						[{\begin{tabular}{c}$a$\\11\end{tabular}}]
-						[{\begin{tabular}{c}$\bar{a}$\\12\end{tabular}}]
-						[{\begin{tabular}{c}$c$\\13\end{tabular}}]
-						[{\begin{tabular}{c}$\bar{c}$\\14\end{tabular}}]
-					]
-					[{$c$}
-						[{\begin{tabular}{c}$a$\\17\end{tabular}}]
-						[{\begin{tabular}{c}$\bar{a}$\\18\end{tabular}}]
-						[{\begin{tabular}{c}$b$\\23\end{tabular}}]
-						[{\begin{tabular}{c}$\bar{b}$\\24\end{tabular}}]
-					]
-					[{$\bar{c}$}
-						[{\begin{tabular}{c}$a$\\19\end{tabular}}]
-						[{\begin{tabular}{c}$\bar{a}$\\20\end{tabular}}]
-						[{\begin{tabular}{c}$b$\\21\end{tabular}}]
-						[{\begin{tabular}{c}$\bar{b}$\\22\end{tabular}}]
-					]
-				]
-			\end{forest}
-		}
-	\end{center}
-	\caption{\label{fig:searchtree} The search tree for decision trees. \texttt{DynProg} explores it depth first, whereas \texttt{Bud-first-search} explores the leaves in the order given below.}
-	%\caption{\label{fig:searchtree} The search tree for decision trees. \dynprog explores it depth first, whereas \budalg explores branches in the order given below the leaves.}
-	\end{figure}
+
 	
 	
 	
@@ -851,7 +865,7 @@ Notice that to simplify the pseudo-code, we use branches to directly index array
 % 	\item $\error{\anode,\afeat}$ $\min(|\posex(\anode=\afeat)|,|\negex(\anode=\afeat)|)$
 % \end{itemize}
 %
-% Algorithm~\ref{alg:search} is a bactracking procedure which expends a current decision tree
+% Algorithm~\ref{alg:search} is a bactracking procedure which expands a current decision tree
 %
 % 	\begin{algorithm}
 % 		\caption{Data Structures\label{alg:init}}
@@ -1024,7 +1038,11 @@ This means that we actually do not have to try other features for that node. Thi
 
 %We order the possible features for branch $\abranch$ in non-decreasing order with respect to a score above and 
 %explore the features in that order in Line~\ref{line:assignment}.
-Computing this order costs $\Theta(\numfeat \log \numfeat)$ for each of the $2^{\mdepth}\numfeat^{\mdepth}$ branches added to $\bud$ at Line~\ref{line:branching}. However, since the depth of the branches is effectively reduced by one, the resulting complexity 
+Computing the frequencies $p(\afeat,{\negex(\abranch)})$ and $p(\afeat,{\posex(\abranch)})$ of every feature $\afeat$ can be done in  $\Theta(\numfeat\numex)$ time where 
+$\numex = |\negex(\abranch)|+|\posex(\abranch)|$.\footnote{$p(\bar{\afeat},{\negex(\abranch)})$ and $p(\bar{\afeat},{\posex(\abranch)})$ can then be deduced in $\Theta(\numfeat)$ time} In other words this is more expensive than the splitting procedure by a factor $\numfeat$, but can be similarly amortized. However, since the depth of the branches is effectively reduced by one, the number of terminal branches is reduced by the same factor $\numfeat$, hence this incurs no asymptotic increase in complexity.
+Furthermore, ordering the features (in $\dom[\abranch]$)
+%Computing this order 
+costs $\Theta(\numfeat \log \numfeat)$ for each of the $2^{\mdepth-1}\numfeat^{\mdepth-1}$ branches added to $\bud$ at Line~\ref{line:branching}. Again, since the depth of the branches is effectively reduced by one, the resulting complexity 
 %(excluding the time for splitting the data set) 
 is $O((\numex + 2^{\mdepth} \log \numfeat) \numfeat^{\mdepth})$. This very slight increase is often inconsequencial, as long as we have $\numex \geq 2^{\mdepth} \log \numfeat$.
 
@@ -1043,7 +1061,7 @@ It is possible to fail early using a lower bound on the error given prior decisi
 %In this case, we can fail by forcing 
 
 
-First, observe that $\best[\abranch]$ is an upper bound on the classification error for any subtree rooted at $\abranch$, since this value comes from an actual tree (of depth $\mdepth - |\abranch|$ for the data set $\langle \negex(\abranch),\posex(\abranch) \rangle$). It is possible to propagate this upper bound to parent nodes efficiently (in $O(|\branch|)$ time). Here we assume that this is done every time the value $\best[\abranch]$ is actually updated, by recursively applying the same update procedure to the parent.
+First, observe that $\best[\abranch]$ is an upper bound on the classification error for any subtree rooted at $\abranch$, since this value comes from an actual tree (of depth $\mdepth - |\abranch|$ for the data set $\langle \negex(\abranch),\posex(\abranch) \rangle$). It is possible to propagate this upper bound to parent nodes efficiently (in $O(|\abranch|)$ time). Here we assume that this is done every time the value $\best[\abranch]$ is actually updated, by recursively applying the same update procedure to the parent.
 
 
 Now, when the condition in Line~\ref{line:optimal} fails for a branch $\abranch$, it means that $\best[\abranch]$ is \emph{optimal}, there is no tree of maximum depth $\mdepth - |\abranch|$ with classification error lower than $\best[\abranch]$. This is true either because every subtree has been explored, or because $\mdepth - |\abranch| = 1$ and the feature $\afeat$ with least 
@@ -1158,7 +1176,7 @@ As long as these choices of feature tests stand (i.e., as long as $\abranch$ bel
 
 \medskip
 
-This reasoning will be more effective when good upper bounds are found early, hence the feature ordering heuristic discussed in the previous section has an impact. Moreover, the order in which buds are expended (the choice of branch in Line~\ref{line:budchoice}) has an impact as well. We found that the simplest branch selection strategy was also the one giving the best results: we expend first the branch that was inserted into \bud\ first (i.e., \bud\ is \emph{FIFO}). One possible explanation is that by avoiding to unnecessarily ``jump'' to different parts of the decision tree, this strategy promotes optimizing sibling subtrees first, and therefore, deeper tree earlier.
+This reasoning will be more effective when good upper bounds are found early, hence the feature ordering heuristic discussed in the previous section has an impact. Moreover, the order in which buds are expanded (the choice of branch in Line~\ref{line:budchoice}) has an impact as well. We found that the simplest branch selection strategy was also the one giving the best results: we expand first the branch that was inserted into \bud\ first (i.e., \bud\ is \emph{FIFO}). One possible explanation is that by avoiding to unnecessarily ``jump'' to different parts of the decision tree, this strategy promotes optimizing sibling subtrees first, and therefore, deeper tree earlier.
 
 % intuitivelly, one want to optimize the branches of the decision trees with the largest error first, in order to benefit from larger lower bounds earlier. To this end, it
 
@@ -1398,6 +1416,19 @@ In the variant ``No lower bound'', the lower bound technique described in Sectio
 \end{center}
 \caption{\label{tab:iti} ITI}
 \end{table}
+
+
+
+\begin{table}[htbp]
+\begin{center}
+\begin{footnotesize}
+\tabcolsep=5pt
+\input{src/tables/gosdt.tex}
+\end{footnotesize}
+\end{center}
+\caption{\label{tab:gosdt} GOSDT}
+\end{table}
+
 
 
 \section{Conclusion}

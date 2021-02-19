@@ -12,11 +12,23 @@ from the `code` directory.
 
 - Command line
 
+to learn a decision tree classifier:
+
+```
 bin/blossom <datafile> [options]
+```
 
 to binarize a non-binary dataset:
 
+```
 bin/binarizer <datafile> --print_ins [--output filename]
+```	
+
+to compile a table:
+	
+```
+bin/compile <datafile> [options]
+```	
 
 - High level API (Sklearn estimator)
 
