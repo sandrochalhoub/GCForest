@@ -41,7 +41,7 @@ void read(const std::string &fn, header_declaration notify_header,
   } catch (std::exception &e) {
     std::cout.flush();
     cerr << "ERROR: " << e.what() << std::endl;
-    exit(1);
+    throw e;
   }
 }
 
@@ -77,7 +77,7 @@ void read_binary(const std::string &fn, data_declaration notify_data,
   } catch (std::exception &e) {
     std::cout.flush();
     cerr << "ERROR: " << e.what() << std::endl;
-    exit(1);
+    throw e;
   }
 }
 

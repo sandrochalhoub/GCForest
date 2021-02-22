@@ -39,10 +39,12 @@ int run_algorithm(DTOptions &opt) {
   WeightedDataset<E_t> input;
 
   ////// READING
-  if (opt.binarize) {
-    read_non_binary(input, opt);
-  } else {
+  try {
     read_binary(input, opt);
+  } catch (const std::exception &e) {
+    if (opt.verbosity >= DTOptions::NORMAL)
+      cout << "c format not recognized or input non-binary, binarizing...\n";
+    read_non_binary(input, opt);
   }
 
   // in compilation, noise and duplicates must be removed (we should probably

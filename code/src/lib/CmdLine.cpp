@@ -163,9 +163,6 @@ DTOptions blossom::parse_dt(int argc, char *argv[]) {
   cmd.add<SwitchArg>(opt.bounding, "", "nolb", "switch bound reasoning off",
                      true);
 
-  cmd.add<SwitchArg>(opt.binarize, "", "binarize", "binarize the data set",
-                     false);
-
   cmd.add<ValueArg<double>>(opt.split, "", "split", "proportion of examples in the test set",
                             false, 0.0, "double");
 

@@ -58,7 +58,6 @@ public:
   enum feature_strategy { MINERROR = 0, ENTROPY = 1, GINI = 2, HYBRID = 3 };
   int feature_strategy;
 
-  bool binarize;
   double split;
   int ada_it;
   int ada_stop;
@@ -92,13 +91,13 @@ public:
         restart_base(opt.restart_base), restart_factor(opt.restart_factor),
         time(opt.time), search(opt.search), bounding(opt.bounding),
         node_strategy(opt.node_strategy),
-        feature_strategy(opt.feature_strategy), binarize(opt.binarize),
-        split(opt.split), ada_it(opt.ada_it), ada_stop(opt.ada_stop),
-        filter(opt.filter), reference_class(opt.reference_class),
-        mindepth(opt.mindepth), minsize(opt.minsize),
-        preprocessing(opt.preprocessing), progress(opt.progress),
-        delimiter(opt.delimiter), intarget(opt.intarget),
-        outtarget(opt.outtarget), pruning(opt.pruning) {}
+        feature_strategy(opt.feature_strategy), split(opt.split),
+        ada_it(opt.ada_it), ada_stop(opt.ada_stop), filter(opt.filter),
+        reference_class(opt.reference_class), mindepth(opt.mindepth),
+        minsize(opt.minsize), preprocessing(opt.preprocessing),
+        progress(opt.progress), delimiter(opt.delimiter),
+        intarget(opt.intarget), outtarget(opt.outtarget), pruning(opt.pruning) {
+  }
 
   ostream &display(ostream &os);
 };

@@ -56,8 +56,8 @@ instance concatenate(const instance &w1, const instance &w2) {
 template <typename T> class Encoding {
 
 public:
-	virtual ~Encoding() {}
-	
+  virtual ~Encoding() {}
+
   // encode the values of the iterator
   virtual void encode(typename std::vector<T>::iterator beg,
                       typename std::vector<T>::iterator end) = 0;
@@ -66,8 +66,8 @@ public:
   virtual const instance &getEncoding(T &x) const = 0;
 
   virtual size_t size() const = 0;
-	
-	virtual const string getType() const = 0;
+
+  virtual const string getType() const = 0;
 
   // returns (in string format) the test corresponding to x[i]==v
   virtual const string getLabel(const int i, const int v) const = 0;
@@ -87,8 +87,8 @@ protected:
   vector<instance> lit;
 
 public:
-	// virtual ~TrivialEncoding() {}
-	
+  // virtual ~TrivialEncoding() {}
+
   virtual size_t size() const { return 1; }
 
   // encode the values of the iterator
@@ -105,12 +105,12 @@ public:
   virtual const instance &getEncoding(T &x) const {
     return lit[(x == value_set[1])];
   }
-	
-	virtual const string getType() const {
+
+  virtual const string getType() const {
     std::stringstream ss;
     ss << "trivial " << value_set[0] << " " << value_set[1];
-		return ss.str();
-	}
+    return ss.str();
+  }
 
   // returns (in string format) the test x[i]
   virtual const string getLabel(const int i, const int v) const {
@@ -134,9 +134,8 @@ protected:
   vector<T> value_set;
 
 public:
-	
-	// virtual ~ClassicEncoding() {}
-	
+  // virtual ~ClassicEncoding() {}
+
   // encode the values of the iterator
   // template <typename RandomIt>
   virtual void encode(typename std::vector<T>::iterator beg,
@@ -190,7 +189,7 @@ public:
     }
   }
 
-	virtual const string getType() const {return "binary-direct";}
+  virtual const string getType() const { return "binary-direct"; }
 
   // returns (in string format) the test x[i]
   const string getLabel(const int i, const int v) const {
@@ -229,8 +228,8 @@ public:
       ClassicEncoding<T>::encoding_map[*i] = e;
     }
   }
-	
-	virtual const string getType() const {return "binary-scaled";}
+
+  virtual const string getType() const { return "binary-scaled"; }
 
   // returns (in string format) the test x[i]
   const string getLabel(const int i, const int v) const { return "&=?"; }
@@ -240,10 +239,12 @@ template <typename T> class Order : public ClassicEncoding<T> {
 
 private:
   size_t num_examples;
+  const string &feature_name;
 
 public:
-  Order(const size_t n) : ClassicEncoding<T>(), num_examples(n) {}
- 
+  Order(const size_t n, const string &f)
+      : ClassicEncoding<T>(), num_examples(n), feature_name(f) {}
+
   virtual size_t size() const {
     return ClassicEncoding<T>::value_set.size() - 1;
   }
@@ -259,22 +260,31 @@ public:
     // for (auto v : ClassicEncoding<T>::value_set)
     //   cout << " " << v;
     // cout << endl;
-		
-		// cout << ClassicEncoding<T>::value_set.size() << " " << (num_examples) ;
 
-		if(ClassicEncoding<T>::value_set.size() < sqrt(num_examples)) {
-			// cout << " full\n";
-			
-			full_encoding();
-		} else {
-			// cout << " reduced\n";
-			
-			reduced_encoding();
-		}
+    // cout << ClassicEncoding<T>::value_set.size() << " " << (num_examples) ;
+
+    if (ClassicEncoding<T>::value_set.size() < sqrt(num_examples)) {
+      // cout << " full\n";
+
+      full_encoding();
+    } else {
+
+      size_t num_intervals{static_cast<size_t>(
+          log(static_cast<double>(ClassicEncoding<T>::value_set.size())))};
+      if (num_intervals < 1)
+        num_intervals = 1;
+
+      cout << "c possible precision loss when binarizing feature "
+           << feature_name << " (" << ClassicEncoding<T>::value_set.size()
+           << " distinct values -> " << num_intervals << " intervals)"
+           << "\n";
+
+      reduced_encoding(num_intervals);
+    }
   }
-	
-	void full_encoding() {
- 	
+
+  void full_encoding() {
+
     auto vb{ClassicEncoding<T>::value_set.begin()};
     auto ve{ClassicEncoding<T>::value_set.end() - 1};
 
@@ -284,14 +294,9 @@ public:
       e.resize(ve - vb, true);
       ClassicEncoding<T>::encoding_map[*i] = e;
     }
-	
- 	}	
-	
-	void reduced_encoding() {
-		size_t num_intervals{static_cast<size_t>(log(static_cast<double>(ClassicEncoding<T>::value_set.size())))};
-		
-		if(num_intervals < 1)
-			num_intervals = 1;
+  }
+
+  void reduced_encoding(const size_t num_intervals) {
 
     vector<size_t> boundary;
     size_t i_size{ClassicEncoding<T>::value_set.size() / num_intervals};
@@ -316,10 +321,9 @@ public:
       e.resize(boundary.size(), true);
       ClassicEncoding<T>::encoding_map[*i] = e;
     }
-	}
-	
-	
-	virtual const string getType() const {return "order";}
+  }
+
+  virtual const string getType() const { return "order"; }
 
   // returns (in string format) the test x[i]
   const string getLabel(const int i, const int v) const {
@@ -352,11 +356,12 @@ public:
     //      v < ClassicEncoding<T>::value_set.end(); ++v) {
     //   assert(*(v - 1) < *v);
     // }
-		
-		size_t num_intervals{static_cast<size_t>(log(static_cast<double>(ClassicEncoding<T>::value_set.size())))};
-		
-		if(num_intervals < 1)
-			num_intervals = 1;
+
+    size_t num_intervals{static_cast<size_t>(
+        log(static_cast<double>(ClassicEncoding<T>::value_set.size())))};
+
+    if (num_intervals < 1)
+      num_intervals = 1;
 
     vector<size_t> boundary;
     size_t i_size{ClassicEncoding<T>::value_set.size() / num_intervals};
@@ -435,8 +440,8 @@ public:
       ClassicEncoding<T>::encoding_map[*i] = e;
     }
   }
-	
-	virtual const string getType() const {return "direct";}
+
+  virtual const string getType() const { return "direct"; }
 
   // returns (in string format) the test x[i]
   const string getLabel(const int i, const int v) const {
@@ -492,20 +497,20 @@ public:
   /*!@name Constructors*/
   //@{
   explicit TypedDataSet() {}
-	~TypedDataSet() {
-		while(not int_encoder.empty()) {
-			delete int_encoder.back();
-			int_encoder.pop_back();
-		}
-		while(not float_encoder.empty()) {
-			delete float_encoder.back();
-			float_encoder.pop_back();
-		}
-		while(not symb_encoder.empty()) {
-			delete symb_encoder.back();
-			symb_encoder.pop_back();
-		}
-	}
+  ~TypedDataSet() {
+    while (not int_encoder.empty()) {
+      delete int_encoder.back();
+      int_encoder.pop_back();
+    }
+    while (not float_encoder.empty()) {
+      delete float_encoder.back();
+      float_encoder.pop_back();
+    }
+    while (not symb_encoder.empty()) {
+      delete symb_encoder.back();
+      symb_encoder.pop_back();
+    }
+  }
   //@}
 
   /*!@name Accessors*/
@@ -622,12 +627,14 @@ public:
         //           int_encoder.push_back(enc);
         //       	}
         else {
-          enc = new Order<int>(int_value[feature_rank[f]].size());
+          enc = new Order<int>(int_value[feature_rank[f]].size(),
+                               feature_label[f]);
           enc->encode(int_buffer.begin(), int_buffer.end());
           int_encoder.push_back(enc);
         }
 
-        // cout << "int (" << feature_rank[f] << "/" << int_encoder.size() << "):";
+        // cout << "int (" << feature_rank[f] << "/" << int_encoder.size() <<
+        // "):";
         // for (auto v : int_buffer)
         //   cout << "\n" << v << " -> " << enc->getEncoding(v);
         // cout << endl;
@@ -648,11 +655,9 @@ public:
         // exit(1);
 
         // cout << "constructor\n";
-				
-				
-				
 
-        Encoding<float> *enc = new Order<float>(float_value[feature_rank[f]].size());
+        Encoding<float> *enc = new Order<float>(
+            float_value[feature_rank[f]].size(), feature_label[f]);
 
         // cout << "encode\n";
 
@@ -732,13 +737,12 @@ public:
       // instance db;
       // bin.duplicate_format(binex, db);
       // bin.add(db, label[i] != min_label);
-			bin.addBitsetExample(binex, label[i] != min_label);
+      bin.addBitsetExample(binex, label[i] != min_label);
 
-                        // cout << binex << endl;
+      // cout << binex << endl;
     }
-		
-		// cout << bin.example_count() << endl;
 
+    // cout << bin.example_count() << endl;
   }
 
   std::ostream &display(std::ostream &os) const {
@@ -779,23 +783,23 @@ public:
       int r{feature_rank[f]};
       switch (t) {
       case INTEGER:
-        os << " " << int_encoder[r]->getType() ;
-				if(int_encoder[r]->size() > 1)
-					os << " " << int_encoder[r]->size();
+        os << " " << int_encoder[r]->getType();
+        if (int_encoder[r]->size() > 1)
+          os << " " << int_encoder[r]->size();
         for (int j{0}; j < int_encoder[r]->size(); ++j)
           os << " " << int_encoder[r]->getLabel(j);
         break;
       case FLOAT:
-        os << " " << float_encoder[r]->getType() ;
-				if(float_encoder[r]->size() > 1)
-					os << " " << float_encoder[r]->size();
+        os << " " << float_encoder[r]->getType();
+        if (float_encoder[r]->size() > 1)
+          os << " " << float_encoder[r]->size();
         for (int j{0}; j < float_encoder[r]->size(); ++j)
           os << " " << float_encoder[r]->getLabel(j);
         break;
       case SYMBOL:
-        os << " " << symb_encoder[r]->getType() ;
-				if(symb_encoder[r]->size() > 1)
-					os << " " << symb_encoder[r]->size();
+        os << " " << symb_encoder[r]->getType();
+        if (symb_encoder[r]->size() > 1)
+          os << " " << symb_encoder[r]->size();
         for (int j{0}; j < symb_encoder[r]->size(); ++j)
           os << " " << symb_encoder[r]->getLabel(j);
         break;

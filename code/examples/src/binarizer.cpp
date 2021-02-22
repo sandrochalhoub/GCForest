@@ -85,21 +85,13 @@ int main(int argc, char *argv[]) {
   WeightedDataset<int> input;
 
   ////// READING
-  if (opt.binarize) {
-
-    read_non_binary(input, opt);
-
-  } else {
-
-    read_binary(input, opt);
-		
-  }
-	
-	// std::function<bool(const int f)> relevant = [](const int f) { return true; };
-	//   input.printDatasetToFile(cout, string(" "), string(""), relevant,
-	//                            opt.outtarget != -1, false);
-
-  // cout << input << endl;
+  // try {
+  //   read_binary(input, opt);
+  // } catch (const std::exception &e) {
+  if (opt.verbosity >= DTOptions::NORMAL)
+    cout << "c format not recognized or input non-binary, binarizing...\n";
+  read_non_binary(input, opt);
+  // }
 
   if (opt.sample < 1)
     input.sample(opt.sample);

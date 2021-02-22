@@ -38,13 +38,13 @@ int run_algorithm(DTOptions &opt) {
   WeightedDataset<E_t> input;
 
   ////// READING
-  if (opt.binarize) {
 
-    read_non_binary(input, opt);
-
-  } else {
-
+  try {
     read_binary(input, opt);
+  } catch (const std::exception &e) {
+    if (opt.verbosity >= DTOptions::NORMAL)
+      cout << "c format not recognized or input non-binary, binarizing...\n";
+    read_non_binary(input, opt);
   }
 
   if (opt.verbosity >= DTOptions::NORMAL)
@@ -66,9 +66,6 @@ int run_algorithm(DTOptions &opt) {
          << endl;
 
   ////// SOLVING
-	
-	cout << "opt.mindepth: " << opt.mindepth << " opt.minsize " << opt.minsize << endl;
-	
   if (opt.mindepth) {
     if (opt.minsize)
       A.minimize_error_depth_size();
