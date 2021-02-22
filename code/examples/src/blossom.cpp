@@ -66,6 +66,9 @@ int run_algorithm(DTOptions &opt) {
          << endl;
 
   ////// SOLVING
+	
+	cout << "opt.mindepth: " << opt.mindepth << " opt.minsize " << opt.minsize << endl;
+	
   if (opt.mindepth) {
     if (opt.minsize)
       A.minimize_error_depth_size();

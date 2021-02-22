@@ -178,13 +178,13 @@ DTOptions blossom::parse_dt(int argc, char *argv[]) {
   cmd.add<SwitchArg>(opt.mindepth, "", "depthobjective",
                      "switch depth objective on", false);
 
-  cmd.add<SwitchArg>(opt.mindepth, "", "erroronly",
+  cmd.add<SwitchArg>(opt.mindepth, "", "nodepthobjective",
                      "switch depth objective off", true);
 
   cmd.add<SwitchArg>(opt.minsize, "", "sizeobjective",
                      "switch size objective on", false);
 
-  cmd.add<SwitchArg>(opt.minsize, "", "depthonly", "switch size objective off",
+  cmd.add<SwitchArg>(opt.minsize, "", "nosizeobjective", "switch size objective off",
                      true);
 
   cmd.add<SwitchArg>(opt.filter, "", "filter",
