@@ -238,7 +238,12 @@ public:
 
 template <typename T> class Order : public ClassicEncoding<T> {
 
+private:
+  size_t num_examples;
+
 public:
+  Order(const size_t n) : ClassicEncoding<T>(), num_examples(n) {}
+ 
   virtual size_t size() const {
     return ClassicEncoding<T>::value_set.size() - 1;
   }
@@ -254,7 +259,22 @@ public:
     // for (auto v : ClassicEncoding<T>::value_set)
     //   cout << " " << v;
     // cout << endl;
+		
+		cout << ClassicEncoding<T>::value_set.size() << " " << (num_examples) ;
 
+		if(ClassicEncoding<T>::value_set.size() < sqrt(num_examples)) {
+			cout << " full\n";
+			
+			full_encoding();
+		} else {
+			cout << " reduced\n";
+			
+			reduced_encoding();
+		}
+  }
+	
+	void full_encoding() {
+ 	
     auto vb{ClassicEncoding<T>::value_set.begin()};
     auto ve{ClassicEncoding<T>::value_set.end() - 1};
 
@@ -264,9 +284,119 @@ public:
       e.resize(ve - vb, true);
       ClassicEncoding<T>::encoding_map[*i] = e;
     }
-  }
+	
+ 	}	
+	
+	void reduced_encoding() {
+		size_t num_intervals{static_cast<size_t>(log(static_cast<double>(ClassicEncoding<T>::value_set.size())))};
+		
+		if(num_intervals < 1)
+			num_intervals = 1;
+
+    vector<size_t> boundary;
+    size_t i_size{ClassicEncoding<T>::value_set.size() / num_intervals};
+    size_t next_boundary{i_size};
+    while (next_boundary < ClassicEncoding<T>::value_set.size()) {
+      boundary.push_back(next_boundary);
+      next_boundary += i_size;
+    }
+
+    auto vb{ClassicEncoding<T>::value_set.begin()};
+    auto ve{ClassicEncoding<T>::value_set.end() - 1};
+
+    size_t b{0};
+    for (auto i{vb}; i <= ve; ++i) {
+      dynamic_bitset<> e;
+
+      while (b < boundary.size() and
+             ClassicEncoding<T>::value_set[boundary[b]] < *i)
+        ++b;
+
+      e.resize(b, false);
+      e.resize(boundary.size(), true);
+      ClassicEncoding<T>::encoding_map[*i] = e;
+    }
+	}
+	
 	
 	virtual const string getType() const {return "order";}
+
+  // returns (in string format) the test x[i]
+  const string getLabel(const int i, const int v) const {
+    std::stringstream ss;
+    ss << (v ? "<=" : ">") << ClassicEncoding<T>::value_set[i];
+    return ss.str();
+  }
+};
+
+template <typename T> class Interval : public ClassicEncoding<T> {
+
+// private:
+//   size_t num_intervals;
+
+public:
+  // Interval(const size_t n) : ClassicEncoding<T>(), num_intervals(n) {}
+
+  virtual size_t size() const {
+    return ClassicEncoding<T>::value_set.size() - 1;
+  }
+
+  // encode the values of the iterator
+  // template <typename RandomIt>
+  void encode(typename std::vector<T>::iterator beg,
+              typename std::vector<T>::iterator end) {
+
+    ClassicEncoding<T>::encode(beg, end);
+
+    // for (auto v{ClassicEncoding<T>::value_set.begin() + 1};
+    //      v < ClassicEncoding<T>::value_set.end(); ++v) {
+    //   assert(*(v - 1) < *v);
+    // }
+		
+		size_t num_intervals{static_cast<size_t>(log(static_cast<double>(ClassicEncoding<T>::value_set.size())))};
+		
+		if(num_intervals < 1)
+			num_intervals = 1;
+
+    vector<size_t> boundary;
+    size_t i_size{ClassicEncoding<T>::value_set.size() / num_intervals};
+    size_t next_boundary{i_size};
+    while (next_boundary < ClassicEncoding<T>::value_set.size()) {
+      boundary.push_back(next_boundary);
+      next_boundary += i_size;
+    }
+
+    // for(auto v : boundary) {
+    // 	cout << v << ": " << ClassicEncoding<T>::value_set[v] << endl;
+    // }
+    // cout << ClassicEncoding<T>::value_set.size() << endl;
+
+    // exit(1);
+
+    // cout << "unary order encode\n";
+    // for (auto v : ClassicEncoding<T>::value_set)
+    //   cout << " " << v;
+    // cout << endl;
+
+    auto vb{ClassicEncoding<T>::value_set.begin()};
+    auto ve{ClassicEncoding<T>::value_set.end() - 1};
+
+    // auto b{boundary.begin()};
+    size_t b{0};
+    for (auto i{vb}; i <= ve; ++i) {
+      dynamic_bitset<> e;
+
+      while (b < boundary.size() and
+             ClassicEncoding<T>::value_set[boundary[b]] < *i)
+        ++b;
+
+      e.resize(b, false);
+      e.resize(boundary.size(), true);
+      ClassicEncoding<T>::encoding_map[*i] = e;
+    }
+  }
+
+  virtual const string getType() const { return "order"; }
 
   // returns (in string format) the test x[i]
   const string getLabel(const int i, const int v) const {
@@ -492,7 +622,7 @@ public:
         //           int_encoder.push_back(enc);
         //       	}
         else {
-          enc = new Order<int>();
+          enc = new Order<int>(int_value[feature_rank[f]].size());
           enc->encode(int_buffer.begin(), int_buffer.end());
           int_encoder.push_back(enc);
         }
@@ -505,18 +635,42 @@ public:
 
       } else if (feature_type[f] == FLOAT) {
 
+        // cout << "compute set\n";
+
         computeSet(float_value[feature_rank[f]], float_buffer);
 
-        Encoding<float> *enc = new Order<float>();
+        // cout << feature_label[f] << " " << float_buffer.size() << endl;
+        //
+        // for(auto x : float_buffer)
+        // 	cout << " " << x;
+        // cout << endl;
+        //
+        // exit(1);
+
+        // cout << "constructor\n";
+				
+				
+				
+
+        Encoding<float> *enc = new Order<float>(float_value[feature_rank[f]].size());
+
+        // cout << "encode\n";
+
         enc->encode(float_buffer.begin(), float_buffer.end());
+
+        // cout << "push enc\n";
+
         float_encoder.push_back(enc);
 
-        // cout << "float (" << feature_rank[f] << "/" << float_encoder.size()
-        //      << "):";
-        // for (auto v : float_buffer)
-        //   cout << "\n" << v << " -> " << enc->getEncoding(v);
-        // cout << endl;
-        // cout << endl;
+        //         cout << "float (" << feature_rank[f] << "/" <<
+        //         float_encoder.size()
+        //              << "):";
+        //         for (auto v : float_buffer)
+        //           cout << "\n" << v << " -> " << enc->getEncoding(v);
+        //         cout << endl;
+        //         cout << endl;
+        //
+        // exit(1);
 
       } else if (feature_type[f] == SYMBOL) {
 
@@ -579,7 +733,11 @@ public:
       // bin.duplicate_format(binex, db);
       // bin.add(db, label[i] != min_label);
 			bin.addBitsetExample(binex, label[i] != min_label);
+
+                        // cout << binex << endl;
     }
+		
+		// cout << bin.example_count() << endl;
 
   }
 

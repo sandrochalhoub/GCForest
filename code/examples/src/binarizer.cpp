@@ -39,7 +39,6 @@ void printToFile(WeightedDataset<E_t> &input, DTOptions &opt) {
   std::function<bool(const int f)> relevant = [](const int f) { return true; };
 
 
-	
 	BacktrackingAlgorithm<WeightedError, E_t> A(opt);
 
   if (opt.filter) {
@@ -99,10 +98,11 @@ int main(int argc, char *argv[]) {
 	// std::function<bool(const int f)> relevant = [](const int f) { return true; };
 	//   input.printDatasetToFile(cout, string(" "), string(""), relevant,
 	//                            opt.outtarget != -1, false);
-	// // cout << input << endl;
 
-	if (opt.sample < 1)
-		input.sample(opt.sample);
+  // cout << input << endl;
+
+  if (opt.sample < 1)
+    input.sample(opt.sample);
 
   ////// PREPROCESING
   if (opt.preprocessing)

@@ -349,7 +349,7 @@ Let $\afeat_i <_{\abranch} \afeat_j$ if and only if feature $\afeat_i$ is select
 \begin{itemize}
 	\item \sequence\ represents the current decision tree: if $(\abranch,\afeat) \in \sequence$, then the current tree tests feature $\afeat$ at the extremity of branch $\abranch$. We say that the branch $\abranch$ is in the current tree, and that feature $\afeat$ is tested on branch $\abranch$.
 	
-	\item If $(\abranch,\afeat) \in \sequence$, then every sub-tree of $\abranch$ starting with a feature test $\aofeat <_{\abranch} \afeat$ has already been explored and $\best[\abranch]$ contains the minimum of their errors. The set $\dom[\abranch]$ contains all \emph{untried} feature tests for branch $\abranch$ ($\dom[\abranch] = \{\aofeat \mid \aofeat \in \features ~\wedge~ \afeat <_{\abranch} \aofeat$).
+	\item If $(\abranch,\afeat) \in \sequence$, then every subtree of $\abranch$ starting with a feature test $\aofeat <_{\abranch} \afeat$ has already been explored and $\best[\abranch]$ contains the minimum of their errors. The set $\dom[\abranch]$ contains all \emph{untried} feature tests for branch $\abranch$ ($\dom[\abranch] = \{\aofeat \mid \aofeat \in \features ~\wedge~ \afeat <_{\abranch} \aofeat$).
 	
 	\item If $(\abranch,\afeat) \in \sequence$ but one of its children $\grow{\abranch}{\afeat}$ or $\grow{\abranch}{\afeat}$ (call it $\aobranch$) is not in the current tree, then either:
 
@@ -370,7 +370,7 @@ expand the tree with the test $\afeat$ at branch $\abranch$. The two children $\
 If there is no bud ($\bud = \emptyset$), then the current tree is complete: every branch $\abranch$ is either terminal or optimal. In that case we pop the last assignment $(\abranch,\afeat)$ from \sequence\ 
 %, mark the feature $\afeat$ as tried for branch $\abranch$ 
 and update the best error of its subtrees. If there is at least one untried feature for branch $\abranch$, we add $\abranch$ to $\bud$.
-Otherwise, it is optimal since all features have been tried, and $\best[\abranch]$ contains the minimum error for any sub-tree of branch $\abranch$. 
+Otherwise, it is optimal since all features have been tried, and $\best[\abranch]$ contains the minimum error for any subtree of branch $\abranch$. 
 %and its error is the sum of the errors of its best subtrees. 
 This branch will never be expanded anymore since it is not added to $\bud$.
 
@@ -652,17 +652,13 @@ Notice that to simplify the pseudo-code, we use branches to index array-like dat
 		  \KwData{$\negex,\posex, \maxd$}
 		  \KwResult{The minimum error on $\negex,\posex$ for decision trees of depth $\maxd$}
 		$\sequence \gets []$\;
-		$\bud \gets \{\emptyset\}$\;
-		% $\error \gets \min(|\negex|,|\posex|)$\;
-		% $\dom \gets (\lambda : {2^{\features}} \mapsto \features)$\;
-		% $\best \gets (\lambda : {2^{\features}} \mapsto \infty)$\;
-		% $\dom \gets (\lambda : 2^{\features \cup \bar{\features}} \mapsto \features)$\;
-		% $\best \gets (\lambda : 2^{\features \cup \bar{\features}} \mapsto \infty)$\;
-		% \HiLi $\opt \gets (\lambda : 2^{\features \cup \bar{\features}} \mapsto 0)$\;
+		% $\bud \gets \emptyset$\;
+		$\bud \gets \newbud(\emptyset,\emptyset)$\;
 		
-	$\dom[\emptyset] \gets \features$\;
-	$\best[\emptyset] \gets \min(\negex, \posex)$\;
-	\HiLi $\opt[\emptyset] \gets \texttt{false}$\;
+		% $\bud \gets \{\emptyset\}$\;
+		% $\dom[\emptyset] \gets \features$\;
+		% $\best[\emptyset] \gets \min(\negex, \posex)$\;
+		% \HiLi $\opt[\emptyset] \gets \texttt{false}$\;
 		
 		
 		\While{$|\sequence| + |\bud| > 0$}{
@@ -678,13 +674,17 @@ Notice that to simplify the pseudo-code, we use branches to index array-like dat
 			\lnl{line:assignment} pick and remove $\afeat$ from $\dom[\abranch]$\;
 			% $\dom[\abranch] \gets \dom[\abranch] \setminus \{\afeat\}$\;
 			push $(\abranch,\afeat)$ on $\sequence$\;
-			split $\negex(\abranch)$ and $\posex(\abranch)$ w.r.t. $\afeat$\;
-			\lnl{line:branching}\ForEach{$v \in \{\afeat, \bar{\afeat}\}$}{
-						\lnl{line:newbud}$\bud \gets \bud \cup \{\grow{\abranch}{v}\}$\;
-						\lnl{line:domain}$\dom(\grow{\abranch}{v}) \gets \features \setminus \{\afeat \mid \afeat \in \abranch ~\vee~ \bar{\afeat} \in \abranch\}$\;
-						$\best(\grow{\abranch}{v}) \gets \min(\negex[\grow{\abranch}{v}], \posex[\grow{\abranch}{v}])$\;
-						\HiLi $\opt(\grow{\abranch}{v}) \gets \texttt{false}$\;
-					}
+			% split $\negex(\abranch)$ and $\posex(\abranch)$ w.r.t. $\afeat$\;
+			% \lnl{line:branching}\ForEach{$v \in \{\afeat, \bar{\afeat}\}$}{
+			% 			\lnl{line:newbud}$\bud \gets \bud \cup \{\grow{\abranch}{v}\}$\;
+			% 			\lnl{line:domain}$\dom(\grow{\abranch}{v}) \gets \features \setminus \{\afeat \mid \afeat \in \abranch ~\vee~ \bar{\afeat} \in \abranch\}$\;
+			% 			$\best(\grow{\abranch}{v}) \gets \min(\negex[\grow{\abranch}{v}], \posex[\grow{\abranch}{v}])$\;
+			% 			\HiLi $\opt(\grow{\abranch}{v}) \gets \texttt{false}$\;
+			% 		}
+			% }
+			\lnl{line:branching} \lForEach{$v \in \{\afeat, \bar{\afeat}\}$}{
+				$\bud \gets \newbud{\bud,\grow{\abranch}{v}}$ %\newbud{$\grow{\abranch}{v}$}
+				}
 			}
 		}
 		\lnl{line:else}\Else {
@@ -702,9 +702,9 @@ Notice that to simplify the pseudo-code, we use branches to index array-like dat
 					}
 					% \lIf{$\opt[\abranch]$}{$\error \gets \error - \best[\abranch]$}
 				} 
-				\HiLi \lnl{line:markoptimal} \lElse{
-					$\opt[\abranch] \gets \texttt{true}$
-				}
+				% \HiLi \lnl{line:markoptimal} \lElse{
+				% 	$\opt[\abranch] \gets \texttt{true}$
+				% }
 				% \lElse {
 				% 	$\error \gets \error + \best[\abranch]$%$\error[\abranch,\afeat]$
 				% }
@@ -736,6 +736,16 @@ Notice that to simplify the pseudo-code, we use branches to index array-like dat
 		}
 		}
 		\Return $\best[\emptyset]$\;
+	  % \setcounter{AlgoLine}{0}
+	   \SetKwProg{myproc}{Procedure}{}{}
+	   \myproc{\newbud{$\bud, \abranch$}}{
+		% \lnl{line:newbud}$\bud \gets \bud \cup \{\abranch\}$\;
+		\lnl{line:splitting}compute $\negex(\abranch)$ and $\posex(\abranch)$ \colorbox{yellow!50}{and $p(\afeat,\negex(\abranch))$ and $p(\afeat,\posex(\abranch)), \forall \afeat \in \features$}\;
+		\lnl{line:domain}$\dom(\abranch) \gets \features \setminus \{\afeat \mid \afeat \in \abranch ~\vee~ \bar{\afeat} \in \abranch\}$ \colorbox{yellow!50}{sorted by increasing Gini score}\;
+		$\best(\abranch) \gets \min(\negex[\abranch], \posex[\abranch])$\;
+		% \colorbox{yellow!50}{$\opt(\abranch) \gets \texttt{false}$}\;
+		\Return{$\bud \cup \{\abranch\}$}\;
+		}
 	\end{footnotesize}
 	\end{algorithm}
 	
@@ -1031,7 +1041,7 @@ The feature tests at Line~\ref{line:assignment} of Algorithm~\ref{alg:bud} are e
 In the data sets we used, the Gini impurity was significantly better, and hence all reported experiment results are using Gini impurity unless stated otherwise. For branches of length $\mdepth-1$, however, we use the error instead. Indeed, the optimal feature $\afeat$ for a branch $\abranch$ that cannot be extended further is the one minimizing 
 % $\error[\abranch,\afeat]$. 
 $\error[\grow{\abranch}{\afeat}] + \error[\grow{\abranch}{\bar{\afeat}}]$.
-This means that we actually do not have to try other features for that node. This is implemented by the highlited code at Line~\ref{line:optimal}: since one cannot improve on the first feature for test at depth $\mdepth$, branches of length $\mdepth-1$ do not have to be put back into \bud, and can be backtracked upon.
+This means that we actually do not have to try other features for that node. This is implemented by the highlighted code at Line~\ref{line:optimal}: since one cannot improve on the first feature for test at depth $\mdepth$, branches of length $\mdepth-1$ do not have to be put back into \bud, and can be backtracked upon.
 
  % which means that we effectively restrict search to branches of length $\mdepth-1$.
 
@@ -1039,12 +1049,14 @@ This means that we actually do not have to try other features for that node. Thi
 %We order the possible features for branch $\abranch$ in non-decreasing order with respect to a score above and 
 %explore the features in that order in Line~\ref{line:assignment}.
 Computing the frequencies $p(\afeat,{\negex(\abranch)})$ and $p(\afeat,{\posex(\abranch)})$ of every feature $\afeat$ can be done in  $\Theta(\numfeat\numex)$ time where 
-$\numex = |\negex(\abranch)|+|\posex(\abranch)|$.\footnote{$p(\bar{\afeat},{\negex(\abranch)})$ and $p(\bar{\afeat},{\posex(\abranch)})$ can then be deduced in $\Theta(\numfeat)$ time} In other words this is more expensive than the splitting procedure by a factor $\numfeat$, but can be similarly amortized. However, since the depth of the branches is effectively reduced by one, the number of terminal branches is reduced by the same factor $\numfeat$, hence this incurs no asymptotic increase in complexity.
-Furthermore, ordering the features (in $\dom[\abranch]$)
+$\numex = |\negex(\abranch)|+|\posex(\abranch)|$.\footnote{$p(\bar{\afeat},{\negex(\abranch)}) = |\negex(\abranch)| - p({\afeat},{\negex(\abranch)})$ and $p(\bar{\afeat},{\posex(\abranch)}) = |\posex(\abranch)| - p({\afeat},{\posex(\abranch)})$ can then be queried in constant time} In other words this is more expensive than the splitting procedure by a factor $\numfeat$, but can be similarly amortized. However, since the depth of the branches is effectively reduced by one, the number of terminal branches is reduced by the same factor $\numfeat$, hence this incurs no asymptotic increase in complexity.
+Furthermore, ordering the features (at Line~\ref{line:domain})
 %Computing this order 
 costs $\Theta(\numfeat \log \numfeat)$ for each of the $2^{\mdepth-1}\numfeat^{\mdepth-1}$ branches added to $\bud$ at Line~\ref{line:branching}. Again, since the depth of the branches is effectively reduced by one, the resulting complexity 
 %(excluding the time for splitting the data set) 
-is $O((\numex + 2^{\mdepth} \log \numfeat) \numfeat^{\mdepth})$. This very slight increase is often inconsequencial, as long as we have $\numex \geq 2^{\mdepth} \log \numfeat$.
+is $O((\numex + 2^{\mdepth} \log \numfeat) \numfeat^{\mdepth})$. This very slight increase is often inconsequencial, as 
+$\numex$ is still often the dominating term.
+% long as we have $\numex \geq 2^{\mdepth} \log \numfeat$.
 
 The feature ordering has a very significant impact on how quickly the algorithm can improve the accuracy of the classifier. Moreover, it also has an impact (though indirect and much less significant) on the computational time necessary to explore the whole search space and prove optimality, because of the lower bound technique detailed in the next section.
 
@@ -1052,7 +1064,9 @@ The feature ordering has a very significant impact on how quickly the algorithm 
 \subsection{Lower Bound}
 \label{sec:lb}
 
-It is possible to fail early using a lower bound on the error given prior decisions in the same way as \murtree, following the idea introduced in \cite{dl8}. The idea is that once some subtrees along a branch $\abranch$ are optimal and the sum of their errors is larger than the current upper bound (the best solution found so far) then there is no need to continue exploring branch $\abranch$. 
+It is possible to fail early using a lower bound on the error given prior decisions in the same way as \dleight~\cite{dl8}.
+%, following the idea introduced in \cite{dl8}. 
+The idea is that once some subtrees along a branch $\abranch$ are optimal and the sum of their errors is larger than the current upper bound (the best solution found so far) then there is no need to continue exploring branch $\abranch$. 
 
 
 %Line~\ref{line:leaves} can be changed to ``\textbf{If} $\bud \neq \emptyset ~\& \not\exists \abranch \in \bud, \dominated{\abranch}$ \textbf{then}''. %Notice that when a branch is ``pruned'' in this way, its 
@@ -1064,23 +1078,30 @@ It is possible to fail early using a lower bound on the error given prior decisi
 First, observe that $\best[\abranch]$ is an upper bound on the classification error for any subtree rooted at $\abranch$, since this value comes from an actual tree (of depth $\mdepth - |\abranch|$ for the data set $\langle \negex(\abranch),\posex(\abranch) \rangle$). It is possible to propagate this upper bound to parent nodes efficiently (in $O(|\abranch|)$ time). Here we assume that this is done every time the value $\best[\abranch]$ is actually updated, by recursively applying the same update procedure to the parent.
 
 
-Now, when the condition in Line~\ref{line:optimal} fails for a branch $\abranch$, it means that $\best[\abranch]$ is \emph{optimal}, there is no tree of maximum depth $\mdepth - |\abranch|$ with classification error lower than $\best[\abranch]$. This is true either because every subtree has been explored, or because $\mdepth - |\abranch| = 1$ and the feature $\afeat$ with least 
+Now, when the condition in Line~\ref{line:optimal} fails for a branch $\abranch$, it means that $\best[\abranch]$ is \emph{optimal}, there is no subtree rooted at $\abranch$ of maximum depth $\mdepth - |\abranch|$ whose classification error is lower than $\best[\abranch]$. This is true either because every subtree has been explored, or, with the changes described in Section~\ref{sec:heuristic}, because $\mdepth - |\abranch| = 1$ and the feature $\afeat$ with least 
 %$\error[\abranch,\afeat]$ 
 $\error[\grow{\abranch}{\afeat}] + \error[\grow{\abranch}{\bar{\afeat}}]$
-has been chosen. The extra Line~\ref{line:markoptimal} simply store this information in the array $\opt$ which shall be used to compute a lower bound.
+has been chosen. 
+Let $\opt[\abranch]=1$ if the branch is optimal and $\opt[\abranch]=0$ otherwise. Notice that this is equivalent, for a branch $\grow{\abranch}{v}$ ending on test $v \in \{\afeat,\bar{\afeat}\}$, to checking if $|\abranch|=\mdepth-1$, or if $(\abranch,\afeat) \in \sequence$ but there is no pair $(\grow{\abranch}{v}, g)$ in sequence.\footnote{Alternatively, and indeed in our implementation, this information can be stored in an array.}
+Moreover, let $\ancestors[\abranch]$ denote the ancestors of branch $\abranch$ in the current tree, i.e., $\ancestors[\abranch] = \{\aobranch \mid (\aobranch,v) \in \sequence ~\wedge~ \aobranch \subset \abranch\}$.
+
+% Either way, a branch $\grow{\abranch}{v}$ ending on test $v \in \{\afeat,\bar{\afeat}\}$
+% is optimal if and only if
+% The extra Line~\ref{line:markoptimal} simply stores this information in the array $\opt$ which shall be used to compute a lower bound.
 
 %loop in Line~\ref{line:backtrack} makes two or more iterations, it means that for the penultimate branch $\abranch$ popped out of \sequence, all possible subtrees have been explored, and therefore, $\best[\abranch]$ is also a lower bound on the classification error for any subtree rooted at $\abranch$. Let $\opt[\abranch]$ be 1 if $\abranch$ has been ``backtracked over'' in this way and 0 otherwise.
 
 
+
 %Let $\abranch$ be a bud in $\bud$. Trivially, if $|\abranch|=\mdepth-1$ then this branch will entail $\min\{\error[\afeat] \mid \afeat \in \dom[\abranch]\}$ misclassifications.
 Now, consider the highlighted code in Line~\ref{line:fail}.
-For any parent $\abranch'$ of $\abranch$, we define a lower bound $\lb{\abranch',\abranch}$, \emph{given the feature tests} $\abranch \setminus \abranch'$ as follows:
+For any ancestor $\abranch'$ of $\abranch$, we define a lower bound $\lb{\abranch',\abranch}$, \emph{given the feature tests} $\abranch \setminus \abranch'$ as follows:
 $$
 \lb{\abranch',\abranch} = \sum\limits_{\abranch' \subset \grow{\abranch''}{\afeat} \subseteq \abranch}\opt[\grow{\abranch''}{\bar{\afeat}}] \cdot \best[\grow{\abranch''}{\bar{\afeat}}]
 $$
 In plain words, $\lb{\abranch',\abranch}$ is the sum the errors of optimal ``sibling'' branches between $\abranch'$ and $\abranch$. We illustrate this bound in Example~\ref{ex:lb}.
 
-As long as these choices of feature tests stand (i.e., as long as $\abranch$ belongs to the decision tree), these subtrees cannot be improved upon, hence this lower bound is correct.
+As long as these choices of feature tests stand (i.e., as long as $\abranch$ belongs to the current tree), these subtrees cannot be improved, hence this lower bound is correct.
 
 
 %

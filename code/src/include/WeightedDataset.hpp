@@ -56,6 +56,9 @@ public:
   void printHeader(ostream &outfile, const string &delimiter,
                    const string &endline, const string &label,
                    selector not_redundant, const bool first = true) const;
+									 
+									 
+									
 
   // void printDatasetToTextFile(ostream &outfile, const bool first =
   // true)
@@ -116,6 +119,10 @@ private:
 template <typename E_t>
 void WeightedDataset<E_t>::addBitsetExample(instance &x, const bool y) {
   data[y].push_back(x);
+	examples[y].reserve(data[y].capacity());
+	examples[y].add(data[y].size()-1);
+	
+	weight[y].push_back(1);
   ++total_weight[y];
 }
 
@@ -387,6 +394,14 @@ void WeightedDataset<E_t>::printDatasetToFile(
       outfile << endline << endl;
     }
   }
+}
+
+template <typename E_t>
+std::ostream &operator<<(std::ostream &os, const WeightedDataset<E_t> &x) {
+  x.printDatasetToFile(os, string(" "), string(""),
+                       [](const int f) { return true; }, 0,
+                       true);
+  return os;
 }
 }
 
