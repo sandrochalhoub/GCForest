@@ -260,14 +260,14 @@ public:
     //   cout << " " << v;
     // cout << endl;
 		
-		cout << ClassicEncoding<T>::value_set.size() << " " << (num_examples) ;
+		// cout << ClassicEncoding<T>::value_set.size() << " " << (num_examples) ;
 
 		if(ClassicEncoding<T>::value_set.size() < sqrt(num_examples)) {
-			cout << " full\n";
+			// cout << " full\n";
 			
 			full_encoding();
 		} else {
-			cout << " reduced\n";
+			// cout << " reduced\n";
 			
 			reduced_encoding();
 		}
