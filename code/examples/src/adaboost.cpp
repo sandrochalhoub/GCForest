@@ -27,13 +27,12 @@ int main(int argc, char *argv[]) {
   WeightedDataset<int> input;
 	
 	////// READING
-  if (opt.binarize) {
-
-    read_non_binary(input, opt);
-
-  } else {
-
+  try {
     read_binary(input, opt);
+  } catch (const std::exception &e) {
+    if (opt.verbosity >= DTOptions::NORMAL)
+      cout << "c format not recognized or input non-binary, binarizing...\n";
+    read_non_binary(input, opt);
   }
 	
   if (opt.verbosity >= DTOptions::NORMAL)
