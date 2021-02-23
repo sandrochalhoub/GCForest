@@ -66,7 +66,7 @@ namespace blossom {
 
 	  int feature_strategy;
 
-	  bool binarize;
+/*	  bool binarize;*/
 	  double split;
 	  int ada_it;
 	  int ada_stop;
