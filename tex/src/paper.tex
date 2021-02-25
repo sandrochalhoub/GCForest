@@ -210,13 +210,11 @@ The solver DL8.5 is a dynamic programming algorithm for the minimum error bounde
 		  \KwResult{The minimum error on $\negex,\posex,\features$ for decision trees of depth $\maxd$}
 			$\error \gets \min(|\negex|,|\posex|)$\;
 			
-			\lIf{$\maxd = 0$ or $\error = 0$} {
-			\Return $\error$
-			}
-			
+			\If{$\maxd > 0$ and $\error > 0$} {
 			\ForEach{$\afeat \in \features$} {
 					$\error \gets \min(\error, \dynprog(\negex(\{\afeat\}),\posex(\{\afeat\}),\features \setminus \{\afeat\},\maxd-1)$\;
 					\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \  $ + \dynprog(\negex(\{\bar{\afeat}\}),\posex(\{\bar{\afeat}\}),\features \setminus \{\afeat\},\maxd-1))$\;
+			}
 			}
 			\Return $\error$\;
 	\end{algorithm}
@@ -1260,6 +1258,7 @@ Moreover, at every branch, ``informationless'' features (i.e., features $\afeat$
 
 
 \section{Experimental Results}
+\label{sec:exp}
 
 All experiments were run
 on 7 cluster nodes, each with 36 Intel Xeon CPU E5-2695 v4 2.10GHz cores
@@ -1277,6 +1276,335 @@ We first compare our algorithm (\budalg) to the state-of-the-art algorithms \mur
 the ratio of optimality proofs (opt.), as well as the average cpu time (cpu) to either prove optimality or find the best solution.
 As \dleight does not provide a solution for every data set (on some instance it goes over the memory limit of 50GB), we provide the number of data sets for which a solution was returned (sol.). Moreover, 
 instead of absolute values, we provide the average relative difference in error and accuracy w.r.t. \budalg, however, and only for the data sets where a decision tree was found. Similarly, we report the average cpu time ratio w.r.t. \budalg, however, only for instances which were proven optimal by both algorithms\footnote{every instance proven optimal by \dleight is also proven optimal by \budalg and \murtree}.
+
+
+\begin{table}[htbp]
+\begin{center}
+\begin{footnotesize}
+\tabcolsep=1.7pt
+\input{src/tables/summaryclasses.tex}
+\end{footnotesize}
+\end{center}
+\caption{\label{tab:summaryaccsmall} Comparison with the state of the art}
+\end{table}
+
+
+
+\subsection{Computing deep classifiers}
+
+Next, we shift our focus to how fast can we obtain accurate trees and how fast can we improve the accuracy over basic solutions found by heuristics.
+Therefore, in order to have a baseline, we use a well known heuristic: \cart (we ran its implementation in scikit-learn).
+Here we report the average error after a given period of time (3 seconds, 10 seconds, 1 minute or 5 minutes) in Table~\ref{tab:summaryspeed}.
+
+
+\medskip
+
+We can see that the first solution found by our algorithm has comparable accuracy (actually, often slightly better) to the one found by \cart. The implementation of \cart in scikit-learn does not seem to be very efficient computationally. However, this is not so relevant as it is clear that one greedy run of the heuristic can be implemented to be as fast as the first dive of \budalg. The point of this experiment is threefold: first, it shows that the first solution is very similar to that found by \cart (here we believe that the only difference is to use the feature yielding the minimum error instead of the feature with minimum Gini impurity for the deepest feature tests); second, this tree
+is found extremely quickly, and there is no scaling issue with respect to the depth of the tree or with respect to the size of the data set; third, even for large data sets and deep trees, the accuracy of the initial classifier can be significantly improved given a reasonable computation time.
+
+%Moreover, although we would need larger data sets to be confident about that, it seems that our algorithm is faster than \cart to find this first decision tree. %One can conjecture that \cart uses more sophisticated heuristic choices to explain these two observations.
+
+%Then, in most cases, it is possible to improve the first solution significantly within a few seconds. Notice that for larger depth, improving the initial solution is harder and the 3s time limit is comparatively tighter than for smaller trees, so the gain of \budalg over \cart is more sensible for small trees.
+
+
+\begin{table}[htbp]
+\begin{center}
+\begin{footnotesize}
+\tabcolsep=1.8pt
+\input{src/tables/summaryspeed.tex}
+\end{footnotesize}
+\end{center}
+\caption{\label{tab:summaryspeed} Comparison with state the of the art: computing accurate trees}
+\end{table}
+
+
+Figure~\ref{fig:cactus} reports the evolution of accuracy over time, giving a good view of the difference between \murtree and \budalg during search. The accuracy of the tree returned by \cart is given for reference. 
+We can see in those graphs that \murtree finds an initial tree extremely quickly, although with very low accuracy. This is because \murtree show progress even when the tree is not complete, i.e., the first solution is always a single node with the most promising feature. We can see in Table~\ref{tab:summaryspeed} that this is indeed always the same feature, irrespective of the maximum depth.
+
+
+
+\begin{figure}
+	\subfloat[depth=3]{\input{src/tables/xscerror3.tex}}
+	\subfloat[depth=7]{\input{src/tables/xscerror7.tex}}
+	\subfloat[depth=10]{\input{src/tables/xscerror10.tex}}
+	% \subfloat[depth=8]{\input{src/tables/xscerror8.tex}}
+	% \subfloat[depth=9]{\input{src/tables/xscerror9.tex}}
+	% \subfloat[depth=10]{\input{src/tables/xscerror10.tex}}
+	\caption{\label{fig:cactus}Accuracy over time, averaged across all data sets}
+\end{figure}
+
+
+\bibliographystyle{plain}
+\bibliography{src/references}
+
+
+% \end{document}
+
+\clearpage
+
+% \newgeometry{bottom=2cm,top=2cm,margin=1cm}
+
+\section*{Appendix}
+
+The benchmark of classification data set we used is described in Table~\ref{tab:info}. It consists of 30 data sets 
+commonly used in related work articles, to which we added some large data sets from Kaggle: \texttt{bank}, \texttt{titanic}, \texttt{surgical-deepnet} and \texttt{weather-aus}, as well as the \texttt{mnist} data sets, \texttt{adult\_discretized} and \texttt{compas\_discretized}. We report the number of data points ($|\allex|$), the number of features ($|\features|$), the same parameters after preprocessing (respectively $|\allex|^*$ and $|\features|^*$), and the ``noise'' ratio, that is: $2|\posex \cap \negex|/(|\posex|+|\negex|)$.
+
+\medskip
+
+Then we report the raw data from our experimental comparison with the state of the art for $\mdepth=3,4,5,7,10$ and for the four size catagories in the following tables:
+
+\tabcolsep=10pt
+\begin{center}
+\begin{tabular}{lrrrr}
+	\toprule
+	\multirow{2}{*}{$\mdepth$}& \multicolumn{2}{c}{$\numex < 1500$} & \multicolumn{2}{c}{$\numex \geq 1500$} \\
+	& $\numfeat < 100$ & $\numfeat \geq 100$ & $\numfeat < 100$ & $\numfeat \geq 100$ \\
+	 % & $\numex < 1500; \numfeat < 100$ & $\numex < 1500; \numfeat \geq 100$ & $\numex \geq 1500; \numfeat < 100$ & $\numex \geq 1500; \numfeat \geq 100$ \\
+	 \midrule
+	$3$ & Table~\ref{tab:all31} & Table~\ref{tab:all32}  & Table~\ref{tab:all33}  & Table~\ref{tab:all34} \\
+	$4$ & Table~\ref{tab:all41} & Table~\ref{tab:all42}  & Table~\ref{tab:all43}  & Table~\ref{tab:all44} \\
+	$5$ & Table~\ref{tab:all51} & Table~\ref{tab:all52}  & Table~\ref{tab:all53}  & Table~\ref{tab:all54} \\
+	$7$ & Table~\ref{tab:all71} & Table~\ref{tab:all72}  & Table~\ref{tab:all73}  & Table~\ref{tab:all74} \\
+	$10$ & Table~\ref{tab:all101} & Table~\ref{tab:all102}  & Table~\ref{tab:all103}  & Table~\ref{tab:all104} \\
+	\bottomrule 
+\end{tabular}
+\end{center}
+
+
+% in Tables~\ref{tab:all3},
+% \ref{tab:all4},
+% \ref{tab:all5},
+% \ref{tab:all6},
+% \ref{tab:all7},
+% \ref{tab:all8},
+% \ref{tab:all9} and \ref{tab:all10}, respectively.
+For every instance, we give the classification error of the best tree found within a time limit of 1h for every method. Moreover, we give the CPU time taken by each method to prove optimality when optimality is proven (in which case we mark it by a ``$^*$''), and to find the best solution otherwise. Notice that \cp\ and \dleight\ are not anytime and hence only report a solution at the end of the time limit when optimality is not proven. In this case, we write $\geq1h$. 
+
+\medskip
+
+Every process was first run with a memory limit of 3.5GB. Many runs of \dleight, \cp\ and \binoct\ went well over that limit and were rerun with a limit of 50GB. Still, 138 runs of \binoct and 164 runs of \dleight (out of 460) went over the limit. As \binoct can output trees anytime, the data for these runs (up until the memory blow-out) are in the tables. For \dleight, however, this is marked as a ``-'' since there was no output.
+%\binoct 138
+%\dleight 164 %5+10+20+23+30+27+25+24
+
+
+
+
+\begin{table}[htbp]%
+\begin{center}%
+\begin{scriptsize}%
+\tabcolsep=10pt%
+\input{src/tables/datasetinfo.tex}%
+\end{scriptsize}%
+\end{center}%
+\caption{\label{tab:info} Benchmark and preprocessing data}%
+\end{table}%
+
+
+\begin{table}[htbp]%
+\begin{center}%
+\begin{scriptsize}%
+\tabcolsep=2pt%
+\input{src/tables/allclasses_smallsmall_3.tex}%
+\end{scriptsize}%
+\end{center}%
+\caption{\label{tab:all31} Comparison with state of the art: $\numex<5000, \numfeat<250$, depth 3}%
+\end{table}%
+
+\begin{table}[htbp]%
+\begin{center}%
+\begin{scriptsize}%
+\tabcolsep=2pt%
+\input{src/tables/allclasses_smallbig_3.tex}%
+\end{scriptsize}%
+\end{center}%
+\caption{\label{tab:all32} Comparison with state of the art: $\numex<5000, \numfeat \geq 250$, depth 3}%
+\end{table}%
+
+\begin{table}[htbp]%
+\begin{center}%
+\begin{scriptsize}%
+\tabcolsep=2pt%
+\input{src/tables/allclasses_bigsmall_3.tex}%
+\end{scriptsize}%
+\end{center}%
+\caption{\label{tab:all33} Comparison with state of the art: $\numex \geq 5000, \numfeat < 250$, depth 3}%
+\end{table}%
+
+\begin{table}[htbp]%
+\begin{center}%
+\begin{scriptsize}%
+\tabcolsep=2pt%
+\input{src/tables/allclasses_bigbig_3.tex}%
+\end{scriptsize}%
+\end{center}%
+\caption{\label{tab:all34} Comparison with state of the art: $\numex \geq 5000, \numfeat \geq 250$, depth 3}%
+\end{table}%
+
+
+\begin{table}[htbp]%
+\begin{center}%
+\begin{scriptsize}%
+\tabcolsep=2pt%
+\input{src/tables/allclasses_smallsmall_4.tex}%
+\end{scriptsize}%
+\end{center}%
+\caption{\label{tab:all41} Comparison with state of the art: $\numex<5000, \numfeat<250$, depth 4}%
+\end{table}%
+
+\begin{table}[htbp]%
+\begin{center}%
+\begin{scriptsize}%
+\tabcolsep=2pt%
+\input{src/tables/allclasses_smallbig_4.tex}%
+\end{scriptsize}%
+\end{center}%
+\caption{\label{tab:all42} Comparison with state of the art: $\numex<5000, \numfeat \geq 250$, depth 4}%
+\end{table}%
+
+\begin{table}[htbp]%
+\begin{center}%
+\begin{scriptsize}%
+\tabcolsep=2pt%
+\input{src/tables/allclasses_bigsmall_4.tex}%
+\end{scriptsize}%
+\end{center}%
+\caption{\label{tab:all43} Comparison with state of the art: $\numex \geq 5000, \numfeat < 250$, depth 4}%
+\end{table}%
+
+\begin{table}[htbp]%
+\begin{center}%
+\begin{scriptsize}%
+\tabcolsep=2pt%
+\input{src/tables/allclasses_bigbig_4.tex}%
+\end{scriptsize}%
+\end{center}%
+\caption{\label{tab:all44} Comparison with state of the art: $\numex \geq 5000, \numfeat \geq 250$, depth 4}%
+\end{table}%
+
+\begin{table}[htbp]%
+\begin{center}%
+\begin{scriptsize}%
+\tabcolsep=2pt%
+\input{src/tables/allclasses_smallsmall_5.tex}%
+\end{scriptsize}%
+\end{center}%
+\caption{\label{tab:all51} Comparison with state of the art: $\numex<5000, \numfeat<250$, depth 5}%
+\end{table}%
+
+\begin{table}[htbp]%
+\begin{center}%
+\begin{scriptsize}%
+\tabcolsep=2pt%
+\input{src/tables/allclasses_smallbig_5.tex}%
+\end{scriptsize}%
+\end{center}%
+\caption{\label{tab:all52} Comparison with state of the art: $\numex<5000, \numfeat \geq 250$, depth 5}%
+\end{table}%
+
+\begin{table}[htbp]%
+\begin{center}%
+\begin{scriptsize}%
+\tabcolsep=2pt%
+\input{src/tables/allclasses_bigsmall_5.tex}%
+\end{scriptsize}%
+\end{center}%
+\caption{\label{tab:all53} Comparison with state of the art: $\numex \geq 5000, \numfeat < 250$, depth 5}%
+\end{table}%
+
+\begin{table}[htbp]%
+\begin{center}%
+\begin{scriptsize}%
+\tabcolsep=2pt%
+\input{src/tables/allclasses_bigbig_5.tex}%
+\end{scriptsize}%
+\end{center}%
+\caption{\label{tab:all54} Comparison with state of the art: $\numex \geq 5000, \numfeat \geq 250$, depth 5}%
+\end{table}%
+
+
+\begin{table}[htbp]%
+\begin{center}%
+\begin{scriptsize}%
+\tabcolsep=2pt%
+\input{src/tables/allclasses_smallsmall_7.tex}%
+\end{scriptsize}%
+\end{center}%
+\caption{\label{tab:all71} Comparison with state of the art: $\numex<5000, \numfeat<250$, depth 7}%
+\end{table}%
+
+\begin{table}[htbp]%
+\begin{center}%
+\begin{scriptsize}%
+\tabcolsep=2pt%
+\input{src/tables/allclasses_smallbig_7.tex}%
+\end{scriptsize}%
+\end{center}%
+\caption{\label{tab:all72} Comparison with state of the art: $\numex<5000, \numfeat \geq 250$, depth 7}%
+\end{table}%
+
+\begin{table}[htbp]%
+\begin{center}%
+\begin{scriptsize}%
+\tabcolsep=2pt%
+\input{src/tables/allclasses_bigsmall_7.tex}%
+\end{scriptsize}%
+\end{center}%
+\caption{\label{tab:all73} Comparison with state of the art: $\numex \geq 5000, \numfeat < 250$, depth 7}%
+\end{table}%
+
+\begin{table}[htbp]%
+\begin{center}%
+\begin{scriptsize}%
+\tabcolsep=2pt%
+\input{src/tables/allclasses_bigbig_7.tex}%
+\end{scriptsize}%
+\end{center}%
+\caption{\label{tab:all74} Comparison with state of the art: $\numex \geq 5000, \numfeat \geq 250$, depth 7}%
+\end{table}%
+
+
+\begin{table}[htbp]%
+\begin{center}%
+\begin{scriptsize}%
+\tabcolsep=2pt%
+\input{src/tables/allclasses_smallsmall_10.tex}%
+\end{scriptsize}%
+\end{center}%
+\caption{\label{tab:all101} Comparison with state of the art: $\numex<5000, \numfeat<250$, depth 10}%
+\end{table}%
+
+\begin{table}[htbp]%
+\begin{center}%
+\begin{scriptsize}%
+\tabcolsep=2pt%
+\input{src/tables/allclasses_smallbig_10.tex}%
+\end{scriptsize}%
+\end{center}%
+\caption{\label{tab:all102} Comparison with state of the art: $\numex<5000, \numfeat \geq 250$, depth 10}%
+\end{table}%
+
+\begin{table}[htbp]%
+\begin{center}%
+\begin{scriptsize}%
+\tabcolsep=2pt%
+\input{src/tables/allclasses_bigsmall_10.tex}%
+\end{scriptsize}%
+\end{center}%
+\caption{\label{tab:all103} Comparison with state of the art: $\numex \geq 5000, \numfeat < 250$, depth 10}%
+\end{table}%
+
+\begin{table}[htbp]%
+\begin{center}%
+\begin{scriptsize}%
+\tabcolsep=2pt%
+\input{src/tables/allclasses_bigbig_10.tex}%
+\end{scriptsize}%
+\end{center}%
+\caption{\label{tab:all104} Comparison with state of the art: $\numex \geq 5000, \numfeat \geq 250$, depth 10}%
+\end{table}%
+
+
+\end{document}
 
 
 % We report in Table~\ref{tab:summaryacc} data averaged over the 47 data sets described above, for
@@ -1352,36 +1680,6 @@ instead of absolute values, we provide the average relative difference in error 
 \end{table}
 
 
-\subsection{Computing deep classifiers}
-
-Next, we shift our focus to how fast can we obtain accurate trees and how fast can we improve the accuracy over basic solutions found by heuristics.
-Therefore, in order to have a baseline, we use a well known heuristic: \cart (we ran its implementation in scikit-learn).
-Here we report the average error after a given period of time (3 seconds, 10 seconds, 1 minute or 5 minutes) in Table~\ref{tab:summaryspeed}.
-
-
-\medskip
-
-We can see that the first solution found by our algorithm has comparable accuracy (actually, often slightly better) to the one found by \cart. The implementation of \cart in scikit-learn does not seem to be very efficient computationally. However, this is not so relevant as it is clear that one greedy run of the heuristic can be implemented to be as fast as the first dive of \budalg. The point of this experiment is threefold: first, it shows that the first solution is very similar to that found by \cart (here we believe that the only difference is to use the feature yielding the minimum error instead of the feature with minimum Gini impurity for the deepest feature tests); second, this tree
-is found extremely quickly, and there is no scaling issue with respect to the depth of the tree or with respect to the size of the data set; third, even for large data sets and deep trees, the accuracy of the initial classifier can be significantly improved given a reasonable computation time.
-
-%Moreover, although we would need larger data sets to be confident about that, it seems that our algorithm is faster than \cart to find this first decision tree. %One can conjecture that \cart uses more sophisticated heuristic choices to explain these two observations.
-
-%Then, in most cases, it is possible to improve the first solution significantly within a few seconds. Notice that for larger depth, improving the initial solution is harder and the 3s time limit is comparatively tighter than for smaller trees, so the gain of \budalg over \cart is more sensible for small trees.
-
-
-\begin{table}[htbp]
-\begin{center}
-\begin{footnotesize}
-\tabcolsep=1.8pt
-\input{src/tables/summaryspeed.tex}
-\end{footnotesize}
-\end{center}
-\caption{\label{tab:summaryspeed} Comparison with state the of the art: computing accurate trees}
-\end{table}
-
-
-Figure~\ref{fig:cactus} reports the evolution of accuracy over time, giving a good view of the difference between \murtree and \budalg during search. The accuracy of the tree returned by \cart is given for reference. 
-We can see in those graphs that \murtree finds an initial tree extremely quickly, although with very low accuracy. This is because \murtree show progress even when the tree is not complete, i.e., the first solution is always a single node with the most promising feature. We can see in Table~\ref{tab:summaryspeed} that this is indeed always the same feature, irrespective of the maximum depth.
 
 
 
