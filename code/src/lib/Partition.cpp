@@ -31,6 +31,11 @@ size_t TreePartition::addNode() {
 
 void TreePartition::remNode() { part.pop_back(); }
 
+void TreePartition::branch(const int node, const int x, const int y) {
+	part[x].begin_idx = part[x].end_idx = part[node].begin_idx;
+	part[y].begin_idx = part[y].end_idx = part[node].end_idx;
+}
+
 Part &TreePartition::operator[](const int i) { return part[i]; }
 
 const Part &TreePartition::operator[](const int i) const { return part[i]; }
@@ -91,6 +96,14 @@ vector<int>::const_iterator Part::begin() const {
 
 vector<int>::const_iterator Part::end() const {
   return element.begin() + end_idx;
+}
+
+void Part::addTrue(vector<int>::iterator elt_ptr) {
+	std::swap(*elt_ptr, element[end_idx++]);
+}
+
+void Part::addFalse(vector<int>::iterator elt_ptr) {
+	std::swap(*elt_ptr, element[--begin_idx]);
 }
 
 std::ostream& Part::display(std::ostream& os) const {

@@ -47,6 +47,9 @@ public:
   template <typename boolean_function>
   void split(Part &l1, Part &l2, boolean_function condition);
 
+	void addFalse(vector<int>::iterator elt_ptr);
+	void addTrue(vector<int>::iterator elt_ptr);
+
   /*!@name Miscellaneous*/
   //@{
   std::ostream &display(std::ostream &os) const;
@@ -82,6 +85,8 @@ public:
   template <typename boolean_function>
   void branch(const int node, const int x, const int y,
               boolean_function condition);
+							
+	void branch(const int node, const int x, const int y);
 
   /*!@name Miscellaneous*/
   //@{

@@ -15,6 +15,12 @@ void SparseSet::reserve(const size_t n) {
     list_.push_back(list_.size());
   }
 }
+
+void SparseSet::resize(const size_t n) {
+  reserve(n);
+	fill();
+}
+
 //
 // void SparseSet::save(size_t &stamp1, size_t &stamp2) { stamp1 = size_; stamp2
 // = start_; }

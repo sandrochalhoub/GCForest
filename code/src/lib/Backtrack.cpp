@@ -334,6 +334,7 @@ void BacktrackingAlgorithm<ErrorPolicy, E_t>::print_new_best() {
        << search_size << " mem=" << setw(3) << wood.size()
        << " time=" << setprecision(max(4, static_cast<int>(log10(t))))
        << fixedwidthfloat(t, 3) << right << endl;
+
 }
 
 template <template <typename> class ErrorPolicy, typename E_t>
@@ -601,7 +602,8 @@ void BacktrackingAlgorithm<ErrorPolicy, E_t>::sort_features(const int node) {
     for (auto f{feature[node]}; f != end_feature[node]; ++f)
       f_error[*f] = get_feature_error(node, *f);
     sort(feature[node], end_feature[node],
-         [&](const int a, const int b) { return f_error[a] < f_error[b]; });
+         // [&](const int a, const int b) { return f_error[a] < f_error[b]; });
+			 	[&](const int a, const int b) { return (f_error[a] < f_error[b] or (f_error[a] == f_error[b] and a < b)); });
     break;
   case DTOptions::ENTROPY:
     for (auto f{feature[node]}; f != end_feature[node]; ++f)
@@ -830,12 +832,12 @@ bool BacktrackingAlgorithm<ErrorPolicy, E_t>::update_upperbound(const int node) 
     max_error[node] = err;
     max_size[node] = sz;
 
-#ifdef PRINTTRACE
-    if (PRINTTRACE)
-      cout << "new best for node " << node << ": feat=" << *feature[node]
-           << ", error=" << max_error[node] << ", size=" << max_size[node]
-           << endl;
-#endif
+// #ifdef PRINTTRACE
+//     if (PRINTTRACE)
+//       cout << "new best for node " << node << ": feat=" << *feature[node]
+//            << ", error=" << max_error[node] << ", size=" << max_size[node]
+//            << endl;
+// #endif
 
     if (node > 0) {
       assert(parent[node] >= 0);
@@ -863,6 +865,7 @@ bool BacktrackingAlgorithm<ErrorPolicy, E_t>::backtrack() {
 
 #ifdef PRINTTRACE
     if (PRINTTRACE) {
+			cout << setw(3) << decision.size();
       for (auto i{0}; i < decision.size(); ++i)
         cout << "   ";
       cout << "backtrack to " << backtrack_node << endl;
@@ -874,13 +877,13 @@ bool BacktrackingAlgorithm<ErrorPolicy, E_t>::backtrack() {
         (equal<E_t>(tree_error[backtrack_node],max_error[backtrack_node]) and
          tree_size[backtrack_node] > max_size[backtrack_node])) {
 
-#ifdef PRINTTRACE
-      if (PRINTTRACE) // and not updt)
-        cout << "new best for node " << backtrack_node
-             << ": feat=" << *feature[backtrack_node]
-             << ", error=" << max_error[backtrack_node]
-             << ", size=" << max_size[backtrack_node] << endl;
-#endif
+// #ifdef PRINTTRACE
+//       if (PRINTTRACE) // and not updt)
+//         cout << "new best for node " << backtrack_node
+//              << ": feat=" << *feature[backtrack_node]
+//              << ", error=" << max_error[backtrack_node]
+//              << ", size=" << max_size[backtrack_node] << endl;
+// #endif
 
       tree_error[backtrack_node] = max_error[backtrack_node];
       tree_size[backtrack_node] = max_size[backtrack_node];
@@ -888,12 +891,12 @@ bool BacktrackingAlgorithm<ErrorPolicy, E_t>::backtrack() {
 
     } else {
 
-#ifdef PRINTTRACE
-      if (PRINTTRACE)
-        cout << "no improvement for node " << backtrack_node
-             << ": feat=" << *feature[backtrack_node] << "("
-             << ") -> free the best subtrees" << endl;
-#endif
+// #ifdef PRINTTRACE
+//       if (PRINTTRACE)
+//         cout << "no improvement for node " << backtrack_node
+//              << ": feat=" << *feature[backtrack_node] << "("
+//              << ") -> free the best subtrees" << endl;
+// #endif
 
       for (auto i{0}; i < 2; ++i)
         if (child[i][backtrack_node] >= 0 and
@@ -914,12 +917,13 @@ bool BacktrackingAlgorithm<ErrorPolicy, E_t>::backtrack() {
            (not max_entropy(backtrack_node, *feature[backtrack_node])));
 
     dead_end = (
+        // (depth[backtrack_node] == ub_depth - 1 and
+        // (node_error(backtrack_node) >= ub_error)) or
         // current_error >= ub_error or
-        (lt<E_t>(0,ub_error) and equal<E_t>(max_error[backtrack_node], 0)) or
+        (lt<E_t>(0, ub_error) and equal<E_t>(max_error[backtrack_node], 0)) or
         no_feature(backtrack_node) or
-        max_entropy(backtrack_node, *feature[backtrack_node])
-					or ( options.bounding and fail(backtrack_node) )
-					);
+        max_entropy(backtrack_node, *feature[backtrack_node]) or
+        (options.bounding and fail(backtrack_node)));
 
     // backtrack again
     if (dead_end) {
@@ -1013,12 +1017,8 @@ void BacktrackingAlgorithm<ErrorPolicy, E_t>::branch(const int node, const int f
     cout << setw(3) << decision.size();
     for (auto i{0}; i < decision.size(); ++i)
       cout << "   ";
-    cout << "branch on " << node << " with " << f << " children: " << c[0]
-         // << " (" << P[0][c[0]].count() << "/" << P[1][c[0]].count() << ") and
-         // "
-         // << c[1] << "(" << P[0][c[1]].count() << "/" << P[1][c[1]].count()
-         // << ")"
-         << endl;
+    cout << "branch on " << node << " with " << f << " ("
+         << (end_feature[node] - feature[node]) << ")";
   }
 #endif
 
@@ -1065,6 +1065,36 @@ void BacktrackingAlgorithm<ErrorPolicy, E_t>::branch(const int node, const int f
     ++current_size;
     }
   }
+	
+#ifdef PRINTTRACE
+  if (PRINTTRACE) {
+    // cout << setw(3) << decision.size()-1;
+    // for (auto i{0}; i < decision.size()-1; ++i)
+    //   cout << "   ";
+    // cout << "branch on " << node << " (" << P[node].count() << "/"
+    //      << (usize(node) - P[node].count()) << ") with " << f
+    // cout << " children: " << child[0][node] << " (" << P[0][c[0]].count() << "/" << P[1][c[0]].count() << ") and " << c[1] << " ("
+    //      << P[0][c[1]].count() << "/" << P[1][c[1]].count()
+    //      << ")" << endl;
+    cout << " children: " << c[0] << " (" << P[0][c[0]].count() << "/" << P[1][c[0]].count() << ") and " << c[1] << " ("
+         << P[0][c[1]].count() << "/" << P[1][c[1]].count()
+         << ")" << endl;
+		//     cout << " children: " << c[0] << " ("
+		// 	<< (child[0][node] >= 0 ? error_policy.get_total(0, child[0][node]) :
+		// (child[0][node] == -1 ? error_policy.get_total(0, node) : 0))
+		// 		<< "/"
+		// 			<< (child[0][node] >= 0 ? error_policy.get_total(1, child[0][node]) :
+		// (child[0][node] == -2 ? error_policy.get_total(1, node) : 0))
+		// 				<< ") and "
+		// 					<< c[1] << " ("
+		// 						<< (child[1][node] >= 0 ? error_policy.get_total(0, child[1][node]) :
+		// 					(child[1][node] == -1 ? error_policy.get_total(0, node) : 0))
+		// 							<< "/"
+		// 								<< (child[1][node] >= 0 ? error_policy.get_total(1, child[1][node]) :
+		// 					(child[1][node] == -2 ? error_policy.get_total(1, node) : 0))
+		//          << ")" << endl;
+  }
+#endif
 
   update_upperbound(node);
 }
@@ -1172,16 +1202,16 @@ void BacktrackingAlgorithm<ErrorPolicy, E_t>::expend() {
       break;
     }
 
-    if (max_entropy(selected_node, *feature[selected_node])) {
-
-      cout << selected_node << " " << *feature[selected_node] << " "
-           << get_feature_frequency(0, selected_node, *feature[selected_node])
-           << " / " << error_policy.get_total(0, selected_node) << " || "
-           << get_feature_frequency(1, selected_node, *feature[selected_node])
-           << " / " << error_policy.get_total(1, selected_node) << endl;
-    }
-
-    assert(not max_entropy(selected_node, *feature[selected_node]));
+    // if (max_entropy(selected_node, *feature[selected_node])) {
+    //
+    //   cout << selected_node << " " << *feature[selected_node] << " "
+    //        << get_feature_frequency(0, selected_node, *feature[selected_node])
+    //        << " / " << error_policy.get_total(0, selected_node) << " || "
+    //        << get_feature_frequency(1, selected_node, *feature[selected_node])
+    //        << " / " << error_policy.get_total(1, selected_node) << endl;
+    // }
+    //
+    // assert(not max_entropy(selected_node, *feature[selected_node]));
   }
 
   if (options.width > 1)
@@ -1190,6 +1220,11 @@ void BacktrackingAlgorithm<ErrorPolicy, E_t>::expend() {
 
   assert(feature[selected_node] >= ranked_feature[selected_node].begin() and
          feature[selected_node] < end_feature[selected_node]);
+	
+	// cout << "(" << (end_feature[selected_node] - feature[selected_node]) << ")";
+	// for(auto f{feature[selected_node]}; f!=end_feature[selected_node]; ++f)
+	// 	cout << setw(3) << *f << " [" << get_feature_error(selected_node, *f) << "]";
+	// cout << endl;
 
   branch(selected_node, *(feature[selected_node]));
 
@@ -1203,7 +1238,8 @@ void BacktrackingAlgorithm<ErrorPolicy, E_t>::initialise_search() {
 
   num_level_zero_feature = num_feature;
 
-  setReverse();
+  setReverse();	
+	
 
   start_time = cpu_time();
 	// search_size = 0;
@@ -1374,6 +1410,11 @@ void BacktrackingAlgorithm<ErrorPolicy, E_t>::minimize_error() {
     print_new_best();
 }
 
+template <template <typename> class ErrorPolicy, typename E_t>
+void BacktrackingAlgorithm<ErrorPolicy, E_t>::perfectTree() {
+  ub_error = min_positive<E_t>();
+}
+
 template <template<typename> class ErrorPolicy, typename E_t>
 void BacktrackingAlgorithm<ErrorPolicy, E_t>::minimize_error_depth() {
 
@@ -1520,10 +1561,10 @@ void BacktrackingAlgorithm<ErrorPolicy, E_t>::clearExamples() {
 template <template <typename> class ErrorPolicy, typename E_t>
 bool BacktrackingAlgorithm<ErrorPolicy, E_t>::fail(const int b) const {
 
-#ifdef PRINTTRACE
-  if (PRINTTRACE)
-    cout << "bound from " << b << endl;
-#endif
+// #ifdef PRINTTRACE
+//   if (PRINTTRACE)
+//     cout << "bound from " << b << endl;
+// #endif
 
   E_t lbe{0};
   auto lbs{0};
@@ -1544,15 +1585,15 @@ bool BacktrackingAlgorithm<ErrorPolicy, E_t>::fail(const int b) const {
           lbs += min_size[child[i][p]];
         ++lbs;
       }
-#ifdef PRINTTRACE
-    if (PRINTTRACE)
-      cout << "parent " << p << " (ub=" << ube << "/" << ubs << ", lb=" << lbe
-           << "/" << lbs << ") ["
-           << (child[0][p] >= 0 ? min_error[child[0][p]] : 0) << "/"
-           << (child[1][p] >= 0 ? min_error[child[1][p]] : 0) << " | "
-           << (child[0][p] >= 0 ? min_size[child[0][p]] : 1) << "/"
-           << (child[1][p] >= 0 ? min_size[child[1][p]] : 1) << "]\n";
-#endif
+// #ifdef PRINTTRACE
+//     if (PRINTTRACE)
+//       cout << "parent " << p << " (ub=" << ube << "/" << ubs << ", lb=" << lbe
+//            << "/" << lbs << ") ["
+//            << (child[0][p] >= 0 ? min_error[child[0][p]] : 0) << "/"
+//            << (child[1][p] >= 0 ? min_error[child[1][p]] : 0) << " | "
+//            << (child[0][p] >= 0 ? min_size[child[0][p]] : 1) << "/"
+//            << (child[1][p] >= 0 ? min_size[child[1][p]] : 1) << "]\n";
+// #endif
 
     if (lt<E_t>(ube, lbe) or
         (equal<E_t>(lbe, ube) and (lbs >= ubs or not size_matters))) {

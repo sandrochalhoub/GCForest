@@ -85,13 +85,13 @@ int main(int argc, char *argv[]) {
   WeightedDataset<int> input;
 
   ////// READING
-  try {
-    read_binary(input, opt);
-  } catch (const std::exception &e) {
+  // try {
+  //   read_binary(input, opt);
+  // } catch (const std::exception &e) {
 		if (opt.verbosity >= DTOptions::NORMAL)
    	 	cout << "c binarizing...\n";
   	read_non_binary(input, opt);
-  }
+  // }
 
   if (opt.sample < 1)
     input.sample(opt.sample);

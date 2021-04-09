@@ -263,7 +263,7 @@ public:
 
     // cout << ClassicEncoding<T>::value_set.size() << " " << (num_examples) ;
 
-    if (ClassicEncoding<T>::value_set.size() < sqrt(num_examples)) {
+    if (ClassicEncoding<T>::value_set.size() < sqrt(num_examples) or ClassicEncoding<T>::value_set.size() < 10) {
       // cout << " full\n";
 
       full_encoding();

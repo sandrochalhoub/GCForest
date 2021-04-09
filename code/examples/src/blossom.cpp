@@ -65,6 +65,9 @@ int run_algorithm(DTOptions &opt) {
     cout << "d examples=" << A.numExample() << " features=" << A.numFeature()
          << endl;
 
+  // A.perfectTree();
+  // A.minimize_error();
+
   ////// SOLVING
   if (opt.mindepth) {
     if (opt.minsize)
@@ -72,10 +75,10 @@ int run_algorithm(DTOptions &opt) {
     else
       A.minimize_error_depth();
   } else {
-		if (opt.minsize)
-			A.set_size_objective();
+    if (opt.minsize)
+      A.set_size_objective();
     A.minimize_error();
-	}
+        }
 
   Tree<E_t> sol = A.getSolution();
 

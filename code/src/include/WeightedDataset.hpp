@@ -154,7 +154,9 @@ inline void WeightedDataset<E_t>::addExample(rIter beg_row, rIter end_row,
 
   int f{0};
   for (auto x{beg_row}; x != end_row; ++x) {
-    assert(*x == 0 or *x == 1);
+    // assert(*x == 0 or *x == 1);
+		if (*x != 0 and *x != 1)
+			throw 0;
     if (x - beg_row != column) {
       if (*x)
         data[y].back().set(f);

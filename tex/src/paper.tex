@@ -1,15 +1,25 @@
-\documentclass{llncs}
+\documentclass{article}
+\usepackage{neurips_2021}
+
 \usepackage[usenames,dvipsnames,svgnames,table]{xcolor}%% http://ctan.org/pkg/xcolor
 \usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+
+\usepackage{hyperref}       % hyperlinks
+\usepackage{url}            % simple URL typesetting
+\usepackage{booktabs}       % professional-quality tables
+\usepackage{amsfonts}       % blackboard math symbols
+\usepackage{nicefrac}       % compact symbols for 1/2, etc.
+\usepackage{microtype}      % microtypography
+\usepackage{xcolor}         % colors
+
 \usepackage{xspace}
 \usepackage{array}
 %\usepackage{amsthm}
 \usepackage{amsmath} 
 \usepackage{amssymb} 
 \usepackage[ruled,vlined]{algorithm2e}
-\usepackage{booktabs}
 \usepackage{multirow}
-\usepackage{url}
 \usepackage{tikz}
 \usetikzlibrary{arrows,shadows,fit,calc,positioning,decorations.pathreplacing,matrix,shapes,petri,topaths,fadings,mindmap,backgrounds,shapes.geometric}
 
@@ -23,6 +33,10 @@
 \usepackage{forest}
 \usepackage{relsize}
 
+\newtheorem{theorem}{Theorem}
+\newtheorem{example}{Example}
+\newenvironment{proof}{\paragraph{Proof:}}{\hfill$\square$}
+
 
 \input{src/macros.tex}
 	
@@ -31,9 +45,26 @@
 
 \title{A Simple and Efficient Anytime Algorithm for Computing Optimal Decision Trees}
 
-\author{Emir Demirovi\'c\inst{1} \and Emmanuel Hebrard\inst{2} \and Louis Jean\inst{2}}
-\institute{TU DELFT, The Netherlands, email: e.demirovic@tudelft.nl
-  \and LAAS-CNRS, Universit\'e de Toulouse, CNRS, France, email: \{hebrard,ljean\}@laas.fr}
+
+\author{%
+  Emir Demirovi\'c \\
+  TU DELFT \\
+	The Netherlands \\
+  \texttt{e.demirovic@tudelft.nl} \\
+	\And
+	Emmanuel Hebrard \\
+	LAAS-CNRS \\
+	Universit\'e de Toulouse, CNRS \\
+	France \\
+	\texttt{hebrard@laas.fr} \\
+	\And
+	Louis Jean \\
+	LAAS-CNRS \\
+	Universit\'e de Toulouse, CNRS \\
+	France \\
+	\texttt{ljean@laas.fr} \\
+}
+
 
 \begin{document}
 
@@ -46,10 +77,12 @@
 
 
 \begin{abstract}
-	In this paper we introduce a relatively {simple} algorithm to learn optimal decision trees of bounded depth. This algorithm, \budalg, is as memory and time efficient as heuristics, and yet more efficient than most exact methods on most data sets. State-of-the-art exact methods often have poor anytime behavior, and hardly scale to deep trees. In our experiments, we found that they are typically orders of magnitude slower than the proposed algorithm to compute optimally accurate classifiers of a given depth.
+	In this paper we introduce a relatively {simple} algorithm to learn optimal decision trees of bounded depth. This algorithm, \budalg, is as memory and time efficient as heuristics, and yet more efficient than most exact methods on most data sets. State-of-the-art exact methods often have poor anytime behavior, and hardly scale to deep trees. Experiments show that they are typically orders of magnitude slower than the proposed algorithm to compute optimally accurate classifiers of a given depth.
 On the other hand, \budalg\ finds, without significant computational overhead, solutions comparable to those returned by standard greedy heuristics, and can quickly improve their accuracy when given more computation time.
 % the first solution found by \budalg\ is comparable to those found by standard greedy heuristics and that significantly improve upon greedy heuristics. On the 
 \end{abstract}
+
+
 
 \section{Introduction}
 
@@ -161,26 +194,28 @@ To a \emph{branch} of a decision tree we associate the ordered set of labels on 
  
 %Moreover, if we also consider data points as conjunctions of features (where every feature appears either positively or negatively),
 %given a branch $\abranch \subseteq \features$ 
-Given a data set $\langle \negex,\posex \rangle$, we can associate a data set $\langle \negex(\abranch),\posex(\abranch) \rangle$ to a branch $\abranch$ where:
-\begin{eqnarray*}
-\negex(\abranch) = \{\ex \mid \ex \in \negex, \abranch \subseteq \ex\}\\
-\posex(\abranch) = \{\ex \mid \ex \in \posex, \abranch \subseteq \ex\}
-\end{eqnarray*}
-
+Given a data set $\langle \negex,\posex \rangle$, we can associate a data set $\langle \negex(\abranch),\posex(\abranch) \rangle$ to a branch $\abranch$ where $\negex(\abranch) = \{\ex \mid \ex \in \negex, \abranch \subseteq \ex\}$ and $\posex(\abranch) = \{\ex \mid \ex \in \posex, \abranch \subseteq \ex\}$.
+% \begin{eqnarray*}
+% \negex(\abranch) = \{\ex \mid \ex \in \negex, \abranch \subseteq \ex\}\\
+% \posex(\abranch) = \{\ex \mid \ex \in \posex, \abranch \subseteq \ex\}
+% \end{eqnarray*}
+%
 % For instance, the branch $\abranch = \{\afeat_i, \bar{\afeat_j}, \bar{\afeat_k}, \afeat_l\}$ has length 4 and
-
+%
 We write $\grow{\abranch}{\afeat}$ as a shortcut for $\abranch \cup \{\afeat\}$.
 The classification error for branch $\abranch$ is $\error[\abranch]=\min(|\negex(\abranch)|, |\posex(\abranch)|)$.
 % %Let $\error[\abranch]$ be $\min(|\negex(\abranch)|, |\posex(\abranch)|)$,
 % and we write $\error[\abranch,\afeat]$ for $\error[\grow{\abranch}{\afeat}] + \error[\grow{\abranch}{\bar{\afeat}}]$.
 % %A branch \abranch\ is said \emph{pure} iff $\error[\abranch]=0$.
 
-\medskip
+% \medskip
 
 Given a binary data set $\langle \negex,\posex \rangle$ on the features \features, %with label function $\classlabel$,
 the \emph{minimum error bounded depth decision tree problem} consists in finding a binary decision tree with vertex labels in \features\ whose branches have cardinality at most $\mdepth$ and the sum of the classification error %($\error[\abranch]$) 
 of its maximal branches is minimum.
 %of depth at most $\maxd$ whose sum of error $\error[\abranch]$ for all branches $\abranch$ from the root to the leaves is equal to $\epsilon$.
+
+
 
 
 \subsection{Dynamic Programming Algorithm}
@@ -204,6 +239,7 @@ The solver DL8.5 is a dynamic programming algorithm for the minimum error bounde
 	% \end{algorithm}
 	
 	\begin{algorithm}
+		\begin{footnotesize}
 		\caption{Dynamic Programming Algorithm\label{alg:dynprog}}
 		\TitleOfAlgo{\dynprog}
 		  \KwData{$\negex,\posex,\features,\maxd$}
@@ -213,11 +249,15 @@ The solver DL8.5 is a dynamic programming algorithm for the minimum error bounde
 			\If{$\maxd > 0$ and $\error > 0$} {
 			\ForEach{$\afeat \in \features$} {
 					$\error \gets \min(\error, \dynprog(\negex(\{\afeat\}),\posex(\{\afeat\}),\features \setminus \{\afeat\},\maxd-1)$\;
-					\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \  $ + \dynprog(\negex(\{\bar{\afeat}\}),\posex(\{\bar{\afeat}\}),\features \setminus \{\afeat\},\maxd-1))$\;
+					\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \  $ + \dynprog(\negex(\{\bar{\afeat}\}),\posex(\{\bar{\afeat}\}),\features \setminus \{\afeat\},\maxd-1))$\;
 			}
 			}
 			\Return $\error$\;
+			\end{footnotesize}
 	\end{algorithm}
+	
+	
+	% \end{document}
 	
 	
 	Let $\numex = |\posex| + |\negex|$, $\numfeat = |\features|$, and let $\mdepth$ be the maximum depth.
@@ -243,9 +283,9 @@ The solver DL8.5 is a dynamic programming algorithm for the minimum error bounde
 	 Algorithm~\ref{alg:dynprog} therefore runs in $\Theta((\numex+2^\mdepth){\Perm{\numfeat}{\mdepth}}) \subset O((\numex + 2^{\mdepth})\numfeat^\mdepth)$ time. Moreover, with the above assumptions on $\numex,\numfeat$ and $\mdepth$, $O(\numex\numfeat^\mdepth)$ is a good approximation of its worst-case time complexity.
 	 
 	 
-	 \medskip
+	 % \medskip
 	 
-	 Notice that computing an optimal decision tree of bounded depth (for any polynomially computable definition of ``optimal'') is therefore polynomial unless the maximum depth is an input, and is not bounded. %Moreover, under the standard assumption that $k \leq \log n$, 
+	 Notice that computing an optimal decision tree of bounded depth (for a polynomially computable definition of ``optimal'') is therefore polynomial unless the maximum depth is an input.
 	 
 	 
 	 
@@ -340,14 +380,14 @@ explores the same search space as Algorithm~\ref{alg:dynprog}: the same branch i
 	\end{figure}
 
 
-\medskip
+% \medskip
 
-Let $\afeat_i <_{\abranch} \afeat_j$ if and only if feature $\afeat_i$ is selected before feature $\afeat_j$ when expanding branch $\abranch$ at Line~\ref{line:assignment}. Algorithm~\ref{alg:bud} has the following invariants, from which a formal proof of correctness can easily be written:
+Let $\afeat_i <_{\abranch} \afeat_j$ if and only if feature $\afeat_i$ is selected before feature $\afeat_j$ when expanding branch $\abranch$ at Line~\ref{line:assignment}. Algorithm~\ref{alg:bud} has the following invariants, from which a formal proof of correctness easily follows:
 
 \begin{itemize}
 	\item \sequence\ represents the current decision tree: if $(\abranch,\afeat) \in \sequence$, then the current tree tests feature $\afeat$ at the extremity of branch $\abranch$. We say that the branch $\abranch$ is in the current tree, and that feature $\afeat$ is tested on branch $\abranch$.
 	
-	\item If $(\abranch,\afeat) \in \sequence$, then every subtree of $\abranch$ starting with a feature test $\aofeat <_{\abranch} \afeat$ has already been explored and $\best[\abranch]$ contains the minimum of their errors. The set $\dom[\abranch]$ contains all \emph{untried} feature tests for branch $\abranch$ ($\dom[\abranch] = \{\aofeat \mid \aofeat \in \features ~\wedge~ \afeat <_{\abranch} \aofeat$).
+	\item If $(\abranch,\afeat) \in \sequence$, then every subtree of $\abranch$ starting with a feature test $\aofeat <_{\abranch} \afeat$ has already been explored and $\best[\abranch]$ contains the minimum of their errors. The set $\dom[\abranch]$ contains all \emph{untried} feature tests for branch $\abranch$ ($\dom[\abranch] = \{\aofeat \mid \aofeat \in \features ~\wedge~ \afeat <_{\abranch} \aofeat \}$).
 	
 	\item If $(\abranch,\afeat) \in \sequence$ but one of its children $\grow{\abranch}{\afeat}$ or $\grow{\abranch}{\afeat}$ (call it $\aobranch$) is not in the current tree, then either:
 
@@ -397,7 +437,7 @@ When the algorithm ends, $\best[\emptyset]$ contains the minimum error of any de
 % \end{itemize}
 
 
-\medskip
+% \medskip
 
 Notice that to simplify the pseudo-code, we use branches to index array-like data structures in Algorithm~\ref{alg:bud} (e.g. $\dom[\abranch]$). Actually, a set of \emph{indices} (at most $2^{\mdepth}$ of them are necessary in the worst case) are used as proxy for branches in all contexts, since the current tree cannot have more than $2^{\mdepth}$ branches. At Line~\ref{line:storebest}, the indices for $\grow{\abranch}{\afeat}$, $\grow{\abranch}{\bar{\afeat}}$ are released, and a free index is marked as used when expanding a branch at Line~\ref{line:branching}. Moreover, the pseudo-code in Algorithm~\ref{alg:bud} does not show how the best subtrees of optimal branches are recorded, nor how the overall best error is updated when completing a new decision tree at Line~\ref{line:else}.
 %The worst case space complexity of the algorithm is therefore in $\Theta(2^{\mdepth}\numfeat)$. Under the standard assumption that $2^{\mdepth} \leq \numex$, this is less than the size of the input.
@@ -552,7 +592,7 @@ Notice that to simplify the pseudo-code, we use branches to index array-like dat
 			
 			\medskip
 			
-			The key difference between Algorithms~\ref{alg:dynprog} and \ref{alg:bud} is the order in which branches are explored (see Figure~\ref{fig:searchtree}). In particular, \dynprog must complete the first recursive call before outputing a full tree. Therefore, the computation time for finding a first complete tree is $\Theta((\numex+2^{\mdepth})\Perm{\numfeat-1}{\mdepth-1})$, that is $O(\numex(\numfeat-1)^{\mdepth-1})$ time. On the other hand, \budalg finds a first tree in linear time: $\Theta(2^{\mdepth}+\numex\numfeat) = \Theta(\numex\numfeat)$.
+			The key difference between Algorithms~\ref{alg:dynprog} and \ref{alg:bud} is the order in which branches are explored (see Figure~\ref{fig:searchtree}). In particular, \dynprog must complete the first recursive call before outputing a full tree. Therefore, the computation time for finding a first complete tree is $\Theta((\numex+2^{\mdepth})\Perm{\numfeat-1}{\mdepth-1})$, that is $O(\numex(\numfeat-1)^{\mdepth-1})$ time. On the other hand, \budalg finds a first tree in linear time: $\Theta(2^{\mdepth}+\numex\mdepth) = \Theta(\numex\mdepth)$.
 			Another difference with actual implementations of Algorithm~\ref{alg:dynprog} (\olddleight\ and \dleight) is that the latter methods use a cache structure in order to reduce the number of branches that need to be explored. Indeed, by using memory, it is sufficient to explore every \emph{combination}\footnote{Actually, some combination may be completely avoided using bounds reasoning and subset lookup.} (instead of every permutation) of $\mdepth$ features since the order of the tests does not matter, given a single branch. Our experimental evaluations, however, show that the overhead of cache lookups may not be always beneficial. Moreover, the space complexity of managing the cache may be prohibitive. On the other hand, Algorithms~\ref{alg:dynprog} and \ref{alg:bud} are essentially memoryless, since, under the standard assumption that $2^{\mdepth} \leq \numex$, their worst-case space complexity is less than the size of the input.
 			
 			
@@ -1021,13 +1061,13 @@ We discuss here only improvements that have an impact on the efficiency of the a
 \subsection{Heuristic Ordering}
 \label{sec:heuristic}
 
-In order to quickly find highly accurate trees, it is important to follow a heuristic. We experimented with three heuristics based on scores to minimize: \emph{error}, \emph{entropy}~\cite{10.1023/A:1022643204877}, and \emph{Gini impurity}~\cite{breiman1984classification}. 
+In order to quickly find highly accurate trees, it is important to select first the most promising features, according to a heuristic . We experimented with three heuristics based on scores to minimize: \emph{error}, \emph{entropy}~\cite{10.1023/A:1022643204877}, and \emph{Gini impurity}~\cite{breiman1984classification}. 
 Each of these heuristics associates a score to a feature $\afeat$ at a branch $\abranch$:
 \begin{eqnarray}
 	\textrm{error}: & \error[\grow{\abranch}{\afeat}] + \error[\grow{\abranch}{\bar{\afeat}}] \\
 	%\textrm{minimum entropy:} & \sum_{v \in \{\afeat,\bar{\afeat}\}} \frac{|\allex(\abranch \wedge v)|}{|\allex(\abranch)|} \cdot -\sum_{\aclass \in \{\negclass,\posclass\}} \frac{|\setex{\aclass}(\abranch \wedge v)|}{|\setex{\aclass}(\abranch)} \log_{2} \frac{|\setex{\aclass}(\abranch \wedge v)|}{|\setex{\aclass}(\abranch)|} \\
 	\textrm{entropy:} & \sum\limits_{v \in \{\afeat,\bar{\afeat}\}} -p(v,\allex) \sum\limits_{\aclass \in \{\negclass,\posclass\}} p(v,\setex{\aclass}) \log_{2} p(v,\setex{\aclass}) \\
-	\textrm{Gini impurity:} &  \sum\limits_{v \in \{\afeat,\bar{\afeat}\}} p(v,\setex{\aclass})(1 - \sum\limits_{\aclass \in \{\negclass,\posclass\}} p(v,\setex{\aclass})^2)
+	\textrm{Gini impurity:} &  \sum\limits_{v \in \{\afeat,\bar{\afeat}\}} p(v,\allex)(1 - \sum\limits_{\aclass \in \{\negclass,\posclass\}} p(v,\setex{\aclass})^2)
 \end{eqnarray}
 With $p(v,{\cal S}) = \frac{|{\cal S}(\grow{\abranch}{v})|}{|{\cal S}(\abranch)|}$ the ratio of datapoints with feature $v$ in the set ${\cal S}$.
 % With $p(v,{\cal S}) = \frac{|{\cal S}(\abranch \wedge v)|}{|{\cal S}(\abranch)|}$.
@@ -1193,7 +1233,7 @@ As long as these choices of feature tests stand (i.e., as long as $\abranch$ bel
 \end{example}
 
 
-\medskip
+% \medskip
 
 This reasoning will be more effective when good upper bounds are found early, hence the feature ordering heuristic discussed in the previous section has an impact. Moreover, the order in which buds are expanded (the choice of branch in Line~\ref{line:budchoice}) has an impact as well. We found that the simplest branch selection strategy was also the one giving the best results: we expand first the branch that was inserted into \bud\ first (i.e., \bud\ is \emph{FIFO}). One possible explanation is that by avoiding to unnecessarily ``jump'' to different parts of the decision tree, this strategy promotes optimizing sibling subtrees first, and therefore, deeper tree earlier.
 
@@ -1239,7 +1279,7 @@ $$
 We can use the weighted version to handle noisy data, by merging duplicated datapoints and suppressing inconsistent datapoints.
 
 Let $\weight^{\negclass}$ (resp. $\weight^{\posclass}$) denote the number of occurrences of $x$ in $\setex{\negclass}$ (resp. $\setex{\posclass}$). We use the weight function $\weight[x] = |\weight^{\negclass}(x) - \weight^{\posclass}(x)|$. Then, for any datapoint $x$, we remove all but one of its occurrences, in $\setex{\negclass}$ if $\weight^{\negclass}>\weight^{\posclass}$, in $\setex{\posclass}$ if $\weight^{\posclass}>\weight^{\negclass}$, and suppress it completely if $\weight^{\posclass}=\weight^{\negclass}$.
-The reported error will then need to be offset by the number of pair of suppressed inconsistant datapoints, that is:
+The reported error will then need to be offset by the number of pairs of suppressed inconsistent datapoints, that is:
 $
 \sum_{x \in \allex}\min(\weight^{\negclass}(x), \weight^{\posclass}(x))
 $.
@@ -1261,27 +1301,42 @@ Moreover, at every branch, ``informationless'' features (i.e., features $\afeat$
 \label{sec:exp}
 
 All experiments were run
-on 7 cluster nodes, each with 36 Intel Xeon CPU E5-2695 v4 2.10GHz cores
+on 4 cluster nodes, each with 36 Intel Xeon CPU E5-2695 v4 2.10GHz cores
 running Linux Ubuntu 16.04.4. Sources were compiled using g++8. 
-Every algorithm was run ten times with the same set of distinct random seeds and a time limit of one hour. We imposed a memory limit of 3.5GB on every instance in the data sets, except for \dleight, where the limit was raised to 50GB.
+Every algorithm was run until completion or until it reaches a time limit of one hour. We imposed a memory limit of 50GB on every algorithm.
 
-We used 47 data sets [from...], and for each data set, we set the maximum depth using integers in $[3,10]$. We organized the results by providing averaged data over the 47 data sets, for each value of maximum depth.
-The raw experimental data from these experiments can be found in the Appendix.
+
+We used a collection of 58 data sets formed by the union of the data sets from related work~\cite{narodytska2018learning,dl85,verwer2019learning}, to which we added extra data sets (\texttt{bank}, \texttt{titanic}, \texttt{surgical-deepnet} and \texttt{weather-aus}, as well as \texttt{mnist\_0}, \texttt{adult\_discretized}, \texttt{compas\_discretized} and \texttt{taiwan\_binarised}). Further description of the data sets as well as all expeimental results are given in appendix. For reason of space, we present aggregated results in this section.
 
 
 
 \subsection{Optimizing trees}
 
-We first compare our algorithm (\budalg) to the state-of-the-art algorithms \murtree and \dleight, for computing optimal trees and proving optimality. We therefore report in Table~\ref{tab:summaryacc} the average error (error), the average accuracy (acc.), 
-the ratio of optimality proofs (opt.), as well as the average cpu time (cpu) to either prove optimality or find the best solution.
-As \dleight does not provide a solution for every data set (on some instance it goes over the memory limit of 50GB), we provide the number of data sets for which a solution was returned (sol.). Moreover, 
-instead of absolute values, we provide the average relative difference in error and accuracy w.r.t. \budalg, however, and only for the data sets where a decision tree was found. Similarly, we report the average cpu time ratio w.r.t. \budalg, however, only for instances which were proven optimal by both algorithms\footnote{every instance proven optimal by \dleight is also proven optimal by \budalg and \murtree}.
+We first compare our algorithm (\budalg) to state-of-the-art algorithms, \murtree~\cite{DBLP:journals/corr/abs-2007-12652} and \dleight~\cite{dl85}, as well as the best MIP (\binoct)~\cite{verwer2019learning} and CP (\cp)~\cite{verhaeghe2019learning} models, for computing optimal trees and proving optimality. 
+
+The data sets in Table~\ref{tab:summaryaccsmall} are organized by their number of datapoints \numex and the size \numfeat of their feature set.
+For each class, every method is run with an upper bound $\mdepth$ on the tree depth shown in the first column. 
+We report for every class and every depth: the ratio of optimality proofs (opt.); the average classification error (error); and %the average accuracy (acc.), 
+ %as well as 
+ the average cpu time (cpu) to prove optimality.
+Since \dleight and \binoct exceed the memory limit of 50GB in some cases, we also provide for those two methods, the ratio of runs where at least one solution was found (sol.). For the same reason, we give their classification error, marked by a ``$^*$'', as the average marginal increase over \budalg's on these ``successful'' data sets. 
+Similarly, the CPU time for all other methods is given as the average marginal increase over \budalg's on data sets for which both methods prove optimality.
+
+For the number of optimality proofs, \budalg is comparable to \murtree.
+It is slightly less efficient for  $\mdepth \leq 5$, but slightly more efficient for $\mdepth \geq 7$. The gap on shallow tree can be explained by \murtree's caching method, and because it puts less emphasis on trying to find good trees faster, but rather tries to exhaust the whole search space faster. The gap on deep trees can mostly be explained by the preprocessing technique whereby inconsistent datapoints are supressed: whereas \budalg can stop searching when the overll classification error reaches the number of inconsistent datapoints, \murtree must exhaust the search space. Despite what a quick look at Table~\ref{tab:summaryaccsmall} may suggests, both methods have similar speed. The large gaps are either due to the same phenomenon described above (when in favor or \budalg), or due to a single data set, namely \texttt{mnist\_0} (when in favor or \murtree).
+Both algorithms find trees of similar qualities for $\mdepth \leq 5$, however, \budalg is significantly better for $\mdepth \geq 7$. 
+
+All other methods are systematically outperformed. \cp has good results on very shallow trees ($\mdepth \leq 4$) but is ineffective for deeper tree. Indeed, the quality of the tree actually \emph{decreases} when $\mdepth$ increases over $4$! \dleight can also find optimal trees in most cases where the number of feature (\numfeat) is low, and for small values of $\mdepth$. When, $\numfeat$ grows, however, it often exceeds the memory limit of 50GB (whereas \budalg does not require more memory than the size of the data set). Finally, \binoct does not produce a single optimality proof and very often exceeds the memory limit.%\footnote{In the experiments in \cite{verwer2019learning} not all datapoints were used.}
+ 
+
+% As \dleight does not provide a solution for every data set (on some instance it goes over the memory limit of 50GB), we provide the number of data sets for which a solution was returned (sol.). Moreover,
+% instead of absolute values, we provide the average relative difference in error and accuracy w.r.t. \budalg, however, and only for the data sets where a decision tree was found. Similarly, we report the average cpu time ratio w.r.t. \budalg, however, only for instances which were proven optimal by both algorithms\footnote{every instance proven optimal by \dleight is also proven optimal by \budalg and \murtree}.
 
 
 \begin{table}[htbp]
 \begin{center}
 \begin{footnotesize}
-\tabcolsep=1.7pt
+\tabcolsep=3pt
 \input{src/tables/summaryclasses.tex}
 \end{footnotesize}
 \end{center}
@@ -1293,14 +1348,16 @@ instead of absolute values, we provide the average relative difference in error 
 \subsection{Computing deep classifiers}
 
 Next, we shift our focus to how fast can we obtain accurate trees and how fast can we improve the accuracy over basic solutions found by heuristics.
-Therefore, in order to have a baseline, we use a well known heuristic: \cart (we ran its implementation in scikit-learn).
-Here we report the average error after a given period of time (3 seconds, 10 seconds, 1 minute or 5 minutes) in Table~\ref{tab:summaryspeed}.
+We use a well known heuristic as baseline: \cart (we ran its implementation in scikit-learn).
+Here we report the average error after a given period of time (3 seconds, 10 seconds, 1 minute or 5 minutes), both for \murtree and \budalg in Table~\ref{tab:summaryspeed}.
 
 
-\medskip
+% \medskip
 
-We can see that the first solution found by our algorithm has comparable accuracy (actually, often slightly better) to the one found by \cart. The implementation of \cart in scikit-learn does not seem to be very efficient computationally. However, this is not so relevant as it is clear that one greedy run of the heuristic can be implemented to be as fast as the first dive of \budalg. The point of this experiment is threefold: first, it shows that the first solution is very similar to that found by \cart (here we believe that the only difference is to use the feature yielding the minimum error instead of the feature with minimum Gini impurity for the deepest feature tests); second, this tree
-is found extremely quickly, and there is no scaling issue with respect to the depth of the tree or with respect to the size of the data set; third, even for large data sets and deep trees, the accuracy of the initial classifier can be significantly improved given a reasonable computation time.
+We can see that the first solution found by \budalg has comparable accuracy to the one found by \cart. The implementation of \cart in scikit-learn does not seem to be very efficient computationally. However, this is not so relevant as it is clear that one greedy run of the heuristic can be implemented to be as fast as the first dive of \budalg. The point of this experiment is threefold. Firstly, it shows that the first solution is very similar to that found by \cart. There is actually a slight advantage for \budalg, which can
+be explained by the small difference in the heuristic selection of features: whereas \cart systematically selects the feature with minimum Gini impurity, \budalg does so for all \emph{but the deepest feature test}, for which it selects the feature with least classification error. 
+Secondly, this first tree
+is found extremely quickly, and there is no scaling issue with respect to the depth of the tree or with respect to the size of the data set. Thirdly, even for large data sets and deep trees, the accuracy of the initial classifier can be significantly improved given a reasonable computation time.
 
 %Moreover, although we would need larger data sets to be confident about that, it seems that our algorithm is faster than \cart to find this first decision tree. %One can conjecture that \cart uses more sophisticated heuristic choices to explain these two observations.
 
@@ -1318,36 +1375,146 @@ is found extremely quickly, and there is no scaling issue with respect to the de
 \end{table}
 
 
-Figure~\ref{fig:cactus} reports the evolution of accuracy over time, giving a good view of the difference between \murtree and \budalg during search. The accuracy of the tree returned by \cart is given for reference. 
-We can see in those graphs that \murtree finds an initial tree extremely quickly, although with very low accuracy. This is because \murtree show progress even when the tree is not complete, i.e., the first solution is always a single node with the most promising feature. We can see in Table~\ref{tab:summaryspeed} that this is indeed always the same feature, irrespective of the maximum depth.
+Figure~\ref{fig:cactus} reports the evolution of the average accuracy (across all 58 data sets) over time, giving a good view of the difference between \murtree and \budalg during search. The accuracy of the tree returned by \cart is given for reference. 
+We can see in those graphs that \murtree finds an initial tree extremely quickly, although with very low accuracy. This is because \murtree show progress even when the tree is not complete, e.g., the first solution is always a single node with the most promising feature. We can see in Table~\ref{tab:summaryspeed} that this is indeed always the same feature, irrespective of the maximum depth.
+
+
+%
+% \begin{figure}
+% 	\subfloat[depth=3]{\input{src/tables/xscerror3.tex}}
+% 	\subfloat[depth=7]{\input{src/tables/xscerror7.tex}}
+% 	\subfloat[depth=10]{\input{src/tables/xscerror10.tex}}
+% 	% \subfloat[depth=8]{\input{src/tables/xscerror8.tex}}
+% 	% \subfloat[depth=9]{\input{src/tables/xscerror9.tex}}
+% 	% \subfloat[depth=10]{\input{src/tables/xscerror10.tex}}
+% 	\caption{\label{fig:cactus}Accuracy over time, averaged across all data sets}
+% \end{figure}
+
+
+\subsection{Factor analysis}
+
+Finally, we report results of three variants of \budalg, in order to analyse the relative contributions of the factors described in Section~\ref{sec:ext}. For each variant, we report the average error (error), the ratio of optimality proofs (opt.) and the cpu time ratio with respect to the default setting on data sets for which an optimal tree has been found.
+
+In the variant ``No heuristic'', the Gini impurity heuristic described in Section~\ref{sec:heuristic} is disabled, and replaced by simply selecting first the feature with minimum error. For shallow trees (depth 3 or 4), since in many cases the search space is completely exhausted, not computing the slightly more costly Gini impurity score may actually be a good choice and we observe run time reduction of about 15\% to 20\%. However, the accuracy of the trees decreases extremely rapidly for larger maximum depth. As a results, many less optimality proofs are obtained, and they take much longer to compute.
+
+In the variant ``No preprocessing'', both data set and feature preprocessings described in Section~\ref{sec:preprocessing} are disabled. The feature ordering is impacted by the removal of inconsistent datapoints, and therefore it may happen that, by luck, a more acurate tree is found for the non-preprocessed data set than for the preprocessed one. However, in most cases, the preprocessing does pay off, yielding more optimality proofs, better accuracy, and shorter runtimes (on that last aspect, we estimate that most of the gain is due to the removal of redundant features, and of inconsistent datapoints, whereas the fusion of duplicated datapoints accounts for only a few percent speed-up).
+
+In the variant ``No lower bound'', the lower bound technique described in Section~\ref{sec:lb} is disabled. In this case we observe a small increase in computational time (from 1\% up to 40\%). However, the search space is explored in the same order, and it only slightly negatively affect accuracy and the number of optimality proofs.
+
+\begin{table}[htbp]
+\begin{center}
+\begin{footnotesize}
+\tabcolsep=2pt
+\input{src/tables/factorbfs.tex}
+\end{footnotesize}
+\end{center}
+\caption{\label{tab:factor} Factor analysis}
+\end{table}
+
+
+\subsection{Balancing Size and Accuracy}
+
+Most toolkits for computing decision trees somehow try to balance size and accuracy. As discussed earlier, \budalg use the relatively standard approach to bound the maximum depth and searches for the tree with maximum accuracy within that limit. Other methods focus on size rather than depth. 
+For instance, the algorithm \gosdt~\cite{NEURIPS2019_ac52c626} optimize a linear combination of the classification error and of the number of leaves. 
+
+From \budalg, we designed a method to trade accuracy for size based on pruning. Given a decition tree of accuracy $\alpha$ and a target accuracy $\tau \leq \alpha$, the subtree of size $s_i$ and classification error $\alpha_i$ such that $\alpha_i/s_i$ is minimum is suppressed, as long as the overall accuracy remains larger than or equal to $\tau$.  We did not manage, unfortunately, to obtain a relevant comparison with \gosdt, because no setting of the regularization parameter enable us to obtain trees with more than a dozen leafs. Instead we experimented with \iti~\cite{}
+
+
+\begin{table}[htbp]
+\begin{center}
+\begin{footnotesize}
+\tabcolsep=5pt
+\input{src/tables/summaryiti.tex}
+\end{footnotesize}
+\end{center}
+\caption{\label{tab:iti} ITI}
+\end{table}
 
 
 
-\begin{figure}
-	\subfloat[depth=3]{\input{src/tables/xscerror3.tex}}
-	\subfloat[depth=7]{\input{src/tables/xscerror7.tex}}
-	\subfloat[depth=10]{\input{src/tables/xscerror10.tex}}
-	% \subfloat[depth=8]{\input{src/tables/xscerror8.tex}}
-	% \subfloat[depth=9]{\input{src/tables/xscerror9.tex}}
-	% \subfloat[depth=10]{\input{src/tables/xscerror10.tex}}
-	\caption{\label{fig:cactus}Accuracy over time, averaged across all data sets}
-\end{figure}
+\section{Conclusion}
+
+We have introduced a simple, exact, iterative, memory-efficient and anytime algorithm for computing optimaly-accurate tree classifiers of bounded depth.
+This algorithm is considerably more efficient than state-of-the-art exact algorithms. Moreover, it has no significant time nor memory overhead with respect to greedy heuristic methods.
+
+
 
 
 \bibliographystyle{plain}
 \bibliography{src/references}
 
 
-% \end{document}
+\section*{Checklist}
 
-\clearpage
+\begin{enumerate}
 
-% \newgeometry{bottom=2cm,top=2cm,margin=1cm}
+\item For all authors...
+\begin{enumerate}
+  \item Do the main claims made in the abstract and introduction accurately reflect the paper's contributions and scope?
+    \answerTODO{}
+  \item Did you describe the limitations of your work?
+    \answerTODO{}
+  \item Did you discuss any potential negative societal impacts of your work?
+    \answerTODO{}
+  \item Have you read the ethics review guidelines and ensured that your paper conforms to them?
+    \answerTODO{}
+\end{enumerate}
 
-\section*{Appendix}
+\item If you are including theoretical results...
+\begin{enumerate}
+  \item Did you state the full set of assumptions of all theoretical results?
+    \answerTODO{}
+	\item Did you include complete proofs of all theoretical results?
+    \answerTODO{}
+\end{enumerate}
 
-The benchmark of classification data set we used is described in Table~\ref{tab:info}. It consists of 30 data sets 
-commonly used in related work articles, to which we added some large data sets from Kaggle: \texttt{bank}, \texttt{titanic}, \texttt{surgical-deepnet} and \texttt{weather-aus}, as well as the \texttt{mnist} data sets, \texttt{adult\_discretized} and \texttt{compas\_discretized}. We report the number of data points ($|\allex|$), the number of features ($|\features|$), the same parameters after preprocessing (respectively $|\allex|^*$ and $|\features|^*$), and the ``noise'' ratio, that is: $2|\posex \cap \negex|/(|\posex|+|\negex|)$.
+\item If you ran experiments...
+\begin{enumerate}
+  \item Did you include the code, data, and instructions needed to reproduce the main experimental results (either in the supplemental material or as a URL)?
+    \answerTODO{}
+  \item Did you specify all the training details (e.g., data splits, hyperparameters, how they were chosen)?
+    \answerTODO{}
+	\item Did you report error bars (e.g., with respect to the random seed after running experiments multiple times)?
+    \answerTODO{}
+	\item Did you include the total amount of compute and the type of resources used (e.g., type of GPUs, internal cluster, or cloud provider)?
+    \answerTODO{}
+\end{enumerate}
+
+\item If you are using existing assets (e.g., code, data, models) or curating/releasing new assets...
+\begin{enumerate}
+  \item If your work uses existing assets, did you cite the creators?
+    \answerTODO{}
+  \item Did you mention the license of the assets?
+    \answerTODO{}
+  \item Did you include any new assets either in the supplemental material or as a URL?
+    \answerTODO{}
+  \item Did you discuss whether and how consent was obtained from people whose data you're using/curating?
+    \answerTODO{}
+  \item Did you discuss whether the data you are using/curating contains personally identifiable information or offensive content?
+    \answerTODO{}
+\end{enumerate}
+
+\item If you used crowdsourcing or conducted research with human subjects...
+\begin{enumerate}
+  \item Did you include the full text of instructions given to participants and screenshots, if applicable?
+    \answerTODO{}
+  \item Did you describe any potential participant risks, with links to Institutional Review Board (IRB) approvals, if applicable?
+    \answerTODO{}
+  \item Did you include the estimated hourly wage paid to participants and the total amount spent on participant compensation?
+    \answerTODO{}
+\end{enumerate}
+
+\end{enumerate}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\appendix
+
+\section{Appendix}
+
+
+The benchmark of classification data set we used is described in Table~\ref{tab:info}. It consists of 51 data sets 
+commonly used in related work articles, to which we added some large data sets from Kaggle: \texttt{bank}, \texttt{titanic}, \texttt{surgical-deepnet} and \texttt{weather-aus}, as well as \texttt{mnist\_0}, \texttt{adult\_discretized} and \texttt{compas\_discretized}. We report the number of data points ($|\allex|$), the number of features ($|\features|$), the same parameters after preprocessing (respectively $|\allex|^*$ and $|\features|^*$), and the ``noise'' ratio, that is: $2|\posex \cap \negex|/(|\posex|+|\negex|)$.
 
 \medskip
 
@@ -1602,6 +1769,225 @@ Every process was first run with a memory limit of 3.5GB. Many runs of \dleight,
 \end{center}%
 \caption{\label{tab:all104} Comparison with state of the art: $\numex \geq 5000, \numfeat \geq 250$, depth 10}%
 \end{table}%
+
+
+
+
+\begin{table}[htbp]%
+\begin{center}%
+\begin{scriptsize}%
+\tabcolsep=2pt%
+\input{src/tables/allfactors_smallsmall_3.tex}%
+\end{scriptsize}%
+\end{center}%
+\caption{\label{tab:all31} Comparison with state of the art: $\numex<5000, \numfeat<250$, depth 3}%
+\end{table}%
+
+\begin{table}[htbp]%
+\begin{center}%
+\begin{scriptsize}%
+\tabcolsep=2pt%
+\input{src/tables/allfactors_smallbig_3.tex}%
+\end{scriptsize}%
+\end{center}%
+\caption{\label{tab:all32} Comparison with state of the art: $\numex<5000, \numfeat \geq 250$, depth 3}%
+\end{table}%
+
+\begin{table}[htbp]%
+\begin{center}%
+\begin{scriptsize}%
+\tabcolsep=2pt%
+\input{src/tables/allfactors_bigsmall_3.tex}%
+\end{scriptsize}%
+\end{center}%
+\caption{\label{tab:all33} Comparison with state of the art: $\numex \geq 5000, \numfeat < 250$, depth 3}%
+\end{table}%
+
+\begin{table}[htbp]%
+\begin{center}%
+\begin{scriptsize}%
+\tabcolsep=2pt%
+\input{src/tables/allfactors_bigbig_3.tex}%
+\end{scriptsize}%
+\end{center}%
+\caption{\label{tab:all34} Comparison with state of the art: $\numex \geq 5000, \numfeat \geq 250$, depth 3}%
+\end{table}%
+
+
+\begin{table}[htbp]%
+\begin{center}%
+\begin{scriptsize}%
+\tabcolsep=2pt%
+\input{src/tables/allfactors_smallsmall_4.tex}%
+\end{scriptsize}%
+\end{center}%
+\caption{\label{tab:all41} Comparison with state of the art: $\numex<5000, \numfeat<250$, depth 4}%
+\end{table}%
+
+\begin{table}[htbp]%
+\begin{center}%
+\begin{scriptsize}%
+\tabcolsep=2pt%
+\input{src/tables/allfactors_smallbig_4.tex}%
+\end{scriptsize}%
+\end{center}%
+\caption{\label{tab:all42} Comparison with state of the art: $\numex<5000, \numfeat \geq 250$, depth 4}%
+\end{table}%
+
+\begin{table}[htbp]%
+\begin{center}%
+\begin{scriptsize}%
+\tabcolsep=2pt%
+\input{src/tables/allfactors_bigsmall_4.tex}%
+\end{scriptsize}%
+\end{center}%
+\caption{\label{tab:all43} Comparison with state of the art: $\numex \geq 5000, \numfeat < 250$, depth 4}%
+\end{table}%
+
+\begin{table}[htbp]%
+\begin{center}%
+\begin{scriptsize}%
+\tabcolsep=2pt%
+\input{src/tables/allfactors_bigbig_4.tex}%
+\end{scriptsize}%
+\end{center}%
+\caption{\label{tab:all44} Comparison with state of the art: $\numex \geq 5000, \numfeat \geq 250$, depth 4}%
+\end{table}%
+
+\begin{table}[htbp]%
+\begin{center}%
+\begin{scriptsize}%
+\tabcolsep=2pt%
+\input{src/tables/allfactors_smallsmall_5.tex}%
+\end{scriptsize}%
+\end{center}%
+\caption{\label{tab:all51} Comparison with state of the art: $\numex<5000, \numfeat<250$, depth 5}%
+\end{table}%
+
+\begin{table}[htbp]%
+\begin{center}%
+\begin{scriptsize}%
+\tabcolsep=2pt%
+\input{src/tables/allfactors_smallbig_5.tex}%
+\end{scriptsize}%
+\end{center}%
+\caption{\label{tab:all52} Comparison with state of the art: $\numex<5000, \numfeat \geq 250$, depth 5}%
+\end{table}%
+
+\begin{table}[htbp]%
+\begin{center}%
+\begin{scriptsize}%
+\tabcolsep=2pt%
+\input{src/tables/allfactors_bigsmall_5.tex}%
+\end{scriptsize}%
+\end{center}%
+\caption{\label{tab:all53} Comparison with state of the art: $\numex \geq 5000, \numfeat < 250$, depth 5}%
+\end{table}%
+
+\begin{table}[htbp]%
+\begin{center}%
+\begin{scriptsize}%
+\tabcolsep=2pt%
+\input{src/tables/allfactors_bigbig_5.tex}%
+\end{scriptsize}%
+\end{center}%
+\caption{\label{tab:all54} Comparison with state of the art: $\numex \geq 5000, \numfeat \geq 250$, depth 5}%
+\end{table}%
+
+
+\begin{table}[htbp]%
+\begin{center}%
+\begin{scriptsize}%
+\tabcolsep=2pt%
+\input{src/tables/allfactors_smallsmall_7.tex}%
+\end{scriptsize}%
+\end{center}%
+\caption{\label{tab:all71} Comparison with state of the art: $\numex<5000, \numfeat<250$, depth 7}%
+\end{table}%
+
+\begin{table}[htbp]%
+\begin{center}%
+\begin{scriptsize}%
+\tabcolsep=2pt%
+\input{src/tables/allfactors_smallbig_7.tex}%
+\end{scriptsize}%
+\end{center}%
+\caption{\label{tab:all72} Comparison with state of the art: $\numex<5000, \numfeat \geq 250$, depth 7}%
+\end{table}%
+
+\begin{table}[htbp]%
+\begin{center}%
+\begin{scriptsize}%
+\tabcolsep=2pt%
+\input{src/tables/allfactors_bigsmall_7.tex}%
+\end{scriptsize}%
+\end{center}%
+\caption{\label{tab:all73} Comparison with state of the art: $\numex \geq 5000, \numfeat < 250$, depth 7}%
+\end{table}%
+
+\begin{table}[htbp]%
+\begin{center}%
+\begin{scriptsize}%
+\tabcolsep=2pt%
+\input{src/tables/allfactors_bigbig_7.tex}%
+\end{scriptsize}%
+\end{center}%
+\caption{\label{tab:all74} Comparison with state of the art: $\numex \geq 5000, \numfeat \geq 250$, depth 7}%
+\end{table}%
+
+
+\begin{table}[htbp]%
+\begin{center}%
+\begin{scriptsize}%
+\tabcolsep=2pt%
+\input{src/tables/allfactors_smallsmall_10.tex}%
+\end{scriptsize}%
+\end{center}%
+\caption{\label{tab:all101} Comparison with state of the art: $\numex<5000, \numfeat<250$, depth 10}%
+\end{table}%
+
+\begin{table}[htbp]%
+\begin{center}%
+\begin{scriptsize}%
+\tabcolsep=2pt%
+\input{src/tables/allfactors_smallbig_10.tex}%
+\end{scriptsize}%
+\end{center}%
+\caption{\label{tab:all102} Comparison with state of the art: $\numex<5000, \numfeat \geq 250$, depth 10}%
+\end{table}%
+
+\begin{table}[htbp]%
+\begin{center}%
+\begin{scriptsize}%
+\tabcolsep=2pt%
+\input{src/tables/allfactors_bigsmall_10.tex}%
+\end{scriptsize}%
+\end{center}%
+\caption{\label{tab:all103} Comparison with state of the art: $\numex \geq 5000, \numfeat < 250$, depth 10}%
+\end{table}%
+
+\begin{table}[htbp]%
+\begin{center}%
+\begin{scriptsize}%
+\tabcolsep=2pt%
+\input{src/tables/allfactors_bigbig_10.tex}%
+\end{scriptsize}%
+\end{center}%
+\caption{\label{tab:all104} Comparison with state of the art: $\numex \geq 5000, \numfeat \geq 250$, depth 10}%
+\end{table}%
+
+
+
+\begin{table}[htbp]
+\begin{center}
+\begin{footnotesize}
+\tabcolsep=5pt
+\input{src/tables/tableiti.tex}
+\end{footnotesize}
+\end{center}
+\caption{\label{tab:iti} Comparison with ITI}
+\end{table}
+
 
 
 \end{document}

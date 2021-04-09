@@ -5,7 +5,7 @@
 #include <iostream>
 #include <random>
 #include <vector>
-#include <cmath>
+// #include <cmath>
 
 #include "CmdLine.hpp"
 #include "Partition.hpp"
@@ -30,31 +30,31 @@ namespace blossom {
 /// this needs to be templated with "T" and should be 0 for integral types
 /// (e.g., static_cast<T>(1.e-9) should work)
 // #define FLOAT_PRECISION std::numeric_limits<T>::epsilon()
-#define FLOAT_PRECISION static_cast<T>(1.e-6)
-
-template <typename T>
-typename std::enable_if<std::is_integral<T>::value, bool>::type
-equal(const T &a, const T &b) {
-  return a == b;
-}
-
-template <typename T>
-typename std::enable_if<std::is_integral<T>::value, bool>::type
-lt(const T &a, const T &b) {
-  return a < b;
-}
-
-template <typename T>
-typename std::enable_if<std::is_floating_point<T>::value, bool>::type
-equal(const T &a, const T &b) {
-  return std::fabs(a - b) < FLOAT_PRECISION;
-}
-
-template <typename T>
-typename std::enable_if<std::is_floating_point<T>::value, bool>::type
-lt(const T &a, const T &b) {
-  return a + FLOAT_PRECISION < b;
-}
+// #define FLOAT_PRECISION static_cast<T>(1.e-6)
+//
+// template <typename T>
+// typename std::enable_if<std::is_integral<T>::value, bool>::type
+// equal(const T &a, const T &b) {
+//   return a == b;
+// }
+//
+// template <typename T>
+// typename std::enable_if<std::is_integral<T>::value, bool>::type
+// lt(const T &a, const T &b) {
+//   return a < b;
+// }
+//
+// template <typename T>
+// typename std::enable_if<std::is_floating_point<T>::value, bool>::type
+// equal(const T &a, const T &b) {
+//   return std::fabs(a - b) < FLOAT_PRECISION;
+// }
+//
+// template <typename T>
+// typename std::enable_if<std::is_floating_point<T>::value, bool>::type
+// lt(const T &a, const T &b) {
+//   return a + FLOAT_PRECISION < b;
+// }
 
 template <typename E_t> class CardinalityError;
 
@@ -99,6 +99,8 @@ public:
   void addSizeObjective();
 
   E_t getUbError() const;
+
+  void perfectTree();
 
   size_t getUbDepth() const;
 
