@@ -77,8 +77,13 @@
 
 
 \begin{abstract}
-	In this paper we introduce a relatively {simple} algorithm to learn optimal decision trees of bounded depth. This algorithm, \budalg, is as memory and time efficient as heuristics, and yet more efficient than most exact methods on most data sets. State-of-the-art exact methods often have poor anytime behavior, and hardly scale to deep trees. Experiments show that they are typically orders of magnitude slower than the proposed algorithm to compute optimally accurate classifiers of a given depth.
-On the other hand, \budalg\ finds, without significant computational overhead, solutions comparable to those returned by standard greedy heuristics, and can quickly improve their accuracy when given more computation time.
+	In this paper we introduce a relatively {simple} algorithm to learn optimal decision trees of bounded depth. This algorithm, \budalg, is as memory and time efficient as heuristics, and yet more efficient than most exact methods on most data sets. 
+	Its worst case time complexity is the same as state-of-the-art exact dynamic programming methods however its anytime behavior is vastly superior.
+	Experiments show that whereas existing exact methods hardly scale to deep trees, \budalg\ finds, without significant computational overhead, solutions comparable to those returned by standard greedy heuristics, and can significantly improve their accuracy when given more computation time.
+	
+	% State-of-the-art exact methods often have poor anytime behavior, and hardly scale to deep trees.
+	% Experiments show that they are typically orders of magnitude slower than the proposed algorithm to compute optimally accurate classifiers of a given depth.
+%On the other hand, \budalg\ finds, without significant computational overhead, solutions comparable to those returned by standard greedy heuristics, and can quickly improve their accuracy when given more computation time.
 % the first solution found by \budalg\ is comparable to those found by standard greedy heuristics and that significantly improve upon greedy heuristics. On the 
 \end{abstract}
 
@@ -92,23 +97,28 @@ In conclusion of their short paper showing that computing decision trees of maxi
 
 It is well established, however, that optimal trees (for some combination of accuracy, depth and size) generalize better to unseen data.
 % than heuristic trees. 
-This experiment has been confirmed in several publications\footnote{Hence we shall not reproduce once again such experiments in this paper.}, in particular for the objective criterion considered in this paper: maximizing the accuracy given an upper bound on the depth~\cite{avellanedaefficient,bertsimas2017optimal,bertsimas2007classification,DBLP:conf/ijcai/Hu0HH20,DBLP:journals/corr/abs-2007-12652,dl8}. 
-Another valuable feature of smaller and/or shallower trees is that interpreting or explaining their prediction is comparatively easier, which is often valuable. 
+This experiment has been confirmed many times, in particular for the objective criterion considered in this paper: maximizing the training accuracy given an upper bound on the depth~\cite{avellanedaefficient,bertsimas2017optimal,bertsimas2007classification,DBLP:conf/ijcai/Hu0HH20,DBLP:journals/corr/abs-2007-12652,dl8}. We rely on this prior work and hence we do not reproduce in this paper experiments comparing optimized trees to heuristic trees on unseen data.
+%\footnote{Hence we shall not reproduce once again such experiments in this paper.} 
+Note that other objective criteria have been considered. For instance, the algorithm \gosdt~\cite{NEURIPS2019_ac52c626} optimize a linear combination of accuracy and number of leaves. However maximizing the accuracy under a constrained depth has valuable properties.
+Besides being easier to tackle algorithmically, the predictions of
+ shallower trees are comparatively easier to interpret and explain. 
+
 
 %\medskip
 
 Despite these desirable features, exact methods have not been widely adopted yet for a simple reason: they do not scale. There has been a significant progress lately, and the most recent approaches show very promising results. However, no exact method can be considered consistantly better than heuristics. 
 For SAT~\cite{avellanedaefficient,narodytska2018learning} and Integer Programming approaches~\cite{aghaei2020learning,bertsimas2017optimal,bertsimas2007classification,verwer2019learning}, the size of the encoding is a first hurdle. All these models require a number of variables at least proportional to the size of the tree and to the number of datapoints. As a result, scaling beyond a few thousands datapoints is difficult. 
-On the other hand, dynamic programming algorithms \olddleight~\cite{dl8} and \dleight~\cite{dl85} scale very well to large data sets. Moreover, these algorithms leverage branch independence: sibling subtrees can be optimized independently, which as a great impact on computational complexity. However, \dleight tends to be memory hungry and furthermore, is not anytime.
+On the other hand, dynamic programming algorithms \olddleight~\cite{dl8} and \dleight~\cite{dl85} scale very well to large data sets. Moreover, these algorithms leverage branch independence: sibling subtrees can be optimized independently, which has a significant impact on computational complexity. However, \dleight tends to be memory hungry and furthermore, is not anytime.
 The constraint programming approach of Verhaeghe \textit{et al.} emulates these positive features using dedicated propagation algorithms and search strategies~\cite{verhaeghe2019learning}, while being potentially anytime, although it does not quite match \dleight's efficiency.
-Finally, a recently introduced algorithm, \murtree~\cite{DBLP:journals/corr/abs-2007-12652}, improves on earlier dynamic programming in several ways. As a result, it clearly dominates previous exact methods. It is more memory efficient, orders of magnitude faster than \dleight, and has a better anytime behavior. However, our experimental results show that for deeper trees, none of these methods can reliably outperform heuristics.
+Finally, a recently introduced algorithm, \murtree~\cite{DBLP:journals/corr/abs-2007-12652}, improves on the dynamic programming approaches in several ways: as the algorithm introduced in this paper it explores the search space in a more flexible way. Moreover, it implements several methods dedicated to exploring the whole search space very fast: delaying feature frequency counts to a specialized algorithm for subtree of depth two, and implementing an efficient recomputation method for the classification error, for instance.
+result, it clearly dominates previous exact methods. It is more memory efficient, orders of magnitude faster than \dleight, and has a better anytime behavior. However, experimental results show that for deeper trees, none of these methods can reliably outperform heuristics, whereas \budalg\ does. Moreover, it is more memory efficient than \murtree, and its pseudo-code is significantly simpler.
  
 
-% \medskip
-
-In this paper we introduce a relatively \emph{simple} algorithm (\budalg), that is as memory and time efficient as heuristics, and yet more efficient than most exact methods on most data sets. 
-This algorithm can be seen as an instance of the more general framework introduced in \cite{DBLP:journals/corr/abs-2007-12652}, however tuned to have the best scalability to large trees and the best anytime behavior as possible. 
-%As a result, it is comparable to \murtree on shallow trees, while clearly outperforming the state of the art on deep trees.
+% % \medskip
+%
+% In this paper we introduce a relatively \emph{simple} algorithm (\budalg), that is as memory and time efficient as heuristics, and yet more efficient than most exact methods on most data sets.
+% This algorithm can be seen as an instance of the more general framework introduced in \cite{DBLP:journals/corr/abs-2007-12652}, however tuned to have the best scalability to large trees and the best anytime behavior as possible.
+% %As a result, it is comparable to \murtree on shallow trees, while clearly outperforming the state of the art on deep trees.
 
 In a nutshell, \budalg emulates the dynamic programming algorithm \dleight~\cite{dl8}, while always expanding non-terminal branches (a.k.a ``buds'') before optimizing grown branches. As a result, this algorithm is in a sense strictly better than both the standard dynamic programming approach (because it is anytime and at least as fast) and than classic heuristics (because it emulates them during search, without significant overhead).
 %but explores the search space so as to improve its anytime behaviour.
@@ -222,7 +232,7 @@ of its maximal branches is minimum.
 
 \subsection{Dynamic Programming Algorithm}
 
-The solver DL8.5 is a dynamic programming algorithm for the minimum error bounded depth decision tree problem. It relies on the observation that given a feature test, the two resulting branches are independent subproblems. Algorithm~\ref{alg:dynprog} gives a high level view of DL8.5.
+The solver DL8.5 is a dynamic programming algorithm for the minimum error bounded depth decision tree problem. It relies on the observation that given a feature test, the two resulting branches are independent subproblems. Algorithm~\ref{alg:dynprog} gives a simplified view of DL8.5.
 
 
 	% \begin{algorithm}
@@ -1418,7 +1428,7 @@ In the variant ``No heuristic'', the Gini impurity heuristic described in Sectio
 
 In the variant ``No preprocessing'', the preprocessing described in Section~\ref{sec:preprocessing} is disabled. The feature ordering is impacted by the removal of datapoints, and therefore it may happen that, by luck, a more acurate tree is found for the non-preprocessed data set than for the preprocessed one. However, in most cases, the preprocessing does pay off, yielding more optimality proofs, better accuracy, and shorter runtimes. We estimate that most of the gain is due to the removal of redundant features, and of inconsistent datapoints, whereas the fusion of datapoints accounts for only a slight speed-up.
 
-In the variant ``No lower bound'', the lower bound described in Section~\ref{sec:lb} is disabled. We observe a slight increase in computation time in average (but up to 200\% for some data sets). However, the search space is explored in the same order, and it only slightly negatively affects the accuracy and the number of proofs in average.
+In the variant ``No lower bound'', the lower bound described in Section~\ref{sec:lb} is disabled. We observe a slight increase in computation time in average (but up to 200\% for some data sets). However, the search space is explored in the same order, and it only slightly negatively affects the accuracy and the number of proofs.
 
 \begin{table}[htbp]
 \begin{center}
@@ -1472,33 +1482,42 @@ This algorithm is considerably more efficient than state-of-the-art exact algori
 \item For all authors...
 \begin{enumerate}
   \item Do the main claims made in the abstract and introduction accurately reflect the paper's contributions and scope?
-    \answerTODO{}
+    \textbf{Yes}. %\answerTODO{}
   \item Did you describe the limitations of your work?
-    \answerTODO{}
+    \textbf{Yes (some limitations)}.
+		%\answerTODO{}
   \item Did you discuss any potential negative societal impacts of your work?
-    \answerTODO{}
+		\textbf{No}.
+    % \answerTODO{}
   \item Have you read the ethics review guidelines and ensured that your paper conforms to them?
-    \answerTODO{}
+		\textbf{No, they were no available}.
+    % \answerTODO{}
 \end{enumerate}
 
 \item If you are including theoretical results...
 \begin{enumerate}
   \item Did you state the full set of assumptions of all theoretical results?
-    \answerTODO{}
+	\textbf{Yes}.
+    % \answerTODO{}
 	\item Did you include complete proofs of all theoretical results?
-    \answerTODO{}
+	\textbf{No, a complete proof of correctness would be both pretty dull and potentially long. Only the invariants are given. The proof of the worst case time complexity is complete, however}.
+    % \answerTODO{}
 \end{enumerate}
 
 \item If you ran experiments...
 \begin{enumerate}
   \item Did you include the code, data, and instructions needed to reproduce the main experimental results (either in the supplemental material or as a URL)?
-    \answerTODO{}
+    %\answerTODO{}
+		\textbf{Yes, all the results are in the appendix, the actual code will be made available after the review process to avoid compromising the double-blindness of the reviewing process}.
   \item Did you specify all the training details (e.g., data splits, hyperparameters, how they were chosen)?
-    \answerTODO{}
+		\textbf{Yes}.
+    %\answerTODO{}
 	\item Did you report error bars (e.g., with respect to the random seed after running experiments multiple times)?
-    \answerTODO{}
+    \textbf{No (not all comparison methods can be randomized, so confidence is obtained by using many data sets and aggregating the results)}.
+		%\answerTODO{}
 	\item Did you include the total amount of compute and the type of resources used (e.g., type of GPUs, internal cluster, or cloud provider)?
-    \answerTODO{}
+		\textbf{Yes}.
+    %\answerTODO{}
 \end{enumerate}
 
 \item If you are using existing assets (e.g., code, data, models) or curating/releasing new assets...
@@ -1518,11 +1537,14 @@ This algorithm is considerably more efficient than state-of-the-art exact algori
 \item If you used crowdsourcing or conducted research with human subjects...
 \begin{enumerate}
   \item Did you include the full text of instructions given to participants and screenshots, if applicable?
-    \answerTODO{}
+    % \answerTODO{}
+		\textbf{N/a}.
   \item Did you describe any potential participant risks, with links to Institutional Review Board (IRB) approvals, if applicable?
-    \answerTODO{}
+    % \answerTODO{}
+		\textbf{N/a}.
   \item Did you include the estimated hourly wage paid to participants and the total amount spent on participant compensation?
-    \answerTODO{}
+    % \answerTODO{}
+		\textbf{N/a}.
 \end{enumerate}
 
 \end{enumerate}
