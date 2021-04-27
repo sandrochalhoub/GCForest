@@ -1352,7 +1352,7 @@ When, $\numfeat$ grows, however, it often exceeds the memory limit of 50GB (wher
 % instead of absolute values, we provide the average relative difference in error and accuracy w.r.t. \budalg, however, and only for the data sets where a decision tree was found. Similarly, we report the average cpu time ratio w.r.t. \budalg, however, only for instances which were proven optimal by both algorithms\footnote{every instance proven optimal by \dleight is also proven optimal by \budalg and \murtree}.
 
 
-\begin{table}[htbp]
+\begin{table}[t]
 \begin{center}
 \begin{footnotesize}
 \tabcolsep=3.75pt
@@ -1418,7 +1418,7 @@ In the variant ``No heuristic'', the Gini impurity heuristic described in Sectio
 
 In the variant ``No preprocessing'', the preprocessing described in Section~\ref{sec:preprocessing} is disabled. The feature ordering is impacted by the removal of datapoints, and therefore it may happen that, by luck, a more acurate tree is found for the non-preprocessed data set than for the preprocessed one. However, in most cases, the preprocessing does pay off, yielding more optimality proofs, better accuracy, and shorter runtimes. We estimate that most of the gain is due to the removal of redundant features, and of inconsistent datapoints, whereas the fusion of datapoints accounts for only a slight speed-up.
 
-In the variant ``No lower bound'', the lower bound technique described in Section~\ref{sec:lb} is disabled. In this case we observe an increase in computational time (up to 200\% for some data sets). However, the search space is explored in the same order, and it only slightly negatively affect accuracy and the number of optimality proofs in average.
+In the variant ``No lower bound'', the lower bound described in Section~\ref{sec:lb} is disabled. We observe a slight increase in computation time in average (but up to 200\% for some data sets). However, the search space is explored in the same order, and it only slightly negatively affects the accuracy and the number of proofs in average.
 
 \begin{table}[htbp]
 \begin{center}
