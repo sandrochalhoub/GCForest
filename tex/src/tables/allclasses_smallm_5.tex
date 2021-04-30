@@ -1,0 +1,38 @@
+\begin{tabular}{lrrrrrrrrrrrr}
+\toprule
+\multirow{2}{*}{}&  \multicolumn{2}{c}{\budalg} & \multicolumn{2}{c}{\murtree} & \multicolumn{2}{c}{\dleight} & \multicolumn{2}{c}{\cp} & \multicolumn{2}{c}{binoct} & \multicolumn{2}{c}{\cart}\\
+\cmidrule(rr){2-3}\cmidrule(rr){4-5}\cmidrule(rr){6-7}\cmidrule(rr){8-9}\cmidrule(rr){10-11}\cmidrule(rr){12-13}
+& \multicolumn{1}{c}{error} & \multicolumn{1}{c}{cpu} & \multicolumn{1}{c}{error} & \multicolumn{1}{c}{cpu} & \multicolumn{1}{c}{error} & \multicolumn{1}{c}{cpu} & \multicolumn{1}{c}{error} & \multicolumn{1}{c}{cpu} & \multicolumn{1}{c}{error} & \multicolumn{1}{c}{cpu} & \multicolumn{1}{c}{error} & \multicolumn{1}{c}{cpu} \\
+\midrule
+
+\texttt{adult\_discretized} & 4423 & 725$^*$ & 4423 & 794$^*$ & 4442 & $\mathsmaller{\geq}1$h & 4423 & $\mathsmaller{\geq}1$h & 7157 & 20 & 4728 & 0.08\\
+\texttt{anneal} & 70 & 44$^*$ & 70 & 148$^*$ & - & - & 75 & $\mathsmaller{\geq}1$h & 101 & 2995 & 123 & 0.00\\
+\texttt{balance-scale} & 45 & 0.46$^*$ & 45 & 0.44$^*$ & 45 & 1.0$^*$ & 45 & 7.9$^*$ & - & - & 49 & 0.00\\
+\texttt{banknote} & 3 & 0.88$^*$ & 3 & 2.2$^*$ & 3 & 3.9$^*$ & 3 & 34$^*$ & - & - & 15 & 0.00\\
+\texttt{breast-cancer} & 6 & 725$^*$ & 6 & 72$^*$ & 6 & 438$^*$ & 6 & $\mathsmaller{\geq}1$h & 14 & 2894 & 16 & 0.00\\
+\texttt{car} & 86 & 2.4$^*$ & 86 & 1.2$^*$ & 86 & 2.7$^*$ & 86 & 21$^*$ & 138 & 3379 & 106 & 0.01\\
+\texttt{car\_evaluation} & 90 & 0.13$^*$ & 90 & 0.37$^*$ & 90 & 0.49$^*$ & 90 & 4.9$^*$ & - & - & 116 & 0.00\\
+\texttt{chess} & 0 & 0.00$^*$ & 0 & 0.00$^*$ & 0 & 0.00$^*$ & 0 & 0.08$^*$ & - & - & 0 & 0.00\\
+\texttt{compas\_discretized} & 1919 & 1.1$^*$ & 1919 & 11$^*$ & 1919 & 26$^*$ & 1919 & 77$^*$ & 1952 & 3153 & 1968 & 0.01\\
+\texttt{heart-cleveland} & 7 & 93$^*$ & 7 & 101$^*$ & - & - & 7 & $\mathsmaller{\geq}1$h & 26 & 3288 & 26 & 0.00\\
+\texttt{hepatitis} & 0 & 0.05$^*$ & 0 & 0.18$^*$ & 0 & 71$^*$ & 0 & 12$^*$ & 6 & 3026 & 8 & 0.00\\
+\texttt{HTRU\_2} & 361 & 98 & 361 & 2724$^*$ & 369 & $\mathsmaller{\geq}1$h & 361 & $\mathsmaller{\geq}1$h & - & - & 394 & 0.06\\
+\texttt{hypothyroid} & 44 & 87$^*$ & 44 & 343$^*$ & - & - & 45 & $\mathsmaller{\geq}1$h & 64 & 3324 & 50 & 0.01\\
+\texttt{IndiansDiabetes} & 125 & 30$^*$ & 125 & 19$^*$ & 125 & 125$^*$ & 125 & 410$^*$ & - & - & 162 & 0.00\\
+\texttt{iris} & 1 & 0.00$^*$ & 1 & 0.00$^*$ & 1 & 0.01$^*$ & 1 & 1.2$^*$ & - & - & 1 & 0.00\\
+\texttt{kr-vs-kp} & 81 & 65$^*$ & 81 & 150$^*$ & - & - & 81 & $\mathsmaller{\geq}1$h & 189 & 3502 & 189 & 0.01\\
+\texttt{lymph} & 0 & 0.00$^*$ & 0 & 0.00$^*$ & 0 & 14$^*$ & 0 & 2.7$^*$ & 7 & 3380 & 4 & 0.00\\
+\texttt{magic04} & 2882 & 756 & 2882 & 873 & 2910 & $\mathsmaller{\geq}1$h & 2882 & $\mathsmaller{\geq}1$h & - & - & 3179 & 0.11\\
+\texttt{messidor} & 281 & 1522$^*$ & 281 & 855$^*$ & - & - & 292 & $\mathsmaller{\geq}1$h & - & - & 345 & 0.00\\
+\texttt{monk1} & 0 & 0.00$^*$ & 0 & 0.00$^*$ & 0 & 0.00$^*$ & 0 & 0.23$^*$ & - & - & 9 & 0.00\\
+\texttt{monk2} & 15 & 0.05$^*$ & 15 & 0.05$^*$ & 15 & 0.09$^*$ & 15 & 2.8$^*$ & - & - & 32 & 0.00\\
+\texttt{monk3} & 2 & 0.03$^*$ & 2 & 0.03$^*$ & 2 & 0.03$^*$ & 2 & 2.2$^*$ & - & - & 5 & 0.00\\
+\texttt{primary-tumor} & 26 & 0.38$^*$ & 26 & 1.5$^*$ & 26 & 24$^*$ & 26 & 103$^*$ & 34 & 3255 & 35 & 0.00\\
+\texttt{seismic\_bumps} & 132 & 1533$^*$ & 132 & 1617$^*$ & - & - & 134 & $\mathsmaller{\geq}1$h & - & - & 151 & 0.01\\
+\texttt{soybean} & 8 & 20$^*$ & 8 & 7.6$^*$ & 8 & 63$^*$ & 8 & 752$^*$ & 14 & 3178 & 23 & 0.00\\
+\texttt{tic-tac-toe} & 63 & 10$^*$ & 63 & 2.3$^*$ & 63 & 14$^*$ & 63 & 89$^*$ & 125 & 3052 & 78 & 0.00\\
+\texttt{vote} & 1 & 24$^*$ & 1 & 6.1$^*$ & 1 & 45$^*$ & 1 & 522$^*$ & 8 & 1319 & 6 & 0.00\\
+\texttt{winequality-red} & 3 & 16$^*$ & 3 & 18$^*$ & 3 & 39$^*$ & 3 & 232$^*$ & - & - & 6 & 0.00\\
+\texttt{yeast} & 313 & 139$^*$ & 313 & 558$^*$ & - & - & 315 & $\mathsmaller{\geq}1$h & 376 & 3456 & 367 & 0.01\\
+\bottomrule
+\end{tabular}

@@ -1687,7 +1687,7 @@ Over more than half of the data sets, \budalg can find trees that are both small
 \begin{table}[htbp]
 \begin{center}
 \begin{footnotesize}
-\tabcolsep=5pt
+\tabcolsep=10pt
 \input{src/tables/summaryiti.tex}
 \end{footnotesize}
 \end{center}
@@ -1706,22 +1706,35 @@ commonly used in related work articles, to which we added some large data sets f
 Then we report the raw data from our experimental comparison with the state of the art for $\mdepth=3,4,5,7,10$ and for the four size catagories in the following tables:
 
 \tabcolsep=10pt
+% \begin{center}
+% \begin{tabular}{lrr}
+% 	\toprule
+% 	\multirow{2}{*}{$\mdepth$}& $\numfeat < 100$ & $\numfeat \geq 100$ \\
+% 	 \midrule
+% 	$3$ & Table~\ref{tab:all31} & Table~\ref{tab:all32}  \\
+% 	$4$ & Table~\ref{tab:all41} & Table~\ref{tab:all42}  \\
+% 	$5$ & Table~\ref{tab:all51} & Table~\ref{tab:all52}  \\
+% 	$7$ & Table~\ref{tab:all71} & Table~\ref{tab:all72}  \\
+% 	$10$ & Table~\ref{tab:all101} & Table~\ref{tab:all102}  \\
+% 	\bottomrule
+% \end{tabular}
+% \end{center}
+
+
 \begin{center}
-\begin{tabular}{lrrrr}
+	\def\arraystretch{1.25}
+\begin{tabular}{lccccc}
 	\toprule
-	\multirow{2}{*}{$\mdepth$}& \multicolumn{2}{c}{$\numex < 1500$} & \multicolumn{2}{c}{$\numex \geq 1500$} \\
-	& $\numfeat < 100$ & $\numfeat \geq 100$ & $\numfeat < 100$ & $\numfeat \geq 100$ \\
-	 % & $\numex < 1500; \numfeat < 100$ & $\numex < 1500; \numfeat \geq 100$ & $\numex \geq 1500; \numfeat < 100$ & $\numex \geq 1500; \numfeat \geq 100$ \\
+	$\numfeat$& $\mdepth = 3$ & $\mdepth = 4$ & $\mdepth = 5$ & $\mdepth = 7$ & $\mdepth = 10$ \\
 	 \midrule
-	$3$ & Table~\ref{tab:all31} & Table~\ref{tab:all32}  & Table~\ref{tab:all33}  & Table~\ref{tab:all34} \\
-	$4$ & Table~\ref{tab:all41} & Table~\ref{tab:all42}  & Table~\ref{tab:all43}  & Table~\ref{tab:all44} \\
-	$5$ & Table~\ref{tab:all51} & Table~\ref{tab:all52}  & Table~\ref{tab:all53}  & Table~\ref{tab:all54} \\
-	$7$ & Table~\ref{tab:all71} & Table~\ref{tab:all72}  & Table~\ref{tab:all73}  & Table~\ref{tab:all74} \\
-	$10$ & Table~\ref{tab:all101} & Table~\ref{tab:all102}  & Table~\ref{tab:all103}  & Table~\ref{tab:all104} \\
+	$< 100$ & Table~\ref{tab:all31} & Table~\ref{tab:all41} & Table~\ref{tab:all51} & Table~\ref{tab:all71} & Table~\ref{tab:all101} \\
+	$\geq 100$ & Table~\ref{tab:all42} & Table~\ref{tab:all32} & Table~\ref{tab:all52} & Table~\ref{tab:all72} & Table~\ref{tab:all102} \\
 	\bottomrule 
 \end{tabular}
 \end{center}
 
+
+\def\arraystretch{1}
 
 % in Tables~\ref{tab:all3},
 % \ref{tab:all4},
@@ -1752,208 +1765,7 @@ Every process was first run with a memory limit of 3.5GB. Many runs of \dleight,
 \end{table}%
 
 
-\begin{table}[htbp]%
-\begin{center}%
-\begin{scriptsize}%
-\tabcolsep=2pt%
-\input{src/tables/allclasses_smallsmall_3.tex}%
-\end{scriptsize}%
-\end{center}%
-\caption{\label{tab:all31} Comparison with state of the art: $\numex<5000, \numfeat<250$, depth 3}%
-\end{table}%
-
-\begin{table}[htbp]%
-\begin{center}%
-\begin{scriptsize}%
-\tabcolsep=2pt%
-\input{src/tables/allclasses_smallbig_3.tex}%
-\end{scriptsize}%
-\end{center}%
-\caption{\label{tab:all32} Comparison with state of the art: $\numex<5000, \numfeat \geq 250$, depth 3}%
-\end{table}%
-
-\begin{table}[htbp]%
-\begin{center}%
-\begin{scriptsize}%
-\tabcolsep=2pt%
-\input{src/tables/allclasses_bigsmall_3.tex}%
-\end{scriptsize}%
-\end{center}%
-\caption{\label{tab:all33} Comparison with state of the art: $\numex \geq 5000, \numfeat < 250$, depth 3}%
-\end{table}%
-
-\begin{table}[htbp]%
-\begin{center}%
-\begin{scriptsize}%
-\tabcolsep=2pt%
-\input{src/tables/allclasses_bigbig_3.tex}%
-\end{scriptsize}%
-\end{center}%
-\caption{\label{tab:all34} Comparison with state of the art: $\numex \geq 5000, \numfeat \geq 250$, depth 3}%
-\end{table}%
-
-
-\begin{table}[htbp]%
-\begin{center}%
-\begin{scriptsize}%
-\tabcolsep=2pt%
-\input{src/tables/allclasses_smallsmall_4.tex}%
-\end{scriptsize}%
-\end{center}%
-\caption{\label{tab:all41} Comparison with state of the art: $\numex<5000, \numfeat<250$, depth 4}%
-\end{table}%
-
-\begin{table}[htbp]%
-\begin{center}%
-\begin{scriptsize}%
-\tabcolsep=2pt%
-\input{src/tables/allclasses_smallbig_4.tex}%
-\end{scriptsize}%
-\end{center}%
-\caption{\label{tab:all42} Comparison with state of the art: $\numex<5000, \numfeat \geq 250$, depth 4}%
-\end{table}%
-
-\begin{table}[htbp]%
-\begin{center}%
-\begin{scriptsize}%
-\tabcolsep=2pt%
-\input{src/tables/allclasses_bigsmall_4.tex}%
-\end{scriptsize}%
-\end{center}%
-\caption{\label{tab:all43} Comparison with state of the art: $\numex \geq 5000, \numfeat < 250$, depth 4}%
-\end{table}%
-
-\begin{table}[htbp]%
-\begin{center}%
-\begin{scriptsize}%
-\tabcolsep=2pt%
-\input{src/tables/allclasses_bigbig_4.tex}%
-\end{scriptsize}%
-\end{center}%
-\caption{\label{tab:all44} Comparison with state of the art: $\numex \geq 5000, \numfeat \geq 250$, depth 4}%
-\end{table}%
-
-\begin{table}[htbp]%
-\begin{center}%
-\begin{scriptsize}%
-\tabcolsep=2pt%
-\input{src/tables/allclasses_smallsmall_5.tex}%
-\end{scriptsize}%
-\end{center}%
-\caption{\label{tab:all51} Comparison with state of the art: $\numex<5000, \numfeat<250$, depth 5}%
-\end{table}%
-
-\begin{table}[htbp]%
-\begin{center}%
-\begin{scriptsize}%
-\tabcolsep=2pt%
-\input{src/tables/allclasses_smallbig_5.tex}%
-\end{scriptsize}%
-\end{center}%
-\caption{\label{tab:all52} Comparison with state of the art: $\numex<5000, \numfeat \geq 250$, depth 5}%
-\end{table}%
-
-\begin{table}[htbp]%
-\begin{center}%
-\begin{scriptsize}%
-\tabcolsep=2pt%
-\input{src/tables/allclasses_bigsmall_5.tex}%
-\end{scriptsize}%
-\end{center}%
-\caption{\label{tab:all53} Comparison with state of the art: $\numex \geq 5000, \numfeat < 250$, depth 5}%
-\end{table}%
-
-\begin{table}[htbp]%
-\begin{center}%
-\begin{scriptsize}%
-\tabcolsep=2pt%
-\input{src/tables/allclasses_bigbig_5.tex}%
-\end{scriptsize}%
-\end{center}%
-\caption{\label{tab:all54} Comparison with state of the art: $\numex \geq 5000, \numfeat \geq 250$, depth 5}%
-\end{table}%
-
-
-\begin{table}[htbp]%
-\begin{center}%
-\begin{scriptsize}%
-\tabcolsep=2pt%
-\input{src/tables/allclasses_smallsmall_7.tex}%
-\end{scriptsize}%
-\end{center}%
-\caption{\label{tab:all71} Comparison with state of the art: $\numex<5000, \numfeat<250$, depth 7}%
-\end{table}%
-
-\begin{table}[htbp]%
-\begin{center}%
-\begin{scriptsize}%
-\tabcolsep=2pt%
-\input{src/tables/allclasses_smallbig_7.tex}%
-\end{scriptsize}%
-\end{center}%
-\caption{\label{tab:all72} Comparison with state of the art: $\numex<5000, \numfeat \geq 250$, depth 7}%
-\end{table}%
-
-\begin{table}[htbp]%
-\begin{center}%
-\begin{scriptsize}%
-\tabcolsep=2pt%
-\input{src/tables/allclasses_bigsmall_7.tex}%
-\end{scriptsize}%
-\end{center}%
-\caption{\label{tab:all73} Comparison with state of the art: $\numex \geq 5000, \numfeat < 250$, depth 7}%
-\end{table}%
-
-\begin{table}[htbp]%
-\begin{center}%
-\begin{scriptsize}%
-\tabcolsep=2pt%
-\input{src/tables/allclasses_bigbig_7.tex}%
-\end{scriptsize}%
-\end{center}%
-\caption{\label{tab:all74} Comparison with state of the art: $\numex \geq 5000, \numfeat \geq 250$, depth 7}%
-\end{table}%
-
-
-\begin{table}[htbp]%
-\begin{center}%
-\begin{scriptsize}%
-\tabcolsep=2pt%
-\input{src/tables/allclasses_smallsmall_10.tex}%
-\end{scriptsize}%
-\end{center}%
-\caption{\label{tab:all101} Comparison with state of the art: $\numex<5000, \numfeat<250$, depth 10}%
-\end{table}%
-
-\begin{table}[htbp]%
-\begin{center}%
-\begin{scriptsize}%
-\tabcolsep=2pt%
-\input{src/tables/allclasses_smallbig_10.tex}%
-\end{scriptsize}%
-\end{center}%
-\caption{\label{tab:all102} Comparison with state of the art: $\numex<5000, \numfeat \geq 250$, depth 10}%
-\end{table}%
-
-\begin{table}[htbp]%
-\begin{center}%
-\begin{scriptsize}%
-\tabcolsep=2pt%
-\input{src/tables/allclasses_bigsmall_10.tex}%
-\end{scriptsize}%
-\end{center}%
-\caption{\label{tab:all103} Comparison with state of the art: $\numex \geq 5000, \numfeat < 250$, depth 10}%
-\end{table}%
-
-\begin{table}[htbp]%
-\begin{center}%
-\begin{scriptsize}%
-\tabcolsep=2pt%
-\input{src/tables/allclasses_bigbig_10.tex}%
-\end{scriptsize}%
-\end{center}%
-\caption{\label{tab:all104} Comparison with state of the art: $\numex \geq 5000, \numfeat \geq 250$, depth 10}%
-\end{table}%
+\tabcolsep=5pt%
 
 
 
@@ -1961,217 +1773,628 @@ Every process was first run with a memory limit of 3.5GB. Many runs of \dleight,
 \begin{table}[htbp]%
 \begin{center}%
 \begin{scriptsize}%
-\tabcolsep=2pt%
-\input{src/tables/allfactors_smallsmall_3.tex}%
+% %\tabcolsep=2pt%
+\input{src/tables/allclasses_smallm_3.tex}%
 \end{scriptsize}%
 \end{center}%
-\caption{\label{tab:all31} Comparison with state of the art: $\numex<5000, \numfeat<250$, depth 3}%
+\caption{\label{tab:all31} Comparison with state of the art: $\numfeat<100$, depth 3}%
 \end{table}%
 
 \begin{table}[htbp]%
 \begin{center}%
 \begin{scriptsize}%
-\tabcolsep=2pt%
-\input{src/tables/allfactors_smallbig_3.tex}%
+% \tabcolsep=2pt%
+\input{src/tables/allclasses_bigm_3.tex}%
 \end{scriptsize}%
 \end{center}%
-\caption{\label{tab:all32} Comparison with state of the art: $\numex<5000, \numfeat \geq 250$, depth 3}%
+\caption{\label{tab:all32} Comparison with state of the art: $\numfeat \geq 100$, depth 3}%
 \end{table}%
 
 \begin{table}[htbp]%
 \begin{center}%
 \begin{scriptsize}%
-\tabcolsep=2pt%
-\input{src/tables/allfactors_bigsmall_3.tex}%
+% \tabcolsep=2pt%
+\input{src/tables/allclasses_smallm_4.tex}%
 \end{scriptsize}%
 \end{center}%
-\caption{\label{tab:all33} Comparison with state of the art: $\numex \geq 5000, \numfeat < 250$, depth 3}%
+\caption{\label{tab:all41} Comparison with state of the art: $\numfeat<100$, depth 4}%
 \end{table}%
 
 \begin{table}[htbp]%
 \begin{center}%
 \begin{scriptsize}%
-\tabcolsep=2pt%
-\input{src/tables/allfactors_bigbig_3.tex}%
+% \tabcolsep=2pt%
+\input{src/tables/allclasses_bigm_4.tex}%
 \end{scriptsize}%
 \end{center}%
-\caption{\label{tab:all34} Comparison with state of the art: $\numex \geq 5000, \numfeat \geq 250$, depth 3}%
-\end{table}%
-
-
-\begin{table}[htbp]%
-\begin{center}%
-\begin{scriptsize}%
-\tabcolsep=2pt%
-\input{src/tables/allfactors_smallsmall_4.tex}%
-\end{scriptsize}%
-\end{center}%
-\caption{\label{tab:all41} Comparison with state of the art: $\numex<5000, \numfeat<250$, depth 4}%
+\caption{\label{tab:all42} Comparison with state of the art: $\numfeat \geq 100$, depth 4}%
 \end{table}%
 
 \begin{table}[htbp]%
 \begin{center}%
 \begin{scriptsize}%
-\tabcolsep=2pt%
-\input{src/tables/allfactors_smallbig_4.tex}%
+% \tabcolsep=2pt%
+\input{src/tables/allclasses_smallm_5.tex}%
 \end{scriptsize}%
 \end{center}%
-\caption{\label{tab:all42} Comparison with state of the art: $\numex<5000, \numfeat \geq 250$, depth 4}%
+\caption{\label{tab:all51} Comparison with state of the art: $\numfeat<100$, depth 5}%
 \end{table}%
 
 \begin{table}[htbp]%
 \begin{center}%
 \begin{scriptsize}%
-\tabcolsep=2pt%
-\input{src/tables/allfactors_bigsmall_4.tex}%
+% \tabcolsep=2pt%
+\input{src/tables/allclasses_bigm_5.tex}%
 \end{scriptsize}%
 \end{center}%
-\caption{\label{tab:all43} Comparison with state of the art: $\numex \geq 5000, \numfeat < 250$, depth 4}%
+\caption{\label{tab:all52} Comparison with state of the art: $\numfeat \geq 100$, depth 5}%
 \end{table}%
 
 \begin{table}[htbp]%
 \begin{center}%
 \begin{scriptsize}%
-\tabcolsep=2pt%
-\input{src/tables/allfactors_bigbig_4.tex}%
+% \tabcolsep=2pt%
+\input{src/tables/allclasses_smallm_7.tex}%
 \end{scriptsize}%
 \end{center}%
-\caption{\label{tab:all44} Comparison with state of the art: $\numex \geq 5000, \numfeat \geq 250$, depth 4}%
+\caption{\label{tab:all71} Comparison with state of the art: $\numfeat<100$, depth 7}%
 \end{table}%
 
 \begin{table}[htbp]%
 \begin{center}%
 \begin{scriptsize}%
-\tabcolsep=2pt%
-\input{src/tables/allfactors_smallsmall_5.tex}%
+%\tabcolsep=2pt%
+\input{src/tables/allclasses_bigm_7.tex}%
 \end{scriptsize}%
 \end{center}%
-\caption{\label{tab:all51} Comparison with state of the art: $\numex<5000, \numfeat<250$, depth 5}%
-\end{table}%
-
-\begin{table}[htbp]%
-\begin{center}%
-\begin{scriptsize}%
-\tabcolsep=2pt%
-\input{src/tables/allfactors_smallbig_5.tex}%
-\end{scriptsize}%
-\end{center}%
-\caption{\label{tab:all52} Comparison with state of the art: $\numex<5000, \numfeat \geq 250$, depth 5}%
-\end{table}%
-
-\begin{table}[htbp]%
-\begin{center}%
-\begin{scriptsize}%
-\tabcolsep=2pt%
-\input{src/tables/allfactors_bigsmall_5.tex}%
-\end{scriptsize}%
-\end{center}%
-\caption{\label{tab:all53} Comparison with state of the art: $\numex \geq 5000, \numfeat < 250$, depth 5}%
-\end{table}%
-
-\begin{table}[htbp]%
-\begin{center}%
-\begin{scriptsize}%
-\tabcolsep=2pt%
-\input{src/tables/allfactors_bigbig_5.tex}%
-\end{scriptsize}%
-\end{center}%
-\caption{\label{tab:all54} Comparison with state of the art: $\numex \geq 5000, \numfeat \geq 250$, depth 5}%
+\caption{\label{tab:all72} Comparison with state of the art: $\numfeat \geq 100$, depth 7}%
 \end{table}%
 
 
 \begin{table}[htbp]%
 \begin{center}%
 \begin{scriptsize}%
-\tabcolsep=2pt%
-\input{src/tables/allfactors_smallsmall_7.tex}%
+%\tabcolsep=2pt%
+\input{src/tables/allclasses_smallm_10.tex}%
 \end{scriptsize}%
 \end{center}%
-\caption{\label{tab:all71} Comparison with state of the art: $\numex<5000, \numfeat<250$, depth 7}%
+\caption{\label{tab:all101} Comparison with state of the art: $\numfeat<100$, depth 10}%
 \end{table}%
 
 \begin{table}[htbp]%
 \begin{center}%
 \begin{scriptsize}%
-\tabcolsep=2pt%
-\input{src/tables/allfactors_smallbig_7.tex}%
+%\tabcolsep=2pt%
+\input{src/tables/allclasses_bigm_10.tex}%
 \end{scriptsize}%
 \end{center}%
-\caption{\label{tab:all72} Comparison with state of the art: $\numex<5000, \numfeat \geq 250$, depth 7}%
+\caption{\label{tab:all102} Comparison with state of the art: $\numfeat \geq 100$, depth 10}%
+\end{table}%
+
+
+
+\begin{table}[htbp]%Factor analysis
+\begin{center}%
+\begin{scriptsize}%
+%\tabcolsep=2pt%
+\input{src/tables/allfactors_smallm_3.tex}%
+\end{scriptsize}%
+\end{center}%
+\caption{\label{tab:all31} Factor analysis: $\numfeat<100$, depth 3}%
 \end{table}%
 
 \begin{table}[htbp]%
 \begin{center}%
 \begin{scriptsize}%
-\tabcolsep=2pt%
-\input{src/tables/allfactors_bigsmall_7.tex}%
+%\tabcolsep=2pt%
+\input{src/tables/allfactors_bigm_3.tex}%
 \end{scriptsize}%
 \end{center}%
-\caption{\label{tab:all73} Comparison with state of the art: $\numex \geq 5000, \numfeat < 250$, depth 7}%
-\end{table}%
-
-\begin{table}[htbp]%
-\begin{center}%
-\begin{scriptsize}%
-\tabcolsep=2pt%
-\input{src/tables/allfactors_bigbig_7.tex}%
-\end{scriptsize}%
-\end{center}%
-\caption{\label{tab:all74} Comparison with state of the art: $\numex \geq 5000, \numfeat \geq 250$, depth 7}%
+\caption{\label{tab:all32} Factor analysis: $\numfeat \geq 100$, depth 3}%
 \end{table}%
 
 
 \begin{table}[htbp]%
 \begin{center}%
 \begin{scriptsize}%
-\tabcolsep=2pt%
-\input{src/tables/allfactors_smallsmall_10.tex}%
+%\tabcolsep=2pt%
+\input{src/tables/allfactors_smallm_4.tex}%
 \end{scriptsize}%
 \end{center}%
-\caption{\label{tab:all101} Comparison with state of the art: $\numex<5000, \numfeat<250$, depth 10}%
+\caption{\label{tab:all41} Factor analysis: $\numfeat<100$, depth 4}%
 \end{table}%
 
 \begin{table}[htbp]%
 \begin{center}%
 \begin{scriptsize}%
-\tabcolsep=2pt%
-\input{src/tables/allfactors_smallbig_10.tex}%
+%\tabcolsep=2pt%
+\input{src/tables/allfactors_bigm_4.tex}%
 \end{scriptsize}%
 \end{center}%
-\caption{\label{tab:all102} Comparison with state of the art: $\numex<5000, \numfeat \geq 250$, depth 10}%
+\caption{\label{tab:all42} Factor analysis: $\numfeat \geq 100$, depth 4}%
 \end{table}%
 
 \begin{table}[htbp]%
 \begin{center}%
 \begin{scriptsize}%
-\tabcolsep=2pt%
-\input{src/tables/allfactors_bigsmall_10.tex}%
+%\tabcolsep=2pt%
+\input{src/tables/allfactors_smallm_5.tex}%
 \end{scriptsize}%
 \end{center}%
-\caption{\label{tab:all103} Comparison with state of the art: $\numex \geq 5000, \numfeat < 250$, depth 10}%
+\caption{\label{tab:all51} Factor analysis: $\numfeat<100$, depth 5}%
 \end{table}%
 
 \begin{table}[htbp]%
 \begin{center}%
 \begin{scriptsize}%
-\tabcolsep=2pt%
-\input{src/tables/allfactors_bigbig_10.tex}%
+%\tabcolsep=2pt%
+\input{src/tables/allfactors_bigm_5.tex}%
 \end{scriptsize}%
 \end{center}%
-\caption{\label{tab:all104} Comparison with state of the art: $\numex \geq 5000, \numfeat \geq 250$, depth 10}%
+\caption{\label{tab:all52} Factor analysis: $\numfeat \geq 100$, depth 5}%
+\end{table}%
+
+\begin{table}[htbp]%
+\begin{center}%
+\begin{scriptsize}%
+%\tabcolsep=2pt%
+\input{src/tables/allfactors_smallm_7.tex}%
+\end{scriptsize}%
+\end{center}%
+\caption{\label{tab:all71} Factor analysis: $\numfeat<100$, depth 7}%
+\end{table}%
+
+\begin{table}[htbp]%
+\begin{center}%
+\begin{scriptsize}%
+%\tabcolsep=2pt%
+\input{src/tables/allfactors_bigm_7.tex}%
+\end{scriptsize}%
+\end{center}%
+\caption{\label{tab:all72} Factor analysis: $\numfeat \geq 100$, depth 7}%
+\end{table}%
+
+\begin{table}[htbp]%
+\begin{center}%
+\begin{scriptsize}%
+%\tabcolsep=2pt%
+\input{src/tables/allfactors_smallm_10.tex}%
+\end{scriptsize}%
+\end{center}%
+\caption{\label{tab:all101} Factor analysis: $\numfeat<100$, depth 10}%
+\end{table}%
+
+\begin{table}[htbp]%
+\begin{center}%
+\begin{scriptsize}%
+%\tabcolsep=2pt%
+\input{src/tables/allfactors_bigm_10.tex}%
+\end{scriptsize}%
+\end{center}%
+\caption{\label{tab:all102} Factor analysis: $\numfeat \geq 100$, depth 10}%
 \end{table}%
 
 
+% \begin{table}[htbp]%
+% \begin{center}%
+% \begin{scriptsize}%
+% % %\tabcolsep=2pt%
+% \input{src/tables/allclasses_smallmall_3.tex}%
+% \end{scriptsize}%
+% \end{center}%
+% \caption{\label{tab:all31} Comparison with state of the art: $\numex<5000, \numfeat<250$, depth 3}%
+% \end{table}%
+%
+% \begin{table}[htbp]%
+% \begin{center}%
+% \begin{scriptsize}%
+% % %\tabcolsep=2pt%
+% \input{src/tables/allclasses_smallbig_3.tex}%
+% \end{scriptsize}%
+% \end{center}%
+% \caption{\label{tab:all32} Comparison with state of the art: $\numex<5000, \numfeat \geq 250$, depth 3}%
+% \end{table}%
+%
+% \begin{table}[htbp]%
+% \begin{center}%
+% \begin{scriptsize}%
+% % %\tabcolsep=2pt%
+% \input{src/tables/allclasses_bigsmall_3.tex}%
+% \end{scriptsize}%
+% \end{center}%
+% \caption{\label{tab:all33} Comparison with state of the art: $\numex \geq 5000, \numfeat < 250$, depth 3}%
+% \end{table}%
+%
+% \begin{table}[htbp]%
+% \begin{center}%
+% \begin{scriptsize}%
+% % \tabcolsep=2pt%
+% \input{src/tables/allclasses_bigbig_3.tex}%
+% \end{scriptsize}%
+% \end{center}%
+% \caption{\label{tab:all34} Comparison with state of the art: $\numex \geq 5000, \numfeat \geq 250$, depth 3}%
+% \end{table}%
+%
+%
+% \begin{table}[htbp]%
+% \begin{center}%
+% \begin{scriptsize}%
+% % \tabcolsep=2pt%
+% \input{src/tables/allclasses_smallmall_4.tex}%
+% \end{scriptsize}%
+% \end{center}%
+% \caption{\label{tab:all41} Comparison with state of the art: $\numex<5000, \numfeat<250$, depth 4}%
+% \end{table}%
+%
+% \begin{table}[htbp]%
+% \begin{center}%
+% \begin{scriptsize}%
+% % \tabcolsep=2pt%
+% \input{src/tables/allclasses_smallbig_4.tex}%
+% \end{scriptsize}%
+% \end{center}%
+% \caption{\label{tab:all42} Comparison with state of the art: $\numex<5000, \numfeat \geq 250$, depth 4}%
+% \end{table}%
+%
+% \begin{table}[htbp]%
+% \begin{center}%
+% \begin{scriptsize}%
+% % \tabcolsep=2pt%
+% \input{src/tables/allclasses_bigsmall_4.tex}%
+% \end{scriptsize}%
+% \end{center}%
+% \caption{\label{tab:all43} Comparison with state of the art: $\numex \geq 5000, \numfeat < 250$, depth 4}%
+% \end{table}%
+%
+% \begin{table}[htbp]%
+% \begin{center}%
+% \begin{scriptsize}%
+% % \tabcolsep=2pt%
+% \input{src/tables/allclasses_bigbig_4.tex}%
+% \end{scriptsize}%
+% \end{center}%
+% \caption{\label{tab:all44} Comparison with state of the art: $\numex \geq 5000, \numfeat \geq 250$, depth 4}%
+% \end{table}%
+%
+% \begin{table}[htbp]%
+% \begin{center}%
+% \begin{scriptsize}%
+% % \tabcolsep=2pt%
+% \input{src/tables/allclasses_smallmall_5.tex}%
+% \end{scriptsize}%
+% \end{center}%
+% \caption{\label{tab:all51} Comparison with state of the art: $\numex<5000, \numfeat<250$, depth 5}%
+% \end{table}%
+%
+% \begin{table}[htbp]%
+% \begin{center}%
+% \begin{scriptsize}%
+% % \tabcolsep=2pt%
+% \input{src/tables/allclasses_smallbig_5.tex}%
+% \end{scriptsize}%
+% \end{center}%
+% \caption{\label{tab:all52} Comparison with state of the art: $\numex<5000, \numfeat \geq 250$, depth 5}%
+% \end{table}%
+%
+% \begin{table}[htbp]%
+% \begin{center}%
+% \begin{scriptsize}%
+% % \tabcolsep=2pt%
+% \input{src/tables/allclasses_bigsmall_5.tex}%
+% \end{scriptsize}%
+% \end{center}%
+% \caption{\label{tab:all53} Comparison with state of the art: $\numex \geq 5000, \numfeat < 250$, depth 5}%
+% \end{table}%
+%
+% \begin{table}[htbp]%
+% \begin{center}%
+% \begin{scriptsize}%
+% % \tabcolsep=2pt%
+% \input{src/tables/allclasses_bigbig_5.tex}%
+% \end{scriptsize}%
+% \end{center}%
+% \caption{\label{tab:all54} Comparison with state of the art: $\numex \geq 5000, \numfeat \geq 250$, depth 5}%
+% \end{table}%
+%
+%
+% \begin{table}[htbp]%
+% \begin{center}%
+% \begin{scriptsize}%
+% % \tabcolsep=2pt%
+% \input{src/tables/allclasses_smallmall_7.tex}%
+% \end{scriptsize}%
+% \end{center}%
+% \caption{\label{tab:all71} Comparison with state of the art: $\numex<5000, \numfeat<250$, depth 7}%
+% \end{table}%
+%
+% \begin{table}[htbp]%
+% \begin{center}%
+% \begin{scriptsize}%
+% % \tabcolsep=2pt%
+% \input{src/tables/allclasses_smallbig_7.tex}%
+% \end{scriptsize}%
+% \end{center}%
+% \caption{\label{tab:all72} Comparison with state of the art: $\numex<5000, \numfeat \geq 250$, depth 7}%
+% \end{table}%
+%
+% \begin{table}[htbp]%
+% \begin{center}%
+% \begin{scriptsize}%
+% % \tabcolsep=2pt%
+% \input{src/tables/allclasses_bigsmall_7.tex}%
+% \end{scriptsize}%
+% \end{center}%
+% \caption{\label{tab:all73} Comparison with state of the art: $\numex \geq 5000, \numfeat < 250$, depth 7}%
+% \end{table}%
+%
+% \begin{table}[htbp]%
+% \begin{center}%
+% \begin{scriptsize}%
+% %\tabcolsep=2pt%
+% \input{src/tables/allclasses_bigbig_7.tex}%
+% \end{scriptsize}%
+% \end{center}%
+% \caption{\label{tab:all74} Comparison with state of the art: $\numex \geq 5000, \numfeat \geq 250$, depth 7}%
+% \end{table}%
+%
+%
+% \begin{table}[htbp]%
+% \begin{center}%
+% \begin{scriptsize}%
+% %\tabcolsep=2pt%
+% \input{src/tables/allclasses_smallmall_10.tex}%
+% \end{scriptsize}%
+% \end{center}%
+% \caption{\label{tab:all101} Comparison with state of the art: $\numex<5000, \numfeat<250$, depth 10}%
+% \end{table}%
+%
+% \begin{table}[htbp]%
+% \begin{center}%
+% \begin{scriptsize}%
+% %\tabcolsep=2pt%
+% \input{src/tables/allclasses_smallbig_10.tex}%
+% \end{scriptsize}%
+% \end{center}%
+% \caption{\label{tab:all102} Comparison with state of the art: $\numex<5000, \numfeat \geq 250$, depth 10}%
+% \end{table}%
+%
+% \begin{table}[htbp]%
+% \begin{center}%
+% \begin{scriptsize}%
+% %\tabcolsep=2pt%
+% \input{src/tables/allclasses_bigsmall_10.tex}%
+% \end{scriptsize}%
+% \end{center}%
+% \caption{\label{tab:all103} Comparison with state of the art: $\numex \geq 5000, \numfeat < 250$, depth 10}%
+% \end{table}%
+%
+% \begin{table}[htbp]%
+% \begin{center}%
+% \begin{scriptsize}%
+% %\tabcolsep=2pt%
+% \input{src/tables/allclasses_bigbig_10.tex}%
+% \end{scriptsize}%
+% \end{center}%
+% \caption{\label{tab:all104} Comparison with state of the art: $\numex \geq 5000, \numfeat \geq 250$, depth 10}%
+% \end{table}%
+%
+%
+%
+%
+% \begin{table}[htbp]%
+% \begin{center}%
+% \begin{scriptsize}%
+% %\tabcolsep=2pt%
+% \input{src/tables/allfactors_smallmall_3.tex}%
+% \end{scriptsize}%
+% \end{center}%
+% \caption{\label{tab:all31} Comparison with state of the art: $\numex<5000, \numfeat<250$, depth 3}%
+% \end{table}%
+%
+% \begin{table}[htbp]%
+% \begin{center}%
+% \begin{scriptsize}%
+% %\tabcolsep=2pt%
+% \input{src/tables/allfactors_smallbig_3.tex}%
+% \end{scriptsize}%
+% \end{center}%
+% \caption{\label{tab:all32} Comparison with state of the art: $\numex<5000, \numfeat \geq 250$, depth 3}%
+% \end{table}%
+%
+% \begin{table}[htbp]%
+% \begin{center}%
+% \begin{scriptsize}%
+% %\tabcolsep=2pt%
+% \input{src/tables/allfactors_bigsmall_3.tex}%
+% \end{scriptsize}%
+% \end{center}%
+% \caption{\label{tab:all33} Comparison with state of the art: $\numex \geq 5000, \numfeat < 250$, depth 3}%
+% \end{table}%
+%
+% \begin{table}[htbp]%
+% \begin{center}%
+% \begin{scriptsize}%
+% %\tabcolsep=2pt%
+% \input{src/tables/allfactors_bigbig_3.tex}%
+% \end{scriptsize}%
+% \end{center}%
+% \caption{\label{tab:all34} Comparison with state of the art: $\numex \geq 5000, \numfeat \geq 250$, depth 3}%
+% \end{table}%
+%
+%
+% \begin{table}[htbp]%
+% \begin{center}%
+% \begin{scriptsize}%
+% %\tabcolsep=2pt%
+% \input{src/tables/allfactors_smallmall_4.tex}%
+% \end{scriptsize}%
+% \end{center}%
+% \caption{\label{tab:all41} Comparison with state of the art: $\numex<5000, \numfeat<250$, depth 4}%
+% \end{table}%
+%
+% \begin{table}[htbp]%
+% \begin{center}%
+% \begin{scriptsize}%
+% %\tabcolsep=2pt%
+% \input{src/tables/allfactors_smallbig_4.tex}%
+% \end{scriptsize}%
+% \end{center}%
+% \caption{\label{tab:all42} Comparison with state of the art: $\numex<5000, \numfeat \geq 250$, depth 4}%
+% \end{table}%
+%
+% \begin{table}[htbp]%
+% \begin{center}%
+% \begin{scriptsize}%
+% %\tabcolsep=2pt%
+% \input{src/tables/allfactors_bigsmall_4.tex}%
+% \end{scriptsize}%
+% \end{center}%
+% \caption{\label{tab:all43} Comparison with state of the art: $\numex \geq 5000, \numfeat < 250$, depth 4}%
+% \end{table}%
+%
+% \begin{table}[htbp]%
+% \begin{center}%
+% \begin{scriptsize}%
+% %\tabcolsep=2pt%
+% \input{src/tables/allfactors_bigbig_4.tex}%
+% \end{scriptsize}%
+% \end{center}%
+% \caption{\label{tab:all44} Comparison with state of the art: $\numex \geq 5000, \numfeat \geq 250$, depth 4}%
+% \end{table}%
+%
+% \begin{table}[htbp]%
+% \begin{center}%
+% \begin{scriptsize}%
+% %\tabcolsep=2pt%
+% \input{src/tables/allfactors_smallmall_5.tex}%
+% \end{scriptsize}%
+% \end{center}%
+% \caption{\label{tab:all51} Comparison with state of the art: $\numex<5000, \numfeat<250$, depth 5}%
+% \end{table}%
+%
+% \begin{table}[htbp]%
+% \begin{center}%
+% \begin{scriptsize}%
+% %\tabcolsep=2pt%
+% \input{src/tables/allfactors_smallbig_5.tex}%
+% \end{scriptsize}%
+% \end{center}%
+% \caption{\label{tab:all52} Comparison with state of the art: $\numex<5000, \numfeat \geq 250$, depth 5}%
+% \end{table}%
+%
+% \begin{table}[htbp]%
+% \begin{center}%
+% \begin{scriptsize}%
+% %\tabcolsep=2pt%
+% \input{src/tables/allfactors_bigsmall_5.tex}%
+% \end{scriptsize}%
+% \end{center}%
+% \caption{\label{tab:all53} Comparison with state of the art: $\numex \geq 5000, \numfeat < 250$, depth 5}%
+% \end{table}%
+%
+% \begin{table}[htbp]%
+% \begin{center}%
+% \begin{scriptsize}%
+% %\tabcolsep=2pt%
+% \input{src/tables/allfactors_bigbig_5.tex}%
+% \end{scriptsize}%
+% \end{center}%
+% \caption{\label{tab:all54} Comparison with state of the art: $\numex \geq 5000, \numfeat \geq 250$, depth 5}%
+% \end{table}%
+%
+%
+% \begin{table}[htbp]%
+% \begin{center}%
+% \begin{scriptsize}%
+% %\tabcolsep=2pt%
+% \input{src/tables/allfactors_smallmall_7.tex}%
+% \end{scriptsize}%
+% \end{center}%
+% \caption{\label{tab:all71} Comparison with state of the art: $\numex<5000, \numfeat<250$, depth 7}%
+% \end{table}%
+%
+% \begin{table}[htbp]%
+% \begin{center}%
+% \begin{scriptsize}%
+% %\tabcolsep=2pt%
+% \input{src/tables/allfactors_smallbig_7.tex}%
+% \end{scriptsize}%
+% \end{center}%
+% \caption{\label{tab:all72} Comparison with state of the art: $\numex<5000, \numfeat \geq 250$, depth 7}%
+% \end{table}%
+%
+% \begin{table}[htbp]%
+% \begin{center}%
+% \begin{scriptsize}%
+% %\tabcolsep=2pt%
+% \input{src/tables/allfactors_bigsmall_7.tex}%
+% \end{scriptsize}%
+% \end{center}%
+% \caption{\label{tab:all73} Comparison with state of the art: $\numex \geq 5000, \numfeat < 250$, depth 7}%
+% \end{table}%
+%
+% \begin{table}[htbp]%
+% \begin{center}%
+% \begin{scriptsize}%
+% %\tabcolsep=2pt%
+% \input{src/tables/allfactors_bigbig_7.tex}%
+% \end{scriptsize}%
+% \end{center}%
+% \caption{\label{tab:all74} Comparison with state of the art: $\numex \geq 5000, \numfeat \geq 250$, depth 7}%
+% \end{table}%
+%
+%
+% \begin{table}[htbp]%
+% \begin{center}%
+% \begin{scriptsize}%
+% %\tabcolsep=2pt%
+% \input{src/tables/allfactors_smallmall_10.tex}%
+% \end{scriptsize}%
+% \end{center}%
+% \caption{\label{tab:all101} Comparison with state of the art: $\numex<5000, \numfeat<250$, depth 10}%
+% \end{table}%
+%
+% \begin{table}[htbp]%
+% \begin{center}%
+% \begin{scriptsize}%
+% %\tabcolsep=2pt%
+% \input{src/tables/allfactors_smallbig_10.tex}%
+% \end{scriptsize}%
+% \end{center}%
+% \caption{\label{tab:all102} Comparison with state of the art: $\numex<5000, \numfeat \geq 250$, depth 10}%
+% \end{table}%
+%
+% \begin{table}[htbp]%
+% \begin{center}%
+% \begin{scriptsize}%
+% %\tabcolsep=2pt%
+% \input{src/tables/allfactors_bigsmall_10.tex}%
+% \end{scriptsize}%
+% \end{center}%
+% \caption{\label{tab:all103} Comparison with state of the art: $\numex \geq 5000, \numfeat < 250$, depth 10}%
+% \end{table}%
+%
+% \begin{table}[htbp]%
+% \begin{center}%
+% \begin{scriptsize}%
+% %\tabcolsep=2pt%
+% \input{src/tables/allfactors_bigbig_10.tex}%
+% \end{scriptsize}%
+% \end{center}%
+% \caption{\label{tab:all104} Comparison with state of the art: $\numex \geq 5000, \numfeat \geq 250$, depth 10}%
+% \end{table}%
 
-\begin{table}[htbp]
-\begin{center}
-\begin{footnotesize}
-\tabcolsep=5pt
-\input{src/tables/tableiti.tex}
-\end{footnotesize}
-\end{center}
-\caption{\label{tab:iti} Comparison with ITI}
-\end{table}
+
+%
+% \begin{table}[htbp]
+% \begin{center}
+% \begin{footnotesize}
+% \tabcolsep=5pt
+% \input{src/tables/tableiti.tex}
+% \end{footnotesize}
+% \end{center}
+% \caption{\label{tab:iti} Comparison with ITI}
+% \end{table}
 
 
 
@@ -2376,7 +2599,7 @@ Every process was first run with a memory limit of 3.5GB. Many runs of \dleight,
 \begin{table}[htbp]%
 \begin{center}%
 \begin{scriptsize}%
-\tabcolsep=2pt%
+%\tabcolsep=2pt%
 \input{src/tables/allopt3.tex}%
 \end{scriptsize}%
 \end{center}%
@@ -2460,7 +2683,7 @@ Every process was first run with a memory limit of 3.5GB. Many runs of \dleight,
 % \begin{table}[htbp]%
 % \begin{center}%
 % \begin{footnotesize}%
-% \tabcolsep=2pt%
+% %\tabcolsep=2pt%
 % \input{src/tables/allfact3.tex}%
 % \end{footnotesize}%
 % \end{center}%

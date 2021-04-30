@@ -1,0 +1,25 @@
+\begin{tabular}{lrrrrrrrr}
+\toprule
+\multirow{2}{*}{}&  \multicolumn{2}{c}{\budalg} & \multicolumn{2}{c}{\noheuristic} & \multicolumn{2}{c}{\nopreprocessing} & \multicolumn{2}{c}{\nolb}\\
+\cmidrule(rr){2-3}\cmidrule(rr){4-5}\cmidrule(rr){6-7}\cmidrule(rr){8-9}
+& \multicolumn{1}{c}{error} & \multicolumn{1}{c}{cpu} & \multicolumn{1}{c}{error} & \multicolumn{1}{c}{cpu} & \multicolumn{1}{c}{error} & \multicolumn{1}{c}{cpu} & \multicolumn{1}{c}{error} & \multicolumn{1}{c}{cpu} \\
+\midrule
+
+\texttt{bank} & 4314 & 290 & 4326 & 1102 & 4314 & 258 & 4314 & 308\\
+\texttt{bank\_conv} & 392 & 1963$^*$ & 392 & 1150$^*$ & 392 & 1288$^*$ & 392 & 1291$^*$\\
+\texttt{default\_credit} & 5270 & 209 & 5270 & 183 & 5270 & 167 & 5270 & 199\\
+\texttt{hand\_posture} & 4896 & 976 & 10096 & 28 & 4896 & 872 & 4896 & 969\\
+\texttt{letter} & 261 & 1185$^*$ & 261 & 813$^*$ & 261 & 292 & 261 & 1407$^*$\\
+\texttt{mnist\_0} & 2173 & 2158 & 2229 & 3292 & 2173 & 1844 & 2173 & 2444\\
+\texttt{mushroom} & 0 & 0.00$^*$ & 0 & 0.00$^*$ & 0 & 0.00$^*$ & 0 & 0.00$^*$\\
+\texttt{pendigits} & 13 & 230$^*$ & 13 & 237$^*$ & 13 & 1871$^*$ & 13 & 341$^*$\\
+\texttt{segment} & 0 & 0.00$^*$ & 0 & 0.00$^*$ & 0 & 0.00$^*$ & 0 & 0.00$^*$\\
+\texttt{spambase} & 590 & 7.7 & 590 & 3504$^*$ & 590 & 7.5 & 590 & 7.5\\
+\texttt{splice-1} & 141 & 3241$^*$ & 141 & 2519$^*$ & 141 & 0.00 & 141 & 3563$^*$\\
+\texttt{Statlog\_satellite} & 111 & 3571 & 120 & 1141 & 111 & 3479 & 114 & 3294\\
+\texttt{Statlog\_shuttle} & 0 & 0.64$^*$ & 0 & 0.79$^*$ & 0 & 1.6$^*$ & 0 & 0.83$^*$\\
+\texttt{surgical-deepnet} & 2269 & 49 & 2414 & 1479 & 2269 & 46 & 2269 & 51\\
+\texttt{taiwan\_binarised} & 5273 & 6.2 & 5273 & 39 & 5273 & 6.2 & 5273 & 7.1\\
+\texttt{weather-aus} & 1749 & 2525 & 1750 & 2646 & 1749 & 2142 & 1749 & 2638\\
+\bottomrule
+\end{tabular}
