@@ -111,7 +111,7 @@ For SAT~\cite{avellanedaefficient,narodytska2018learning} and Integer Programmin
 On the other hand, dynamic programming algorithms \olddleight~\cite{dl8} and \dleight~\cite{dl85} scale very well to large data sets. Moreover, these algorithms leverage branch independence: sibling subtrees can be optimized independently, which has a significant impact on computational complexity. However, \dleight tends to be memory hungry and furthermore, is not anytime.
 The constraint programming approach of Verhaeghe \textit{et al.} emulates these positive features using dedicated propagation algorithms and search strategies~\cite{verhaeghe2019learning}, while being potentially anytime, although it does not quite match \dleight's efficiency.
 Finally, a recently introduced algorithm, \murtree~\cite{DBLP:journals/corr/abs-2007-12652}, improves on the dynamic programming approaches in several ways: as the algorithm introduced in this paper it explores the search space in a more flexible way. Moreover, it implements several methods dedicated to exploring the whole search space very fast: delaying feature frequency counts to a specialized algorithm for subtree of depth two, and implementing an efficient recomputation method for the classification error, for instance.
-result, it clearly dominates previous exact methods. It is more memory efficient, orders of magnitude faster than \dleight, and has a better anytime behavior. However, experimental results show that for deeper trees, none of these methods can reliably outperform heuristics, whereas \budalg\ does. Moreover, it is more memory efficient than \murtree, and its pseudo-code is significantly simpler.
+As a result, it clearly dominates previous exact methods. It is more memory efficient, orders of magnitude faster than \dleight, and has a better anytime behavior. However, experimental results show that for deeper trees, none of these methods can reliably outperform heuristics, whereas \budalg\ does. Moreover, it is more memory efficient than \murtree, and its pseudo-code is significantly simpler.
  
 
 % % \medskip
@@ -1100,7 +1100,9 @@ This means that we actually do not have to try other features for that node. Thi
 %We order the possible features for branch $\abranch$ in non-decreasing order with respect to a score above and 
 %explore the features in that order in Line~\ref{line:assignment}.
 Computing the frequencies $p(\afeat,{\negex[\abranch]})$ and $p(\afeat,{\posex[\abranch]})$ of every feature $\afeat$ can be done in  $\Theta(\numfeat\numex)$ time where 
-$\numex = |\negex[\abranch]|+|\posex[\abranch]|$.\footnote{$p(\bar{\afeat},{\negex[\abranch]}) = |\negex[\abranch]| - p({\afeat},{\negex[\abranch]})$ and $p(\bar{\afeat},{\posex[\abranch]}) = |\posex[\abranch]| - p({\afeat},{\posex[\abranch]})$ can then be queried in constant time} In other words this is more expensive than the splitting procedure by a factor $\numfeat$, but can be similarly amortized. However, since the depth of the branches is effectively reduced by one, the number of terminal branches is reduced by the same factor $\numfeat$, hence this incurs no asymptotic increase in complexity.
+$\numex = |\negex[\abranch]|+|\posex[\abranch]|$, while $p(\bar{\afeat},{\negex[\abranch]})$ and $p(\bar{\afeat},{\posex[\abranch]})$ can be obtained by taking the complement to $|\negex[\abranch]|$ and $|\posex[\abranch]|$, respectively.
+%\footnote{$p(\bar{\afeat},{\negex[\abranch]}) = |\negex[\abranch]| - p({\afeat},{\negex[\abranch]})$ and $p(\bar{\afeat},{\posex[\abranch]}) = |\posex[\abranch]| - p({\afeat},{\posex[\abranch]})$ can then be queried in constant time} 
+In other words this is more expensive than the splitting procedure by a factor $\numfeat$, but can be similarly amortized. However, since the depth of the branches is effectively reduced by one, the number of terminal branches is reduced by the same factor $\numfeat$, hence this incurs no asymptotic increase in complexity.
 Furthermore, ordering the features (at Line~\ref{line:domain})
 %Computing this order 
 costs $\Theta(\numfeat \log \numfeat)$ for each of the $2^{\mdepth-1}\numfeat^{\mdepth-1}$ branches added to $\bud$ at Line~\ref{line:branching}. Again, since the depth of the branches is effectively reduced by one, the resulting complexity 
@@ -1153,7 +1155,7 @@ For any ancestor $\abranch'$ of $\abranch$, we define a lower bound $\lb{\abranc
 $$
 \lb{\abranch',\abranch} = \sum\limits_{\abranch' \subset \grow{\abranch''}{\afeat} \subseteq \abranch}\opt[\grow{\abranch''}{\bar{\afeat}}] \cdot \best[\grow{\abranch''}{\bar{\afeat}}]
 $$
-In plain words, $\lb{\abranch',\abranch}$ is the sum the errors of optimal ``sibling'' branches between $\abranch'$ and $\abranch$. %We illustrate this bound in Example~\ref{ex:lb}.
+In plain words, $\lb{\abranch',\abranch}$ is the sum the errors of optimal ``sibling'' branches between $\abranch'$ and $\abranch$.\footnote{An example illustrating this bound is given in Example~\ref{ex:lb} in  appendix.} %We illustrate this bound in Example~\ref{ex:lb}.
 As long as these choices of feature tests stand (i.e., as long as $\abranch$ belongs to the current tree), these subtrees cannot be improved, hence this lower bound is correct.
 
 
@@ -1367,6 +1369,17 @@ When, $\numfeat$ grows, however, it often exceeds the memory limit of 50GB (wher
 \begin{footnotesize}
 \tabcolsep=3.75pt
 \input{src/tables/summaryclasses.tex}
+\end{footnotesize}
+\end{center}
+\caption{\label{tab:summaryaccsmall} Comparison with the state of the art}
+\end{table}
+
+
+\begin{table}[t]
+\begin{center}
+\begin{footnotesize}
+\tabcolsep=3pt
+\input{src/tables/summaryclassesacc.tex}
 \end{footnotesize}
 \end{center}
 \caption{\label{tab:summaryaccsmall} Comparison with the state of the art}
