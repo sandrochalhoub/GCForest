@@ -1364,6 +1364,8 @@ When, $\numfeat$ grows, however, it often exceeds the memory limit of 50GB (wher
 % instead of absolute values, we provide the average relative difference in error and accuracy w.r.t. \budalg, however, and only for the data sets where a decision tree was found. Similarly, we report the average cpu time ratio w.r.t. \budalg, however, only for instances which were proven optimal by both algorithms\footnote{every instance proven optimal by \dleight is also proven optimal by \budalg and \murtree}.
 
 
+% \clearpage
+
 \begin{table}[t]
 \begin{center}
 \begin{footnotesize}
@@ -1378,12 +1380,26 @@ When, $\numfeat$ grows, however, it often exceeds the memory limit of 50GB (wher
 \begin{table}[t]
 \begin{center}
 \begin{footnotesize}
+\tabcolsep=3.5pt
+\input{src/tables/summaryclassesgerror.tex}
+\end{footnotesize}
+\end{center}
+\caption{\label{tab:summaryaccsmall} Comparison with the state of the art, errors are geometric averages}
+\end{table}
+
+\begin{table}[t]
+\begin{center}
+\begin{footnotesize}
 \tabcolsep=3pt
 \input{src/tables/summaryclassesacc.tex}
 \end{footnotesize}
 \end{center}
 \caption{\label{tab:summaryaccsmall} Comparison with the state of the art}
 \end{table}
+
+
+% \clearpage
+
 
 
 
@@ -1422,15 +1438,15 @@ We can see in those graphs that \murtree finds an initial tree extremely quickly
 
 
 
-\begin{figure}
-	\subfloat[depth=3]{\input{src/tables/xscerror3.tex}}
-	\subfloat[depth=7]{\input{src/tables/xscerror7.tex}}
-	\subfloat[depth=10]{\input{src/tables/xscerror10.tex}}
-	% \subfloat[depth=8]{\input{src/tables/xscerror8.tex}}
-	% \subfloat[depth=9]{\input{src/tables/xscerror9.tex}}
-	% \subfloat[depth=10]{\input{src/tables/xscerror10.tex}}
-	\caption{\label{fig:cactus}Accuracy over time, averaged across all data sets}
-\end{figure}
+% \begin{figure}
+% 	\subfloat[depth=3]{\input{src/tables/xscerror3.tex}}
+% 	\subfloat[depth=7]{\input{src/tables/xscerror7.tex}}
+% 	\subfloat[depth=10]{\input{src/tables/xscerror10.tex}}
+% 	% \subfloat[depth=8]{\input{src/tables/xscerror8.tex}}
+% 	% \subfloat[depth=9]{\input{src/tables/xscerror9.tex}}
+% 	% \subfloat[depth=10]{\input{src/tables/xscerror10.tex}}
+% 	\caption{\label{fig:cactus}Accuracy over time, averaged across all data sets}
+% \end{figure}
 
 
 \subsection{Factor analysis}
