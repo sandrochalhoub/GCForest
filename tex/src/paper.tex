@@ -111,7 +111,7 @@ For SAT~\cite{avellanedaefficient,narodytska2018learning} and Integer Programmin
 On the other hand, dynamic programming algorithms \olddleight~\cite{dl8} and \dleight~\cite{dl85} scale very well to large data sets. Moreover, these algorithms leverage branch independence: sibling subtrees can be optimized independently, which has a significant impact on computational complexity. However, \dleight tends to be memory hungry and furthermore, is not anytime.
 The constraint programming approach of Verhaeghe \textit{et al.} emulates these positive features using dedicated propagation algorithms and search strategies~\cite{verhaeghe2019learning}, while being potentially anytime, although it does not quite match \dleight's efficiency.
 Finally, a recently introduced algorithm, \murtree~\cite{DBLP:journals/corr/abs-2007-12652}, improves on the dynamic programming approaches in several ways: as the algorithm introduced in this paper it explores the search space in a more flexible way. Moreover, it implements several methods dedicated to exploring the whole search space very fast: delaying feature frequency counts to a specialized algorithm for subtree of depth two, and implementing an efficient recomputation method for the classification error, for instance.
-As a result, it clearly dominates previous exact methods. It is more memory efficient, orders of magnitude faster than \dleight, and has a better anytime behavior. However, experimental results show that for deeper trees, none of these methods can reliably outperform heuristics, whereas \budalg\ does. Moreover, it is more memory efficient than \murtree, and its pseudo-code is significantly simpler.
+As a result, it outperforms previous exact methods: it is more memory efficient, orders of magnitude faster than \dleight, and has a better anytime behavior. However, experimental results show that for deeper trees, none of these methods can reliably outperform heuristics, whereas \budalg\ does. Moreover, it is more memory efficient than \murtree, and its pseudo-code is significantly simpler.
  
 
 % % \medskip
@@ -123,7 +123,7 @@ As a result, it clearly dominates previous exact methods. It is more memory effi
 In a nutshell, \budalg emulates the dynamic programming algorithm \dleight~\cite{dl8}, while always expanding non-terminal branches (a.k.a ``buds'') before optimizing grown branches. As a result, this algorithm is in a sense strictly better than both the standard dynamic programming approach (because it is anytime and at least as fast) and than classic heuristics (because it emulates them during search, without significant overhead).
 %but explores the search space so as to improve its anytime behaviour.
 Our experimental results show that it outperforms the state of the art, to the exception of \murtree on relatively shallow trees (typically for maximum depth up to 4), for which its more sophisticated (albeit more complex) algorithmic features can pay off.
-In particular, on data sets that \dleight can tackle, \budalg can always find classifiers at least as accurate faster, and when the former can prove optimality, the latter does it orders of magnitude faster.
+%In particular, on data sets that \dleight can tackle, \budalg can always find classifiers at least as accurate faster, and when the former can prove optimality, the latter does it orders of magnitude faster.
 
 
 
