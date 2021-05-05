@@ -91,22 +91,24 @@
 
 \section{Introduction}
 
-In conclusion of their short paper showing that computing decision trees of maximum accuracy is NP-complete, Hyafil and Rivest stated: ``Accordingly, it is to be expected that that good heuristics for constructing near-optimal binary decision trees will be the best solution to this problem in the near future.''~\cite{NPhardTrees}. Indeed, heuristic approaches such as \cart\cite{breiman1984classification}, \idthree~\cite{10.1023/A:1022643204877} or \cfour~\cite{c4-5} have been prevalent long afterward, and are still vastly more commonly used in practice than exact approaches.
+In conclusion of their short paper showing that computing decision trees of maximum accuracy is NP-complete, Hyafil and Rivest write: ``Accordingly, it is to be expected that that good heuristics for constructing near-optimal binary decision trees will be the best solution to this problem in the near future.''~\cite{NPhardTrees}. Indeed, heuristic approaches such as \cart\cite{breiman1984classification}, \idthree~\cite{10.1023/A:1022643204877} or \cfour~\cite{c4-5} have been prevalent long afterward, and are still vastly more commonly used in practice than exact approaches. In this paper, we propose a new exact algorithm (\budalg) which, while being effective at proving optimality, does not have computational or memory overhead compared to greedy heuristics.
 
 %\medskip
 
-It is well established, however, that optimal trees (for some combination of accuracy, depth and size) generalize better to unseen data.
+It is well established that optimal trees (for some combination of accuracy, depth and size) generalize better to unseen data.
 % than heuristic trees. 
-This experiment has been confirmed many times, in particular for the objective criterion considered in this paper: maximizing the training accuracy given an upper bound on the depth~\cite{avellanedaefficient,bertsimas2017optimal,bertsimas2007classification,DBLP:conf/ijcai/Hu0HH20,DBLP:journals/corr/abs-2007-12652,dl8}. We rely on this prior work and hence we do not reproduce in this paper experiments comparing optimized trees to heuristic trees on unseen data.
+%This experiment has been confirmed many times, 
+Previous experiments show a significative gain in test accuracy,
+in particular for the objective criterion considered in this paper: maximizing the training accuracy given an upper bound on the depth~\cite{avellanedaefficient,bertsimas2017optimal,bertsimas2007classification,DBLP:journals/corr/abs-2007-12652,DBLP:conf/ijcai/Hu0HH20,dl8}. %We rely on this prior work and hence we do not reproduce in this paper experiments comparing optimized trees to heuristic trees on unseen data.
 %\footnote{Hence we shall not reproduce once again such experiments in this paper.} 
-Note that other objective criteria have been considered. For instance, the algorithm \gosdt~\cite{NEURIPS2019_ac52c626} optimize a linear combination of accuracy and number of leaves. However maximizing the accuracy under a constrained depth has valuable properties.
-Besides being easier to tackle algorithmically, the predictions of
- shallower trees are comparatively easier to interpret and explain. 
+Other objective criteria have been considered. For instance, the algorithm \gosdt~\cite{NEURIPS2019_ac52c626} optimizes a linear combination of accuracy and number of leaves. However maximizing the accuracy under a constrained depth has valuable properties, e.g.,
+this is easier to tackle algorithmically, and the predictions of
+ shallower trees are easier to interpret and explain. 
 
 
 %\medskip
 
-Despite these desirable features, exact methods have not been widely adopted yet for a simple reason: they do not scale. There has been a significant progress lately, and the most recent approaches show very promising results. However, no exact method can be considered consistantly better than heuristics. 
+Despite these desirable features, exact methods have not been widely adopted yet for a simple reason: they do not scale. There has been a significant progress lately, and the most recent approaches show very promising results. However, no exact method can replace heuristics in all contexts. 
 For SAT~\cite{avellanedaefficient,narodytska2018learning} and Integer Programming approaches~\cite{aghaei2020learning,bertsimas2017optimal,bertsimas2007classification,verwer2019learning}, the size of the encoding is a first hurdle. All these models require a number of variables at least proportional to the size of the tree and to the number of datapoints. As a result, scaling beyond a few thousands datapoints is difficult. 
 On the other hand, dynamic programming algorithms \olddleight~\cite{dl8} and \dleight~\cite{dl85} scale very well to large data sets. Moreover, these algorithms leverage branch independence: sibling subtrees can be optimized independently, which has a significant impact on computational complexity. However, \dleight tends to be memory hungry and furthermore, is not anytime.
 The constraint programming approach of Verhaeghe \textit{et al.} emulates these positive features using dedicated propagation algorithms and search strategies~\cite{verhaeghe2019learning}, while being potentially anytime, although it does not quite match \dleight's efficiency.
@@ -1329,8 +1331,10 @@ on 4 cluster nodes, each with 36 Intel Xeon CPU E5-2695 v4 2.10GHz cores
 running Linux Ubuntu 16.04.4. Sources were compiled using g++8. 
 Every algorithm was run until completion or until reaching a time limit of one hour, and within a memory limit of 50GB.
 
-
 We used a collection of 58 data sets formed by the union of the data sets from related work~\cite{narodytska2018learning,dl85,verwer2019learning}, to which we added extra data sets (\texttt{bank}, \texttt{titanic}, \texttt{surgical-deepnet} and \texttt{weather-aus}, as well as \texttt{mnist\_0}, \texttt{adult\_discretized}, \texttt{compas\_discretized} and \texttt{taiwan\_binarised}). Further description of the data sets as well as the raw data from our experimental results are given in appendix. For reason of space, we present aggregated results in this section.
+
+In this paper, we do not reproduce experiments to assess the accuracy of optimal (or ``optimized'') trees compared to heuristic trees. Instead, we train on the whole data set, and focus on the training accuracy. The rationale is that previous experiments show that with a bounded depth, training and testing accuracies are well correlated, and we want to use the largest possible data sets in order to assess how well our algorithm scales.
+
 
 
 
