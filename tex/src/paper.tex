@@ -1338,7 +1338,7 @@ We do not reproduce experiments to assess the accuracy of optimized and heuristi
 
 
 
-\subsection{Computing optimal classifiers}
+\subsection{Computing (optimaly) accurate classifiers}
 
 We first compare \budalg to state-of-the-art algorithms, \murtree~\cite{DBLP:journals/corr/abs-2007-12652} and \dleight~\cite{dl85}, as well as the best MIP (\binoct)~\cite{verwer2019learning} and CP (\cp)~\cite{verhaeghe2019learning} models, for computing and proving optimal trees. 
 
@@ -1390,19 +1390,19 @@ The difference in CPU time is due to the same phenomenon (when in favor or \buda
 \begin{table}[htbp]
 \begin{center}
 \begin{footnotesize}
-\tabcolsep=3pt
+\tabcolsep=2.75pt
 \input{src/tables/summaryclassesacc.tex}
 \end{footnotesize}
 \end{center}
-\caption{\label{tab:summaryaccsmall} Comparison with the state of the art: computing optimal classifiers}
+\caption{\label{tab:summaryaccsmall} Comparison with the state of the art: accuracy and optimality proofs}
 \end{table}
 
-When not proving optimality, however, \budalg is significantly better than \murtree, especially as the depth and the number of features grow. Notice that the accuracy results in Table~\ref{tab:summaryaccsmall} include data sets for which an optimal tree is found so the gap on other data set is much larger. Moreover, it is averaged over a large number of data sets, so a difference of even a fraction of a point is significant: the full results in appendix show that the differences are variable, but they are consistently in favor of \budalg.
+When proving optimality is too hard, however, \budalg is significantly better than \murtree, especially as the depth and the number of features grow. Notice that the accuracy results in Table~\ref{tab:summaryaccsmall} include data sets for which an optimal tree is found so the gap on other data set is much larger. Moreover, it is averaged over a large number of data sets, so a difference of even a fraction of a point is significant: the full results in appendix show that the differences are variable, but they are consistently in favor of \budalg.
  % both algorithms find trees of similar qualities for $\mdepth \leq 5$ and $\numfeat < 100$, however, \budalg is significantly better as these parameters grow.
 All other methods are systematically outperformed. \cp has good results on very shallow trees ($\mdepth \leq 4$) but is ineffective for deeper tree. Indeed, the accuracy actually \emph{decreases} when $\mdepth$ increases! \dleight can also find optimal trees in most cases 
 for low values of \numfeat\ and $\mdepth$.
 % \numfeat) is low, and for small values of $\mdepth$.
-When, $\numfeat$ grows, however, it often exceeds the memory limit of 50GB (whereas \budalg does not require more memory than the size of the data set). Finally, \binoct does not produce a single optimality proof and very often exceeds the memory limit.%\footnote{In the experiments in \cite{verwer2019learning} not all datapoints were used.}
+When $\numfeat$ grows, however, it often exceeds the memory limit of 50GB (whereas \budalg does not require more memory than the size of the data set). Finally, \binoct does not produce a single optimality proof and very often exceeds the memory limit.%\footnote{In the experiments in \cite{verwer2019learning} not all datapoints were used.}
  
 
 % \clearpage
@@ -1410,7 +1410,7 @@ When, $\numfeat$ grows, however, it often exceeds the memory limit of 50GB (wher
 
 
 
-\subsection{Computing accurate classifiers}
+\subsection{Anytime behavior}
 
 Next, we shift our focus to how fast can we obtain accurate trees and how fast can we improve the accuracy over basic solutions found by heuristics.
 We use a well known heuristic as baseline: \cart (we ran its implementation in scikit-learn).
@@ -1444,11 +1444,11 @@ is found extremely quickly, and there is no scaling issue with respect to the de
 \begin{table}[htbp]
 \begin{center}
 \begin{footnotesize}
-\tabcolsep=5pt
+\tabcolsep=3pt
 \input{src/tables/summaryaccspeed.tex}
 \end{footnotesize}
 \end{center}
-\caption{\label{tab:summaryspeed} Comparison with state the of the art: computing accurate classifiers}
+\caption{\label{tab:summaryspeed} Comparison with state the of the art: anytime behavior}
 \end{table}
 
 
@@ -1493,7 +1493,7 @@ it only slightly negatively affects the accuracy and the number of proofs.
 \begin{table}[htbp]
 \begin{center}
 \begin{footnotesize}
-\tabcolsep=7pt
+\tabcolsep=6pt
 \input{src/tables/factorbfsacc.tex}
 \end{footnotesize}
 \end{center}
