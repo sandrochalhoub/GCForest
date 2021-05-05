@@ -709,8 +709,22 @@ To simplify the pseudo-code, we use branches to index array-like data structures
 			
 			\medskip
 			
-			The key difference between Algorithms~\ref{alg:dynprog} and \ref{alg:bud} is the order in which branches are explored (see Figure~\ref{fig:searchtree}). In particular, \dynprog must complete the first recursive call before outputing a full tree. Therefore, the computation time for finding a first complete tree is $\Theta((\numex+2^{\mdepth})\Perm{\numfeat-1}{\mdepth-1})$, that is $O(\numex(\numfeat-1)^{\mdepth-1})$ time. On the other hand, \budalg finds a first tree in linear time: $\Theta(2^{\mdepth}+\numex\mdepth) = \Theta(\numex\mdepth)$.
-			Another difference with actual implementations of Algorithm~\ref{alg:dynprog} (\olddleight\ and \dleight) is that the latter methods use a cache structure in order to reduce the number of branches that need to be explored. Indeed, by using memory, it is sufficient to explore every \emph{combination}\footnote{Actually, some combination may be completely avoided using bounds reasoning and subset lookup.} (instead of every permutation) of $\mdepth$ features since the order of the tests does not matter, given a single branch. Our experimental evaluations, however, show that the overhead of cache lookups may not be always beneficial. Moreover, the space complexity of managing the cache may be prohibitive. On the other hand, Algorithms~\ref{alg:dynprog} and \ref{alg:bud} are essentially memoryless, since, under the standard assumption that $2^{\mdepth} \leq \numex$, their worst-case space complexity is less than the size of the input.
+			The key difference between Algorithms~\ref{alg:dynprog} and \ref{alg:bud} is the order in which branches are explored (see Figure~\ref{fig:searchtree}). In particular, \dynprog must complete the first recursive call before outputing a full tree. 
+			%Therefore, the computation time for finding a first complete tree is $\Theta((\numex+2^{\mdepth})\Perm{\numfeat-1}{\mdepth-1})$, that is $O(\numex(\numfeat-1)^{\mdepth-1})$ time.
+			Therefore, it finds a first complete tree in $\Theta((\numex+2^{\mdepth})\Perm{\numfeat-1}{\mdepth-1})$, that is $O(\numex(\numfeat-1)^{\mdepth-1})$ time. 	
+			On the other hand, \budalg finds a first tree in linear time: $\Theta(2^{\mdepth}+\numex\mdepth) = \Theta(\numex\mdepth)$.
+			Another difference with actual implementations of Algorithm~\ref{alg:dynprog} (\olddleight\ and \dleight) is that the latter methods use a cache structure in order to reduce the number of branches that need to be explored. 
+			%Indeed, by using memory, 
+%there is no need to explore every permutation			
+			% % it is sufficient to explore every \emph{combination}
+			% % %\footnote{Actually, some combination may be completely avoided using bounds reasoning and subset lookup.}
+			% % (instead of every permutation)
+			% of $\mdepth$ features.
+			% For one thing,
+			%  % since
+			%  the order of the tests does not matter, given a single branch and using bounds reasoning and subset lookup the set of branches to explore can even be reduced further.
+			 %
+			 Our experimental evaluations, however, show that the overhead of cache lookups may not always be beneficial. Moreover, the space complexity of managing the cache may be prohibitive. On the other hand, Algorithm~\ref{alg:bud} is essentially memoryless, since, under the standard assumption that $2^{\mdepth} \leq \numex$, its worst-case space complexity is less than the size of the input.
 			
 			
 		
@@ -1115,7 +1129,7 @@ is $O((\numex + 2^{\mdepth} \log \numfeat) \numfeat^{\mdepth})$. This very sligh
 $\numex$ is still often the dominating term.
 % long as we have $\numex \geq 2^{\mdepth} \log \numfeat$.
 
-The feature ordering has a very significant impact on how quickly the algorithm can improve the accuracy of the classifier. Moreover, it also has an indirect, and much less significant, impact on the computational time necessary to explore the whole search space and prove optimality, because of the lower bound technique detailed in the next section.
+The feature ordering has a  significant impact on how quickly the algorithm can improve the accuracy of the classifier. Moreover, it also has an indirect, and  less significant, impact on the time necessary to prove optimality, because of the lower bound technique detailed in the next section.
 
 
 \subsection{Lower Bound}
