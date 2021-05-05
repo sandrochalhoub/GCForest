@@ -1404,6 +1404,15 @@ for low values of \numfeat\ and $\mdepth$.
 % \numfeat) is low, and for small values of $\mdepth$.
 When $\numfeat$ grows, however, it often exceeds the memory limit of 50GB (whereas \budalg does not require more memory than the size of the data set). Finally, \binoct does not produce a single optimality proof and very often exceeds the memory limit.%\footnote{In the experiments in \cite{verwer2019learning} not all datapoints were used.}
  
+ 
+ \begin{figure}
+ 	% \subfloat[depth=3]{\input{src/tables/xscopt3.tex}}
+ 	\subfloat[depth=4]{\input{src/tables/xscopt4.tex}}
+ 	% \subfloat[depth=5]{\input{src/tables/xscopt5.tex}}
+ 	\subfloat[depth=7]{\input{src/tables/xscopt7.tex}}
+ 	\subfloat[depth=10]{\input{src/tables/xscopt10.tex}}
+ 	\caption{\label{fig:cactus}Proof ratio over time, averaged across all data sets}
+ \end{figure}
 
 % \clearpage
 
@@ -1458,12 +1467,11 @@ We can see in those graphs that \murtree finds an initial tree extremely quickly
 
 
 \begin{figure}
-	\subfloat[depth=3]{\input{src/tables/xscerror3.tex}}
+	% \subfloat[depth=3]{\input{src/tables/xscerror3.tex}}
+	\subfloat[depth=4]{\input{src/tables/xscerror4.tex}}
+	% \subfloat[depth=5]{\input{src/tables/xscerror5.tex}}
 	\subfloat[depth=7]{\input{src/tables/xscerror7.tex}}
 	\subfloat[depth=10]{\input{src/tables/xscerror10.tex}}
-	% \subfloat[depth=8]{\input{src/tables/xscerror8.tex}}
-	% \subfloat[depth=9]{\input{src/tables/xscerror9.tex}}
-	% \subfloat[depth=10]{\input{src/tables/xscerror10.tex}}
 	\caption{\label{fig:cactus}Accuracy over time, averaged across all data sets}
 \end{figure}
 
