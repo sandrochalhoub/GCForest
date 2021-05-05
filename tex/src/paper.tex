@@ -1088,8 +1088,8 @@ With $p(v,{\cal S}) = \frac{|{\cal S}(\grow{\abranch}{v})|}{|{\cal S}(\abranch)|
 % With $p(v,{\cal S}) = \frac{|{\cal S}(\abranch \wedge v)|}{|{\cal S}(\abranch)|}$.
 %The minimum error is simply defined as 
 
-The feature tests at Line~\ref{line:assignment} of Algorithm~\ref{alg:bud} are explored in non-decreasing order with respect to one of the scores above.
-
+The feature tests at Line~\ref{line:assignment} of Algorithm~\ref{alg:bud} are explored in non-decreasing order of any of these scores.
+%with respect to one of the scores above.
 
 In the data sets we used, the Gini impurity was significantly better, and hence all reported experiment results are using Gini impurity unless stated otherwise. For branches of length $\mdepth-1$, however, we use the error instead. Indeed, the optimal feature $\afeat$ for a branch $\abranch$ that cannot be extended further is the one minimizing 
 % $\error[\abranch,\afeat]$. 
@@ -1297,7 +1297,7 @@ $$
 \error[\abranch] = \min\left( \sum\limits_{x \in \negex[\abranch]}\weight[x], \sum\limits_{x \in \posex[\abranch]}\weight[x] \right)
 $$
 We can use the weighted version to handle noisy data, by merging duplicated datapoints and suppressing inconsistent datapoints.
-
+%
 Let $\weight^{\negclass}$ (resp. $\weight^{\posclass}$) denote the number of occurrences of $x$ in $\setex{\negclass}$ (resp. $\setex{\posclass}$). We use the weight function $\weight[x] = |\weight^{\negclass}(x) - \weight^{\posclass}(x)|$. Then, for any datapoint $x$, we remove all but one of its occurrences, in $\setex{\negclass}$ if $\weight^{\negclass}>\weight^{\posclass}$, in $\setex{\posclass}$ if $\weight^{\posclass}>\weight^{\negclass}$, and suppress it completely if $\weight^{\posclass}=\weight^{\negclass}$.
 The reported error will then need to be offset by the number of pairs of suppressed inconsistent datapoints, that is:
 $
@@ -1333,7 +1333,7 @@ Every algorithm was run until completion or until reaching a time limit of one h
 
 We used a collection of 58 data sets formed by the union of the data sets from related work~\cite{narodytska2018learning,dl85,verwer2019learning}, to which we added extra data sets (\texttt{bank}, \texttt{titanic}, \texttt{surgical-deepnet} and \texttt{weather-aus}, as well as \texttt{mnist\_0}, \texttt{adult\_discretized}, \texttt{compas\_discretized} and \texttt{taiwan\_binarised}). Further description of the data sets as well as the raw data from our experimental results are given in appendix. For reason of space, we present aggregated results in this section.
 
-In this paper, we do not reproduce experiments to assess the accuracy of optimal (or ``optimized'') trees compared to heuristic trees. Instead, we train on the whole data set, and focus on the training accuracy. The rationale is that previous experiments show that with a bounded depth, training and testing accuracies are well correlated, and we want to use the largest possible data sets in order to assess how well our algorithm scales.
+We do not reproduce experiments to assess the accuracy of optimized and heuristic trees. Instead, we train on the whole data set, and focus on the training accuracy. The rationale is that previous experiments show that with a bounded depth, training and testing accuracies are well correlated, and we want to use the largest possible data sets in order to assess how well our algorithm scales.
 
 
 
@@ -1346,23 +1346,19 @@ The data sets in Table~\ref{tab:summaryaccsmall} are organized
 in two classes according to
 the size \numfeat\ of their feature set.
 Every method is run with an upper bound $\mdepth$ on the tree depth shown in the first column. 
-We report for both classes and for every depth: the ratio of optimality proofs (opt.); the average classification error (error); and %the average accuracy (acc.), 
+We report for both classes and for every depth: the ratio of optimality proofs (opt.); the average training accuracy (acc.); and %the average accuracy (acc.), 
  %as well as 
  the average cpu time (cpu) to prove optimality.
-Since \dleight and \binoct exceed the memory limit of 50GB in some cases, we also provide, for those two methods, the ratio of runs where at least one solution was found (sol.). For the same reason, we give their classification error, marked by a ``$^*$'', as the average marginal increase over \budalg's on these ``successful'' data sets. 
+Since \dleight and \binoct exceed the memory limit of 50GB in some cases, we also provide, for those two methods, the ratio of runs where at least one solution was found (sol.). For the same reason, we give their accuracy, marked by a ``$^*$'', as the average marginal increase over \budalg's on these ``successful'' data sets. 
 Similarly, the CPU time for all other methods is given as the average marginal increase over \budalg's on data sets for which both methods prove optimality.
 
 \budalg is comparable to \murtree for the number of optimality proofs.
 % The number of optimality proofs is similar for \budalg and \murtree.
-It is slightly less efficient for  $\mdepth \leq 7$, but slightly more for $\mdepth = 10$. The gap on shallow trees can be explained by \murtree's caching, and because it puts less emphasis on finding good trees faster, but rather tries to exhaust the search space faster. The gap on deep trees can be partly explained by the removal of inconsistent datapoints: whereas \budalg can stop searching when the overall classification error reaches the number of inconsistent datapoints, \murtree must exhaust the search space. Despite what a quick look at Table~\ref{tab:summaryaccsmall} may suggest, both methods have similar speed. The large gaps are either due to the same phenomenon described above (when in favor or \budalg), or due to a few data sets, e.g. \texttt{mnist\_0}, where caching is probably helpful (when in favor or \murtree).
+It is slightly less efficient for  $\mdepth \leq 7$, but slightly more for $\mdepth = 10$. The gap on shallow trees can be explained by \murtree's caching, and because it puts less emphasis on finding good trees faster, but rather tries to exhaust the search space faster. The gap on deep trees can be partly explained by the removal of inconsistent datapoints: whereas \budalg can stop searching when the overall classification error reaches the number of inconsistent datapoints, \murtree must exhaust the search space. 
+The difference in CPU time is due to the same phenomenon (when in favor or \budalg), or due to a few data sets, e.g. \texttt{mnist\_0}, where caching is probably helpful (when in favor or \murtree). Results on individual data sets (see Appendix) show that otherwise, both algorithms are comparable for proving optimality.
 
-When not proving optimality, however, \budalg is significantly better than \murtree, especially as the depth and the number of features grow.
- % both algorithms find trees of similar qualities for $\mdepth \leq 5$ and $\numfeat < 100$, however, \budalg is significantly better as these parameters grow.
-All other methods are systematically outperformed. \cp has good results on very shallow trees ($\mdepth \leq 4$) but is ineffective for deeper tree. Indeed, the quality of the tree actually \emph{decreases} when $\mdepth$ increases! \dleight can also find optimal trees in most cases 
-for low values of \numfeat\ and $\mdepth$.
-% \numfeat) is low, and for small values of $\mdepth$.
-When, $\numfeat$ grows, however, it often exceeds the memory limit of 50GB (whereas \budalg does not require more memory than the size of the data set). Finally, \binoct does not produce a single optimality proof and very often exceeds the memory limit.%\footnote{In the experiments in \cite{verwer2019learning} not all datapoints were used.}
- 
+%Despite what a quick look at Table~\ref{tab:summaryaccsmall} may suggest, both methods have similar speed. The large gaps are either due to the same phenomenon described above (when in favor or \budalg), or due to a few data sets, e.g. \texttt{mnist\_0}, where caching is probably helpful (when in favor or \murtree).
+
 
 % As \dleight does not provide a solution for every data set (on some instance it goes over the memory limit of 50GB), we provide the number of data sets for which a solution was returned (sol.). Moreover,
 % instead of absolute values, we provide the average relative difference in error and accuracy w.r.t. \budalg, however, and only for the data sets where a decision tree was found. Similarly, we report the average cpu time ratio w.r.t. \budalg, however, only for instances which were proven optimal by both algorithms\footnote{every instance proven optimal by \dleight is also proven optimal by \budalg and \murtree}.
@@ -1370,44 +1366,51 @@ When, $\numfeat$ grows, however, it often exceeds the memory limit of 50GB (wher
 
 % \clearpage
 
-\begin{table}[t]
-\begin{center}
-\begin{footnotesize}
-\tabcolsep=3.75pt
-\input{src/tables/summaryclasses.tex}
-\end{footnotesize}
-\end{center}
-\caption{\label{tab:summaryaccsmall} Comparison with the state of the art}
-\end{table}
+% \begin{table}[t]
+% \begin{center}
+% \begin{footnotesize}
+% \tabcolsep=3.75pt
+% \input{src/tables/summaryclasses.tex}
+% \end{footnotesize}
+% \end{center}
+% \caption{\label{tab:summaryaccsmall} Comparison with the state of the art}
+% \end{table}
+%
+%
+% \begin{table}[t]
+% \begin{center}
+% \begin{footnotesize}
+% \tabcolsep=3.5pt
+% \input{src/tables/summaryclassesgerror.tex}
+% \end{footnotesize}
+% \end{center}
+% \caption{\label{tab:summaryaccsmall} Comparison with the state of the art, errors are geometric averages}
+% \end{table}
 
-
-\begin{table}[t]
-\begin{center}
-\begin{footnotesize}
-\tabcolsep=3.5pt
-\input{src/tables/summaryclassesgerror.tex}
-\end{footnotesize}
-\end{center}
-\caption{\label{tab:summaryaccsmall} Comparison with the state of the art, errors are geometric averages}
-\end{table}
-
-\begin{table}[t]
+\begin{table}[htbp]
 \begin{center}
 \begin{footnotesize}
 \tabcolsep=3pt
 \input{src/tables/summaryclassesacc.tex}
 \end{footnotesize}
 \end{center}
-\caption{\label{tab:summaryaccsmall} Comparison with the state of the art}
+\caption{\label{tab:summaryaccsmall} Comparison with the state of the art: computing optimal classifiers}
 \end{table}
 
+When not proving optimality, however, \budalg is significantly better than \murtree, especially as the depth and the number of features grow. Notice that the accuracy results in Table~\ref{tab:summaryaccsmall} include data sets for which an optimal tree is found so the gap on other data set is much larger. Moreover, it is averaged over a large number of data sets, so a difference of even a fraction of a point is significant: the full results in appendix show that the differences are variable, but they are consistently in favor of \budalg.
+ % both algorithms find trees of similar qualities for $\mdepth \leq 5$ and $\numfeat < 100$, however, \budalg is significantly better as these parameters grow.
+All other methods are systematically outperformed. \cp has good results on very shallow trees ($\mdepth \leq 4$) but is ineffective for deeper tree. Indeed, the accuracy actually \emph{decreases} when $\mdepth$ increases! \dleight can also find optimal trees in most cases 
+for low values of \numfeat\ and $\mdepth$.
+% \numfeat) is low, and for small values of $\mdepth$.
+When, $\numfeat$ grows, however, it often exceeds the memory limit of 50GB (whereas \budalg does not require more memory than the size of the data set). Finally, \binoct does not produce a single optimality proof and very often exceeds the memory limit.%\footnote{In the experiments in \cite{verwer2019learning} not all datapoints were used.}
+ 
 
 % \clearpage
 
 
 
 
-\subsection{Computing accurate classifiers efficiently}
+\subsection{Computing accurate classifiers}
 
 Next, we shift our focus to how fast can we obtain accurate trees and how fast can we improve the accuracy over basic solutions found by heuristics.
 We use a well known heuristic as baseline: \cart (we ran its implementation in scikit-learn).
@@ -1416,7 +1419,9 @@ Here we report the average error after a given period of time (3 seconds, 10 sec
 
 % \medskip
 
-We can see that the first solution found by \budalg has comparable accuracy to the one found by \cart. The implementation of \cart in scikit-learn does not seem to be very efficient computationally. However, this is not so relevant as it is clear that one greedy run of the heuristic can be implemented to be as fast as the first dive of \budalg. The point of this experiment is threefold. Firstly, it shows that the first solution is very similar to that found by \cart. There is actually a slight advantage for \budalg, which can
+%We can see that the first solution found by \budalg has comparable accuracy to the one found by \cart. 
+%The implementation of \cart in scikit-learn does not seem to be very efficient computationally. However, this is not so relevant as it is clear that one greedy run of the heuristic can be implemented to be as fast as the first dive of \budalg. 
+The point of this experiment is threefold. Firstly, it shows that the first solution is very similar to that found by \cart. There is actually a slight advantage for \budalg, which can
 be explained by the small difference in the heuristic selection of features: whereas \cart systematically selects the feature with minimum Gini impurity, \budalg does so for all \emph{but the deepest feature test}, for which it selects the feature with least classification error. 
 Secondly, this first tree
 is found extremely quickly, and there is no scaling issue with respect to the depth of the tree or with respect to the size of the data set. Thirdly, even for large data sets and deep trees, the accuracy of the initial classifier can be significantly improved given a reasonable computation time.
@@ -1426,14 +1431,24 @@ is found extremely quickly, and there is no scaling issue with respect to the de
 %Then, in most cases, it is possible to improve the first solution significantly within a few seconds. Notice that for larger depth, improving the initial solution is harder and the 3s time limit is comparatively tighter than for smaller trees, so the gain of \budalg over \cart is more sensible for small trees.
 
 
+% \begin{table}[htbp]
+% \begin{center}
+% \begin{footnotesize}
+% \tabcolsep=5pt
+% \input{src/tables/summaryspeed.tex}
+% \end{footnotesize}
+% \end{center}
+% \caption{\label{tab:summaryspeed} Comparison with state the of the art: computing accurate classifiers}
+% \end{table}
+
 \begin{table}[htbp]
 \begin{center}
 \begin{footnotesize}
 \tabcolsep=5pt
-\input{src/tables/summaryspeed.tex}
+\input{src/tables/summaryaccspeed.tex}
 \end{footnotesize}
 \end{center}
-\caption{\label{tab:summaryspeed} Comparison with state the of the art: computing accurate trees}
+\caption{\label{tab:summaryspeed} Comparison with state the of the art: computing accurate classifiers}
 \end{table}
 
 
@@ -1455,19 +1470,31 @@ We can see in those graphs that \murtree finds an initial tree extremely quickly
 
 \subsection{Factor analysis}
 
-Finally, we report results of three variants, in order to analyse the impact of the factors described in Section~\ref{sec:ext}. For each variant, we report the average error (error), the ratio of optimality proofs (opt.) and the relative increase of cpu time  (cpu$^*$), on data sets for which an optimal tree has been found.
+Finally, we report results of three variants, in order to analyse the impact of the factors described in Section~\ref{sec:ext}. For each variant, we report the average accuracy (acc.), the ratio of optimality proofs (opt.) and the relative increase of cpu time  (cpu$^*$), on data sets for which an optimal tree has been found.
 
 In the variant ``No heuristic'', the Gini impurity heuristic described in Section~\ref{sec:heuristic} is disabled, and replaced by simply selecting first the feature with minimum error. For shallow trees (depth 3 or 4), since in many cases the search space is completely exhausted, not computing the slightly more costly Gini impurity score may actually be a good choice and we observe run time reduction of about 15\% to 20\%. However, the accuracy of the trees decreases extremely rapidly for larger maximum depth. As a results, many less optimality proofs are obtained, and they take much longer to compute.
 
 In the variant ``No preprocessing'', the preprocessing described in Section~\ref{sec:preprocessing} is disabled. The feature ordering is impacted by the removal of datapoints, and therefore it may happen that, by luck, a more acurate tree is found for the non-preprocessed data set than for the preprocessed one. However, in most cases, the preprocessing does pay off, yielding more optimality proofs, better accuracy, and shorter runtimes. We estimate that most of the gain is due to the removal of redundant features, and of inconsistent datapoints, whereas the fusion of datapoints accounts for only a slight speed-up.
 
-In the variant ``No lower bound'', the lower bound described in Section~\ref{sec:lb} is disabled. We observe a slight increase in computation time in average (but up to 200\% for some data sets). However, the search space is explored in the same order, and it only slightly negatively affects the accuracy and the number of proofs.
+In the variant ``No lower bound'', the bound described in Section~\ref{sec:lb} is disabled. We observe a slight increase in computation time in average (but up to 200\% for some data sets). However, 
+%the search space is explored in the same order, and 
+it only slightly negatively affects the accuracy and the number of proofs.
+
+% \begin{table}[htbp]
+% \begin{center}
+% \begin{footnotesize}
+% \tabcolsep=7pt
+% \input{src/tables/factorbfs.tex}
+% \end{footnotesize}
+% \end{center}
+% \caption{\label{tab:factor} Factor analysis}
+% \end{table}
 
 \begin{table}[htbp]
 \begin{center}
 \begin{footnotesize}
 \tabcolsep=7pt
-\input{src/tables/factorbfs.tex}
+\input{src/tables/factorbfsacc.tex}
 \end{footnotesize}
 \end{center}
 \caption{\label{tab:factor} Factor analysis}
