@@ -1425,7 +1425,9 @@ When proving optimality is hard, however, \budalg is clearly the best in terms o
 Other methods are systematically outperformed. \cp has good results on very shallow trees ($\mdepth \leq 4$) but is ineffective for deeper tree. Indeed, the accuracy actually \emph{decreases} when $\mdepth$ increases! \dleight can also find optimal trees in most cases 
 for low values of \numfeat\ and $\mdepth$.
 % \numfeat) is low, and for small values of $\mdepth$.
-When $\numfeat$ grows, however, it often exceeds the memory limit of 50GB (whereas \budalg does not require more memory than the size of the data set). Finally, \binoct does not produce a single optimality proof and very often exceeds the memory limit.%\footnote{In the experiments in \cite{verwer2019learning} not all datapoints were used.}
+When $\numfeat$ grows, however, it often exceeds the memory limit of 50GB (whereas \budalg does not require more memory than the size of the data set). Finally, \binoct does not produce a single proof and very often exceeds the memory limit.%\footnote{In the experiments in \cite{verwer2019learning} not all datapoints were used.}
+Figure~\ref{fig:proofcactus} shows the evolution of the ratio of proofs, averaged across all 58 data sets, over time: \budalg\ 
+prove optimality faster when $\mdepth$ grows, but given enough time, \murtree\ matches it for $\mdepth \leq 7$.
  
  
  \begin{figure}[htbp]
@@ -1434,7 +1436,7 @@ When $\numfeat$ grows, however, it often exceeds the memory limit of 50GB (where
  	% \subfloat[maximum depth = 5]{\input{src/tables/xscopt5.tex}}
  	\subfloat[maximum depth = 7]{\input{src/tables/xscopt7.tex}}
  	\subfloat[maximum depth = 10]{\input{src/tables/xscopt10.tex}}
- 	\caption{\label{fig:cactus}Proof ratio over time, averaged across all data sets}
+ 	\caption{\label{fig:proofcactus}Proof ratio over time, averaged across all data sets}
  \end{figure}
 
 % \clearpage
@@ -1489,7 +1491,7 @@ is found extremely quickly, and there is no scaling issue with respect to the de
 
 
 
-Figure~\ref{fig:cactus} reports the evolution of the average accuracy (across all 58 data sets) over time, giving a good view of the difference between \murtree and \budalg during search. The accuracy of the tree returned by \cart is given for reference. 
+Figure~\ref{fig:acccactus} reports the evolution of the average accuracy (across all 58 data sets) over time, giving a good view of the difference between \murtree and \budalg during search. The accuracy of the tree returned by \cart is given for reference. 
 We can see in those graphs that \murtree finds an initial tree extremely quickly, although its accuracy is very low. This is because \murtree shows progress even when the tree is not complete, e.g., the first solution is always a single node with the most promising feature. We can see in Table~\ref{tab:summaryspeed} that this is indeed always the same first tree, irrespective of the depth.
 
 
@@ -1500,7 +1502,7 @@ We can see in those graphs that \murtree finds an initial tree extremely quickly
 	% \subfloat[maximum depth = 5]{\input{src/tables/xscerror5.tex}}
 	\subfloat[maximum depth = 7]{\input{src/tables/xscerror7.tex}}
 	\subfloat[maximum depth = 10]{\input{src/tables/xscerror10.tex}}
-	\caption{\label{fig:cactus}Accuracy over time, averaged across all data sets}
+	\caption{\label{fig:acccactus}Accuracy over time, averaged across all data sets}
 \end{figure}
 
 
