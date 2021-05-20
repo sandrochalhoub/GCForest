@@ -1,4 +1,4 @@
-# Blossom Decisiont Tree Learner
+# Blossom, a Fast Decision Tree Learner
 
 Install by running
 
@@ -6,7 +6,7 @@ Install by running
 pip3 install --user .
 ```
 
-from the `code` directory.
+from the root directory.
 
 ## Usage
 
