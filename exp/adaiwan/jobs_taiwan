@@ -1,2 +1,0 @@
-../../code/bin/adaboost /net/phorcys/data/roc/eh/dt/simp/taiwan_binarised.txt --search 1000000 --seed 35413 --max_depth 10 --split 0.200000 --ada_it 30 --print_par
-../../code/bin/adaboost /net/phorcys/data/roc/eh/dt/simp/taiwan_binarised.txt --search 1000000 --seed 35413 --max_depth 10 --split 0.200000 --ada_it 30 --use_weights --filter_inconsistent --print_par
