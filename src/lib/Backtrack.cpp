@@ -222,11 +222,11 @@ bool BacktrackingAlgorithm<ErrorPolicy, E_t>::limit_out() {
 
   if (time_limit > 0 and (search_size % checking_period) == 0) {
 		
-		print_new_best();
+		// print_new_best();
 		
 		auto cpu_now{cpu_time()};
 		
-		cout << (cpu_now - prev_cpu) << endl;
+		// cout << (cpu_now - prev_cpu) << endl;
 		
 		if((cpu_now - prev_cpu) < .25)
 			checking_period *= 2;
