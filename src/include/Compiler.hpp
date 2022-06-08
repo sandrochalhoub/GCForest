@@ -13,8 +13,8 @@
 #include "Tree.hpp"
 #include "utils.hpp"
 
-// #define PRINT_TRACE
-#define PRINT_TRACE print_trace();
+#define PRINT_TRACE
+// #define PRINT_TRACE print_trace();
 
 using namespace boost;
 using namespace std;
