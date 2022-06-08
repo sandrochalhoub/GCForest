@@ -263,6 +263,7 @@ private:
 
   int solution_root;
 
+	double prev_cpu;
   int checking_period;
 
   bool interrupted;

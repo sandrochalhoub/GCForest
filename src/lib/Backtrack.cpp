@@ -155,6 +155,8 @@ void BacktrackingAlgorithm<ErrorPolicy, E_t>::init() {
 
   time_limit = options.time;
 
+
+	prev_cpu = cpu_time();
   checking_period = 1000;
 
   interrupted = false;
@@ -218,9 +220,25 @@ template <template<typename> class ErrorPolicy, typename E_t>
 bool BacktrackingAlgorithm<ErrorPolicy, E_t>::limit_out() {
   ++search_size;
 
-  if (time_limit > 0 and (num_backtracks % checking_period) == 0)
-    if (cpu_time() >= (time_limit + start_time))
+  if (time_limit > 0 and (search_size % checking_period) == 0) {
+		
+		print_new_best();
+		
+		auto cpu_now{cpu_time()};
+		
+		cout << (cpu_now - prev_cpu) << endl;
+		
+		if((cpu_now - prev_cpu) < .25)
+			checking_period *= 2;
+		else if((cpu_now - prev_cpu) > 1)
+			checking_period /= 2;
+		
+		
+		prev_cpu = cpu_now;
+		
+    if (cpu_now >= (time_limit + start_time))
       interrupted = true;
+	}
   interrupted = interrupted or (search_limit and search_size > search_limit);
 	
   return interrupted;
@@ -339,7 +357,7 @@ void BacktrackingAlgorithm<ErrorPolicy, E_t>::print_new_best() {
 
 template <template <typename> class ErrorPolicy, typename E_t>
 void BacktrackingAlgorithm<ErrorPolicy, E_t>::print_progress() {
-	if(not options.progress)
+	if(not options.progress) 
 		return;
   int width{68};
   auto ne{feature[0] - ranked_feature[0].begin() + 1};
@@ -1343,6 +1361,9 @@ bool BacktrackingAlgorithm<ErrorPolicy, E_t>::search() {
     PRINT_TRACE;
 
     DO_ASSERTS;
+		
+		
+
 
     if (blossom.empty()) {
       if (not notify_solution(sat))

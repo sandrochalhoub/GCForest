@@ -13,8 +13,8 @@
 
 // #define DEBUG_MODE
 
-#define PRINTTRACE                                                             \
-  (options.verbosity >= DTOptions::YACKING)
+// #define PRINTTRACE                                                             \
+//   (options.verbosity > DTOptions::YACKING)
 // #define REPRINTTRACE (algo.options.verbosity >= DTOptions::YACKING)
 
 namespace blossom {
