@@ -118,6 +118,12 @@ DTOptions blossom::parse_dt(int argc, char *argv[]) {
   cmd.add<UnlabeledValueArg<std::string>>(opt.instance_file, "file",
                                           "instance file", true, "", "string");
 
+  // cmd.add<ValueArg<string>>(opt.test, "", "test", "test file", false, "",
+  //                           "string");
+
+  cmd.add<ValueArg<string>>(opt.tree_file, "", "tree_file", "tree file", false,
+                            "", "string");
+
   cmd.add<ValueArg<string>>(opt.debug, "", "debug", "debug file", false, "",
                             "string");
 
@@ -198,8 +204,8 @@ DTOptions blossom::parse_dt(int argc, char *argv[]) {
   // *v=NULL)
 
   // Constraint<double> *range = new RangeConstraint<double>(0, 1);
-  cmd.add<ValueArg<double>>(opt.sample, "", "sample", "sampling ratio", false,
-                            1.0, "double");
+  cmd.add<ValueArg<double>>(opt.test_sample, "", "test_sample",
+                            "sampling ratio", false, 0.0, "double");
 
   cmd.add<ValueArg<int>>(opt.width, "", "width",
                          "number of tied features for random selection", false,
@@ -241,10 +247,10 @@ DTOptions blossom::parse_dt(int argc, char *argv[]) {
                          false, 2, "int");
 
   cmd.add<SwitchArg>(opt.preprocessing, "", "preprocessing",
-                     "switch sample preprocessing oon", false);
+                     "switch test_sample preprocessing oon", false);
 
   cmd.add<SwitchArg>(opt.preprocessing, "", "nopreprocessing",
-                     "switch sample preprocessing off", true);
+                     "switch test_sample preprocessing off", true);
 
   cmd.add<SwitchArg>(opt.progress, "", "progress", "print progress", false);
 
@@ -268,6 +274,9 @@ DTOptions blossom::parse_dt(int argc, char *argv[]) {
   cmd.add<ValueArg<double>>(opt.pruning, "", "pruning", "pruning (maximum)",
                             false, 0, "double");
 
+  cmd.add<SwitchArg>(opt.sample_only, "", "sample_only", "stop after sampling",
+                     false);
+
   cmd.parse(argc, argv);
   return opt;
 }
@@ -277,7 +286,7 @@ ostream &DTOptions::display(ostream &os) {
      << endl
      << setw(20) << left << "p seed:" << setw(30) << right << seed << endl
      // << setw(20) << left << "p sampling ratio:" << setw(30) << right <<
-     // sample
+     // test_sample
      // << endl
      << setw(20) << left << "p minimize depth:" << setw(30) << right
      << (mindepth ? "yes" : "no") << endl

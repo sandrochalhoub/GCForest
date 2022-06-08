@@ -18,6 +18,8 @@ public:
   // the actual options
   string cmdline; // for reference
   string instance_file;
+  string tree_file;
+  // string test;
   string debug;
   string output;
   string format;
@@ -35,7 +37,7 @@ public:
 
   bool verified;
 
-  double sample;
+  double test_sample;
 
   int width;
   double focus;
@@ -79,25 +81,27 @@ public:
 
   double pruning;
 
+  bool sample_only;
+
   DTOptions(){};
   DTOptions(const DTOptions &opt)
       : cmdline(opt.cmdline), instance_file(opt.instance_file),
-        debug(opt.debug), output(opt.output), format(opt.format),
-        verbosity(opt.verbosity), seed(opt.seed), print_sol(opt.print_sol),
-        print_par(opt.print_par), print_ins(opt.print_ins),
-        print_sta(opt.print_sta), print_cmd(opt.print_cmd),
-        verified(opt.verified), sample(opt.sample), width(opt.width),
-        focus(opt.focus), max_depth(opt.max_depth),
-        restart_base(opt.restart_base), restart_factor(opt.restart_factor),
-        time(opt.time), search(opt.search), bounding(opt.bounding),
-        node_strategy(opt.node_strategy),
+        tree_file(opt.tree_file), debug(opt.debug), output(opt.output),
+        format(opt.format), verbosity(opt.verbosity), seed(opt.seed),
+        print_sol(opt.print_sol), print_par(opt.print_par),
+        print_ins(opt.print_ins), print_sta(opt.print_sta),
+        print_cmd(opt.print_cmd), verified(opt.verified),
+        test_sample(opt.test_sample), width(opt.width), focus(opt.focus),
+        max_depth(opt.max_depth), restart_base(opt.restart_base),
+        restart_factor(opt.restart_factor), time(opt.time), search(opt.search),
+        bounding(opt.bounding), node_strategy(opt.node_strategy),
         feature_strategy(opt.feature_strategy), split(opt.split),
         ada_it(opt.ada_it), ada_stop(opt.ada_stop), filter(opt.filter),
         reference_class(opt.reference_class), mindepth(opt.mindepth),
         minsize(opt.minsize), preprocessing(opt.preprocessing),
         progress(opt.progress), delimiter(opt.delimiter),
-        intarget(opt.intarget), outtarget(opt.outtarget), pruning(opt.pruning) {
-  }
+        intarget(opt.intarget), outtarget(opt.outtarget), pruning(opt.pruning),
+        sample_only(opt.sample_only) {}
 
   ostream &display(ostream &os);
 };
