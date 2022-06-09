@@ -10,8 +10,8 @@ LIBFORMAT  = static_pic
 #
 #------------------------------------------------------------
 
-CPLEXDIR      = /net/phorcys/data/roc/Logiciels/CPLEX_Studio201/cplex/
-CONCERTDIR    = /net/phorcys/data/roc/Logiciels/CPLEX_Studio201/concert/
+CPLEXDIR      = /net/phorcys/data/roc/Logiciels/CPLEX_Studio201/cplex
+CONCERTDIR    = /net/phorcys/data/roc/Logiciels/CPLEX_Studio201/concert
 BLOSSOMDIR    = ..
 
 
@@ -122,7 +122,7 @@ $(OBJ)/%.o:  $(SRC)/%.cpp $(INC)/%.hpp
 #
 
 gcforest: gcforest.o
-	$(CCC) $(CCFLAGS) $(CCLNDIRS) $(PLIBOBJ) $(LFLAGS) -o gcforest gcforest.o $(CCLNFLAGS)
+	$(CCC) $(CCFLAGS) $(CCLNDIRS) $(PLIBOBJ) $(LFLAGS) -o gcforest gcforest.o #$(CCLNFLAGS)
 gcforest.o: gcforest.cpp
 	$(CCC) -c $(CCFLAGS) gcforest.cpp -o gcforest.o
 
