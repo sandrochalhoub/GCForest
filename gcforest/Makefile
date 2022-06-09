@@ -1,4 +1,4 @@
-include ./boost_home
+include ../boost_home
 SYSTEM     = x86-64_linux
 LIBFORMAT  = static_pic
 
@@ -12,7 +12,21 @@ LIBFORMAT  = static_pic
 
 CPLEXDIR      = /net/phorcys/data/roc/Logiciels/CPLEX_Studio201/cplex/
 CONCERTDIR    = /net/phorcys/data/roc/Logiciels/CPLEX_Studio201/concert/
-BLOSSOMDIR    = /home/schalhoub/Documents/Blossom_Git/blossom
+BLOSSOMDIR    = ..
+
+
+BIN=$(BLOSSOMDIR)/gcforest/bin
+SRC=$(BLOSSOMDIR)/src/lib
+OBJ=$(BLOSSOMDIR)/src/obj
+INC=$(BLOSSOMDIR)/src/include
+TCL=$(BLOSSOMDIR)/tools
+
+
+PINCSRC = $(wildcard $(INC)/*.hpp)
+PLIBSRC = $(wildcard $(SRC)/*.cpp)
+PLIBAUX = $(PLIBSRC:.cpp=.o)
+PLIBOBJ = $(patsubst $(SRC)/%, $(OBJ)/%, $(PLIBAUX))
+
 
 # ---------------------------------------------------------------------
 # Compiler selection 
@@ -26,9 +40,9 @@ JAVAC = javac
 # Compiler options 
 # ---------------------------------------------------------------------
 
-CCOPT = -m64 -fPIC -fno-strict-aliasing -fexceptions -DNDEBUG
-COPT  = -m64 -fPIC
-JOPT  = -classpath $(CPLEXDIR)/lib/cplex.jar -O
+CCOPT = -m64 -fPIC -fno-strict-aliasing -fexceptions -DNDEBUG -O3 -Wno-sign-compare
+
+COMPILFLAGS= -std=c++1z -D_LIBCPP_ENABLE_CXX17_REMOVED_AUTO_PTR
 
 # ---------------------------------------------------------------------
 # Link options and libraries
@@ -53,34 +67,38 @@ JAVA      = java   -Djava.library.path=$(CPLEXDIR)/bin/x86-64_linux -classpath $
 CONCERTINCDIR = $(CONCERTDIR)/include
 CPLEXINCDIR   = $(CPLEXDIR)/include
 
-SRC 	      = $(BLOSSOMDIR)/src
-EXDIR         = $(BLOSSOMDIR)/examples
-EXSRCCPP      = $(EXDIR)/src
-EXINC         = $(SRC)/include
-EXDATA        = $(BLOSSOMDIR)/data
-BIN	      = $(BLOSSOMDIR)/bin
-SRC           = $(SRC)/lib
-OBJ	      =	$(SRC)/obj
-DOC	      =	$(BLOSSOMDIR)/doc
-TCL	      =	$(BLOSSOMDIR)/tools
+# SRC 	      = $(BLOSSOMDIR)/src
+# EXDIR         = $(BLOSSOMDIR)/examples
+# EXSRCCPP      = $(EXDIR)/src
+# EXINC         = $(SRC)/include
+# EXDATA        = $(BLOSSOMDIR)/data
+# BIN	      = $(BLOSSOMDIR)/bin
+# SRC           = $(SRC)/lib
+# OBJ	      =	$(SRC)/obj
+# DOC	      =	$(BLOSSOMDIR)/doc
+# TCL	      =	$(BLOSSOMDIR)/tools
 
 
-CFLAGS  = $(COPT)  -I$(CPLEXINCDIR)
-CCFLAGS = $(CCOPT) -I$(CPLEXINCDIR) -I$(CONCERTINCDIR) 
-JCFLAGS = $(JOPT)
 
+# CFLAGS = -I$(INC) -I$(TCL) -Wall -I$(BOOSTDIR) -fPIC -D_LIBCPP_ENABLE_CXX17_REMOVED_AUTO_PTR # -ffloat-store
+LFLAGS = -L$(OBJ) -flto #--static
+
+CFLAGS  = -I$(INC) -I$(TCL) -Wall -I$(BOOSTDIR)
+CCFLAGS = $(CFLAGS) -I$(CPLEXINCDIR) -I$(CONCERTINCDIR)
+
+
+
+%.o:			CFLAGS +=$(CCOPT) $(COMPILFLAGS)
 
 #------------------------------------------------------------
 #  make all      : to compile the examples. 
 #  make execute  : to compile and execute the examples.
 #------------------------------------------------------------
 
-CPP_EX = blend
+CPP_EX = gcforest #blend
 
-all_cpp: $(CPP_EX)
+all_cpp: lib $(CPP_EX)
 
-execute_cpp: $(CPP_EX)
-	$(run) ./blend
 
 # ------------------------------------------------------------
 
@@ -88,16 +106,25 @@ clean :
 	/bin/rm -rf *.o *~ *.class
 	/bin/rm -rf $(C_EX) $(CX_EX) $(CPP_EX)
 	/bin/rm -rf *.mps *.ord *.sos *.lp *.sav *.net *.msg *.log *.clp
+	
+	
+	
+	
+lib: $(PLIBOBJ) $(PUTIOBJ)
+$(OBJ)/%.o:  $(SRC)/%.cpp $(INC)/%.hpp
+	@echo 'compile '$<
+	$(CCC) $(CFLAGS) -c $< -o $@
+	
 
 # ------------------------------------------------------------
 #
 # The examples
 #
 
-blend: blend.o
-	$(CCC) $(CCFLAGS) $(CCLNDIRS) -o blend blend.o $(CCLNFLAGS)
-blend.o: $(EXSRCCPP)/blend.cpp
-	$(CCC) -c $(CCFLAGS) $(EXSRCCPP)/blend.cpp -o blend.o
+gcforest: gcforest.o
+	$(CCC) $(CCFLAGS) $(CCLNDIRS) $(PLIBOBJ) $(LFLAGS) -o gcforest gcforest.o $(CCLNFLAGS)
+gcforest.o: gcforest.cpp
+	$(CCC) -c $(CCFLAGS) gcforest.cpp -o gcforest.o
 
 # Local Variables:
 # mode: makefile
