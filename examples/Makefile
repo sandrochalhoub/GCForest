@@ -53,13 +53,17 @@ JAVA      = java   -Djava.library.path=$(CPLEXDIR)/bin/x86-64_linux -classpath $
 CONCERTINCDIR = $(CONCERTDIR)/include
 CPLEXINCDIR   = $(CPLEXDIR)/include
 
-EXDIR         = $(CPLEXDIR)/examples
-EXINC         = $(EXDIR)/include
-EXDATA        = $(EXDIR)/data
-EXSRCC        = $(EXDIR)/src/c
-EXSRCCX       = $(EXDIR)/src/c_x
-EXSRCCPP      = $(EXDIR)/src/cpp
-EXSRCJAVA     = $(EXDIR)/src/java
+SRC 					= $(BLOSSOMDIR)/src
+EXDIR         = $(BLOSSOMDIR)/examples
+EXSRCCPP      = $(EXDIR)/src
+EXINC         = $(SRC)/include
+EXDATA        = $(BLOSSOMDIR)/data
+BIN	      		= $(BLOSSOMDIR)/bin
+SRC           = $(SRC)/lib
+OBJ						=	$(SRC)/obj
+DOC						=	$(BLOSSOMDIR)/doc
+TCL						=	$(BLOSSOMDIR)/tools
+
 
 CFLAGS  = $(COPT)  -I$(CPLEXINCDIR)
 CCFLAGS = $(CCOPT) -I$(CPLEXINCDIR) -I$(CONCERTINCDIR) 
