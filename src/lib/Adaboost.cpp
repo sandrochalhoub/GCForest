@@ -40,6 +40,7 @@ void Adaboost::train() {
               << " error=" << std::setw(6) << best_error 
               << " size=" << setw(5) << best_size << endl;
   }
+
 }
 
 double Adaboost::get_accuracy() const {
