@@ -75,12 +75,12 @@ JCFLAGS = $(JOPT)
 #  make execute  : to compile and execute the examples.
 #------------------------------------------------------------
 
-CPP_EX = blend
+CPP_EX = gcforest
 
 all_cpp: $(CPP_EX)
 
 execute_cpp: $(CPP_EX)
-	$(run) ./blend
+	$(run) ./gcforest
 
 # ------------------------------------------------------------
 
@@ -94,10 +94,10 @@ clean :
 # The examples
 #
 
-blend: blend.o
-	$(CCC) $(CCFLAGS) $(CCLNDIRS) -o blend blend.o $(CCLNFLAGS)
-blend.o: $(EXSRCCPP)/blend.cpp
-	$(CCC) -c $(CCFLAGS) $(EXSRCCPP)/blend.cpp -o blend.o
+gcforest: gcforest.o
+	$(CCC) $(CCFLAGS) $(CCLNDIRS) -o gcforest gcforest.o $(CCLNFLAGS)
+gcforest.o: $(EXSRCCPP)/gcforest.cpp
+	$(CCC) -c $(CCFLAGS) $(EXSRCCPP)/gcforest.cpp -o gcforest.o
 
 # Local Variables:
 # mode: makefile
