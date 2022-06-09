@@ -122,7 +122,7 @@ $(OBJ)/%.o:  $(SRC)/%.cpp $(INC)/%.hpp
 #
 
 gcforest: gcforest.o
-	$(CCC) $(CCFLAGS) $(CCLNDIRS) $(PLIBOBJ) $(LFLAGS) -o gcforest gcforest.o #$(CCLNFLAGS)
+	$(CCC) $(CCFLAGS) $(CCLNDIRS) $(PLIBOBJ) $(LFLAGS) -o gcforest gcforest.o $(CCLNFLAGS)
 gcforest.o: gcforest.cpp
 	$(CCC) -c $(CCFLAGS) gcforest.cpp -o gcforest.o
 
