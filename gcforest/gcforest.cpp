@@ -49,8 +49,16 @@ int main(int argc, char *argv[]) {
   if(opt.verbosity >= DTOptions::NORMAL)
     cout << "d inputtime=" << cpu_time() << endl;
   
-  // Modification of the original Adaboost train() method: it now returns the weight vector. This will help feed it into Cplex (don't know how for now).
-  std::vector<double>* a = A.train();
-
+  // Modification of the original Adaboost train() method: it now returns the first weight vector. This will help feed it into Cplex (don't know how for now).
+  std::vector<double>* a;
+  
+  // Following won't be kept, but I wanted to check how dramatically Adaboost modifies the weights.
+  for (int i = 0 ; i < 10 ; i++) {
+    a = A.train();
+    for (int y = 0 ; y < 2 ; y++) {
+	for (int x = 0 ; x < 2 ; x++) printf("%f ", a[y][x]);
+	printf("\n");
+    }
+  }
 
 }
