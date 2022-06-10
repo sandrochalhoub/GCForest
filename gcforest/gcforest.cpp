@@ -30,7 +30,7 @@ int main(int argc, char *argv[]) {
 
   WeightedDataset<int> input;
 	
-	////// READING
+  ////// READING
   try {
     read_binary(input, opt);
   } catch (const std::exception &e) {
@@ -44,14 +44,13 @@ int main(int argc, char *argv[]) {
 
   input.preprocess(opt.verbosity >= DTOptions::NORMAL);
 
-	Adaboost A(input, opt);
+  Adaboost A(input, opt);
  
-	if(opt.verbosity >= DTOptions::NORMAL)
-		cout << "d inputtime=" << cpu_time() << endl;
-	
-	// train() currently returns void. I will probably modify Adaboost for the purpose of gcforest, as to make it return the double array w[j][i].
-	// Would allow us to feed it directly into WeightedDataset<int> input prior to working on the CG model.
-  A.train();
+  if(opt.verbosity >= DTOptions::NORMAL)
+    cout << "d inputtime=" << cpu_time() << endl;
+  
+  // Modification of the original Adaboost train() method: it now returns the weight vector. This will help feed it into Cplex (don't know how for now).
+  std::vector<double>* a = A.train();
 
 
 }

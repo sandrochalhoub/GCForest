@@ -20,7 +20,7 @@ Adaboost::Adaboost(WeightedDataset<int> &d, DTOptions &opt)
   algo.options.verbosity = DTOptions::SILENT;
 }
 
-void Adaboost::train() {
+std::vector<double>* Adaboost::train() {
 
   start_time = cpu_time();
   classifiers.clear();
@@ -40,6 +40,8 @@ void Adaboost::train() {
               << " error=" << std::setw(6) << best_error 
               << " size=" << setw(5) << best_size << endl;
   }
+
+return weight;
 
 }
 
@@ -114,10 +116,8 @@ void Adaboost::update_weights() {
     auto i{0};
     for (auto xi : X) {
       double u = (y == 0 ? -1 : 1);
-			double upred = alpha * (last_tree.predict(X[xi]) ? 1 : -1);
-			
-			weight[y][i] *= (exp(-u * upred) 
-				/ (2 * sqrt(err * (1 - err)))); // I'm not sur what this is yet
+      double upred = alpha * (last_tree.predict(X[xi]) ? 1 : -1);
+      weight[y][i] *= (exp(-u * upred)/ (2 * sqrt(err * (1 - err)))); // I'm not sure what this is yet
       algo.setWeight(y, i, weight[y][i]);
 
       ++i;
