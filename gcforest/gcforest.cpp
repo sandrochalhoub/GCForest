@@ -50,7 +50,11 @@ int main(int argc, char *argv[]) {
     cout << "d inputtime=" << cpu_time() << endl;
   
   A.train();
-  std::vector<WeakClassifier> classifiers = A.getClassifier();
+  //printf(A.getClassifier()[0].T);
+  std::vector<double>* weights = A.getClassifier()[0].T.getWeights();
+  printf("%f ", weights[0][0]);
+
+
 
   // Modification of the original Adaboost train() method: it now returns the first weight vector. This will help feed it into Cplex (don't know how for now).
   // Following won't be kept, but I wanted to check how dramatically Adaboost modifies the weights.

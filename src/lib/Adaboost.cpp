@@ -99,6 +99,8 @@ void Adaboost::initialize_weights() {
     for (auto x : X) {
       weight[y].push_back(double(X.weight(x)));
       algo.addExample(X[x], y, weight[y].back());
+      //reminder
+      printf("%f ", weight[y][x]);
     }
   }
 }
@@ -117,12 +119,15 @@ void Adaboost::update_weights() {
       double upred = alpha * (last_tree.predict(X[xi]) ? 1 : -1);
       weight[y][i] *= (exp(-u * upred)/ (2 * sqrt(err * (1 - err)))); // I'm not sure what this is yet
       algo.setWeight(y, i, weight[y][i]);
+      //reminder
+      printf("%f ", weight[y][i]);
 
       ++i;
     }
   }
 }
 
+// reminder
 std::vector<WeakClassifier> Adaboost::getClassifier() {
   return classifiers;
 }

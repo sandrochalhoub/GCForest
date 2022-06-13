@@ -41,6 +41,7 @@ public:
 
   size_t get_error() const;
 
+  //Reminder
   std::vector<WeakClassifier> getClassifier();
 
 private:
