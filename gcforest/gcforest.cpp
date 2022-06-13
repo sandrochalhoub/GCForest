@@ -48,26 +48,29 @@ int main(int argc, char *argv[]) {
  
   if(opt.verbosity >= DTOptions::NORMAL)
     cout << "d inputtime=" << cpu_time() << endl;
-  
-  A.train();
-  //printf(A.getClassifier()[0].T);
-  std::vector<double>* weights = A.getClassifier()[0].T.getWeights();
-  printf("%f ", weights[0][0]);
 
+  std::vector<double>* a = A.train();
+  std::vector<WeakClassifier> classifiers = A.getClassifier();
+  // printf("%lu \n\n\n", classifiers.size());
+  std::vector<double>* weights;
 
-
-  // Modification of the original Adaboost train() method: it now returns the first weight vector. This will help feed it into Cplex (don't know how for now).
-  // Following won't be kept, but I wanted to check how dramatically Adaboost modifies the weights.
-  //std::vector<double>* a;
-  //int x = 0;
-  //int y = 0;
-  //for (int i = 0 ; i < 10 ; i++) {
-  //  a = A.train();
-  //  for (y = 0 ; y < a->size() ; y++) {
-	//for (x = 0 ; a[y].size() ; x++) printf("%f ", a[y][x]);
-	//printf("\n");
-    //}
-
+  // These nested for loops print the correct weight values, exactly as returned by the train() function (later on, train() won't be returning the vector anymore, this is just for testing).
+  // Still wondering about the upper bound of x.
+  //for (int x = 0 ; x < input.example_count(); x++) {
+    //printf("%f  |  ", a[0][x]);
+    //printf("%f  |  ", a[1][x]);
   //}
+
+  printf("\n\n\n\n\n\n");
+
+
+  // These nested for loops print the weight values as obtained with the getters I implemented, for now they don't match those returned by train();  
+  for (int i = 0 ; i < classifiers.size() ; i++) {
+    weights = classifiers[i].T.getWeights();
+    for (int x = 0 ; x < weights->size() ; x++) {
+	printf("%f  |  ", weights[0][x]);
+	printf("%f  |  ", weights[1][x]);
+    }
+  }
 
 }

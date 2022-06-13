@@ -363,7 +363,6 @@ void Wood<E_t>::get_descendants(const int node, vector<int> &bag, const bool ter
 //       get_leaf(child[0][node], nodes);
 //     if (child[1][node] > 1)
 //       get_leaf(child[1][node], nodes);
-//   }
 // }
 
 //reminder
