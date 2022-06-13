@@ -20,7 +20,7 @@ Adaboost::Adaboost(WeightedDataset<int> &d, DTOptions &opt)
   algo.options.verbosity = DTOptions::SILENT;
 }
 
-std::vector<double>* Adaboost::train() {
+void Adaboost::train() {
 
   start_time = cpu_time();
   classifiers.clear();
@@ -40,8 +40,6 @@ std::vector<double>* Adaboost::train() {
               << " error=" << std::setw(6) << best_error 
               << " size=" << setw(5) << best_size << endl;
   }
-
-return weight;
 
 }
 
@@ -123,6 +121,10 @@ void Adaboost::update_weights() {
       ++i;
     }
   }
+}
+
+std::vector<WeakClassifier> Adaboost::getClassifier() {
+  return classifiers;
 }
 
 bool Adaboost::should_stop() {

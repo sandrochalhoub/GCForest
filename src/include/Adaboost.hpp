@@ -26,7 +26,7 @@ public:
 
   Adaboost(WeightedDataset<int> &d, DTOptions &opt);
 
-  std::vector<double>* train();
+  void train();
 
 	template<class sample>
   bool predict(const sample &i) const;
@@ -40,6 +40,8 @@ public:
   double get_accuracy() const;
 
   size_t get_error() const;
+
+  std::vector<WeakClassifier> getClassifier();
 
 private:
   // the orginal dataset (weights are only there to represent cardinality)
