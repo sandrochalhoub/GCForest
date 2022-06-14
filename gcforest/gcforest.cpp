@@ -89,6 +89,7 @@ int run_algorithm(DTOptions &opt) {
 
   // Adaboost resulting forest
   std::vector<WeakClassifier> classifiers = A.getClassifier();
+  //std::vector<int> predictions[classifiers.size()];
 
   // Backtracking initialization
   //if (opt.mindepth) {
@@ -106,17 +107,17 @@ int run_algorithm(DTOptions &opt) {
   for (int i = 0 ; i < classifiers.size() ; i++) {
     Tree<double> sol = classifiers[i].T;
     if (opt.verified) {
-      E_t tree_error = 0;
+      //E_t tree_error = 0;
       for (auto y{0}; y < 2; ++y) {
         auto X{(*training_set)[y]};
         for (auto j : X) {
 	  int prediction = getPrediction(X, classifiers, i, j);
-	  //printf("%d | ", prediction);
-          tree_error += (sol.predict(X[i]) != y) * X.weight(i);
+	  //predictions[i].push_back(prediction);
+	  //printf("%d | ", predictions[i][j]);
+          //tree_error += (sol.predict(X[i]) != y) * X.weight(i);
 	  if (sol.predict(X[i]) == y) {
-	    //printf("%d |  ", X.weight(i));
-	    B.setWeight(y, i, X.weight(i));
-	    //int vecWeights = B.getWeight(y, i);
+	    B.setWeight(i, j, X.weight(i));
+	    //int vecWeights = B.getWeight(i, j);
 	    //if (vecWeights == X.weight(i)) printf("YES ");
 	  }
 	}
