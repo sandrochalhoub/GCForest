@@ -34,8 +34,6 @@ public:
 
   int getChild(const int node, const int branch) const;
 
-  vector<E_t>* getWeights();
-
   int getFeature(const int node) const;
 	
 	template<class sample>
@@ -89,8 +87,6 @@ public:
   size_t size() const;
 
   size_t count() const;
-
-  vector<E_t>* getWeights();
 
   // void cut(const int node);
 
@@ -159,12 +155,6 @@ template <class E_t>
 int Tree<E_t>::getChild(const int node, const int branch) const {
   return wood->getChild(node, branch);
 }
-
-//reminder
-template <class E_t> vector<E_t>* Tree<E_t>::getWeights() {
-  return wood->getWeights();
-}
-
 
 template <class E_t> int Tree<E_t>::getFeature(const int node) const {
   return wood->getFeature(node);
@@ -364,11 +354,6 @@ void Wood<E_t>::get_descendants(const int node, vector<int> &bag, const bool ter
 //     if (child[1][node] > 1)
 //       get_leaf(child[1][node], nodes);
 // }
-
-//reminder
-template <class E_t> vector<E_t>* Wood<E_t>::getWeights() {
-  return weight;
-}
 
 template <class E_t>
 void Wood<E_t>::prune(const int root, const E_t *total, const E_t max_error) {

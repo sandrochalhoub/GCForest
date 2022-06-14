@@ -26,7 +26,7 @@ public:
 
   Adaboost(WeightedDataset<int> &d, DTOptions &opt);
 
-  std::vector<double>* train();
+  void train();
 
 	template<class sample>
   bool predict(const sample &i) const;
