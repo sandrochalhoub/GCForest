@@ -19,10 +19,14 @@ ILOSTLBEGIN
 using namespace std;
 using namespace blossom;
 
+// Returns the prediction of the j-th tree of the forest, for the i-th for data point
+int getPrediction(WeightedDataset<int>::List X, std::vector<WeakClassifier> classifiers, int j, int i) {
+  Tree<double> * sol = &(classifiers[j].T);
+  return (*sol).predict(X[i]);
+}
 
 template <template <typename> class ErrorPolicy = WeightedError,
           typename E_t = int>
-
 int run_algorithm(DTOptions &opt) {
 
   WeightedDataset<E_t> input;
@@ -64,13 +68,16 @@ int run_algorithm(DTOptions &opt) {
   if (opt.verbosity >= DTOptions::NORMAL)
     cout << "d readtime=" << cpu_time() << endl;
 
-  ////// PREPROCESING
+  ////// PREPROCESSING
   if (opt.preprocessing) {
     training_set->preprocess(opt.verbosity >= DTOptions::NORMAL);
   }
 
-  ////// CREATING THE ALGORITHM
+  ////// CREATING THE ALGORITHMS
+
+  // Adaboost for the forest initialization.
   Adaboost A(*training_set, opt);
+  // BacktrackingAlgorithm for all subsequent iterations.
   BacktrackingAlgorithm<ErrorPolicy, E_t> B(*training_set, opt);
 
   if (opt.verbosity >= DTOptions::NORMAL)
@@ -78,20 +85,47 @@ int run_algorithm(DTOptions &opt) {
 
   ////// SOLVING
   A.train();
+  printf("\n\n");
+
+  // Adaboost resulting forest
   std::vector<WeakClassifier> classifiers = A.getClassifier();
 
+  // Backtracking initialization
+  //if (opt.mindepth) {
+    //if (opt.minsize)
+      //B.minimize_error_depth_size();
+    //else
+      //B.minimize_error_depth();
+  //} else {
+    //if (opt.minsize)
+     //B.set_size_objective();
+    //B.minimize_error();
+  //}
+
+  // Work in progress: solving with CG
   for (int i = 0 ; i < classifiers.size() ; i++) {
     Tree<double> sol = classifiers[i].T;
     if (opt.verified) {
       E_t tree_error = 0;
       for (auto y{0}; y < 2; ++y) {
         auto X{(*training_set)[y]};
-        for (auto i : X)
+        for (auto j : X) {
+	  int prediction = getPrediction(X, classifiers, i, j);
+	  //printf("%d | ", prediction);
           tree_error += (sol.predict(X[i]) != y) * X.weight(i);
+	  if (sol.predict(X[i]) == y) {
+	    //printf("%d |  ", X.weight(i));
+	    B.setWeight(y, i, X.weight(i));
+	    //int vecWeights = B.getWeight(y, i);
+	    //if (vecWeights == X.weight(i)) printf("YES ");
+	  }
+	}
       }
     }
+    printf("\n");
   }
 
+  //printf("%f \n", B.accuracy());
   return 0;
 }
 
