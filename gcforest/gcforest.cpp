@@ -20,9 +20,8 @@ using namespace std;
 using namespace blossom;
 
 // Returns the prediction of the j-th tree of the forest, for the i-th for data point
-int getPrediction(WeightedDataset<int>::List X, std::vector<WeakClassifier> classifiers, int j, int i) {
-  Tree<double> * sol = &(classifiers[j].T);
-  return (*sol).predict(X[i]);
+int getPrediction(WeightedDataset<int>::List X, Tree<double> * sol, int j, int i) {
+  return sol->predict(X[i]);
 }
 
 template <template <typename> class ErrorPolicy = WeightedError,
@@ -89,7 +88,8 @@ int run_algorithm(DTOptions &opt) {
 
   // Adaboost resulting forest
   std::vector<WeakClassifier> classifiers = A.getClassifier();
-  //std::vector<int> predictions[classifiers.size()];
+  std::vector<int> predictions[classifiers.size()];
+  std::vector<int> label[classifiers.size()];
 
   // Backtracking initialization
   //if (opt.mindepth) {
@@ -103,30 +103,32 @@ int run_algorithm(DTOptions &opt) {
     //B.minimize_error();
   //}
 
+
   // Work in progress: solving with CG
   for (int i = 0 ; i < classifiers.size() ; i++) {
-    Tree<double> sol = classifiers[i].T;
+    Tree<double> * sol = &(classifiers[i].T);
     if (opt.verified) {
       //E_t tree_error = 0;
       for (auto y{0}; y < 2; ++y) {
         auto X{(*training_set)[y]};
-        for (auto j : X) {
-	  int prediction = getPrediction(X, classifiers, i, j);
+	for (auto j : X) {
+	  int prediction = getPrediction(X, sol, i, j);
+	  // For some reason, push_back putting very random values at some places here. Probably a memory problem, but why? 
 	  //predictions[i].push_back(prediction);
 	  //printf("%d | ", predictions[i][j]);
           //tree_error += (sol.predict(X[i]) != y) * X.weight(i);
-	  if (sol.predict(X[i]) == y) {
-	    B.setWeight(i, j, X.weight(i));
-	    //int vecWeights = B.getWeight(i, j);
+	  if (prediction == y) {
+	    // Which parameters for setWeight ?
+	    B.setWeight(y, i, X.weight(i));
+	    //int vecWeights = B.getWeight(y, i);
 	    //if (vecWeights == X.weight(i)) printf("YES ");
 	  }
 	}
       }
     }
-    printf("\n");
+    //printf("\n");
   }
 
-  //printf("%f \n", B.accuracy());
   return 0;
 }
 
