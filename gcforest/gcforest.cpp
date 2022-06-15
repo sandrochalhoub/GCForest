@@ -20,9 +20,9 @@ using namespace std;
 using namespace blossom;
 
 // Returns the prediction of the current tree of the forest, for the i-th for data point
-int getPrediction(WeightedDataset<int>::List X, std::vector<WeakClassifier> classifiers, int j, int i) {
-  Tree<double>* sol = &(classifiers[j].T);
-  return sol->predict(X[i]);
+int getPrediction(WeightedDataset<int>::List* X, std::vector<WeakClassifier>* classifiers, int j, int i) {
+  Tree<double>* sol = &((*classifiers)[j].T);
+  return sol->predict((*X)[i]);
 }
 
 template <template <typename> class ErrorPolicy = WeightedError,
@@ -86,66 +86,39 @@ int run_algorithm(DTOptions &opt) {
   A.train();
   printf("\n");
 
+  ////// Reminder: 1000000 is supposed to be the size of the training set, which we can only get with X.size() declared later. Still thinking of a solution
   std::vector<WeakClassifier> classifiers = A.getClassifier();
-  std::vector<std::vector<int>> predictions;
-  std::vector<int> weights;
-  std::vector<std::vector<int>> label;
-  std::vector<int> cplex_vector;
+  std::vector<std::vector<int>> predictions(classifiers.size(), vector<int>(1000000, 0));
+  std::vector<int> weights(classifiers.size());
+  std::vector<std::vector<int>> label(classifiers.size(), vector<int>(1000000, 0));
+  std::vector<int> cplex_vector(1000000);
   long unsigned int data_size; // Size of the training set
-
-  ////// Backtracking initialization
-  /*
-  if (opt.mindepth) {
-    if (opt.minsize)
-      B.minimize_error_depth_size();
-    else
-      B.minimize_error_depth();
-  } else {
-    if (opt.minsize)
-     B.set_size_objective();
-    B.minimize_error();
-  }
-  */
-
 
   ////// Work in progress: solving with CG
   for (int j = 0 ; j < classifiers.size() ; j++) {
     if (opt.verified) {
-      //E_t tree_error = 0;
       for (auto y{0}; y < 2; ++y) {
         auto X{(*training_set)[y]};
 	data_size = X.size();
 	for (auto i : X) {
-	  int sum = 0;
-	  int prediction = getPrediction(X, classifiers, j, i);
-	  //printf("%d | ", prediction);	   
-	  //// For some reason, push_back putting very random values at some places here. Probably a memory problem, but why?
-	  
+	  int prediction = getPrediction(&X, &classifiers, j, i);
+	  predictions[j][i] = prediction;	   
+	  ////// Reminder to ask about direct access / push_back / insert
 	  //auto posPred = predictions[j].begin() + i;
 	  //predictions[j].insert(posPred, prediction);
 	  //predictions[j].push_back(prediction);
 	  //printf("%d | ", predictions[j][i]);
 	  
-          //tree_error += (sol.predict(X[j]) != y) * X.weight(j);
-	  
 	  if (prediction == y) {
-	    auto posWeights = weights.begin() + j;
-	    weights.insert(posWeights, X.weight(i));
-	    sum += weights[j] * prediction;
-	    printf("%d | ", weights[j]);
+	    weights[j] = X.weight(i);	    
+	    //auto posWeights = weights.begin() + j;
+	    //weights.insert(posWeights, X.weight(i));
+	    //printf("%d | ", weights[j]);
+
 	    //// Which parameters for setWeight ?
 	    B.setWeight(y, j, weights[j]);
 	    //int vecWeights = B.getWeight(y, j);
 	    //printf("%d ", vecWeights);
-
-	    /*
-	    if (i == data_size) {
-	      //auto posCplex = cplex_vector.begin() + i;
-	      if(weights[j] * prediction > 0) cplex_vector.push_back(1);
-    	      else cplex_vector.push_back(-1);
-	      printf("%d | ", cplex_vector[i]);
-	    }
-	    */
 	  }
 	}
       }
@@ -154,17 +127,16 @@ int run_algorithm(DTOptions &opt) {
   }
 
   ////// Computing the f[i] vector, = 1 if the sum > 0, = -1 otherwise
-
-  /*
   for (int i = 0 ; i < data_size ; i++) {
-    int sum = 0
+    int sum = 0;
     for (int j = 0 ; j < classifiers.size() ; j++) {
 	sum += weights[j] * predictions[j][i];
     }
-    if(weights[j] * predictions[j][i] > 0) cplex_vector[i] = 1;
+    if(sum > 0) cplex_vector[i] = 1;
     else cplex_vector[i] = -1;
+    //printf("%d | ", cplex_vector[i]);
   }
-  */
+
   return 0;
 }
 
