@@ -19,8 +19,9 @@ ILOSTLBEGIN
 using namespace std;
 using namespace blossom;
 
-// Returns the prediction of the j-th tree of the forest, for the i-th for data point
-int getPrediction(WeightedDataset<int>::List X, Tree<double> * sol, int j, int i) {
+// Returns the prediction of the current tree of the forest, for the i-th for data point
+int getPrediction(WeightedDataset<int>::List X, std::vector<WeakClassifier> classifiers, int j, int i) {
+  Tree<double>* sol = &(classifiers[j].T);
   return sol->predict(X[i]);
 }
 
@@ -73,10 +74,9 @@ int run_algorithm(DTOptions &opt) {
   }
 
   ////// CREATING THE ALGORITHMS
-
-  // Adaboost for the forest initialization.
+  ////// Adaboost for the forest initialization.
   Adaboost A(*training_set, opt);
-  // BacktrackingAlgorithm for all subsequent iterations.
+  ////// BacktrackingAlgorithm for all subsequent iterations.
   BacktrackingAlgorithm<ErrorPolicy, E_t> B(*training_set, opt);
 
   if (opt.verbosity >= DTOptions::NORMAL)
@@ -84,44 +84,68 @@ int run_algorithm(DTOptions &opt) {
 
   ////// SOLVING
   A.train();
-  printf("\n\n");
+  printf("\n");
 
-  // Adaboost resulting forest
   std::vector<WeakClassifier> classifiers = A.getClassifier();
-  std::vector<int> predictions[classifiers.size()];
-  std::vector<int> label[classifiers.size()];
+  std::vector<std::vector<int>> predictions;
+  std::vector<int> weights;
+  std::vector<std::vector<int>> label;
+  std::vector<int> cplex_vector;
+  long unsigned int data_size; // Size of the training set
 
-  // Backtracking initialization
-  //if (opt.mindepth) {
-    //if (opt.minsize)
-      //B.minimize_error_depth_size();
-    //else
-      //B.minimize_error_depth();
-  //} else {
-    //if (opt.minsize)
-     //B.set_size_objective();
-    //B.minimize_error();
-  //}
+  ////// Backtracking initialization
+  /*
+  if (opt.mindepth) {
+    if (opt.minsize)
+      B.minimize_error_depth_size();
+    else
+      B.minimize_error_depth();
+  } else {
+    if (opt.minsize)
+     B.set_size_objective();
+    B.minimize_error();
+  }
+  */
 
 
-  // Work in progress: solving with CG
-  for (int i = 0 ; i < classifiers.size() ; i++) {
-    Tree<double> * sol = &(classifiers[i].T);
+  ////// Work in progress: solving with CG
+  for (int j = 0 ; j < classifiers.size() ; j++) {
     if (opt.verified) {
       //E_t tree_error = 0;
       for (auto y{0}; y < 2; ++y) {
         auto X{(*training_set)[y]};
-	for (auto j : X) {
-	  int prediction = getPrediction(X, sol, i, j);
-	  // For some reason, push_back putting very random values at some places here. Probably a memory problem, but why? 
-	  //predictions[i].push_back(prediction);
-	  //printf("%d | ", predictions[i][j]);
-          //tree_error += (sol.predict(X[i]) != y) * X.weight(i);
+	data_size = X.size();
+	for (auto i : X) {
+	  int sum = 0;
+	  int prediction = getPrediction(X, classifiers, j, i);
+	  //printf("%d | ", prediction);	   
+	  //// For some reason, push_back putting very random values at some places here. Probably a memory problem, but why?
+	  
+	  //auto posPred = predictions[j].begin() + i;
+	  //predictions[j].insert(posPred, prediction);
+	  //predictions[j].push_back(prediction);
+	  //printf("%d | ", predictions[j][i]);
+	  
+          //tree_error += (sol.predict(X[j]) != y) * X.weight(j);
+	  
 	  if (prediction == y) {
-	    // Which parameters for setWeight ?
-	    B.setWeight(y, i, X.weight(i));
-	    //int vecWeights = B.getWeight(y, i);
-	    //if (vecWeights == X.weight(i)) printf("YES ");
+	    auto posWeights = weights.begin() + j;
+	    weights.insert(posWeights, X.weight(i));
+	    sum += weights[j] * prediction;
+	    printf("%d | ", weights[j]);
+	    //// Which parameters for setWeight ?
+	    B.setWeight(y, j, weights[j]);
+	    //int vecWeights = B.getWeight(y, j);
+	    //printf("%d ", vecWeights);
+
+	    /*
+	    if (i == data_size) {
+	      //auto posCplex = cplex_vector.begin() + i;
+	      if(weights[j] * prediction > 0) cplex_vector.push_back(1);
+    	      else cplex_vector.push_back(-1);
+	      printf("%d | ", cplex_vector[i]);
+	    }
+	    */
 	  }
 	}
       }
@@ -129,6 +153,18 @@ int run_algorithm(DTOptions &opt) {
     //printf("\n");
   }
 
+  ////// Computing the f[i] vector, = 1 if the sum > 0, = -1 otherwise
+
+  /*
+  for (int i = 0 ; i < data_size ; i++) {
+    int sum = 0
+    for (int j = 0 ; j < classifiers.size() ; j++) {
+	sum += weights[j] * predictions[j][i];
+    }
+    if(weights[j] * predictions[j][i] > 0) cplex_vector[i] = 1;
+    else cplex_vector[i] = -1;
+  }
+  */
   return 0;
 }
 
