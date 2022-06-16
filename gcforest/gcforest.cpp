@@ -100,25 +100,26 @@ int run_algorithm(DTOptions &opt) {
       for (auto y{0}; y < 2; ++y) {
         auto X{(*training_set)[y]};
 	data_size = X.size();
-	for (auto i : X) {
+	for (int i = 0 ; i < data_size ; i++) {
+	  //printf("%d | ", i);
 	  int prediction = getPrediction(&X, &classifiers, j, i);
 	  predictions[j][i] = prediction;	   
 	  ////// Reminder to ask about direct access / push_back / insert
 	  //auto posPred = predictions[j].begin() + i;
 	  //predictions[j].insert(posPred, prediction);
 	  //predictions[j].push_back(prediction);
-	  //printf("%d | ", predictions[j][i]);
+	  //printf("%d \n", predictions[j][i]);
 	  
 	  if (prediction == y) {
 	    weights[j] = X.weight(i);	    
 	    //auto posWeights = weights.begin() + j;
 	    //weights.insert(posWeights, X.weight(i));
-	    //printf("%d | ", weights[j]);
+	    //printf("%d | %d \n", i, weights[j]);
 
 	    //// Which parameters for setWeight ?
-	    B.setWeight(y, j, weights[j]);
-	    //int vecWeights = B.getWeight(y, j);
-	    //printf("%d ", vecWeights);
+	    B.setWeight(y, i, weights[j]);
+	    int vecWeights = B.getWeight(y, i);
+	    printf("%d | %d \n", i, vecWeights);
 	  }
 	}
       }
@@ -130,11 +131,14 @@ int run_algorithm(DTOptions &opt) {
   for (int i = 0 ; i < data_size ; i++) {
     int sum = 0;
     for (int j = 0 ; j < classifiers.size() ; j++) {
-	sum += weights[j] * predictions[j][i];
+	if (predictions[j][i] == 0)
+	  sum += weights[j] * -1;
+	else
+	  sum += weights[j] * 1;
     }
     if(sum > 0) cplex_vector[i] = 1;
     else cplex_vector[i] = -1;
-    //printf("%d | ", cplex_vector[i]);
+    //printf("%d | %d \n", i, cplex_vector[i]);
   }
 
   return 0;
