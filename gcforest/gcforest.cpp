@@ -25,6 +25,33 @@ int getPrediction(WeightedDataset<int>::List* X, std::vector<WeakClassifier>* cl
   return sol->predict((*X)[i]);
 }
 
+// Column generation method with CPLEX
+int generateColumns(IloIntArray weights, IloIntArray predictions, IloIntArray labels) {
+  IloEnv env;
+
+  try {
+      IloModel primal(env);
+      IloCplex primalSolver(primal);
+      /// COLUMN-GENERATION PROCEDURE
+      IloIntArray newWeights(env, weights.getSize());
+
+      for (;;) {
+         /// OPTIMIZE OVER CURRENT PATTERNS
+         primalSolver.solve();
+         /// FIND AND ADD A NEW PATTERN
+	 
+      }
+  } catch (IloException& ex) {
+      cerr << "Error: " << ex << endl;
+  } catch (...) {
+      cerr << "Error" << endl;
+  }
+
+  env.end();
+
+  return 0;
+}
+
 template <template <typename> class ErrorPolicy = WeightedError,
           typename E_t = int>
 int run_algorithm(DTOptions &opt) {
@@ -34,7 +61,6 @@ int run_algorithm(DTOptions &opt) {
   WeightedDataset<E_t> input;
 
   ////// READING
-
   try {
     read_binary(input, opt);
   } catch (const std::exception &e) {
@@ -76,9 +102,9 @@ int run_algorithm(DTOptions &opt) {
   }
 
   ////// CREATING THE ALGORITHMS
-  ////// Adaboost for the forest initialization.
+  // Adaboost for the forest initialization.
   Adaboost A(*training_set, opt);
-  ////// BacktrackingAlgorithm for all subsequent iterations.
+  // BacktrackingAlgorithm for all subsequent iterations.
   BacktrackingAlgorithm<ErrorPolicy, E_t> B(*training_set, opt);
 
   if (opt.verbosity >= DTOptions::NORMAL)
@@ -88,57 +114,84 @@ int run_algorithm(DTOptions &opt) {
   A.train();
   printf("\n");
 
+  // All data points whose class is 0
+  auto classZero{(*training_set)[0]};
+  // All data points whose class is 1
+  auto classOne{(*training_set)[1]};
+  // Size of the entire training set
+  int data_size = classZero.size() + classOne.size();
+  //printf("\n %d \n", data_size);
 
-  ////// Reminder: 1000000 is supposed to be the size of the training set, which we can only get with X.size() declared later. Still thinking of a solution
   std::vector<WeakClassifier> classifiers = A.getClassifier();
-  std::vector<std::vector<int>> predictions(classifiers.size(), vector<int>(1000000, 0));
+
+  std::vector<std::vector<int>> predictions(classifiers.size(), vector<int>(data_size, 0));
   //IloIntArray cplex_predictions(env);
+
   std::vector<int> weights(classifiers.size());
   IloIntArray cplex_weights(env);
-  std::vector<std::vector<int>> label(classifiers.size(), vector<int>(1000000, 0));
-  //IloIntArray cplex_labels(env);
-  std::vector<int> decision_vector(1000000);
-  IloIntArray cplex_vector(env);
-  long unsigned int data_size = 0; // Size of the training set
 
-  ////// Work in progress: solving with CG
+  std::vector<int> label(data_size, 0);
+  IloIntArray cplex_labels(env);
+
+  std::vector<int> decision_vector(data_size);
+  IloNumArray cplex_vector(env);
+
+  ////// WORK IN PROGRESS
   for (int j = 0 ; j < classifiers.size() ; j++) {
+    //printf("\nTREE NUMBER %d \n\n", j);
     if (opt.verified) {
-      for (auto y{0}; y < 2; ++y) {
-        auto X{(*training_set)[y]};
-	//printf("%f ", X.operator[](1));
-	data_size = X.size();
 	for (int i = 0 ; i < data_size ; i++) {
-	  //printf("%d | ", i);
-	  int prediction = getPrediction(&X, &classifiers, j, i);
-	  predictions[j][i] = prediction;	   
-	  ////// Reminder to ask about direct access / push_back / insert
-	  //auto posPred = predictions[j].begin() + i;
-	  //predictions[j].insert(posPred, prediction);
-	  //predictions[j].push_back(prediction);
-	  //printf("%d | ", predictions[j][i]);
+	  ////// CLASS ZERO
+	  if (i < classZero.size()) {
+	    //printf("%d | ", i);
+	    int prediction = getPrediction(&classZero, &classifiers, j, i);
+	    predictions[j][i] = prediction;	   
+	    ////// Reminder to ask about direct access / push_back / insert
+	    //auto posPred = predictions[j].begin() + i;
+	    //predictions[j].insert(posPred, prediction);
+	    //predictions[j].push_back(prediction);
+	    //printf("%d | ", predictions[j][i]);
 	  
-	  if (prediction == y) {
-	    weights[j] = X.weight(i);    
-	    //auto posWeights = weights.begin() + j;
-	    //weights.insert(posWeights, X.weight(i));
-	    //printf("%d | %d \n", i, weights[j]);
-
-	    //// Which parameters for setWeight ?
-	    B.setWeight(y, i, weights[j]);
-	    /*
-	    int vecWeights = B.getWeight(y, i);
-	    printf("%d | %d \n", i, vecWeights);
-	    */
+	    if (prediction == 0) {
+	      weights[j] = classZero.weight(i);    
+	      //auto posWeights = weights.begin() + j;
+	      //weights.insert(posWeights, X.weight(i));
+	      //printf("%d | %d \n", i, weights[j]);
+	      B.setWeight(0, i, weights[j]);
+	      /*
+	      int vecWeights = B.getWeight(0, i);
+	      printf("%d | %d \n", i, vecWeights);
+	      */
+	    }
+	  ////// CLASS ONE
+	  } else {
+	      //printf("%d | ", i);
+	      int prediction = getPrediction(&classOne, &classifiers, j, i);
+	      predictions[j][i] = prediction;	   
+	      //auto posPred = predictions[j].begin() + i;
+	      //predictions[j].insert(posPred, prediction);
+	      //predictions[j].push_back(prediction);
+	      //printf("%d | ", predictions[j][i]);
+	  
+	      if (prediction == 1) {
+	        weights[j] = classOne.weight(i);    
+	        //auto posWeights = weights.begin() + j;
+	        //weights.insert(posWeights, X.weight(i));
+	        //printf("%d | %d \n", i, weights[j]);
+	        B.setWeight(1, i, weights[j]);
+	        /*
+	        int vecWeights = B.getWeight(1, i);
+	        printf("%d | %d \n", i, vecWeights);
+	        */
+	    }
 	  }
 	}
-      }
     }
     //printf("\n");
   }
 
+
   ////// Computing the f[i] vector, = 1 if the sum > 0, = -1 otherwise
-  // still have the problem of determining data_size, it's different at X[0] and X[1]...
   for (int i = 0 ; i < data_size ; i++) {
     int sum = 0;
     for (int j = 0 ; j < classifiers.size() ; j++) {
@@ -147,7 +200,7 @@ int run_algorithm(DTOptions &opt) {
 	else
 	  sum += weights[j] * 1;
     }
-    if(sum > 0) decision_vector[i] = 1;
+    if(sum >= 0) decision_vector[i] = 1;
     else decision_vector[i] = -1;
     //printf("%d | %d \n", i, decision_vector[i]);
   }
@@ -160,9 +213,9 @@ int run_algorithm(DTOptions &opt) {
   }
 
   // Decision function
-  for (int i = 0 ; i < decision_vector.size() ; i++) {
+  for (int i = 0 ; i < data_size ; i++) {
     cplex_vector.add(decision_vector[i]);
-    //printf("%d | %lu \n", i, cplex_weights.operator[](i));
+    //printf("%d | %f \n", i, cplex_vector.operator[](i));
   }
 
   return 0;
