@@ -133,7 +133,7 @@ int run_algorithm(DTOptions &opt) {
   IloIntArray cplex_classes(env);
 
   std::vector<int> decision_vector(data_size);
-  IloNumArray cplex_vector(env);
+  IloNumArray forest_prediction(env);
 
   ////// WORK IN PROGRESS
   for (int j = 0 ; j < classifiers.size() ; j++) {
@@ -225,8 +225,8 @@ int run_algorithm(DTOptions &opt) {
 
   // Decision function
   for (int i = 0 ; i < data_size ; i++) {
-    cplex_vector.add(decision_vector[i]);
-    //printf("%d | %f \n", i, cplex_vector.operator[](i));
+    forest_prediction.add(decision_vector[i]);
+    //printf("%d | %f \n", i, forest_prediction.operator[](i));
   }
 
   return 0;
