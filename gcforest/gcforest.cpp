@@ -19,7 +19,7 @@ ILOSTLBEGIN
 using namespace std;
 using namespace blossom;
 
-// Returns the prediction of the current tree of the forest, for the i-th for data point
+// Returns the prediction of the j-th tree of the forest, for the i-th data point
 int getPrediction(WeightedDataset<int>::List* X, std::vector<WeakClassifier>* classifiers, int j, int i) {
   Tree<double>* sol = &((*classifiers)[j].T);
   return sol->predict((*X)[i]);
@@ -28,6 +28,8 @@ int getPrediction(WeightedDataset<int>::List* X, std::vector<WeakClassifier>* cl
 template <template <typename> class ErrorPolicy = WeightedError,
           typename E_t = int>
 int run_algorithm(DTOptions &opt) {
+
+  IloEnv env;
 
   WeightedDataset<E_t> input;
 
@@ -86,19 +88,25 @@ int run_algorithm(DTOptions &opt) {
   A.train();
   printf("\n");
 
+
   ////// Reminder: 1000000 is supposed to be the size of the training set, which we can only get with X.size() declared later. Still thinking of a solution
   std::vector<WeakClassifier> classifiers = A.getClassifier();
   std::vector<std::vector<int>> predictions(classifiers.size(), vector<int>(1000000, 0));
+  //IloIntArray cplex_predictions(env);
   std::vector<int> weights(classifiers.size());
+  IloIntArray cplex_weights(env);
   std::vector<std::vector<int>> label(classifiers.size(), vector<int>(1000000, 0));
-  std::vector<int> cplex_vector(1000000);
-  long unsigned int data_size; // Size of the training set
+  //IloIntArray cplex_labels(env);
+  std::vector<int> decision_vector(1000000);
+  IloIntArray cplex_vector(env);
+  long unsigned int data_size = 0; // Size of the training set
 
   ////// Work in progress: solving with CG
   for (int j = 0 ; j < classifiers.size() ; j++) {
     if (opt.verified) {
       for (auto y{0}; y < 2; ++y) {
         auto X{(*training_set)[y]};
+	//printf("%f ", X.operator[](1));
 	data_size = X.size();
 	for (int i = 0 ; i < data_size ; i++) {
 	  //printf("%d | ", i);
@@ -108,18 +116,20 @@ int run_algorithm(DTOptions &opt) {
 	  //auto posPred = predictions[j].begin() + i;
 	  //predictions[j].insert(posPred, prediction);
 	  //predictions[j].push_back(prediction);
-	  //printf("%d \n", predictions[j][i]);
+	  //printf("%d | ", predictions[j][i]);
 	  
 	  if (prediction == y) {
-	    weights[j] = X.weight(i);	    
+	    weights[j] = X.weight(i);    
 	    //auto posWeights = weights.begin() + j;
 	    //weights.insert(posWeights, X.weight(i));
 	    //printf("%d | %d \n", i, weights[j]);
 
 	    //// Which parameters for setWeight ?
 	    B.setWeight(y, i, weights[j]);
+	    /*
 	    int vecWeights = B.getWeight(y, i);
 	    printf("%d | %d \n", i, vecWeights);
+	    */
 	  }
 	}
       }
@@ -128,6 +138,7 @@ int run_algorithm(DTOptions &opt) {
   }
 
   ////// Computing the f[i] vector, = 1 if the sum > 0, = -1 otherwise
+  // still have the problem of determining data_size, it's different at X[0] and X[1]...
   for (int i = 0 ; i < data_size ; i++) {
     int sum = 0;
     for (int j = 0 ; j < classifiers.size() ; j++) {
@@ -136,9 +147,22 @@ int run_algorithm(DTOptions &opt) {
 	else
 	  sum += weights[j] * 1;
     }
-    if(sum > 0) cplex_vector[i] = 1;
-    else cplex_vector[i] = -1;
-    //printf("%d | %d \n", i, cplex_vector[i]);
+    if(sum > 0) decision_vector[i] = 1;
+    else decision_vector[i] = -1;
+    //printf("%d | %d \n", i, decision_vector[i]);
+  }
+
+  ////// CPLEX vectors
+  // Weights
+  for (int i = 0 ; i < weights.size() ; i++) {
+    cplex_weights.add(weights[i]);
+    //printf("%d | %lu \n", i, cplex_weights.operator[](i));
+  }
+
+  // Decision function
+  for (int i = 0 ; i < decision_vector.size() ; i++) {
+    cplex_vector.add(decision_vector[i]);
+    //printf("%d | %lu \n", i, cplex_weights.operator[](i));
   }
 
   return 0;
