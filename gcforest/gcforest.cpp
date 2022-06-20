@@ -130,8 +130,7 @@ int run_algorithm(DTOptions &opt) {
   std::vector<int> weights(classifiers.size());
   IloIntArray cplex_weights(env);
 
-  std::vector<int> label(data_size, 0);
-  IloIntArray cplex_labels(env);
+  IloIntArray cplex_classes(env);
 
   std::vector<int> decision_vector(data_size);
   IloNumArray cplex_vector(env);
@@ -190,15 +189,27 @@ int run_algorithm(DTOptions &opt) {
     //printf("\n");
   }
 
+  ////// Creating the class vector, for CPLEX use
+  for (int i = 0 ; i < data_size ; i++) {
+    if (i < classZero.size()) cplex_classes.add(0);
+    else cplex_classes.add(1);
+  }
 
   ////// Computing the f[i] vector, = 1 if the sum > 0, = -1 otherwise
   for (int i = 0 ; i < data_size ; i++) {
     int sum = 0;
     for (int j = 0 ; j < classifiers.size() ; j++) {
-	if (predictions[j][i] == 0)
-	  sum += weights[j] * -1;
-	else
-	  sum += weights[j] * 1;
+	if (i < classZero.size()) {
+	  if (predictions[j][i] == 0)
+	    sum += weights[j] * 1;
+	  else
+	    sum += weights[j] * -1;
+	} else {
+	  if (predictions[j][i] == 1)
+	    sum += weights[j] * 1;
+	  else
+	    sum += weights[j] * -1;
+	}
     }
     if(sum >= 0) decision_vector[i] = 1;
     else decision_vector[i] = -1;

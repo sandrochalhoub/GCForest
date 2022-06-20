@@ -1,0 +1,30 @@
+
+*** These modified files were found in JOE when it aborted on Mon Jun 20 15:16:12 2022
+*** JOE was aborted because the terminal closed
+
+*** Fichier '(Sans nom)'
+/home/schalhoub/Documents/Blossom_Git/blossom/.git/COMMIT_EDITMSG
+
+*** Fichier '/home/schalhoub/Documents/Blossom_Git/blossom/.git/COMMIT_EDITMSG'
+update gcforest
+
+# Veuillez saisir le message de validation pour vos modifications. Les lignes
+# commençant par '#' seront ignorées, et un message vide abandonne la validation.
+#
+# Date :       Mon Jun 20 15:14:56 2022 +0200
+# Validateur : Sandro Chalhoub <schalhoub@gallagher.laas.fr>
+#
+# Sur la branche gcforest
+# Votre branche est en avance sur 'origin/gcforest' de 1 commit.
+#   (utilisez "git push" pour publier vos commits locaux)
+#
+# Modifications qui seront validées :
+#	modifié :         gcforest/gcforest.cpp
+#
+
+
+
+
+*** Fichier '* Startup Log *'
+Traitement de '/etc/joe/editorrc'...Traitement de '/etc/joe/ftyperc'...Finished processing /etc/joe/ftyperc
+Finished processing /etc/joe/editorrc
