@@ -13,20 +13,20 @@
 
 ILOSTLBEGIN
 
-//IloInt nbElements;
+//IloIloInt nbElements;
 //IloNumArray p;
 
 using namespace std;
 using namespace blossom;
 
 // Returns the prediction of the j-th tree of the forest, for the i-th data point
-int getPrediction(WeightedDataset<int>::List* X, std::vector<WeakClassifier>* classifiers, int j, int i) {
+IloInt getPrediction(WeightedDataset<int>::List* X, std::vector<WeakClassifier>* classifiers, IloInt j, IloInt i) {
   Tree<double>* sol = &((*classifiers)[j].T);
   return sol->predict((*X)[i]);
 }
 
 // Column generation method with CPLEX, IN PROGRESS
-int generateColumns(IloIntArray weights, IloIntArray predictions, IloIntArray labels) {
+IloInt generateColumns(IloIntArray weights, IloIntArray predictions, IloIntArray labels) {
   IloEnv env;
 
   try {
@@ -54,7 +54,7 @@ int generateColumns(IloIntArray weights, IloIntArray predictions, IloIntArray la
 
 template <template <typename> class ErrorPolicy = WeightedError,
           typename E_t = int>
-int run_algorithm(DTOptions &opt) {
+IloInt run_algorithm(DTOptions &opt) {
 
   IloEnv env;
 
@@ -119,111 +119,90 @@ int run_algorithm(DTOptions &opt) {
   // All data points whose class is 1
   auto classOne{(*training_set)[1]};
   // Size of the entire training set
-  int data_size = classZero.size() + classOne.size();
-  //printf("\n %d \n", data_size);
-
+  IloInt data_size = classZero.size() + classOne.size();
+  // The forest built by Adaboost
   std::vector<WeakClassifier> classifiers = A.getClassifier();
 
-  std::vector<std::vector<int>> predictions(classifiers.size(), vector<int>(data_size, 0));
-  //IloIntArray cplex_predictions(env);
+  ////// CPLEX vectors
+  // Prediction matrix, Pi[j-th three][i-th data point]
+  IloArray<IloIntArray> predictions(env, classifiers.size());
+  // Weights vector
+  IloIntArray weights(env);
+  // Classes vector
+  IloIntArray classes(env);
+  // Decisions vector, f[i] = 1 / -1
+  IloIntArray decisions(env);
 
-  std::vector<int> weights(classifiers.size());
-  IloIntArray cplex_weights(env);
-
-  IloIntArray cplex_classes(env);
-
+  ////// Obsolete
+  /*std::vector<std::vector<int>> predictions(classifiers.size(), vector<int>(data_size, 0));
+  //std::vector<int> weights(classifiers.size());
   std::vector<int> decision_vector(data_size);
-  IloNumArray forest_prediction(env);
+  */
 
   ////// BUILDING PREDICTIONS AND WEIGHTS VECTORS
-  for (int j = 0 ; j < classifiers.size() ; j++) {
+  for (IloInt j = 0 ; j < classifiers.size() ; j++) {
+    predictions[j] = IloIntArray(env, data_size, 0, 1, ILOINT);
     //printf("\nTREE NUMBER %d \n\n", j);
     if (opt.verified) {
-	for (int i = 0 ; i < data_size ; i++) {
+	for (IloInt i = 0 ; i < data_size ; i++) {
 	  ////// CLASS ZERO
 	  if (i < classZero.size()) {
 	    //printf("%d | ", i);
-	    int prediction = getPrediction(&classZero, &classifiers, j, i);
+	    IloInt prediction = getPrediction(&classZero, &classifiers, j, i);
 	    predictions[j][i] = prediction;	   
-	    ////// Reminder to ask about direct access / push_back / insert
-	    //auto posPred = predictions[j].begin() + i;
-	    //predictions[j].insert(posPred, prediction);
-	    //predictions[j].push_back(prediction);
-	    //printf("%d | ", predictions[j][i]);
-	  
+	    //printf("%lu\n", predictions[j][i]);
+	    /*
 	    if (prediction == 0) {
 	      weights[j] = classZero.weight(i);    
-	      //auto posWeights = weights.begin() + j;
-	      //weights.insert(posWeights, X.weight(i));
-	      //printf("%d | %d \n", i, weights[j]);
+	      printf("%d | %d \n", i, weights[j]);
 	      B.setWeight(0, i, weights[j]);
-	      /*
-	      int vecWeights = B.getWeight(0, i);
+	      IloInt vecWeights = B.getWeight(0, i);
 	      printf("%d | %d \n", i, vecWeights);
-	      */
 	    }
+	    */
 	  ////// CLASS ONE
 	  } else {
 	      //printf("%d | ", i);
-	      int prediction = getPrediction(&classOne, &classifiers, j, i);
-	      predictions[j][i] = prediction;	   
-	      //auto posPred = predictions[j].begin() + i;
-	      //predictions[j].insert(posPred, prediction);
-	      //predictions[j].push_back(prediction);
-	      //printf("%d | ", predictions[j][i]);
-	  
+	      IloInt prediction = getPrediction(&classOne, &classifiers, j, i);
+	      predictions[j][i] = prediction;
+	      //printf("%lu\n" predictions[j][i]);
+	      /*
 	      if (prediction == 1) {
 	        weights[j] = classOne.weight(i);    
-	        //auto posWeights = weights.begin() + j;
-	        //weights.insert(posWeights, X.weight(i));
 	        //printf("%d | %d \n", i, weights[j]);
 	        B.setWeight(1, i, weights[j]);
-	        /*
-	        int vecWeights = B.getWeight(1, i);
+	        IloInt vecWeights = B.getWeight(1, i);
 	        printf("%d | %d \n", i, vecWeights);
-	        */
-	    }
+	      }
+	      */
 	  }
 	}
     }
     //printf("\n");
   }
 
-  ////// CPLEX vectors
-
-  // Class vector
-  for (int i = 0 ; i < data_size ; i++) {
-    if (i < classZero.size()) cplex_classes.add(0);
-    else cplex_classes.add(1);
-    //printf("%lu | ", cplex_classes.operator[](i));
-  }
-
-  // Forest prediction vector. Still not sure what it's used for
-  for (int i = 0 ; i < data_size ; i++) {
-    int sum = 0;
-    for (int j = 0 ; j < classifiers.size() ; j++) {
+  // Filling the decisions and classes vectors
+  for (IloInt i = 0 ; i < data_size ; i++) {
+    if (i < classZero.size()) classes.add(0);
+    else classes.add(1);
+    //printf("%lu | ", classes.operator[](i));
+    IloInt sum = 0;
+    for (IloInt j = 0 ; j < classifiers.size() ; j++) {
 	if (i < classZero.size()) {
 	  if (predictions[j][i] == 0)
-	    sum += weights[j] * 1;
+	    sum += 1;
 	  else
-	    sum += weights[j] * -1;
+	    sum += -1;
 	} else {
 	  if (predictions[j][i] == 1)
-	    sum += weights[j] * 1;
+	    sum += 1;
 	  else
-	    sum += weights[j] * -1;
+	    sum += -1;
 	}
     }
-    if(sum >= 0) decision_vector[i] = 1;
-    else decision_vector[i] = -1;
-    forest_prediction.add(decision_vector[i]);
-    //printf("%d | %f \n", i, forest_prediction.operator[](i));
-  }
-
-  // Weights vector
-  for (int i = 0 ; i < weights.size() ; i++) {
-    cplex_weights.add(weights[i]);
-    //printf("%d | %lu \n", i, cplex_weights.operator[](i));
+    if(sum >= 0)  decisions.add(1);
+    else  decisions.add(-1);
+    //printf("i = %d | class = %lu | prediction accuracy = %d \n", i, classes[i], decisions[i]);
   }
 
   return 0;
