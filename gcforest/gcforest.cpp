@@ -13,9 +13,6 @@
 
 ILOSTLBEGIN
 
-//IloIloInt nbElements;
-//IloNumArray p;
-
 using namespace std;
 using namespace blossom;
 
@@ -26,21 +23,29 @@ IloInt getPrediction(WeightedDataset<int>::List* X, std::vector<WeakClassifier>*
 }
 
 // Column generation method with CPLEX, IN PROGRESS
-IloInt generateColumns(IloIntArray weights, IloIntArray predictions, IloIntArray labels) {
+IloInt generateColumns(IloArray<IloIntArray> decisions) {
   IloEnv env;
 
   try {
       IloModel primal(env);
+      IloObjective obj = IloAdd(primal, IloMinimize(env));
       IloCplex primalSolver(primal);
-      /// COLUMN-GENERATION PROCEDURE
-      IloIntArray newWeights(env, weights.getSize());
 
-      for (;;) {
+      IloInt forestSize = predictions.getSize();
+      IloInt datasetSize = classes.getSize();
+      IloIntArray weights(env, forestSize);
+      IloIntArray z(env, datasetSize);
+      IloInt zInt;
+
+      /// COLUMN-GENERATION PROCEDURE
+
+
+      //for (;;) {
          /// OPTIMIZE OVER CURRENT PATTERNS
-         primalSolver.solve();
+         //primalSolver.solve();
          /// FIND AND ADD A NEW PATTERN
 	 
-      }
+      //}
   } catch (IloException& ex) {
       cerr << "Error: " << ex << endl;
   } catch (...) {
@@ -124,24 +129,22 @@ IloInt run_algorithm(DTOptions &opt) {
   std::vector<WeakClassifier> classifiers = A.getClassifier();
 
   ////// CPLEX vectors
-  // Prediction matrix, Pi[j-th three][i-th data point]
-  IloArray<IloIntArray> predictions(env, classifiers.size());
   // Weights vector
   IloIntArray weights(env);
-  // Classes vector
-  IloIntArray classes(env);
-  // Decisions vector, f[i] = 1 / -1
-  IloIntArray decisions(env);
+  // Decisions vector == 1 if predictions[j][i] == classes[i], -1 otherwise
+  IloArray<IloIntArray> decisions(env, classifiers.size());
 
   ////// Obsolete
   /*std::vector<std::vector<int>> predictions(classifiers.size(), vector<int>(data_size, 0));
-  //std::vector<int> weights(classifiers.size());
+  IloArray<IloIntArray> predictions(env, classifiers.size());
+  std::vector<int> weights(classifiers.size());
   std::vector<int> decision_vector(data_size);
   */
 
   ////// BUILDING PREDICTIONS AND WEIGHTS VECTORS
   for (IloInt j = 0 ; j < classifiers.size() ; j++) {
-    predictions[j] = IloIntArray(env, data_size, 0, 1, ILOINT);
+    //predictions[j] = IloIntArray(env, data_size, 0, 1, ILOINT);
+    decisions[j] = IloIntArray(env, data_size, 0, 1, ILOINT);
     //printf("\nTREE NUMBER %d \n\n", j);
     if (opt.verified) {
 	for (IloInt i = 0 ; i < data_size ; i++) {
@@ -149,8 +152,10 @@ IloInt run_algorithm(DTOptions &opt) {
 	  if (i < classZero.size()) {
 	    //printf("%d | ", i);
 	    IloInt prediction = getPrediction(&classZero, &classifiers, j, i);
-	    predictions[j][i] = prediction;	   
-	    //printf("%lu\n", predictions[j][i]);
+	    //predictions[j][i] = prediction;
+            if (prediction == 0) decisions[j][i] = 1;
+	    else decisions[j][i] = -1;	   
+	    //printf("%d\n", decisions[j][i]);
 	    /*
 	    if (prediction == 0) {
 	      weights[j] = classZero.weight(i);    
@@ -164,8 +169,9 @@ IloInt run_algorithm(DTOptions &opt) {
 	  } else {
 	      //printf("%d | ", i);
 	      IloInt prediction = getPrediction(&classOne, &classifiers, j, i);
-	      predictions[j][i] = prediction;
-	      //printf("%lu\n" predictions[j][i]);
+	      if (prediction == 1) decisions[j][i] = 1;
+	      else decisions[j][i] = -1;
+	      //printf("%d\n", decisions[j][i]);
 	      /*
 	      if (prediction == 1) {
 	        weights[j] = classOne.weight(i);    
@@ -181,29 +187,7 @@ IloInt run_algorithm(DTOptions &opt) {
     //printf("\n");
   }
 
-  // Filling the decisions and classes vectors
-  for (IloInt i = 0 ; i < data_size ; i++) {
-    if (i < classZero.size()) classes.add(0);
-    else classes.add(1);
-    //printf("%lu | ", classes.operator[](i));
-    IloInt sum = 0;
-    for (IloInt j = 0 ; j < classifiers.size() ; j++) {
-	if (i < classZero.size()) {
-	  if (predictions[j][i] == 0)
-	    sum += 1;
-	  else
-	    sum += -1;
-	} else {
-	  if (predictions[j][i] == 1)
-	    sum += 1;
-	  else
-	    sum += -1;
-	}
-    }
-    if(sum >= 0)  decisions.add(1);
-    else  decisions.add(-1);
-    //printf("i = %d | class = %lu | prediction accuracy = %d \n", i, classes[i], decisions[i]);
-  }
+  //generateColumns(predictions, classes);
 
   return 0;
 }
