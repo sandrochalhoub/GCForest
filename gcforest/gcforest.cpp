@@ -25,7 +25,7 @@ int getPrediction(WeightedDataset<int>::List* X, std::vector<WeakClassifier>* cl
   return sol->predict((*X)[i]);
 }
 
-// Column generation method with CPLEX
+// Column generation method with CPLEX, IN PROGRESS
 int generateColumns(IloIntArray weights, IloIntArray predictions, IloIntArray labels) {
   IloEnv env;
 
@@ -135,7 +135,7 @@ int run_algorithm(DTOptions &opt) {
   std::vector<int> decision_vector(data_size);
   IloNumArray forest_prediction(env);
 
-  ////// WORK IN PROGRESS
+  ////// BUILDING PREDICTIONS AND WEIGHTS VECTORS
   for (int j = 0 ; j < classifiers.size() ; j++) {
     //printf("\nTREE NUMBER %d \n\n", j);
     if (opt.verified) {
@@ -189,13 +189,16 @@ int run_algorithm(DTOptions &opt) {
     //printf("\n");
   }
 
-  ////// Creating the class vector, for CPLEX use
+  ////// CPLEX vectors
+
+  // Class vector
   for (int i = 0 ; i < data_size ; i++) {
     if (i < classZero.size()) cplex_classes.add(0);
     else cplex_classes.add(1);
+    //printf("%lu | ", cplex_classes.operator[](i));
   }
 
-  ////// Computing the f[i] vector, = 1 if the sum > 0, = -1 otherwise
+  // Forest prediction vector. Still not sure what it's used for
   for (int i = 0 ; i < data_size ; i++) {
     int sum = 0;
     for (int j = 0 ; j < classifiers.size() ; j++) {
@@ -213,20 +216,14 @@ int run_algorithm(DTOptions &opt) {
     }
     if(sum >= 0) decision_vector[i] = 1;
     else decision_vector[i] = -1;
-    //printf("%d | %d \n", i, decision_vector[i]);
+    forest_prediction.add(decision_vector[i]);
+    //printf("%d | %f \n", i, forest_prediction.operator[](i));
   }
 
-  ////// CPLEX vectors
-  // Weights
+  // Weights vector
   for (int i = 0 ; i < weights.size() ; i++) {
     cplex_weights.add(weights[i]);
     //printf("%d | %lu \n", i, cplex_weights.operator[](i));
-  }
-
-  // Decision function
-  for (int i = 0 ; i < data_size ; i++) {
-    forest_prediction.add(decision_vector[i]);
-    //printf("%d | %f \n", i, forest_prediction.operator[](i));
   }
 
   return 0;
