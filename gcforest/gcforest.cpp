@@ -27,18 +27,32 @@ IloInt generateColumns(IloArray<IloIntArray> decisions) {
   IloEnv env;
 
   try {
+      // Model
       IloModel primal(env);
-      IloObjective obj = IloAdd(primal, IloMinimize(env));
-      IloCplex primalSolver(primal);
-
-      IloInt forestSize = predictions.getSize();
-      IloInt datasetSize = classes.getSize();
-      IloIntArray weights(env, forestSize);
-      IloIntArray z(env, datasetSize);
-      IloInt zInt;
+      // Constants
+      IloInt forestSize = decisions.getSize();
+      IloInt datasetSize = decisions[0].getSize();
+      // Variables
+      IloNumVarArray weights(env, forestSize);
+      IloNumVarArray z(env, datasetSize);
+      IloNumVar zMin;
+      // Objective function
+      IloObjective obj = IloAdd(primal, IloMinimize(env, zMin));
+      // Constraints
+      for (IloInt i = 0 ; i < datasetSize ; i++) {
+        primal.add(z[i] - zMin <= 0);
+      }
+      for (IloInt j = 0 ; j < forestSize ; j++) {
+	primal.add(weights[j] >= 0);
+	for (IloInt i = 0 ; i < datasetSize ; i++) {
+	  primal.add(weights[j] * decisions[j][i] + z[i] >= 0);
+	}
+      }   
 
       /// COLUMN-GENERATION PROCEDURE
 
+      IloCplex primalSolver(primal);
+      primalSolver.exportModel("gcforest.lp");
 
       //for (;;) {
          /// OPTIMIZE OVER CURRENT PATTERNS
@@ -46,6 +60,18 @@ IloInt generateColumns(IloArray<IloIntArray> decisions) {
          /// FIND AND ADD A NEW PATTERN
 	 
       //}
+      /*
+      if (primalSolver.solve()) {
+         primalSolver.out() << "Solution status: " << primalSolver.getStatus() << endl;
+         for (IloInt j = 0; j < forestSize ; j++) {
+            primalSolver.out() << "   tree " << j << ": "
+                        << primalSolver.getValue(weights[j]) << endl;
+         }
+         //primalSolver.out() << "Total cost = " << primalSolver.getObjValue() << endl;
+      }
+      else primalSolver.out()<< "No solution" << endl;
+      primalSolver.printTime();
+      */
   } catch (IloException& ex) {
       cerr << "Error: " << ex << endl;
   } catch (...) {
@@ -110,7 +136,7 @@ IloInt run_algorithm(DTOptions &opt) {
   // Adaboost for the forest initialization.
   Adaboost A(*training_set, opt);
   // BacktrackingAlgorithm for all subsequent iterations.
-  BacktrackingAlgorithm<ErrorPolicy, E_t> B(*training_set, opt);
+  //BacktrackingAlgorithm<ErrorPolicy, E_t> B(*training_set, opt);
 
   if (opt.verbosity >= DTOptions::NORMAL)
     cout << "d inputtime=" << cpu_time() << endl;
@@ -129,8 +155,6 @@ IloInt run_algorithm(DTOptions &opt) {
   std::vector<WeakClassifier> classifiers = A.getClassifier();
 
   ////// CPLEX vectors
-  // Weights vector
-  IloIntArray weights(env);
   // Decisions vector == 1 if predictions[j][i] == classes[i], -1 otherwise
   IloArray<IloIntArray> decisions(env, classifiers.size());
 
@@ -139,6 +163,7 @@ IloInt run_algorithm(DTOptions &opt) {
   IloArray<IloIntArray> predictions(env, classifiers.size());
   std::vector<int> weights(classifiers.size());
   std::vector<int> decision_vector(data_size);
+  IloIntArray weights(env);
   */
 
   ////// BUILDING PREDICTIONS AND WEIGHTS VECTORS
