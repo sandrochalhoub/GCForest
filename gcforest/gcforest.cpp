@@ -33,22 +33,38 @@ IloInt generateColumns(IloArray<IloIntArray> decisions) {
       IloInt forestSize = decisions.getSize();
       IloInt datasetSize = decisions[0].getSize();
       // Variables
-      IloNumVarArray weights(env, forestSize);
-      IloNumVarArray z(env, datasetSize);
+      //IloNumVarArray weights(env, forestSize);
+      IloRangeArray z(env, datasetSize);
+      IloRangeArray weights(env, forestSize);
+      IloRangeArray accuracyConstraint;
+      //IloNumVarArray z(env, datasetSize);
       IloNumVar zMin;
       // Objective function
       IloObjective obj = IloAdd(primal, IloMinimize(env, zMin));
       // Constraints
-      for (IloInt i = 0 ; i < datasetSize ; i++) {
-        primal.add(z[i] - zMin <= 0);
-      }
+      // Constraint on the sum
       for (IloInt j = 0 ; j < forestSize ; j++) {
-	primal.add(weights[j] >= 0);
+	IloExpr expr(env);
 	for (IloInt i = 0 ; i < datasetSize ; i++) {
-	  primal.add(weights[j] * decisions[j][i] + z[i] >= 0);
+	  expr += decisions[j][i] * weights[j] + z[i];
+	  accuracyConstraint[i] = IloRange(env, 0, IloInfinity);
 	}
-      }   
+      }
+      primal.add(accuracyConstraint);
+      
+      // Constraint on z
+      for (IloInt i = 0 ; i < datasetSize ; i++) {
+	z[i] = IloRange(env, -IloInfinity, zMin);
+      }
+      primal.add(z);
 
+      // Constraint on the weight vector
+      for (IloInt j = 0 ; j < forestSize ; j++) {
+	weights[j] = IloRange(env, 0, IloInfinity);
+      }
+      primal.add(weights);
+
+/*
       /// COLUMN-GENERATION PROCEDURE
 
       IloCplex primalSolver(primal);
@@ -60,7 +76,7 @@ IloInt generateColumns(IloArray<IloIntArray> decisions) {
          /// FIND AND ADD A NEW PATTERN
 	 
       //}
-      /*
+
       if (primalSolver.solve()) {
          primalSolver.out() << "Solution status: " << primalSolver.getStatus() << endl;
          for (IloInt j = 0; j < forestSize ; j++) {
@@ -71,7 +87,7 @@ IloInt generateColumns(IloArray<IloIntArray> decisions) {
       }
       else primalSolver.out()<< "No solution" << endl;
       primalSolver.printTime();
-      */
+*/
   } catch (IloException& ex) {
       cerr << "Error: " << ex << endl;
   } catch (...) {
