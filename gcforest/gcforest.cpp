@@ -47,7 +47,7 @@ IloInt generateColumns(IloArray<IloIntArray> decisions) {
 	IloExpr expr(env);
 	for (IloInt i = 0 ; i < datasetSize ; i++) {
 	  expr += decisions[j][i] * weights[j] + z[i];
-	  accuracyConstraint[i] = IloRange(env, 0, IloInfinity);
+	  accuracyConstraint[i] = IloRange(env, 0, expr, IloInfinity);
 	}
       }
       primal.add(accuracyConstraint);
