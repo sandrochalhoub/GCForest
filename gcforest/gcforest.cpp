@@ -32,37 +32,41 @@ IloInt generateColumns(IloArray<IloIntArray> decisions) {
       // Constants
       IloInt forestSize = decisions.getSize();
       IloInt datasetSize = decisions[0].getSize();
-      // Variables
-      //IloNumVarArray weights(env, forestSize);
-      IloRangeArray z(env, datasetSize);
-      IloRangeArray weights(env, forestSize);
-      IloRangeArray accuracyConstraint;
-      //IloNumVarArray z(env, datasetSize);
-      IloNumVar zMin;
+      // Variables of the LP
+      IloNumVarArray weights(env, forestSize, 0, IloInfinity);
+      IloNumVarArray z(env, datasetSize, -IloInfinity, IloInfinity);
+      IloNumVar zMin(env, -IloInfinity, IloInfinity);
+      // Constraints
+      IloRangeArray ct_z(env, datasetSize);
+      IloRangeArray ct_w(env, forestSize);
+      IloRangeArray ct_acc(env, datasetSize);
       // Objective function
       IloObjective obj = IloAdd(primal, IloMinimize(env, zMin));
-      // Constraints
-      // Constraint on the sum
-      for (IloInt j = 0 ; j < forestSize ; j++) {
+
+      ///// BUILDING CONSTRAINTS
+      // Constraint on the accuracy sum
+      for (IloInt i = 0 ; i < datasetSize ; i++) {
 	IloExpr expr(env);
-	for (IloInt i = 0 ; i < datasetSize ; i++) {
+	for (IloInt j = 0 ; j < forestSize ; j++) {
 	  expr += decisions[j][i] * weights[j] + z[i];
-	  accuracyConstraint[i] = IloRange(env, 0, expr, IloInfinity);
 	}
+	ct_acc[i] = IloRange(env, 0, expr, IloInfinity);
       }
-      primal.add(accuracyConstraint);
+      primal.add(ct_acc);
       
       // Constraint on z
       for (IloInt i = 0 ; i < datasetSize ; i++) {
-	z[i] = IloRange(env, -IloInfinity, zMin);
+	IloExpr expr(env);
+	expr += z[i] - zMin;
+	ct_z[i] = IloRange(env, -IloInfinity, expr, 0);
       }
-      primal.add(z);
+      primal.add(ct_z);
 
       // Constraint on the weight vector
       for (IloInt j = 0 ; j < forestSize ; j++) {
-	weights[j] = IloRange(env, 0, IloInfinity);
+	ct_w[j] = IloRange(env, 0, weights[j], IloInfinity);
       }
-      primal.add(weights);
+      primal.add(ct_w);
 
 /*
       /// COLUMN-GENERATION PROCEDURE
@@ -228,7 +232,7 @@ IloInt run_algorithm(DTOptions &opt) {
     //printf("\n");
   }
 
-  //generateColumns(predictions, classes);
+  generateColumns(decisions);
 
   return 0;
 }
