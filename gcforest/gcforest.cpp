@@ -1,44 +1,126 @@
-/*************************************************************************
-minicsp
-
-Copyright 2010--2011 George Katsirelos
-
-Minicsp is free software: you can redistribute it and/or modify it
-under the terms of the GNU General Public License as published by the
-Free Software Foundation, either version 3 of the License, or (at your
-option) any later version.
-
-Minicsp is distributed in the hope that it will be useful, but WITHOUT
-ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-for more details.
-
-You should have received a copy of the GNU General Public License
-along with minicsp.  If not, see <http://www.gnu.org/licenses/>.
-
-*************************************************************************/
-
+#include <cstdio>
 #include <iostream>
 #include <random>
 #include <stdlib.h>
+#include "../src/include/WeightedDataset.hpp"
+#include "../src/include/Backtrack.hpp"
+#include "../src/include/Adaboost.hpp"
+#include "../src/include/CSVReader.hpp"
+#include "../src/include/CmdLine.hpp"
+#include "../src/include/Reader.hpp"
+#include "../src/include/Tree.hpp"
+#include "/net/phorcys/data/roc/Logiciels/CPLEX_Studio201/cplex/include/ilcplex/ilocplex.h"
 
-#include "Backtrack.hpp"
-#include "CmdLine.hpp"
-#include "Tree.hpp"
-#include "WeightedDataset.hpp"
-#include "Reader.hpp"
+ILOSTLBEGIN
 
 using namespace std;
 using namespace blossom;
 
-template <template <typename> class ErrorPolicy = CardinalityError,
-          typename E_t = unsigned long>
-int run_algorithm(DTOptions &opt) {
+// Returns the prediction of the j-th tree of the forest, for the i-th data point
+IloInt getPrediction(WeightedDataset<int>::List* X, std::vector<WeakClassifier>* classifiers, IloInt j, IloInt i) {
+  //printf("%d | ", i);
+  Tree<double>* sol = &((*classifiers)[j].T);
+  return sol->predict((*X)[i]);
+}
+
+// Column generation method with CPLEX, IN PROGRESS
+IloInt generateColumns(IloArray<IloIntArray> decisions) {
+  IloEnv env;
+
+  try {
+      // Model
+      IloModel primal(env);
+      // Constants
+      IloInt forestSize = decisions.getSize();
+      IloInt datasetSize = decisions[0].getSize();
+      // Variables of the LP
+      IloNumVarArray weights(env, forestSize, 0, IloInfinity);
+      IloNumVarArray z(env, datasetSize, -IloInfinity, IloInfinity);
+      IloNumVar zMin(env, -IloInfinity, IloInfinity);
+      // Constraints
+      IloRangeArray ct_acc(env, datasetSize);
+      IloRangeArray ct_z(env, datasetSize);
+      IloRangeArray ct_w(env, forestSize);
+      // Objective function
+      //IloObjective obj = IloAdd(primal, IloMinimize(env, zMin));
+      primal.add(IloMinimize(env, zMin));
+
+      ///// BUILDING CONSTRAINTS
+      // Subject to the accuracy constraint
+      for (IloInt i = 0 ; i < datasetSize ; i++) {
+	IloExpr expr(env);
+	for (IloInt j = 0 ; j < forestSize ; j++) {
+	  expr += decisions[j][i] * weights[j] + z[i];
+	}
+	ct_acc[i] = IloRange(env, 0, expr, IloInfinity);
+      }
+      primal.add(ct_acc);
+      
+      // Subject to the constraint on z
+      for (IloInt i = 0 ; i < datasetSize ; i++) {
+	IloExpr expr(env);
+	expr += z[i] - zMin;
+	ct_z[i] = IloRange(env, -IloInfinity, expr, 0);
+      }
+      primal.add(ct_z);
+
+      // Subject to the constraint on weights
+      for (IloInt j = 0 ; j < forestSize ; j++) {
+	ct_w[j] = IloRange(env, 0, weights[j], IloInfinity);
+      }
+      primal.add(ct_w);
+
+
+      /// COLUMN-GENERATION PROCEDURE
+
+      IloCplex primalSolver(primal);
+      primalSolver.solve();
+
+      if (primalSolver.solve()) {
+        primalSolver.out() << "Solution status: " << primalSolver.getStatus() << endl;
+	primalSolver.out() << "Total cost = " << primalSolver.getObjValue() << endl;
+      }
+
+      //primalSolver.exportModel("gcforest.lp");
+      /*
+      //for (;;) {
+         /// OPTIMIZE OVER CURRENT PATTERNS
+         //primalSolver.solve();
+         /// FIND AND ADD A NEW PATTERN
+	 
+      //}
+
+      if (primalSolver.solve()) {
+         primalSolver.out() << "Solution status: " << primalSolver.getStatus() << endl;
+         for (IloInt j = 0; j < forestSize ; j++) {
+            primalSolver.out() << "   tree " << j << ": "
+                        << primalSolver.getValue(weights[j]) << endl;
+         }
+         //primalSolver.out() << "Total cost = " << primalSolver.getObjValue() << endl;
+      }
+      else primalSolver.out()<< "No solution" << endl;
+      primalSolver.printTime();
+      */
+  } catch (IloException& ex) {
+      cerr << "Error: " << ex << endl;
+  } catch (...) {
+      cerr << "Error" << endl;
+  }
+
+  env.end();
+
+  return 0;
+}
+
+template <template <typename> class ErrorPolicy = WeightedError,
+          typename E_t = int>
+IloInt run_algorithm(DTOptions &opt) {
+
+  IloEnv env;
 
   WeightedDataset<E_t> input;
 
   ////// READING
-
   try {
     read_binary(input, opt);
   } catch (const std::exception &e) {
@@ -47,7 +129,6 @@ int run_algorithm(DTOptions &opt) {
     read_non_binary(input, opt);
   }
 
-  // vector<size_t> subset;
   WeightedDataset<E_t> *test_set = new WeightedDataset<E_t>();
   WeightedDataset<E_t> *training_set = new WeightedDataset<E_t>();
 
@@ -65,144 +146,105 @@ int run_algorithm(DTOptions &opt) {
           cout << " " << *x;
         }
         cout << endl;
-        // cout << input.examples[y] << endl;
       }
-      // return 0;
     }
-
-    // cout << *training_set << endl;
-    // cout << *test_set << endl;
 
   } else {
     training_set = &input;
   }
 
-  // cout << training_set << endl;
-
-  // cout << input.example_count() << endl;
-
   if (opt.verbosity >= DTOptions::NORMAL)
     cout << "d readtime=" << cpu_time() << endl;
 
-  ////// PREPROCESING
+  ////// PREPROCESSING
   if (opt.preprocessing) {
     training_set->preprocess(opt.verbosity >= DTOptions::NORMAL);
   }
 
-  ////// CREATING THE ALGORITHM
-  BacktrackingAlgorithm<ErrorPolicy, E_t> A(*training_set, opt);
+  ////// CREATING THE ALGORITHMS
+  // Adaboost for the forest initialization.
+  Adaboost A(*training_set, opt);
+  // BacktrackingAlgorithm for all subsequent iterations.
+  //BacktrackingAlgorithm<ErrorPolicy, E_t> B(*training_set, opt);
 
   if (opt.verbosity >= DTOptions::NORMAL)
     cout << "d inputtime=" << cpu_time() << endl;
 
-  ////// PRINTING DATA INFO
-  if (opt.print_ins)
-    cout << "d examples=" << A.numExample() << " features=" << A.numFeature()
-         << endl;
-
-  // A.perfectTree();
-  // A.minimize_error();
-
   ////// SOLVING
-  if (opt.mindepth) {
-    if (opt.minsize)
-      A.minimize_error_depth_size();
-    else
-      A.minimize_error_depth();
-  } else {
-    if (opt.minsize)
-      A.set_size_objective();
-    A.minimize_error();
-  }
+  A.train();
+  printf("\n");
 
-  Tree<E_t> sol = A.getSolution();
+  // All data points whose class is 0
+  auto classZero{(*training_set)[0]};
+  // All data points whose class is 1
+  auto classOne{(*training_set)[1]};
+  // Size of the entire training set
+  IloInt data_size = classZero.size() + classOne.size();
+  /*
+  printf("DATASIZE %d \n\n\n", data_size);
+  printf("CLASS ZERO %d \n\n\n", classZero.size());
+  */
+  // The forest built by Adaboost
+  std::vector<WeakClassifier> classifiers = A.getClassifier();
+  ////// CPLEX vectors
+  // Decisions vector == 1 if predictions[j][i] == classes[i], -1 otherwise
+  IloArray<IloIntArray> decisions(env, classifiers.size());
 
-  if (opt.verified) {
+  ////// Obsolete
+  /*std::vector<std::vector<int>> predictions(classifiers.size(), vector<int>(data_size, 0));
+  IloArray<IloIntArray> predictions(env, classifiers.size());
+  std::vector<int> weights(classifiers.size());
+  std::vector<int> decision_vector(data_size);
+  IloIntArray weights(env);
+  */
 
-    E_t tree_error = 0;
-    for (auto y{0}; y < 2; ++y) {
-      auto X{(*training_set)[y]};
-      for (auto i : X)
-        tree_error += (sol.predict(X[i]) != y) * X.weight(i);
+  ////// BUILDING PREDICTIONS AND WEIGHTS VECTORS
+  for (IloInt j = 0 ; j < classifiers.size() ; j++) {
+    //predictions[j] = IloIntArray(env, data_size, 0, 1, ILOINT);
+    decisions[j] = IloIntArray(env, data_size, 0, 1, ILOINT);
+    //printf("\nTREE NUMBER %d \n\n", j);
+    if (opt.verified) {
+	for (IloInt i = 0 ; i < data_size ; i++) {
+	  ////// CLASS ZERO
+	  if (i < classZero.size()) {
+	    //printf("%d | ", i);
+	    IloInt prediction = getPrediction(&classZero, &classifiers, j, i);
+	    //predictions[j][i] = prediction;
+            if (prediction == 0) decisions[j][i] = 1;
+	    else decisions[j][i] = -1;	   
+	    //printf("%d\n", decisions[j][i]);
+	    /*
+	    if (prediction == 0) {
+	      weights[j] = classZero.weight(i);    
+	      printf("%d | %d \n", i, weights[j]);
+	      B.setWeight(0, i, weights[j]);
+	      IloInt vecWeights = B.getWeight(0, i);
+	      printf("%d | %d \n", i, vecWeights);
+	    }
+	    */
+	  ////// CLASS ONE
+	  } else {
+	      //printf("%d | ", i);
+	      IloInt prediction = getPrediction(&classOne, &classifiers, j, i);
+	      if (prediction == 1) decisions[j][i] = 1;
+	      else decisions[j][i] = -1;
+	      //printf("%d\n", decisions[j][i]);
+	      /*
+	      if (prediction == 1) {
+	        weights[j] = classOne.weight(i);    
+	        //printf("%d | %d \n", i, weights[j]);
+	        B.setWeight(1, i, weights[j]);
+	        IloInt vecWeights = B.getWeight(1, i);
+	        printf("%d | %d \n", i, vecWeights);
+	      }
+	      */
+	  }
+	}
     }
-
-    assert(tree_error == A.error());
-
-    cout << std::setprecision(std::numeric_limits<long double>::digits10 + 1)
-         << std::setw(0) << "p solution verified (" << tree_error << " / "
-         << A.error() << ")" << endl;
+    //printf("\n");
   }
 
-  if (opt.pruning) {
-
-    cout << "p post-pruning (additional error up to " << opt.pruning << ")\n";
-
-    size_t total[2] = {training_set->total(0), training_set->total(1)};
-
-    E_t limit{static_cast<E_t>(opt.pruning) - A.error() -
-              training_set->numInconsistent()};
-    if (limit < 0)
-      limit = 0;
-
-    sol.prune(total, limit, false);
-
-    E_t tree_error = 0;
-    for (auto y{0}; y < 2; ++y) {
-      auto X{(*training_set)[y]};
-      for (auto i : X)
-        tree_error += (sol.predict(X[i]) != y) * X.weight(i);
-    }
-
-    // double t{cpu_time() - start_time};
-
-    double accuracy{
-        1.0 -
-        static_cast<double>(tree_error + training_set->numInconsistent()) /
-            static_cast<double>(training_set->input_example_count())};
-
-    cout << left << "d accuracy=" << setw(6) << setprecision(4)
-         << fixedwidthfloat(accuracy, 4) << " error=" << setw(4)
-         << tree_error + training_set->numInconsistent() << " depth=" << setw(3)
-         << sol.depth() << " size=" << setw(3) << sol.size()
-         // << " time=" << setprecision(max(4, static_cast<int>(log10(t))))
-         // << fixedwidthfloat(t, 3) << right
-         << endl;
-
-    // cout << "after pruning: " << tree_error << endl;
-    // cout << sol.size() << " " << sol.depth() << endl;
-  }
-
-  if (opt.tree_file != "") {
-    ofstream treefile(opt.tree_file, ios_base::out);
-    // treefile << A << endl;
-    treefile << sol << endl;
-  }
-
-  if (opt.test_sample != 0) {
-
-    E_t tree_error = 0;
-    for (auto y{0}; y < 2; ++y) {
-      auto X{(*test_set)[y]};
-      for (auto i : X) {
-        assert(X.weight(i) == 1);
-        tree_error += (sol.predict(X[i]) != y) * X.weight(i);
-      }
-    }
-
-    // assert(tree_error == A.error());
-
-    cout << std::setprecision(std::numeric_limits<long double>::digits10 + 1)
-         << std::setw(0) << "d test_error=" << tree_error
-         << " test_accuracy=" << setprecision(7)
-         << 1.0 -
-                static_cast<double>(tree_error) /
-                    static_cast<double>(test_set->example_count())
-         << endl;
-  }
-
-  if (opt.print_sol) {
-    cout << sol << endl;
-  }
+  generateColumns(decisions);
 
   return 0;
 }
@@ -218,8 +260,9 @@ int main(int argc, char *argv[]) {
     opt.display(cout);
 
   if (opt.preprocessing) {
-    return run_algorithm<WeightedError, unsigned long>(opt);
+    return run_algorithm<WeightedError, int>(opt);
   } else {
     return run_algorithm<>(opt);
   }
+
 }

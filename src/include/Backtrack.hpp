@@ -145,6 +145,9 @@ public:
 
   void setWeight(const int y, const size_t i, const E_t w);
 
+  //Reminder
+  E_t getWeight(const int y, const size_t i);
+
   bool isRelevant(const int f) const { return feature_set[f]; };
 
   /*!@name Printing*/

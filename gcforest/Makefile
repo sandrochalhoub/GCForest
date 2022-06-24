@@ -12,7 +12,7 @@ LIBFORMAT  = static_pic
 
 CPLEXDIR      = /net/phorcys/data/roc/Logiciels/CPLEX_Studio201/cplex
 CONCERTDIR    = /net/phorcys/data/roc/Logiciels/CPLEX_Studio201/concert
-BLOSSOMDIR    = ..
+BLOSSOMDIR    = ../.
 
 
 BIN=$(BLOSSOMDIR)/gcforest/bin
@@ -99,7 +99,6 @@ CPP_EX = gcforest #blend
 
 all_cpp: lib $(CPP_EX)
 
-
 # ------------------------------------------------------------
 
 clean :
@@ -127,5 +126,5 @@ gcforest.o: gcforest.cpp
 	$(CCC) -c $(CCFLAGS) gcforest.cpp -o gcforest.o
 
 # Local Variables:
-# mode: makefile
-# End:
+# modtt
+# makefile

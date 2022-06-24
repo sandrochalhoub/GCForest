@@ -41,6 +41,9 @@ public:
 
   size_t get_error() const;
 
+  //Reminder
+  std::vector<WeakClassifier> getClassifier();
+
 private:
   // the orginal dataset (weights are only there to represent cardinality)
   WeightedDataset<int> &dataset;

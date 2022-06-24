@@ -353,7 +353,6 @@ void Wood<E_t>::get_descendants(const int node, vector<int> &bag, const bool ter
 //       get_leaf(child[0][node], nodes);
 //     if (child[1][node] > 1)
 //       get_leaf(child[1][node], nodes);
-//   }
 // }
 
 template <class E_t>
@@ -642,6 +641,7 @@ template <class E_t> int Wood<E_t>::grow() {
 
   return node;
 }
+
 
 template <class E_t> int Wood<E_t>::copyNode(const int node) {
   if (node > 1) {
