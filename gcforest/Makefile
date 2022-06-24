@@ -12,7 +12,7 @@ LIBFORMAT  = static_pic
 
 CPLEXDIR      = /net/phorcys/data/roc/Logiciels/CPLEX_Studio201/cplex
 CONCERTDIR    = /net/phorcys/data/roc/Logiciels/CPLEX_Studio201/concert
-BLOSSOMDIR    = /home/schalhoub/Documents/Blossom_Git/blossom
+BLOSSOMDIR    = ../.
 
 
 BIN=$(BLOSSOMDIR)/gcforest/bin

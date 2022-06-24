@@ -18,6 +18,7 @@ using namespace blossom;
 
 // Returns the prediction of the j-th tree of the forest, for the i-th data point
 IloInt getPrediction(WeightedDataset<int>::List* X, std::vector<WeakClassifier>* classifiers, IloInt j, IloInt i) {
+  //printf("%d | ", i);
   Tree<double>* sol = &((*classifiers)[j].T);
   return sol->predict((*X)[i]);
 }
@@ -37,14 +38,15 @@ IloInt generateColumns(IloArray<IloIntArray> decisions) {
       IloNumVarArray z(env, datasetSize, -IloInfinity, IloInfinity);
       IloNumVar zMin(env, -IloInfinity, IloInfinity);
       // Constraints
+      IloRangeArray ct_acc(env, datasetSize);
       IloRangeArray ct_z(env, datasetSize);
       IloRangeArray ct_w(env, forestSize);
-      IloRangeArray ct_acc(env, datasetSize);
       // Objective function
-      IloObjective obj = IloAdd(primal, IloMinimize(env, zMin));
+      //IloObjective obj = IloAdd(primal, IloMinimize(env, zMin));
+      primal.add(IloMinimize(env, zMin));
 
       ///// BUILDING CONSTRAINTS
-      // Constraint on the accuracy sum
+      // Subject to the accuracy constraint
       for (IloInt i = 0 ; i < datasetSize ; i++) {
 	IloExpr expr(env);
 	for (IloInt j = 0 ; j < forestSize ; j++) {
@@ -54,7 +56,7 @@ IloInt generateColumns(IloArray<IloIntArray> decisions) {
       }
       primal.add(ct_acc);
       
-      // Constraint on z
+      // Subject to the constraint on z
       for (IloInt i = 0 ; i < datasetSize ; i++) {
 	IloExpr expr(env);
 	expr += z[i] - zMin;
@@ -62,18 +64,25 @@ IloInt generateColumns(IloArray<IloIntArray> decisions) {
       }
       primal.add(ct_z);
 
-      // Constraint on the weight vector
+      // Subject to the constraint on weights
       for (IloInt j = 0 ; j < forestSize ; j++) {
 	ct_w[j] = IloRange(env, 0, weights[j], IloInfinity);
       }
       primal.add(ct_w);
 
-/*
+
       /// COLUMN-GENERATION PROCEDURE
 
       IloCplex primalSolver(primal);
-      primalSolver.exportModel("gcforest.lp");
+      primalSolver.solve();
 
+      if (primalSolver.solve()) {
+        primalSolver.out() << "Solution status: " << primalSolver.getStatus() << endl;
+	primalSolver.out() << "Total cost = " << primalSolver.getObjValue() << endl;
+      }
+
+      //primalSolver.exportModel("gcforest.lp");
+      /*
       //for (;;) {
          /// OPTIMIZE OVER CURRENT PATTERNS
          //primalSolver.solve();
@@ -91,7 +100,7 @@ IloInt generateColumns(IloArray<IloIntArray> decisions) {
       }
       else primalSolver.out()<< "No solution" << endl;
       primalSolver.printTime();
-*/
+      */
   } catch (IloException& ex) {
       cerr << "Error: " << ex << endl;
   } catch (...) {
@@ -171,9 +180,12 @@ IloInt run_algorithm(DTOptions &opt) {
   auto classOne{(*training_set)[1]};
   // Size of the entire training set
   IloInt data_size = classZero.size() + classOne.size();
+  /*
+  printf("DATASIZE %d \n\n\n", data_size);
+  printf("CLASS ZERO %d \n\n\n", classZero.size());
+  */
   // The forest built by Adaboost
   std::vector<WeakClassifier> classifiers = A.getClassifier();
-
   ////// CPLEX vectors
   // Decisions vector == 1 if predictions[j][i] == classes[i], -1 otherwise
   IloArray<IloIntArray> decisions(env, classifiers.size());
