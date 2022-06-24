@@ -1,9 +1,9 @@
 include ./boost_home
 
-COPTIMIZE= -c #-O3 -fno-omit-frame-pointer -flto
+COPTIMIZE= -O3 -fno-omit-frame-pointer -flto
 COMPILFLAGS= -std=c++1z -Wno-sign-compare
 
-MAINDIR = ./home/schalhoub/Documents/Blossom_Git/blossom
+MAINDIR = .
 
 CCC = g++
 

@@ -10,6 +10,7 @@
 #include "../src/include/Reader.hpp"
 #include "../src/include/Tree.hpp"
 #include "/net/phorcys/data/roc/Logiciels/CPLEX_Studio201/cplex/include/ilcplex/ilocplex.h"
+#include <typeinfo>
 
 ILOSTLBEGIN
 
@@ -17,15 +18,16 @@ using namespace std;
 using namespace blossom;
 
 // Returns the prediction of the j-th tree of the forest, for the i-th data point
-IloInt getPrediction(WeightedDataset<int>::List* X, std::vector<WeakClassifier>* classifiers, IloInt j, IloInt i) {
-  //printf("%d | ", i);
-  Tree<double>* sol = &((*classifiers)[j].T);
-  return sol->predict((*X)[i]);
+
+bool getPrediction(WeightedDataset<int>::List& X, std::vector<WeakClassifier>& classifiers, IloInt j, IloInt i) {
+  Tree<double>* sol = &(classifiers[j].T);
+  return sol->predict(X[i]);
 }
 
 // Column generation method with CPLEX, IN PROGRESS
 IloInt generateColumns(IloArray<IloIntArray> decisions) {
   IloEnv env;
+  IloInt max_weights = 10;
 
   try {
       // Model
@@ -41,6 +43,8 @@ IloInt generateColumns(IloArray<IloIntArray> decisions) {
       IloRangeArray ct_acc(env, datasetSize);
       IloRangeArray ct_z(env, datasetSize);
       IloRangeArray ct_w(env, forestSize);
+      IloRangeArray ct_wSum(env, forestSize);
+      
       // Objective function
       //IloObjective obj = IloAdd(primal, IloMinimize(env, zMin));
       primal.add(IloMinimize(env, zMin));
@@ -64,12 +68,19 @@ IloInt generateColumns(IloArray<IloIntArray> decisions) {
       }
       primal.add(ct_z);
 
-      // Subject to the constraint on weights
+      // Subject to the constraint : positive weights
       for (IloInt j = 0 ; j < forestSize ; j++) {
 	ct_w[j] = IloRange(env, 0, weights[j], IloInfinity);
       }
       primal.add(ct_w);
 
+      // Subject to the constraint : bounded sum of weights
+      for (IloInt j = 0 ; j < forestSize ; j++) {
+	IloExpr expr(env);
+	expr += weights[j];
+	ct_wSum[j] = IloRange(env, -IloInfinity, expr, max_weights);
+      }
+      primal.add(ct_wSum);
 
       /// COLUMN-GENERATION PROCEDURE
 
@@ -180,10 +191,9 @@ IloInt run_algorithm(DTOptions &opt) {
   auto classOne{(*training_set)[1]};
   // Size of the entire training set
   IloInt data_size = classZero.size() + classOne.size();
-  /*
-  printf("DATASIZE %d \n\n\n", data_size);
-  printf("CLASS ZERO %d \n\n\n", classZero.size());
-  */
+  
+  printf("Data size = %lu, among which class zero size = %lu and class one size = %lu. \n\n", data_size, classZero.size(), classOne.size());
+  
   // The forest built by Adaboost
   std::vector<WeakClassifier> classifiers = A.getClassifier();
   ////// CPLEX vectors
@@ -204,13 +214,45 @@ IloInt run_algorithm(DTOptions &opt) {
     decisions[j] = IloIntArray(env, data_size, 0, 1, ILOINT);
     //printf("\nTREE NUMBER %d \n\n", j);
     if (opt.verified) {
+			
+			
+			for(auto i : classZero) {
+				cout << " " << i << ": " << classZero[i] << endl;
+				assert(classZero.contain(i));
+				if(!classZero.contain(i))
+				{
+					cout << "erreur\n";
+					exit(1);
+				}
+			}
+			cout << "size=" << classZero.size() << endl << training_set->examples[0] << endl;
+			
+			for(auto i : classOne) {
+				cout << " " << i << ": " << classOne[i] << endl;
+				assert(classOne.contain(i));
+				if(!classOne.contain(i))
+				{
+					cout << "erreur\n";
+					exit(1);
+				}
+			}
+			cout << "size=" << classOne.size() << training_set->examples[1] << endl;
+			
+			
+			
 	for (IloInt i = 0 ; i < data_size ; i++) {
 	  ////// CLASS ZERO
 	  if (i < classZero.size()) {
 	    //printf("%d | ", i);
-	    IloInt prediction = getPrediction(&classZero, &classifiers, j, i);
+			
+			
+			assert(classZero.contain(i));
+
+
+	    bool prediction = getPrediction(classZero, classifiers, j, i);
+
 	    //predictions[j][i] = prediction;
-            if (prediction == 0) decisions[j][i] = 1;
+            if (!prediction) decisions[j][i] = 1;
 	    else decisions[j][i] = -1;	   
 	    //printf("%d\n", decisions[j][i]);
 	    /*
@@ -225,8 +267,12 @@ IloInt run_algorithm(DTOptions &opt) {
 	  ////// CLASS ONE
 	  } else {
 	      //printf("%d | ", i);
-	      IloInt prediction = getPrediction(&classOne, &classifiers, j, i);
-	      if (prediction == 1) decisions[j][i] = 1;
+			
+			assert(classOne.contain(i));
+
+
+	      bool prediction = getPrediction(classOne, classifiers, j, i - classZero.size());
+	      if (prediction) decisions[j][i] = 1;
 	      else decisions[j][i] = -1;
 	      //printf("%d\n", decisions[j][i]);
 	      /*
@@ -240,10 +286,10 @@ IloInt run_algorithm(DTOptions &opt) {
 	      */
 	  }
 	}
+	
     }
-    //printf("\n");
   }
-
+  printf("\n\n");
   generateColumns(decisions);
 
   return 0;
