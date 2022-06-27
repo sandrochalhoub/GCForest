@@ -166,6 +166,9 @@ IloInt run_algorithm(DTOptions &opt) {
   if (opt.verbosity >= DTOptions::NORMAL)
     cout << "d readtime=" << cpu_time() << endl;
 
+  ////// Size of the entire training set prior to the pre-processing
+  IloInt data_size = (*training_set)[0].size() + (*training_set)[1].size();
+
   ////// PREPROCESSING
   if (opt.preprocessing) {
     training_set->preprocess(opt.verbosity >= DTOptions::NORMAL);
@@ -188,10 +191,6 @@ IloInt run_algorithm(DTOptions &opt) {
   auto classZero{(*training_set)[0]};
   // All data points whose class is 1
   auto classOne{(*training_set)[1]};
-  // Size of the entire training set
-  IloInt data_size = classZero.size() + classOne.size();
-  
-  printf("Data size = %lu, among which class zero size = %lu and class one size = %lu. \n\n", data_size, classZero.size(), classOne.size());
   
   // The forest built by Adaboost
   std::vector<WeakClassifier> classifiers = A.getClassifier();
@@ -199,90 +198,38 @@ IloInt run_algorithm(DTOptions &opt) {
   // Decisions vector == 1 if predictions[j][i] == classes[i], -1 otherwise
   IloArray<IloIntArray> decisions(env, classifiers.size());
 
-  ////// Obsolete
-  /*std::vector<std::vector<int>> predictions(classifiers.size(), vector<int>(data_size, 0));
-  IloArray<IloIntArray> predictions(env, classifiers.size());
-  std::vector<int> weights(classifiers.size());
-  std::vector<int> decision_vector(data_size);
-  IloIntArray weights(env);
-  */
-
   ////// BUILDING PREDICTIONS AND WEIGHTS VECTORS
   for (IloInt j = 0 ; j < classifiers.size() ; j++) {
-    //predictions[j] = IloIntArray(env, data_size, 0, 1, ILOINT);
     decisions[j] = IloIntArray(env, data_size, 0, 1, ILOINT);
     //printf("\nTREE NUMBER %d \n\n", j);
     if (opt.verified) {
-			
-			
-			for(auto i : classZero) {
-				cout << " " << i << ": " << classZero[i] << endl;
-				assert(classZero.contain(i));
-				if(!classZero.contain(i))
-				{
-					cout << "erreur\n";
-					exit(1);
-				}
-			}
-			cout << "size=" << classZero.size() << endl << training_set->examples[0] << endl;
-			
-			for(auto i : classOne) {
-				cout << " " << i << ": " << classOne[i] << endl;
-				assert(classOne.contain(i));
-				if(!classOne.contain(i))
-				{
-					cout << "erreur\n";
-					exit(1);
-				}
-			}
-			cout << "size=" << classOne.size() << training_set->examples[1] << endl;
-			
-			
-			
-	for (IloInt i = 0 ; i < data_size ; i++) {
-	  ////// CLASS ZERO
-	  if (i < classZero.size()) {
-	    //printf("%d | ", i);
-			
-			
-			assert(classZero.contain(i));
-
-
-	    bool prediction = getPrediction(classZero, classifiers, j, i);
-	    //predictions[j][i] = prediction;
-            if (!prediction) decisions[j][i] = 1;
-	    else decisions[j][i] = -1;	   
-	    //printf("%d\n", decisions[j][i]);
-	    /*
-	    if (prediction == 0) {
-	      weights[j] = classZero.weight(i);    
-	      printf("%d | %d \n", i, weights[j]);
-	      B.setWeight(0, i, weights[j]);
-	      IloInt vecWeights = B.getWeight(0, i);
-	      printf("%d | %d \n", i, vecWeights);
-	    }
-	    */
-	  ////// CLASS ONE
-	  } else {
-	      //printf("%d | ", i);
-			
-			assert(classOne.contain(i));
-
-	      bool prediction = getPrediction(classOne, classifiers, j, i - classZero.size());
-	      if (prediction) decisions[j][i] = 1;
-	      else decisions[j][i] = -1;
-	      //printf("%d\n", decisions[j][i]);
-	      /*
-	      if (prediction == 1) {
-	        weights[j] = classOne.weight(i);    
-	        //printf("%d | %d \n", i, weights[j]);
-	        B.setWeight(1, i, weights[j]);
-	        IloInt vecWeights = B.getWeight(1, i);
-	        printf("%d | %d \n", i, vecWeights);
-	      }
-	      */
-	  }
+      for(auto i : classZero) {
+	bool prediction = getPrediction(classZero, classifiers, j, i);
+	if (!prediction) decisions[j][i] = 1;
+	else decisions[j][i] = -1;	   
+	cout << " " << i << ": " << classZero[i] << endl;
+	assert(classZero.contain(i));
+	if(!classZero.contain(i))
+	{
+	  cout << "erreur\n";
+	  exit(1);
 	}
+      }
+      cout << "size=" << classZero.size() << endl << training_set->examples[0] << endl;
+			
+      for(auto i : classOne) {
+	bool prediction = getPrediction(classOne, classifiers, j, i);
+	if (prediction) decisions[j][i + classZero.size()] = 1;
+	else decisions[j][i + classZero.size()] = -1;
+	cout << " " << i << ": " << classOne[i] << endl;
+	assert(classOne.contain(i));
+	if(!classOne.contain(i))
+	{
+	  cout << "erreur\n";
+	  exit(1);
+	}
+      }
+      cout << "size=" << classOne.size() << training_set->examples[1] << endl;
 	
     }
   }
