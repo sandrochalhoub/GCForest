@@ -24,7 +24,7 @@ class Adaboost {
 public:
   DTOptions &options;
 
-  Adaboost(WeightedDataset<int> &d, DTOptions &opt);
+  Adaboost(WeightedDataset<double> &d, DTOptions &opt);
 
   void train();
 
@@ -46,7 +46,7 @@ public:
 
 private:
   // the orginal dataset (weights are only there to represent cardinality)
-  WeightedDataset<int> &dataset;
+  WeightedDataset<double> &dataset;
   // previous weights in the adaboost iterations
   std::vector<double> weight[2];
 

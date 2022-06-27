@@ -1858,7 +1858,6 @@ void BacktrackingAlgorithm<ErrorPolicy, E_t>::setWeight(const int y,
   error_policy.set_weight(y, i, w);
 }
 
-//Reminder
 template <template <typename> class ErrorPolicy, typename E_t>
 E_t BacktrackingAlgorithm<ErrorPolicy, E_t>::getWeight(const int y,
                                                         const size_t i) {

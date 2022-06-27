@@ -20,13 +20,15 @@ using namespace std;
 using namespace blossom;
 
 // Returns the prediction of the j-th tree of the forest, for the i-th data point
-bool getPrediction(WeightedDataset<int>::List& X, std::vector<WeakClassifier>& classifiers, IloInt j, IloInt i) {
+bool getPrediction(WeightedDataset<double>::List& X, std::vector<WeakClassifier>& classifiers, IloInt j, IloInt i) {
   Tree<double>* sol = &(classifiers[j].T);
   return sol->predict(X[i]);
 }
 
 // Column generation method with CPLEX, IN PROGRESS
-IloInt generateColumns(IloArray<IloIntArray> decisions) {
+template <template <typename> class ErrorPolicy = WeightedError,
+          typename E_t = double>
+IloInt generateColumns(DTOptions &opt, WeightedDataset<E_t> *training_set, IloArray<IloIntArray> decisions) {
   IloEnv env;
   IloInt max_weights = 10;
 
@@ -34,27 +36,26 @@ IloInt generateColumns(IloArray<IloIntArray> decisions) {
       // Model
       IloModel primal(env);
       // Constants
-      IloInt forestSize = decisions.getSize();
-      IloInt datasetSize = decisions[0].getSize();
+      IloInt forest_size = decisions.getSize();
+      IloInt data_size = (*training_set)[0].size() + (*training_set)[1].size();
       // Variables of the LP
-      IloNumVarArray weights(env, forestSize, 0, IloInfinity);
-      IloNumVarArray z(env, datasetSize, -IloInfinity, IloInfinity);
+      IloNumVarArray weights(env, forest_size, 0, IloInfinity);
+      IloNumVarArray z(env, data_size, -IloInfinity, IloInfinity);
       IloNumVar zMin(env, -IloInfinity, IloInfinity);
       // Constraints
-      IloRangeArray ct_acc(env, datasetSize);
-      IloRangeArray ct_z(env, datasetSize);
-      IloRangeArray ct_w(env, forestSize);
+      IloRangeArray ct_acc(env, data_size);
+      IloRangeArray ct_z(env, data_size);
+      IloRangeArray ct_w(env, forest_size);
       IloRangeArray ct_wSum(env, 1);
       
       // Objective function
-      //IloObjective obj = IloAdd(primal, IloMinimize(env, zMin));
       primal.add(IloMinimize(env, zMin));
 
       ///// BUILDING CONSTRAINTS
       // Subject to the accuracy constraint
-      for (IloInt i = 0 ; i < datasetSize ; i++) {
+      for (IloInt i = 0 ; i < data_size ; i++) {
 	IloExpr expr(env);
-	for (IloInt j = 0 ; j < forestSize ; j++) {
+	for (IloInt j = 0 ; j < forest_size ; j++) {
 	  expr += decisions[j][i] * weights[j] + z[i];
 	}
 	ct_acc[i] = IloRange(env, 0, expr, IloInfinity);
@@ -62,7 +63,7 @@ IloInt generateColumns(IloArray<IloIntArray> decisions) {
       primal.add(ct_acc);
       
       // Subject to the constraint on z
-      for (IloInt i = 0 ; i < datasetSize ; i++) {
+      for (IloInt i = 0 ; i < data_size ; i++) {
 	IloExpr expr(env);
 	expr += z[i] - zMin;
 	ct_z[i] = IloRange(env, -IloInfinity, expr, 0);
@@ -70,14 +71,14 @@ IloInt generateColumns(IloArray<IloIntArray> decisions) {
       primal.add(ct_z);
 
       // Subject to the constraint : positive weights
-      for (IloInt j = 0 ; j < forestSize ; j++) {
+      for (IloInt j = 0 ; j < forest_size ; j++) {
 	ct_w[j] = IloRange(env, 0, weights[j], IloInfinity);
       }
       primal.add(ct_w);
 
       // Subject to the constraint : bounded sum of weights
       IloExpr sum(env);
-      for (IloInt j = 0 ; j < forestSize ; j++) {
+      for (IloInt j = 0 ; j < forest_size ; j++) {
 	sum += weights[j];
       }
       ct_wSum[0] = IloRange(env, -IloInfinity, sum, max_weights);
@@ -88,7 +89,7 @@ IloInt generateColumns(IloArray<IloIntArray> decisions) {
       IloCplex primalSolver(primal);
       if (primalSolver.solve()) {
          primalSolver.out() << "Solution status: " << primalSolver.getStatus() << endl;
-         for (IloInt j = 0; j < forestSize ; j++) {
+         for (IloInt j = 0; j < forest_size ; j++) {
             primalSolver.out() << "   tree " << j << ": "
                         << primalSolver.getValue(weights[j]) << endl;
          }
@@ -97,13 +98,28 @@ IloInt generateColumns(IloArray<IloIntArray> decisions) {
       else primalSolver.out()<< "No solution" << endl;
       primalSolver.printTime();
 
+      // Array (of size data_size) of the alpha dual constraint
       IloNumArray alpha(env);
       primalSolver.getDuals(alpha, ct_acc);
-
+      for (int i = 0 ; i < alpha.getSize() ; i++) printf("%f | ", alpha[i]);
+      printf("\n\n\n");
+      // Array (always of size 1) of the beta dual constraint
       IloNumArray beta(env);
       primalSolver.getDuals(beta, ct_wSum);
-
       //primalSolver.exportModel("gcforest.lp");
+
+      ///// Not working yet : determining a new tree with BacktrackingAlgorithm
+      /*
+      BacktrackingAlgorithm<ErrorPolicy, E_t> B(*training_set, opt);
+      for (int y = 0; y < 2; ++y) {
+        auto i{0};
+	for (auto xi : (*training_set)[y]) {
+	  B.setWeight(y, i, alpha[xi]);
+	  printf("%f | ", B.getWeight(y, i));
+          ++i;
+	}
+      }
+      */
 
   } catch (IloException& ex) {
       cerr << "Error: " << ex << endl;
@@ -117,7 +133,7 @@ IloInt generateColumns(IloArray<IloIntArray> decisions) {
 }
 
 template <template <typename> class ErrorPolicy = WeightedError,
-          typename E_t = int>
+          typename E_t = double>
 IloInt run_algorithm(DTOptions &opt) {
 
   IloEnv env;
@@ -171,8 +187,6 @@ IloInt run_algorithm(DTOptions &opt) {
   ////// CREATING THE ALGORITHMS
   // Adaboost for the forest initialization.
   Adaboost A(*training_set, opt);
-  // BacktrackingAlgorithm for all subsequent iterations.
-  //BacktrackingAlgorithm<ErrorPolicy, E_t> B(*training_set, opt);
 
   if (opt.verbosity >= DTOptions::NORMAL)
     cout << "d inputtime=" << cpu_time() << endl;
@@ -200,7 +214,7 @@ IloInt run_algorithm(DTOptions &opt) {
       for(auto i : classZero) {
 	bool prediction = getPrediction(classZero, classifiers, j, i);
 	if (!prediction) decisions[j][i] = 1;
-	else decisions[j][i] = -1;	
+	else decisions[j][i] = -1;
 	/*   
 	cout << " " << i << ": " << classZero[i] << endl;
 	assert(classZero.contain(i));
@@ -232,7 +246,7 @@ IloInt run_algorithm(DTOptions &opt) {
     }
   }
   printf("\n\n");
-  generateColumns(decisions);
+  generateColumns(opt, training_set, decisions);
 
   return 0;
 }
@@ -248,7 +262,7 @@ int main(int argc, char *argv[]) {
     opt.display(cout);
 
   if (opt.preprocessing) {
-    return run_algorithm<WeightedError, int>(opt);
+    return run_algorithm<WeightedError, double>(opt);
   } else {
     return run_algorithm<>(opt);
   }
