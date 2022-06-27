@@ -11,6 +11,8 @@
 #include "../src/include/Tree.hpp"
 #include "/net/phorcys/data/roc/Logiciels/CPLEX_Studio201/cplex/include/ilcplex/ilocplex.h"
 #include <typeinfo>
+#include <iterator>
+#include <algorithm>
 
 ILOSTLBEGIN
 
@@ -42,7 +44,7 @@ IloInt generateColumns(IloArray<IloIntArray> decisions) {
       IloRangeArray ct_acc(env, datasetSize);
       IloRangeArray ct_z(env, datasetSize);
       IloRangeArray ct_w(env, forestSize);
-      IloRangeArray ct_wSum(env, forestSize);
+      IloRangeArray ct_wSum(env, 1);
       
       // Objective function
       //IloObjective obj = IloAdd(primal, IloMinimize(env, zMin));
@@ -74,43 +76,35 @@ IloInt generateColumns(IloArray<IloIntArray> decisions) {
       primal.add(ct_w);
 
       // Subject to the constraint : bounded sum of weights
+      IloExpr sum(env);
       for (IloInt j = 0 ; j < forestSize ; j++) {
-	IloExpr expr(env);
-	expr += weights[j];
-	ct_wSum[j] = IloRange(env, -IloInfinity, expr, max_weights);
+	sum += weights[j];
       }
+      ct_wSum[0] = IloRange(env, -IloInfinity, sum, max_weights);
       primal.add(ct_wSum);
 
       /// COLUMN-GENERATION PROCEDURE
 
       IloCplex primalSolver(primal);
-      primalSolver.solve();
-
-      if (primalSolver.solve()) {
-        primalSolver.out() << "Solution status: " << primalSolver.getStatus() << endl;
-	primalSolver.out() << "Total cost = " << primalSolver.getObjValue() << endl;
-      }
-
-      //primalSolver.exportModel("gcforest.lp");
-      /*
-      //for (;;) {
-         /// OPTIMIZE OVER CURRENT PATTERNS
-         //primalSolver.solve();
-         /// FIND AND ADD A NEW PATTERN
-	 
-      //}
-
       if (primalSolver.solve()) {
          primalSolver.out() << "Solution status: " << primalSolver.getStatus() << endl;
          for (IloInt j = 0; j < forestSize ; j++) {
             primalSolver.out() << "   tree " << j << ": "
                         << primalSolver.getValue(weights[j]) << endl;
          }
-         //primalSolver.out() << "Total cost = " << primalSolver.getObjValue() << endl;
+         primalSolver.out() << "Total cost = " << primalSolver.getObjValue() << endl;
       }
       else primalSolver.out()<< "No solution" << endl;
       primalSolver.printTime();
-      */
+
+      IloNumArray alpha(env);
+      primalSolver.getDuals(alpha, ct_acc);
+
+      IloNumArray beta(env);
+      primalSolver.getDuals(beta, ct_wSum);
+
+      //primalSolver.exportModel("gcforest.lp");
+
   } catch (IloException& ex) {
       cerr << "Error: " << ex << endl;
   } catch (...) {
@@ -206,7 +200,8 @@ IloInt run_algorithm(DTOptions &opt) {
       for(auto i : classZero) {
 	bool prediction = getPrediction(classZero, classifiers, j, i);
 	if (!prediction) decisions[j][i] = 1;
-	else decisions[j][i] = -1;	   
+	else decisions[j][i] = -1;	
+	/*   
 	cout << " " << i << ": " << classZero[i] << endl;
 	assert(classZero.contain(i));
 	if(!classZero.contain(i))
@@ -214,13 +209,15 @@ IloInt run_algorithm(DTOptions &opt) {
 	  cout << "erreur\n";
 	  exit(1);
 	}
+	*/
       }
-      cout << "size=" << classZero.size() << endl << training_set->examples[0] << endl;
+      //cout << "size=" << classZero.size() << endl << training_set->examples[0] << endl;
 			
       for(auto i : classOne) {
 	bool prediction = getPrediction(classOne, classifiers, j, i);
 	if (prediction) decisions[j][i + classZero.size()] = 1;
 	else decisions[j][i + classZero.size()] = -1;
+	/*
 	cout << " " << i << ": " << classOne[i] << endl;
 	assert(classOne.contain(i));
 	if(!classOne.contain(i))
@@ -228,8 +225,9 @@ IloInt run_algorithm(DTOptions &opt) {
 	  cout << "erreur\n";
 	  exit(1);
 	}
+	*/
       }
-      cout << "size=" << classOne.size() << training_set->examples[1] << endl;
+      //cout << "size=" << classOne.size() << training_set->examples[1] << endl;
 	
     }
   }
