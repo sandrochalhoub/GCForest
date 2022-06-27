@@ -101,7 +101,7 @@ IloInt generateColumns(DTOptions &opt, WeightedDataset<E_t> *training_set, IloAr
       // Array (of size data_size) of the alpha dual constraint
       IloNumArray alpha(env);
       primalSolver.getDuals(alpha, ct_acc);
-      for (int i = 0 ; i < alpha.getSize() ; i++) printf("%f | ", alpha[i]);
+      for (int i = 0 ; i < alpha.getSize() ; i++) cout << alpha[i] << " |  ";
       printf("\n\n\n");
       // Array (always of size 1) of the beta dual constraint
       IloNumArray beta(env);
@@ -109,17 +109,16 @@ IloInt generateColumns(DTOptions &opt, WeightedDataset<E_t> *training_set, IloAr
       //primalSolver.exportModel("gcforest.lp");
 
       ///// Not working yet : determining a new tree with BacktrackingAlgorithm
-      /*
+      
       BacktrackingAlgorithm<ErrorPolicy, E_t> B(*training_set, opt);
       for (int y = 0; y < 2; ++y) {
         auto i{0};
 	for (auto xi : (*training_set)[y]) {
 	  B.setWeight(y, i, alpha[xi]);
-	  printf("%f | ", B.getWeight(y, i));
-          ++i;
+          cout << B.getWeight(y, i) << " |  ";
 	}
+	++i;
       }
-      */
 
   } catch (IloException& ex) {
       cerr << "Error: " << ex << endl;
