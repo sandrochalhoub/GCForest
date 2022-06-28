@@ -115,40 +115,23 @@ IloInt generateColumns(DTOptions &opt, WeightedDataset<E_t> *training_set, IloAr
 
       ///// Not working yet : determining a new tree with BacktrackingAlgorithm
       BacktrackingAlgorithm<ErrorPolicy, E_t> B(*training_set, opt);
-      int size = classZero.size();
-
-      for (int i = 0 ; i < alpha.getSize() ; i++) {
-	printf("%d %f \n", i, alpha[i]);
-      }
-      printf("\n\n");
 
       int k=0;
       for (auto i : classZero) {
-	     B.setWeight(0, k, alpha[k]);
-       ++k;
+	B.setWeight(0, k, alpha[k]);
+	++k;
       }
 
       k=0;
       for (auto i : classOne) {
 	B.setWeight(1, k, alpha[k]);
-  ++k;
-      }
-      printf("\n\n");
-      for (int i = 0 ; i < 296 ; i++) {
-	printf("%d %f \n", i, B.getWeight(0, i));
-      }
-      printf("\n\n");
-      for (int i = 296 ; i < B.numExample() ; i++) {
-	printf("%d %f \n", i, B.getWeight(1, i));
+	++k;
       }
 
-
-/*
       for (int i = 0 ; i < B.numExample() ; i++) {
-	if (B.getWeight(0, i) == 0 && B.getWeight(1, i) != 0) printf("%f | ", B.getWeight(1, i));
-	else printf("%f | ", B.getWeight(0, i));
+	printf("i=%d, alpha[i]=%f, w[0][i]=%f, w[1][i]=%f \n", i, alpha[i], B.getWeight(0, i), B.getWeight(1, i));
       }
-*/
+
   } catch (IloException& ex) {
       cerr << "Error: " << ex << endl;
   } catch (...) {
