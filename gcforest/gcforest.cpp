@@ -122,12 +122,16 @@ IloInt generateColumns(DTOptions &opt, WeightedDataset<E_t> *training_set, IloAr
       }
       printf("\n\n");
 
+      int k=0;
       for (auto i : classZero) {
-	B.setWeight(0, i, alpha[i]);
+	     B.setWeight(0, k, alpha[k]);
+       ++k;
       }
 
+      k=0;
       for (auto i : classOne) {
-	B.setWeight(1, i+size, alpha[i]);
+	B.setWeight(1, k, alpha[k]);
+  ++k;
       }
       printf("\n\n");
       for (int i = 0 ; i < 296 ; i++) {
