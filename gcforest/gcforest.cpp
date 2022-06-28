@@ -18,6 +18,7 @@ using namespace std;
 using namespace blossom;
 
 // Returns the prediction of the j-th tree of the forest, for the i-th data point
+
 bool getPrediction(WeightedDataset<int>::List& X, std::vector<WeakClassifier>& classifiers, IloInt j, IloInt i) {
   Tree<double>* sol = &(classifiers[j].T);
   return sol->predict(X[i]);
@@ -249,6 +250,7 @@ IloInt run_algorithm(DTOptions &opt) {
 
 
 	    bool prediction = getPrediction(classZero, classifiers, j, i);
+
 	    //predictions[j][i] = prediction;
             if (!prediction) decisions[j][i] = 1;
 	    else decisions[j][i] = -1;	   
@@ -267,6 +269,7 @@ IloInt run_algorithm(DTOptions &opt) {
 	      //printf("%d | ", i);
 			
 			assert(classOne.contain(i));
+
 
 	      bool prediction = getPrediction(classOne, classifiers, j, i - classZero.size());
 	      if (prediction) decisions[j][i] = 1;
