@@ -1,4 +1,3 @@
-ex
 #ifndef _BLOSSOM_BACKTRACK_HPP
 #define _BLOSSOM_BACKTRACK_HPP
 

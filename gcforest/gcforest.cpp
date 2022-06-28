@@ -127,12 +127,31 @@ IloInt generateColumns(DTOptions &opt, WeightedDataset<E_t> *training_set, IloAr
 	B.setWeight(1, k, alpha[k + classZero.size()]);
 	++k;
       }
-
-for(int y=0; y<2; ++y) {
-      for (int i = 0 ; i < B.examples[y].size() ; i++) {
-	printf("i=%d, alpha[i]=%f, w[0][i]=%f, w[1][i]=%f \n", i, alpha[i + y*(B.examples[0].size())], B.getWeight(y, i));
+/*
+      for (int i = 0 ; i < classZero.size() ; i++) {
+	printf("i=%d, alpha[i]=%f, w[0][i]=%f \n", i, alpha[i], B.getWeight(0, i));
       }
-    }
+      for (int i = 0 ; i < classOne.size() ; i++) {
+	printf("i=%d, alpha[i]=%f, w[1][i]=%f \n", i, alpha[i+classZero.size()], B.getWeight(1, i));
+      }
+*/
+
+/*
+      bool check = false;
+      std::vector<int> decision(data_size, 0);
+      while(!check) {
+	B.perfectTree();
+	B.minimize_error();
+	Tree<double> sol = B.getSolution();
+	for (int i = 0 ; i < data_size ; i++) {
+	  bool zero = sol.predict(classZero[i]);
+	  bool one = sol.predict(classOne[i]);
+	  if (zero) decision[i] = 0; else if (one) decision[i] = 1;
+	}
+	
+      }
+
+*/
 
   } catch (IloException& ex) {
       cerr << "Error: " << ex << endl;
