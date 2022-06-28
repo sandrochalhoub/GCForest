@@ -40,7 +40,7 @@ JAVAC = javac
 # Compiler options 
 # ---------------------------------------------------------------------
 
-CCOPT = -m64 -fPIC -fno-strict-aliasing -fexceptions -O3 -Wno-sign-compare #-DNDEBUG
+CCOPT = -m64 -fPIC -fno-strict-aliasing -fexceptions -O3 -Wno-sign-compare -c #-DNDEBUG
 
 COMPILFLAGS= -std=c++1z -D_LIBCPP_ENABLE_CXX17_REMOVED_AUTO_PTR
 
