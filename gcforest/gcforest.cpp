@@ -101,25 +101,49 @@ IloInt generateColumns(DTOptions &opt, WeightedDataset<E_t> *training_set, IloAr
       // Array (of size data_size) of the alpha dual constraint
       IloNumArray alpha(env);
       primalSolver.getDuals(alpha, ct_acc);
-      for (int i = 0 ; i < alpha.getSize() ; i++) cout << alpha[i] << " |  ";
+      //for (int i = 0 ; i < alpha.getSize() ; i++) cout << alpha[i] << " |  ";
       printf("\n\n\n");
       // Array (always of size 1) of the beta dual constraint
       IloNumArray beta(env);
       primalSolver.getDuals(beta, ct_wSum);
       //primalSolver.exportModel("gcforest.lp");
 
-      ///// Not working yet : determining a new tree with BacktrackingAlgorithm
-      
-      BacktrackingAlgorithm<ErrorPolicy, E_t> B(*training_set, opt);
-      for (int y = 0; y < 2; ++y) {
-        auto i{0};
-	for (auto xi : (*training_set)[y]) {
-	  B.setWeight(y, i, alpha[xi]);
-          cout << B.getWeight(y, i) << " |  ";
-	}
-	++i;
-      }
+      // All data points whose class is 0
+      auto classZero{(*training_set)[0]};
+      // All data points whose class is 1
+      auto classOne{(*training_set)[1]};
 
+      ///// Not working yet : determining a new tree with BacktrackingAlgorithm
+      BacktrackingAlgorithm<ErrorPolicy, E_t> B(*training_set, opt);
+      int size = classZero.size();
+/*
+      for (int i = 0 ; i < B.numExample() ; i++) {
+	printf("%d | %d | %f \n", size, i, B.getWeight(0, i));
+      }
+      for (auto i : classZero) {
+	B.setWeight(0, i, alpha[i]);
+	printf("%f | ", B.getWeight(0, i));
+      }
+*/
+/*
+      for (auto i : classOne) {
+	B.setWeight(1, i + size, alpha[i]);
+	printf("%f | ", B.getWeight(1, i + size));
+      }
+	printf("\n\n");
+*/
+/*
+      for (int i = 0 ; i < alpha.getSize() ; i++) {
+	printf("%f | ", alpha[i]);
+      }
+      printf("\n\n");
+*/
+/*
+      for (int i = 0 ; i < B.numExample() ; i++) {
+	if (B.getWeight(0, i) == 0 && B.getWeight(1, i) != 0) printf("%f | ", B.getWeight(1, i));
+	else printf("%f | ", B.getWeight(0, i));
+      }
+*/
   } catch (IloException& ex) {
       cerr << "Error: " << ex << endl;
   } catch (...) {
@@ -225,7 +249,6 @@ IloInt run_algorithm(DTOptions &opt) {
 	*/
       }
       //cout << "size=" << classZero.size() << endl << training_set->examples[0] << endl;
-			
       for(auto i : classOne) {
 	bool prediction = getPrediction(classOne, classifiers, j, i);
 	if (prediction) decisions[j][i + classZero.size()] = 1;
