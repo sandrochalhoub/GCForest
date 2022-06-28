@@ -11,6 +11,8 @@
 #include "../src/include/Tree.hpp"
 #include "/net/phorcys/data/roc/Logiciels/CPLEX_Studio201/cplex/include/ilcplex/ilocplex.h"
 #include <typeinfo>
+#include <iterator>
+#include <algorithm>
 
 ILOSTLBEGIN
 
@@ -18,14 +20,15 @@ using namespace std;
 using namespace blossom;
 
 // Returns the prediction of the j-th tree of the forest, for the i-th data point
-
-bool getPrediction(WeightedDataset<int>::List& X, std::vector<WeakClassifier>& classifiers, IloInt j, IloInt i) {
+bool getPrediction(WeightedDataset<double>::List& X, std::vector<WeakClassifier>& classifiers, IloInt j, IloInt i) {
   Tree<double>* sol = &(classifiers[j].T);
   return sol->predict(X[i]);
 }
 
 // Column generation method with CPLEX, IN PROGRESS
-IloInt generateColumns(IloArray<IloIntArray> decisions) {
+template <template <typename> class ErrorPolicy = WeightedError,
+          typename E_t = double>
+IloInt generateColumns(DTOptions &opt, WeightedDataset<E_t> *training_set, IloArray<IloIntArray> decisions) {
   IloEnv env;
   IloInt max_weights = 10;
 
@@ -33,27 +36,26 @@ IloInt generateColumns(IloArray<IloIntArray> decisions) {
       // Model
       IloModel primal(env);
       // Constants
-      IloInt forestSize = decisions.getSize();
-      IloInt datasetSize = decisions[0].getSize();
+      IloInt forest_size = decisions.getSize();
+      IloInt data_size = (*training_set)[0].size() + (*training_set)[1].size();
       // Variables of the LP
-      IloNumVarArray weights(env, forestSize, 0, IloInfinity);
-      IloNumVarArray z(env, datasetSize, -IloInfinity, IloInfinity);
+      IloNumVarArray weights(env, forest_size, 0, IloInfinity);
+      IloNumVarArray z(env, data_size, -IloInfinity, IloInfinity);
       IloNumVar zMin(env, -IloInfinity, IloInfinity);
       // Constraints
-      IloRangeArray ct_acc(env, datasetSize);
-      IloRangeArray ct_z(env, datasetSize);
-      IloRangeArray ct_w(env, forestSize);
-      IloRangeArray ct_wSum(env, forestSize);
+      IloRangeArray ct_acc(env, data_size);
+      IloRangeArray ct_z(env, data_size);
+      IloRangeArray ct_w(env, forest_size);
+      IloRangeArray ct_wSum(env, 1);
       
       // Objective function
-      //IloObjective obj = IloAdd(primal, IloMinimize(env, zMin));
       primal.add(IloMinimize(env, zMin));
 
       ///// BUILDING CONSTRAINTS
       // Subject to the accuracy constraint
-      for (IloInt i = 0 ; i < datasetSize ; i++) {
+      for (IloInt i = 0 ; i < data_size ; i++) {
 	IloExpr expr(env);
-	for (IloInt j = 0 ; j < forestSize ; j++) {
+	for (IloInt j = 0 ; j < forest_size ; j++) {
 	  expr += decisions[j][i] * weights[j] + z[i];
 	}
 	ct_acc[i] = IloRange(env, 0, expr, IloInfinity);
@@ -61,7 +63,7 @@ IloInt generateColumns(IloArray<IloIntArray> decisions) {
       primal.add(ct_acc);
       
       // Subject to the constraint on z
-      for (IloInt i = 0 ; i < datasetSize ; i++) {
+      for (IloInt i = 0 ; i < data_size ; i++) {
 	IloExpr expr(env);
 	expr += z[i] - zMin;
 	ct_z[i] = IloRange(env, -IloInfinity, expr, 0);
@@ -69,49 +71,84 @@ IloInt generateColumns(IloArray<IloIntArray> decisions) {
       primal.add(ct_z);
 
       // Subject to the constraint : positive weights
-      for (IloInt j = 0 ; j < forestSize ; j++) {
+      for (IloInt j = 0 ; j < forest_size ; j++) {
 	ct_w[j] = IloRange(env, 0, weights[j], IloInfinity);
       }
       primal.add(ct_w);
 
       // Subject to the constraint : bounded sum of weights
-      for (IloInt j = 0 ; j < forestSize ; j++) {
-	IloExpr expr(env);
-	expr += weights[j];
-	ct_wSum[j] = IloRange(env, -IloInfinity, expr, max_weights);
+      IloExpr sum(env);
+      for (IloInt j = 0 ; j < forest_size ; j++) {
+	sum += weights[j];
       }
+      ct_wSum[0] = IloRange(env, -IloInfinity, sum, max_weights);
       primal.add(ct_wSum);
 
       /// COLUMN-GENERATION PROCEDURE
 
       IloCplex primalSolver(primal);
-      primalSolver.solve();
-
-      if (primalSolver.solve()) {
-        primalSolver.out() << "Solution status: " << primalSolver.getStatus() << endl;
-	primalSolver.out() << "Total cost = " << primalSolver.getObjValue() << endl;
-      }
-
-      //primalSolver.exportModel("gcforest.lp");
-      /*
-      //for (;;) {
-         /// OPTIMIZE OVER CURRENT PATTERNS
-         //primalSolver.solve();
-         /// FIND AND ADD A NEW PATTERN
-	 
-      //}
-
       if (primalSolver.solve()) {
          primalSolver.out() << "Solution status: " << primalSolver.getStatus() << endl;
-         for (IloInt j = 0; j < forestSize ; j++) {
+         for (IloInt j = 0; j < forest_size ; j++) {
             primalSolver.out() << "   tree " << j << ": "
                         << primalSolver.getValue(weights[j]) << endl;
          }
-         //primalSolver.out() << "Total cost = " << primalSolver.getObjValue() << endl;
+         primalSolver.out() << "Total cost = " << primalSolver.getObjValue() << endl;
       }
       else primalSolver.out()<< "No solution" << endl;
       primalSolver.printTime();
-      */
+
+      // Array (of size data_size) of the alpha dual constraint
+      IloNumArray alpha(env);
+      primalSolver.getDuals(alpha, ct_acc);
+      //for (int i = 0 ; i < alpha.getSize() ; i++) cout << alpha[i] << " |  ";
+      printf("\n\n\n");
+      // Array (always of size 1) of the beta dual constraint
+      IloNumArray beta(env);
+      primalSolver.getDuals(beta, ct_wSum);
+      //primalSolver.exportModel("gcforest.lp");
+
+      // All data points whose class is 0
+      auto classZero{(*training_set)[0]};
+      // All data points whose class is 1
+      auto classOne{(*training_set)[1]};
+
+      ///// Not working yet : determining a new tree with BacktrackingAlgorithm
+      BacktrackingAlgorithm<ErrorPolicy, E_t> B(*training_set, opt);
+      int size = classZero.size();
+
+      for (int i = 0 ; i < alpha.getSize() ; i++) {
+	printf("%d %f \n", i, alpha[i]);
+      }
+      printf("\n\n");
+
+      int k=0;
+      for (auto i : classZero) {
+	     B.setWeight(0, k, alpha[k]);
+       ++k;
+      }
+
+      k=0;
+      for (auto i : classOne) {
+	B.setWeight(1, k, alpha[k]);
+  ++k;
+      }
+      printf("\n\n");
+      for (int i = 0 ; i < 296 ; i++) {
+	printf("%d %f \n", i, B.getWeight(0, i));
+      }
+      printf("\n\n");
+      for (int i = 296 ; i < B.numExample() ; i++) {
+	printf("%d %f \n", i, B.getWeight(1, i));
+      }
+
+
+/*
+      for (int i = 0 ; i < B.numExample() ; i++) {
+	if (B.getWeight(0, i) == 0 && B.getWeight(1, i) != 0) printf("%f | ", B.getWeight(1, i));
+	else printf("%f | ", B.getWeight(0, i));
+      }
+*/
   } catch (IloException& ex) {
       cerr << "Error: " << ex << endl;
   } catch (...) {
@@ -124,7 +161,7 @@ IloInt generateColumns(IloArray<IloIntArray> decisions) {
 }
 
 template <template <typename> class ErrorPolicy = WeightedError,
-          typename E_t = int>
+          typename E_t = double>
 IloInt run_algorithm(DTOptions &opt) {
 
   IloEnv env;
@@ -167,6 +204,9 @@ IloInt run_algorithm(DTOptions &opt) {
   if (opt.verbosity >= DTOptions::NORMAL)
     cout << "d readtime=" << cpu_time() << endl;
 
+  ////// Size of the entire training set prior to the pre-processing
+  IloInt data_size = (*training_set)[0].size() + (*training_set)[1].size();
+
   ////// PREPROCESSING
   if (opt.preprocessing) {
     training_set->preprocess(opt.verbosity >= DTOptions::NORMAL);
@@ -175,8 +215,6 @@ IloInt run_algorithm(DTOptions &opt) {
   ////// CREATING THE ALGORITHMS
   // Adaboost for the forest initialization.
   Adaboost A(*training_set, opt);
-  // BacktrackingAlgorithm for all subsequent iterations.
-  //BacktrackingAlgorithm<ErrorPolicy, E_t> B(*training_set, opt);
 
   if (opt.verbosity >= DTOptions::NORMAL)
     cout << "d inputtime=" << cpu_time() << endl;
@@ -189,10 +227,6 @@ IloInt run_algorithm(DTOptions &opt) {
   auto classZero{(*training_set)[0]};
   // All data points whose class is 1
   auto classOne{(*training_set)[1]};
-  // Size of the entire training set
-  IloInt data_size = classZero.size() + classOne.size();
-  
-  printf("Data size = %lu, among which class zero size = %lu and class one size = %lu. \n\n", data_size, classZero.size(), classOne.size());
   
   // The forest built by Adaboost
   std::vector<WeakClassifier> classifiers = A.getClassifier();
@@ -200,97 +234,46 @@ IloInt run_algorithm(DTOptions &opt) {
   // Decisions vector == 1 if predictions[j][i] == classes[i], -1 otherwise
   IloArray<IloIntArray> decisions(env, classifiers.size());
 
-  ////// Obsolete
-  /*std::vector<std::vector<int>> predictions(classifiers.size(), vector<int>(data_size, 0));
-  IloArray<IloIntArray> predictions(env, classifiers.size());
-  std::vector<int> weights(classifiers.size());
-  std::vector<int> decision_vector(data_size);
-  IloIntArray weights(env);
-  */
-
   ////// BUILDING PREDICTIONS AND WEIGHTS VECTORS
   for (IloInt j = 0 ; j < classifiers.size() ; j++) {
-    //predictions[j] = IloIntArray(env, data_size, 0, 1, ILOINT);
     decisions[j] = IloIntArray(env, data_size, 0, 1, ILOINT);
     //printf("\nTREE NUMBER %d \n\n", j);
     if (opt.verified) {
-			
-			
-			for(auto i : classZero) {
-				cout << " " << i << ": " << classZero[i] << endl;
-				assert(classZero.contain(i));
-				if(!classZero.contain(i))
-				{
-					cout << "erreur\n";
-					exit(1);
-				}
-			}
-			cout << "size=" << classZero.size() << endl << training_set->examples[0] << endl;
-			
-			for(auto i : classOne) {
-				cout << " " << i << ": " << classOne[i] << endl;
-				assert(classOne.contain(i));
-				if(!classOne.contain(i))
-				{
-					cout << "erreur\n";
-					exit(1);
-				}
-			}
-			cout << "size=" << classOne.size() << training_set->examples[1] << endl;
-			
-			
-			
-	for (IloInt i = 0 ; i < data_size ; i++) {
-	  ////// CLASS ZERO
-	  if (i < classZero.size()) {
-	    //printf("%d | ", i);
-			
-			
-			assert(classZero.contain(i));
-
-
-	    bool prediction = getPrediction(classZero, classifiers, j, i);
-
-	    //predictions[j][i] = prediction;
-            if (!prediction) decisions[j][i] = 1;
-	    else decisions[j][i] = -1;	   
-	    //printf("%d\n", decisions[j][i]);
-	    /*
-	    if (prediction == 0) {
-	      weights[j] = classZero.weight(i);    
-	      printf("%d | %d \n", i, weights[j]);
-	      B.setWeight(0, i, weights[j]);
-	      IloInt vecWeights = B.getWeight(0, i);
-	      printf("%d | %d \n", i, vecWeights);
-	    }
-	    */
-	  ////// CLASS ONE
-	  } else {
-	      //printf("%d | ", i);
-			
-			assert(classOne.contain(i));
-
-
-	      bool prediction = getPrediction(classOne, classifiers, j, i - classZero.size());
-	      if (prediction) decisions[j][i] = 1;
-	      else decisions[j][i] = -1;
-	      //printf("%d\n", decisions[j][i]);
-	      /*
-	      if (prediction == 1) {
-	        weights[j] = classOne.weight(i);    
-	        //printf("%d | %d \n", i, weights[j]);
-	        B.setWeight(1, i, weights[j]);
-	        IloInt vecWeights = B.getWeight(1, i);
-	        printf("%d | %d \n", i, vecWeights);
-	      }
-	      */
-	  }
+      for(auto i : classZero) {
+	bool prediction = getPrediction(classZero, classifiers, j, i);
+	if (!prediction) decisions[j][i] = 1;
+	else decisions[j][i] = -1;
+	/*   
+	cout << " " << i << ": " << classZero[i] << endl;
+	assert(classZero.contain(i));
+	if(!classZero.contain(i))
+	{
+	  cout << "erreur\n";
+	  exit(1);
 	}
+	*/
+      }
+      //cout << "size=" << classZero.size() << endl << training_set->examples[0] << endl;
+      for(auto i : classOne) {
+	bool prediction = getPrediction(classOne, classifiers, j, i);
+	if (prediction) decisions[j][i + classZero.size()] = 1;
+	else decisions[j][i + classZero.size()] = -1;
+	/*
+	cout << " " << i << ": " << classOne[i] << endl;
+	assert(classOne.contain(i));
+	if(!classOne.contain(i))
+	{
+	  cout << "erreur\n";
+	  exit(1);
+	}
+	*/
+      }
+      //cout << "size=" << classOne.size() << training_set->examples[1] << endl;
 	
     }
   }
   printf("\n\n");
-  generateColumns(decisions);
+  generateColumns(opt, training_set, decisions);
 
   return 0;
 }
@@ -306,7 +289,7 @@ int main(int argc, char *argv[]) {
     opt.display(cout);
 
   if (opt.preprocessing) {
-    return run_algorithm<WeightedError, int>(opt);
+    return run_algorithm<WeightedError, double>(opt);
   } else {
     return run_algorithm<>(opt);
   }
