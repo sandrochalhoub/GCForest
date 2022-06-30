@@ -18,7 +18,7 @@ using namespace blossom;
 
 IloInt nb_iter = 0;
 IloInt ITERMAX = 200;
-IloInt TARGET_ACCURACY = 0.99;
+IloNum TARGET_ACCURACY = 0.99;
 
 // Column generation function with CPLEX (Work in Progress)
 template <template <typename> class ErrorPolicy = WeightedError,
@@ -52,7 +52,7 @@ IloInt generateColumns(DTOptions &opt, WeightedDataset<E_t> *training_set, IloAr
 	for (IloInt j = 0 ; j < forest_size ; j++) {
 	  expr += decisions[j][i] * weights[j] + z[i];
 	}
-	ct_acc[i] = IloRange(env, 5, expr, IloInfinity);
+	ct_acc[i] = IloRange(env, 0, expr, IloInfinity);
       }
       primal.add(ct_acc);
       
