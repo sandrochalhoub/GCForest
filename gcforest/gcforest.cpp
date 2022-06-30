@@ -21,8 +21,7 @@ IloInt ITERMAX = 200;
 IloNum TARGET_ACCURACY = 0.99;
 
 // Column generation function with CPLEX (Work in Progress)
-template <template <typename> class ErrorPolicy = WeightedError,
-          typename E_t = double>
+template <template <typename> class ErrorPolicy = WeightedError, typename E_t = double>
 IloInt generateColumns(DTOptions &opt, WeightedDataset<E_t> *training_set, IloArray<IloIntArray> decisions) {
   IloEnv env;
 
@@ -48,32 +47,32 @@ IloInt generateColumns(DTOptions &opt, WeightedDataset<E_t> *training_set, IloAr
       //// CONSTRAINTS
       // Subject to the accuracy constraint
       for (IloInt i = 0 ; i < data_size ; i++) {
-	IloExpr expr(env);
-	for (IloInt j = 0 ; j < forest_size ; j++) {
-	  expr += decisions[j][i] * weights[j] + z[i];
-	}
-	ct_acc[i] = IloRange(env, 0, expr, IloInfinity);
+        IloExpr expr(env);
+        for (IloInt j = 0 ; j < forest_size ; j++) {
+          expr += decisions[j][i] * weights[j] + z[i];
+	      }
+	      ct_acc[i] = IloRange(env, 0, expr, IloInfinity);
       }
       primal.add(ct_acc);
       
       // Subject to the constraint on z
       for (IloInt i = 0 ; i < data_size ; i++) {
-	IloExpr expr(env);
-	expr += z[i] - zMin;
-	ct_z[i] = IloRange(env, -IloInfinity, expr, 0);
+        IloExpr expr(env);
+        expr += z[i] - zMin;
+        ct_z[i] = IloRange(env, -IloInfinity, expr, 0);
       }
       primal.add(ct_z);
 
       // Subject to positive weights
       for (IloInt j = 0 ; j < forest_size ; j++) {
-	ct_w[j] = IloRange(env, 0, weights[j], IloInfinity);
+	      ct_w[j] = IloRange(env, 0, weights[j], IloInfinity);
       }
       primal.add(ct_w);
 
       // Subject to a bounded sum of weights
       IloExpr sum(env);
       for (IloInt j = 0 ; j < forest_size ; j++) {
-	sum += weights[j];
+	      sum += weights[j];
       }
       ct_wSum[0] = IloRange(env, 0, sum, max_weights);
       primal.add(ct_wSum);
@@ -83,15 +82,14 @@ IloInt generateColumns(DTOptions &opt, WeightedDataset<E_t> *training_set, IloAr
       if (primalSolver.solve()) {
          primalSolver.out() << "Solution status: " << primalSolver.getStatus() << endl;
          for (IloInt j = 0; j < forest_size ; j++) {
-            primalSolver.out() << "   tree " << j << ": "
-                        << primalSolver.getValue(weights[j]) << endl;
+            primalSolver.out() << "   tree " << j << ": " << primalSolver.getValue(weights[j]) << endl;
          }
          primalSolver.out() << "Total cost = " << primalSolver.getObjValue() << endl;
       }
       else {
-	 primalSolver.out()<< "No solution" << endl;
-	 env.end();
-	 return 0;
+	      primalSolver.out()<< "No solution" << endl;
+	      env.end();
+	      return 0;
       }
       primalSolver.printTime();
       //primalSolver.exportModel("gcforest.lp");
@@ -116,18 +114,18 @@ IloInt generateColumns(DTOptions &opt, WeightedDataset<E_t> *training_set, IloAr
       }
       k=0;
       for (auto i : classOne) {
-	B.setWeight(1, k, alpha[k + classZero.size()]);
-	++k;
+	      B.setWeight(1, k, alpha[k + classZero.size()]);
+	      ++k;
       }
       B.minimize_error();
       Tree<double> sol = B.getSolution();
 
 /*
       for (int i = 0 ; i < classZero.size() ; i++) {
-	printf("i=%d, alpha[i]=%f, w[0][i]=%f \n", i, alpha[i], B.getWeight(0, i));
+	      printf("i=%d, alpha[i]=%f, w[0][i]=%f \n", i, alpha[i], B.getWeight(0, i));
       }
       for (int i = 0 ; i < classOne.size() ; i++) {
-	printf("i=%lu, alpha[i]=%f, w[1][i]=%f \n", i + classZero.size(), alpha[i+classZero.size()], B.getWeight(1, i));
+	      printf("i=%lu, alpha[i]=%f, w[1][i]=%f \n", i + classZero.size(), alpha[i+classZero.size()], B.getWeight(1, i));
       }
 */
 
@@ -137,38 +135,38 @@ IloInt generateColumns(DTOptions &opt, WeightedDataset<E_t> *training_set, IloAr
       IloIntArray decision(env, data_size);
       k=0;
       for(auto i : classZero) {
-	//printf("%lu | %d | %lu\n", data_size, i, classZero.size());
-	bool prediction = sol.predict(classZero[i]);
-	if (!prediction) decision[k] = 1;
-	else decision[k] = -1;
-	k++;
-	//printf("i=%d, pred %d, decision %d\n", i, prediction, decision[i]);
+        //printf("%lu | %d | %lu\n", data_size, i, classZero.size());
+        bool prediction = sol.predict(classZero[i]);
+        if (!prediction) decision[k] = 1;
+        else decision[k] = -1;
+        k++;
+        //printf("i=%d, pred %d, decision %d\n", i, prediction, decision[i]);
       }
       k = 0;
       for(auto i : classOne) {
-	bool prediction = sol.predict(classOne[i]);
-	//printf("%lu | %d | %lu\n", data_size, i, classOne.size());
-	if (prediction) decision[k + classZero.size()] = 1;
-	else decision[k + classZero.size()] = -1;
-	k++;
-	//printf("i=%lu, pred %d, decision %d\n", i + classZero.size(), prediction, decision[i + classZero.size()]);
+        bool prediction = sol.predict(classOne[i]);
+        //printf("%lu | %d | %lu\n", data_size, i, classOne.size());
+        if (prediction) decision[k + classZero.size()] = 1;
+        else decision[k + classZero.size()] = -1;
+        k++;
+        //printf("i=%lu, pred %d, decision %d\n", i + classZero.size(), prediction, decision[i + classZero.size()]);
      }
 
       // Adding new tree to the forest
 
       IloArray<IloIntArray> new_decisions(env, forest_size + 1);
       for (IloInt j = 0 ; j < forest_size + 1 ; j++) {
-	if (j < forest_size)
-	  new_decisions[j] = IloIntArray(decisions[j]);
-	else
-	  new_decisions[j] = IloIntArray(decision);
-	//for (IloInt i = 0 ; i < data_size ; i++) printf("%lu %d \n", i, new_decisions[j][i]);
+        if (j < forest_size)
+          new_decisions[j] = IloIntArray(decisions[j]);
+        else
+          new_decisions[j] = IloIntArray(decision);
+        //for (IloInt i = 0 ; i < data_size ; i++) printf("%lu %d \n", i, new_decisions[j][i]);
       }
 
       // Stop if accuracy is already good enough
       if (B.accuracy() > TARGET_ACCURACY) {
-	env.end();
-	return 0;
+        env.end();
+        return 0;
       }
 
       // Stop if ITERMAX reached
@@ -193,10 +191,8 @@ bool getPrediction(WeightedDataset<double>::List& X, std::vector<WeakClassifier>
 }
 
 // Forest initialization
-template <template <typename> class ErrorPolicy = WeightedError,
-          typename E_t = double>
+template <template <typename> class ErrorPolicy = WeightedError, typename E_t = double>
 IloInt init_algorithm(DTOptions &opt) {
-
   IloEnv env;
 
   WeightedDataset<E_t> input;
@@ -215,8 +211,7 @@ IloInt init_algorithm(DTOptions &opt) {
 
   if (opt.test_sample != 0) {
 
-    std::vector<int>::iterator endx[2] = {input.examples[0].bbegin(),
-                                          input.examples[1].bbegin()};
+    std::vector<int>::iterator endx[2] = {input.examples[0].bbegin(), input.examples[1].bbegin()};
 
     input.drawSample(opt.test_sample, *training_set, *test_set, opt.seed);
 
@@ -272,19 +267,19 @@ IloInt init_algorithm(DTOptions &opt) {
     if (opt.verified) {
       IloInt k = 0;
       for(auto i : classZero) {
-	//printf("%lu | %d | %lu\n", data_size, i, classZero.size());
-	bool prediction = getPrediction(classZero, classifiers, j, i);
-	if (!prediction) decisions[j][k] = 1;
-	else decisions[j][k] = -1;
-	k++;
+        //printf("%lu | %d | %lu\n", data_size, i, classZero.size());
+        bool prediction = getPrediction(classZero, classifiers, j, i);
+        if (!prediction) decisions[j][k] = 1;
+        else decisions[j][k] = -1;
+        k++;
       }
       k = 0;
       for(auto i : classOne) {
-	//printf("%lu | %d | %lu\n", data_size, i, classOne.size());
-	bool prediction = getPrediction(classOne, classifiers, j, i);
-	if (prediction) decisions[j][k + classZero.size()] = 1;
-	else decisions[j][k + classZero.size()] = -1;
-	k++;
+        //printf("%lu | %d | %lu\n", data_size, i, classOne.size());
+        bool prediction = getPrediction(classOne, classifiers, j, i);
+        if (prediction) decisions[j][k + classZero.size()] = 1;
+        else decisions[j][k + classZero.size()] = -1;
+        k++;
       }
     }
   }
@@ -310,3 +305,4 @@ int main(int argc, char *argv[]) {
   }
 
 }
+
