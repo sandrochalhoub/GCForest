@@ -75,12 +75,12 @@ IloInt generateColumns(DTOptions &opt, WeightedDataset<E_t> *training_set, IloAr
       for (IloInt j = 0 ; j < forest_size ; j++) {
 	sum += weights[j];
       }
-      ct_wSum[0] = IloRange(env, -IloInfinity, sum, max_weights);
+      ct_wSum[0] = IloRange(env, 0, sum, max_weights);
       primal.add(ct_wSum);
 
       //// SOLVING
       IloCplex primalSolver(primal);
-      if (primalSolver.solve()) {;
+      if (primalSolver.solve()) {
          primalSolver.out() << "Solution status: " << primalSolver.getStatus() << endl;
          for (IloInt j = 0; j < forest_size ; j++) {
             primalSolver.out() << "   tree " << j << ": "
@@ -88,7 +88,11 @@ IloInt generateColumns(DTOptions &opt, WeightedDataset<E_t> *training_set, IloAr
          }
          primalSolver.out() << "Total cost = " << primalSolver.getObjValue() << endl;
       }
-      else primalSolver.out()<< "No solution" << endl;
+      else {
+	 primalSolver.out()<< "No solution" << endl;
+	 env.end();
+	 return 0;
+      }
       primalSolver.printTime();
       //primalSolver.exportModel("gcforest.lp");
 
@@ -105,16 +109,18 @@ IloInt generateColumns(DTOptions &opt, WeightedDataset<E_t> *training_set, IloAr
 
       // Initializing a new tree with weights = alpha
       BacktrackingAlgorithm<ErrorPolicy, E_t> B(*training_set, opt);
-      int k=0;
+      IloInt k=0;
       for (auto i : classZero) {
-	     B.setWeight(0, k, alpha[k]);
-       ++k;
+        B.setWeight(0, k, alpha[k]);
+        ++k;
       }
       k=0;
       for (auto i : classOne) {
 	B.setWeight(1, k, alpha[k + classZero.size()]);
 	++k;
       }
+      B.minimize_error();
+      Tree<double> sol = B.getSolution();
 
 /*
       for (int i = 0 ; i < classZero.size() ; i++) {
@@ -128,18 +134,28 @@ IloInt generateColumns(DTOptions &opt, WeightedDataset<E_t> *training_set, IloAr
       //// COLUMN-GENERATION (work in progress, stops after ITERMAX iterations)
 
       // Decision vector of the new tree
-      IloIntArray decision(env, data_size, -1, 1, ILOINT);
-      B.minimize_error();
-      Tree<double> sol = B.getSolution();
+      IloIntArray decision(env, data_size);
+      k=0;
       for(auto i : classZero) {
+	//printf("%lu | %d | %lu\n", data_size, i, classZero.size());
 	bool prediction = sol.predict(classZero[i]);
-	if (!prediction) decision[i] = 1;
-	else decision[i] = -1;
+	if (!prediction) decision[k] = 1;
+	else decision[k] = -1;
+	k++;
 	//printf("i=%d, pred %d, decision %d\n", i, prediction, decision[i]);
       }
-      printf("\n\n");
+      k = 0;
+      for(auto i : classOne) {
+	bool prediction = sol.predict(classOne[i]);
+	//printf("%lu | %d | %lu\n", data_size, i, classOne.size());
+	if (prediction) decision[k + classZero.size()] = 1;
+	else decision[k + classZero.size()] = -1;
+	k++;
+	//printf("i=%lu, pred %d, decision %d\n", i + classZero.size(), prediction, decision[i + classZero.size()]);
+     }
 
       // Adding new tree to the forest
+
       IloArray<IloIntArray> new_decisions(env, forest_size + 1);
       for (IloInt j = 0 ; j < forest_size + 1 ; j++) {
 	if (j < forest_size)
@@ -252,17 +268,23 @@ IloInt init_algorithm(DTOptions &opt) {
 
   //// BUILDING DECISION VECTORS
   for (IloInt j = 0 ; j < classifiers.size() ; j++) {
-    decisions[j] = IloIntArray(env, data_size, -1, 1, ILOINT);
+    decisions[j] = IloIntArray(env, data_size);
     if (opt.verified) {
+      IloInt k = 0;
       for(auto i : classZero) {
+	//printf("%lu | %d | %lu\n", data_size, i, classZero.size());
 	bool prediction = getPrediction(classZero, classifiers, j, i);
-	if (!prediction) decisions[j][i] = 1;
-	else decisions[j][i] = -1;
+	if (!prediction) decisions[j][k] = 1;
+	else decisions[j][k] = -1;
+	k++;
       }
+      k = 0;
       for(auto i : classOne) {
+	//printf("%lu | %d | %lu\n", data_size, i, classOne.size());
 	bool prediction = getPrediction(classOne, classifiers, j, i);
-	if (prediction) decisions[j][i + classZero.size()] = 1;
-	else decisions[j][i + classZero.size()] = -1;
+	if (prediction) decisions[j][k + classZero.size()] = 1;
+	else decisions[j][k + classZero.size()] = -1;
+	k++;
       }
     }
   }
