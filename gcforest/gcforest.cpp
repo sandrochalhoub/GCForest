@@ -18,13 +18,13 @@ using namespace blossom;
 
 IloInt nb_iter = 0;
 IloInt ITERMAX = 200;
+IloInt TARGET_ACCURACY = 0.99;
 
 // Column generation function with CPLEX (Work in Progress)
 template <template <typename> class ErrorPolicy = WeightedError,
           typename E_t = double>
 IloInt generateColumns(DTOptions &opt, WeightedDataset<E_t> *training_set, IloArray<IloIntArray> decisions) {
   IloEnv env;
-  IloInt max_weights = 10;
 
   try {
       // Model
@@ -32,6 +32,7 @@ IloInt generateColumns(DTOptions &opt, WeightedDataset<E_t> *training_set, IloAr
       // Constants
       IloInt forest_size = decisions.getSize();
       IloInt data_size = (*training_set)[0].size() + (*training_set)[1].size();
+      IloInt max_weights = 10;
       // Variables of the LP
       IloNumVarArray weights(env, forest_size, 0, IloInfinity);
       IloNumVarArray z(env, data_size, -IloInfinity, IloInfinity);
@@ -89,7 +90,7 @@ IloInt generateColumns(DTOptions &opt, WeightedDataset<E_t> *training_set, IloAr
       }
       else primalSolver.out()<< "No solution" << endl;
       primalSolver.printTime();
-      primalSolver.exportModel("gcforest.lp");
+      //primalSolver.exportModel("gcforest.lp");
 
       // Dual variables
       IloNumArray alpha(env, data_size);
@@ -149,7 +150,7 @@ IloInt generateColumns(DTOptions &opt, WeightedDataset<E_t> *training_set, IloAr
       }
 
       // Stop if accuracy is already good enough
-      if (B.accuracy() > 0.99) {
+      if (B.accuracy() > TARGET_ACCURACY) {
 	env.end();
 	return 0;
       }
