@@ -83,7 +83,7 @@ IloInt generateColumns(DTOptions &opt, WeightedDataset<E_t> *training_set, IloAr
       if (primalSolver.solve()) {
          primalSolver.out() << "Solution status: " << primalSolver.getStatus() << endl;
          for (IloInt j = 0; j < forest_size ; j++) {
-            primalSolver.out() << "   tree " << j << ": " << primalSolver.getValue(weights[j]) << endl;
+            primalSolver.out() << "   weight tree " << j << ": " << primalSolver.getValue(weights[j]) << endl;
          }
          primalSolver.out() << "Total cost = " << primalSolver.getObjValue() << endl;
       }
@@ -115,29 +115,24 @@ IloInt generateColumns(DTOptions &opt, WeightedDataset<E_t> *training_set, IloAr
       }
       k=0;
       for (auto i : classOne) {
-	      B.setWeight(1, k, alpha[k + classZero.size()]);
+	    	B.setWeight(1, k, alpha[k + classZero.size()]);
 	      ++k;
       }
       B.minimize_error();
       Tree<double> sol = B.getSolution();
+      /*
 			if (B.accuracy() > TARGET_ACCURACY) {
         env.end();
         return 0;
       }
-
-/*
-      for (int i = 0 ; i < classZero.size() ; i++) {
-	      printf("i=%d, alpha[i]=%f, w[0][i]=%f \n", i, alpha[i], B.getWeight(0, i));
-      }
-      for (int i = 0 ; i < classOne.size() ; i++) {
-	      printf("i=%lu, alpha[i]=%f, w[1][i]=%f \n", i + classZero.size(), alpha[i+classZero.size()], B.getWeight(1, i));
-      }
-*/
-
+      */
+      
       //// COLUMN-GENERATION (work in progress, stops after ITERMAX iterations)
 
       // Decision vector of the new tree
       IloIntArray decision(env, data_size);
+      IloArray<IloIntArray> new_decisions(env, forest_size + 1);
+      
       k=0;
       for(auto i : classZero) {
         //printf("%lu | %d | %lu\n", data_size, i, classZero.size());
@@ -155,33 +150,30 @@ IloInt generateColumns(DTOptions &opt, WeightedDataset<E_t> *training_set, IloAr
         else decision[k + classZero.size()] = -1;
         //printf("i=%lu, pred %d, decision %d\n", k + classZero.size(), prediction, decision[k + classZero.size()]);
         k++;
-     }
-    
-      // Adding new tree to the forest
-      IloArray<IloIntArray> new_decisions(env, forest_size + 1);
-      for (IloInt j = 0 ; j < forest_size + 1 ; j++) {
-        if (j < forest_size)
-          new_decisions[j] = IloIntArray(decisions[j]);
-        else
-          new_decisions[j] = IloIntArray(decision);
-        //for (IloInt i = 0 ; i < data_size ; i++) printf("%lu %d \n", i, new_decisions[j][i]);
-      }
-/*
-      for (IloInt i = 0 ; i < data_size ; i++) {
-				double sum;
-        IloExpr expr(env);
-        for (IloInt j = 0 ; j < forest_size ; j++) {
-          expr += decisions[j][i] * weights[j] + z[i];
-	        sum += primalSolver.getValue(weights[j]) * decisions[j][i] + primalSolver.getValue(z[i]);
-	      }
-				cout<< "acc = " << sum << endl;
-      }
-*/
+			}
+			
+			// Dual constraint
+		  IloNum dual_sum = 0.0;
+		  for (IloInt i = 0 ; i < data_size ; i++) {
+		  	dual_sum += decision[i] * alpha[i];
+		  }
+		  
+		  // If the new tree does not violate the dual constraint, it is added to the forest
+		  if (dual_sum > beta[0]) {
+		  	cout << "\nDual constraint respected, dual_sum = " << dual_sum << " > beta = " << beta[0] << "\n" << endl;
+		    // Adding the new tree to the forest
+		    for (IloInt j = 0 ; j < forest_size + 1 ; j++) {
+		      if (j < forest_size)
+		        new_decisions[j] = IloIntArray(decisions[j]);
+		      else
+		        new_decisions[j] = IloIntArray(decision);
+		    }
+		    // Repeat if ITERMAX not reached yet
+				if (ITERMAX > nb_iter++)
+        	generateColumns(opt, training_set, new_decisions);
+		  }
 
-      // Stop if ITERMAX reached
-      if (++nb_iter < ITERMAX)
-        generateColumns(opt, training_set, new_decisions);
-
+	// Otherwise stop
   } catch (IloException& ex) {
       cerr << "Error: " << ex << endl;
   } catch (...) {
