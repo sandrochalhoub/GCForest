@@ -83,7 +83,7 @@ IloInt generateColumns(DTOptions &opt, WeightedDataset<E_t> *training_set, IloAr
       if (primalSolver.solve()) {
          primalSolver.out() << "Solution status: " << primalSolver.getStatus() << endl;
          for (IloInt j = 0; j < forest_size ; j++) {
-            primalSolver.out() << "   weight tree " << j << ": " << primalSolver.getValue(weights[j]) << endl;
+         	primalSolver.out() << "   weight tree " << j << ": " << primalSolver.getValue(weights[j]) << endl;
          }
          primalSolver.out() << "Total cost = " << primalSolver.getObjValue() << endl;
       }
@@ -248,6 +248,8 @@ IloInt init_algorithm(DTOptions &opt) {
 
   //// SOLVING
   A.train();
+  // If the forest built by Adaboost is already good enough, column generation is unnecessary
+  if (A.get_accuracy() >= TARGET_ACCURACY) return 0;
   printf("\n");
 
   // All data points whose class is 0
