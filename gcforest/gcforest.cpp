@@ -115,17 +115,16 @@ IloInt generateColumns(DTOptions &opt, WeightedDataset<E_t> *training_set, IloAr
       }
       k=0;
       for (auto i : classOne) {
-	    	B.setWeight(1, k, alpha[k + classZero.size()]);
-	      ++k;
+				B.setWeight(1, k, alpha[k + classZero.size()]);
+				++k;
       }
       B.minimize_error();
       Tree<double> sol = B.getSolution();
-      /*
+      
 			if (B.accuracy() > TARGET_ACCURACY) {
         env.end();
         return 0;
       }
-      */
       
       //// COLUMN-GENERATION (work in progress, stops after ITERMAX iterations)
 
@@ -153,10 +152,10 @@ IloInt generateColumns(DTOptions &opt, WeightedDataset<E_t> *training_set, IloAr
 			}
 			
 			// Dual constraint
-		  IloNum dual_sum = 0.0;
-		  for (IloInt i = 0 ; i < data_size ; i++) {
-		  	dual_sum += decision[i] * alpha[i];
-		  }
+			IloNum dual_sum = 0.0;
+			for (IloInt i = 0 ; i < data_size ; i++) {
+				dual_sum += decision[i] * alpha[i];
+			}
 		  
 		  // If the new tree does not violate the dual constraint, it is added to the forest
 		  if (dual_sum > beta[0]) {
