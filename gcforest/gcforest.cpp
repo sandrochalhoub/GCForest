@@ -37,6 +37,9 @@ IloInt generateColumns(DTOptions &opt, WeightedDataset<E_t> *training_set, IloAr
       IloNumVarArray weights(env, forest_size, 0, 1);
       IloNumVarArray z(env, data_size, -IloInfinity, IloInfinity);
       IloNumVar zMin(env, -IloInfinity, IloInfinity);
+      // Variables of the forest
+      IloNum guess = 0;
+      IloNum accuracy = 0;
       // Constraints
       IloRangeArray ct_acc(env, data_size);
       IloRangeArray ct_z(env, data_size);
@@ -59,7 +62,7 @@ IloInt generateColumns(DTOptions &opt, WeightedDataset<E_t> *training_set, IloAr
       // Subject to the constraint on z
       for (IloInt i = 0 ; i < data_size ; i++) {
         IloExpr expr(env);
-        expr += z[i] - zMin;
+        expr = z[i] - zMin;
         ct_z[i] = IloRange(env, -IloInfinity, expr, -EPS);
       }
       primal.add(ct_z);
@@ -85,7 +88,7 @@ IloInt generateColumns(DTOptions &opt, WeightedDataset<E_t> *training_set, IloAr
          for (IloInt j = 0; j < forest_size ; j++) {
          	primalSolver.out() << "   weight tree " << j << ": " << primalSolver.getValue(weights[j]) << endl;
          }
-         primalSolver.out() << "Total cost = " << primalSolver.getObjValue() << endl;
+         primalSolver.out() << "zMin = " << primalSolver.getObjValue() << endl;
       }
       else {
 	      primalSolver.out()<< "No solution" << endl;
@@ -93,8 +96,36 @@ IloInt generateColumns(DTOptions &opt, WeightedDataset<E_t> *training_set, IloAr
 	      return 0;
       }
       primalSolver.printTime();
-      //primalSolver.exportModel("gcforest.lp");
+      
+		    
+		  // Computing the forest accuracy
+		  for (IloInt i = 0 ; i < data_size ; i++) {
+		    for (IloInt j = 0 ; j < forest_size ; j++) {
+		      guess += decisions[j][i] * primalSolver.getValue(weights[j]);
+		    }
+		    accuracy += (guess > 0);
+		  }
+		  accuracy /= data_size;
+		  cout << "\n" << nb_iter << " forest accuracy = " << accuracy << "\n\n" << endl;
+		  
+		  /*
+      IloNum sumZ = 0;
+      for (IloInt i = 0 ; i < data_size ; i++) {
+      	if (primalSolver.getValue(z[i]) >= EPS)  sumZ++;
+      }
+      sumZ /= data_size;
+      cout << "\n\nACCURACY BY Z = " << sumZ << "\n\n" << endl;
+			*/
+		  
+		  // Stop if forest accuracy is good enough
+		  if (accuracy >= TARGET_ACCURACY) {
+		    env.end();
+  		  return 0;
+		  }
 
+      
+      //primalSolver.exportModel("gcforest.lp");
+      
       // Dual variables
       IloNumArray alpha(env, data_size);
       primalSolver.getDuals(alpha, ct_acc);
@@ -120,12 +151,7 @@ IloInt generateColumns(DTOptions &opt, WeightedDataset<E_t> *training_set, IloAr
       }
       B.minimize_error();
       Tree<double> sol = B.getSolution();
-      
-			if (B.accuracy() > TARGET_ACCURACY) {
-        env.end();
-        return 0;
-      }
-      
+
       //// COLUMN-GENERATION (work in progress, stops after ITERMAX iterations)
 
       // Decision vector of the new tree
@@ -158,21 +184,21 @@ IloInt generateColumns(DTOptions &opt, WeightedDataset<E_t> *training_set, IloAr
 			}
 		  
 		  // If the new tree does not violate the dual constraint, it is added to the forest
-		  if (dual_sum > beta[0]) {
+		  // IMPORTANT REMINDER : should be > but >= performs better
+		  if (dual_sum >= beta[0]) {
 		  	cout << "\nDual constraint respected, dual_sum = " << dual_sum << " > beta = " << beta[0] << "\n" << endl;
 		    // Adding the new tree to the forest
 		    for (IloInt j = 0 ; j < forest_size + 1 ; j++) {
-		      if (j < forest_size)
-		        new_decisions[j] = IloIntArray(decisions[j]);
-		      else
-		        new_decisions[j] = IloIntArray(decision);
+		      if (j < forest_size) new_decisions[j] = IloIntArray(decisions[j]);
+		      else new_decisions[j] = IloIntArray(decision);
 		    }
+
 		    // Repeat if ITERMAX not reached yet
 				if (ITERMAX > nb_iter++)
         	generateColumns(opt, training_set, new_decisions);
 		  }
 
-	// Otherwise stop
+	// Stop if ITERMAX reached
   } catch (IloException& ex) {
       cerr << "Error: " << ex << endl;
   } catch (...) {
