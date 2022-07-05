@@ -159,7 +159,7 @@ int run_algorithm(DTOptions &opt) {
 
     cout << "limit: " << limit << endl;
 
-    sol.prune(total, limit, false);
+    sol = sol.prune(total, limit, false);
 
     E_t tree_error = 0;
     for (auto y{0}; y < 2; ++y) {
