@@ -1,5 +1,6 @@
 #include <cstdio>
 #include <iostream>
+#include <fstream>
 #include <random>
 #include <stdlib.h>
 #include "../src/include/WeightedDataset.hpp"
@@ -10,6 +11,7 @@
 #include "../src/include/Reader.hpp"
 #include "../src/include/Tree.hpp"
 #include "/net/phorcys/data/roc/Logiciels/CPLEX_Studio201/cplex/include/ilcplex/ilocplex.h"
+#include <chrono>
 
 ILOSTLBEGIN
 
@@ -47,6 +49,10 @@ IloInt generateColumns(DTOptions &opt, WeightedDataset<E_t> *training_set, IloAr
       IloRangeArray ct_wSum(env, 1);
       // Objective function
       primal.add(IloMinimize(env, zMin));
+			// CSV
+			std::ofstream myfile;
+      myfile.open ("example.csv", ios::app);
+
 
       //// CONSTRAINTS
       // Subject to the accuracy constraint
@@ -104,6 +110,7 @@ IloInt generateColumns(DTOptions &opt, WeightedDataset<E_t> *training_set, IloAr
 		      guess += decisions[j][i] * primalSolver.getValue(weights[j]);
 		    }
 		    accuracy += (guess > 0);
+		    guess = 0;
 		  }
 		  accuracy /= data_size;
 		  cout << "\n" << nb_iter << " forest accuracy = " << accuracy << "\n\n" << endl;
@@ -119,12 +126,14 @@ IloInt generateColumns(DTOptions &opt, WeightedDataset<E_t> *training_set, IloAr
 		  
 		  // Stop if forest accuracy is good enough
 		  if (accuracy >= TARGET_ACCURACY) {
+				myfile << accuracy;
+				myfile << ",";
+        myfile << nb_iter;
+				myfile << ",";
+				myfile.close();
 		    env.end();
   		  return 0;
 		  }
-
-      
-      //primalSolver.exportModel("gcforest.lp");
       
       // Dual variables
       IloNumArray alpha(env, data_size);
@@ -196,8 +205,14 @@ IloInt generateColumns(DTOptions &opt, WeightedDataset<E_t> *training_set, IloAr
 		    // Repeat if ITERMAX not reached yet
 				if (ITERMAX > nb_iter++)
         	generateColumns(opt, training_set, new_decisions);
+				else {
+					myfile << accuracy;
+					myfile << ",";
+		      myfile << nb_iter;
+					myfile << ",";
+				}
 		  }
-
+  myfile.close();
 	// Stop if ITERMAX reached
   } catch (IloException& ex) {
       cerr << "Error: " << ex << endl;
@@ -219,6 +234,7 @@ bool getPrediction(WeightedDataset<double>::List& X, std::vector<WeakClassifier>
 // Forest initialization
 template <template <typename> class ErrorPolicy = WeightedError, typename E_t = double>
 IloInt init_algorithm(DTOptions &opt) {
+  std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
   IloEnv env;
 
   WeightedDataset<E_t> input;
@@ -273,9 +289,28 @@ IloInt init_algorithm(DTOptions &opt) {
     cout << "d inputtime=" << cpu_time() << endl;
 
   //// SOLVING
+  std::chrono::steady_clock::time_point ada_start = std::chrono::steady_clock::now();
   A.train();
+  std::chrono::steady_clock::time_point ada_end = std::chrono::steady_clock::now();
+	// CSV
+  std::ofstream myfile;
+  myfile.open("example.csv", ios::app);
+	myfile << A.get_accuracy();
+  myfile << ",";
+	myfile << std::chrono::duration_cast<std::chrono::milliseconds>(ada_end - ada_start).count();
+  myfile << ",";
   // If the forest built by Adaboost is already good enough, column generation is unnecessary
-  if (A.get_accuracy() >= TARGET_ACCURACY) return 0;
+  if (A.get_accuracy() >= TARGET_ACCURACY) {
+		myfile << A.get_accuracy();
+		myfile << ",";
+		myfile << nb_iter;
+		myfile << ",";
+		myfile << std::chrono::duration_cast<std::chrono::milliseconds>(ada_end - ada_start).count();
+		myfile << "\n";
+		env.end();
+		return 0;
+	}
+	myfile.close();
   printf("\n");
 
   // All data points whose class is 0
@@ -313,13 +348,32 @@ IloInt init_algorithm(DTOptions &opt) {
   }
   printf("\n\n");
   generateColumns(opt, training_set, decisions);
-
+	std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+  myfile.open("example.csv", ios::app);
+  myfile << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
+  myfile << ",";
+	myfile << "\n";
+	myfile.close();
+	env.end();
   return 0;
 }
 
 int main(int argc, char *argv[]) {
   DTOptions opt = parse_dt(argc, argv);
-
+	// CSV
+  std::ofstream myfile;
+  myfile.open("example.csv", ios::app);
+  myfile << argv[1];
+  myfile << ",";
+  myfile << argv[3];
+  myfile << ",";
+	// If the ADA_STOP parameter is used (experimental)
+	if (argc > 5) myfile << argv[5];
+  else myfile << "N/A";
+  myfile << ",";
+	myfile << ITERMAX;
+  myfile << ",";  
+	myfile.close();
   if (opt.print_cmd)
     cout << opt.cmdline << endl;
 
@@ -331,6 +385,7 @@ int main(int argc, char *argv[]) {
   } else {
     return init_algorithm<>(opt);
   }
+
 
 }
 
