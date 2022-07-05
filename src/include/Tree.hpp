@@ -292,22 +292,22 @@ void Wood<E_t>::compute_error(const int node, vector<E_t> &error,
     E_t rc[2] = {getCount(node, 0), getCount(node, 1)};
     E_t lc[2] = {total[0] - getCount(node, 0), total[1] - getCount(node, 1)};
 
-    // // cout << node << " (" << total[0] << "/" << total[1] << ") " <<
-    // // feature[node]
-    // // 	<< ": " << child[0][node] << "=" << getCount(node,0) << "/" <<
-    // // getCount(node,1) << " <> "
-    // // 		<< child[0][node] << "=" << (total[0]-getCount(node,0)) << "/"
-    // // <<
-    // // (total[1]-getCount(node,1)) << endl;
-    // //
+    // cout << node << " (" << total[0] << "/" << total[1] << ") " <<
+    // feature[node]
+    // 	<< ": " << child[0][node] << "=" << getCount(node,0) << "/" <<
+    // getCount(node,1) << " <> "
+    // 		<< child[0][node] << "=" << (total[0]-getCount(node,0)) << "/"
+    // <<
+    // (total[1]-getCount(node,1)) << endl;
     //
-    // cout << node << " (" << total[0] << "/" << total[1] << ")|("
-    // 	<< getCount(node,0) << "/" << getCount(node,1) << ") " << feature[node]
-    // 	<< ": " << child[0][node] << "=" << lc[0] << "/" << lc[1] << " <> "
-    // 		<< child[1][node] << "=" << rc[0] << "/" << rc[1] << endl;
-    //
-    // // assert(total[0] >= getCount(node,0));
-    // // assert(total[1] >= getCount(node,1));
+    
+    cout << node << " (" << total[0] << "/" << total[1] << ")|("
+    	<< getCount(node,0) << "/" << getCount(node,1) << ") " << feature[node]
+    	<< ": " << child[0][node] << "=" << lc[0] << "/" << lc[1] << " <> "
+    		<< child[1][node] << "=" << rc[0] << "/" << rc[1] << endl;
+    
+    // assert(total[0] >= getCount(node,0));
+    // assert(total[1] >= getCount(node,1));
 
     if (child[0][node] >= 2) {
       compute_error(child[0][node], error, marginal, mode, lc, cumulative);
@@ -449,51 +449,87 @@ void Wood<E_t>::prune(const int root, const E_t *total, const E_t max_error) {
 template <class E_t>
 void Wood<E_t>::prune2(const int root, const E_t *total, const E_t max_error) {
 
+
+  cout << "prune\n" ;
+  this->display(cout, root, 0);
+
+  cout << endl;
+
+
+  /* all of the following vectors hold info indexed by nodes*/
+
+  // number of leaves under the node
   vector<size_t> num_leaf;
   num_leaf.resize(size(), 1);
 
+  // error at the node
   vector<size_t> error;
   error.resize(size(), 0);
 
+  // extra error if the node is removed
   vector<size_t> marginal;
   marginal.resize(size(), 0);
 
+  // the label used if the node is removed
   vector<bool> mode;
   mode.resize(size(), false);
 
+  // get a list of all nodes from root
   vector<int> nodes;
 	get_descendants(root, nodes);
 
+  // compute all of the info
   compute_size(root, num_leaf);
-
   compute_error(root, error, marginal, mode, total, true);
 	
 	
-  // for (auto l : nodes) {
-  //   cout << "node_" << l << " f=" << getFeature(l) << " s=" << (2 * num_leaf[l] - 1) << " e=" << error[l]
-  //        << " m=" << marginal[l] << endl;
-  // }
-  //
+  for (auto l : nodes) {
+    cout << "node_" << l << " f=" << getFeature(l) << " s=" << (2 * num_leaf[l] - 1) << " e=" << error[l]
+         << " m=" << marginal[l] << endl;
 
+    assert(l>=0);
+    assert(l<size());
+  }
+  
+
+  // the extra error so far
   E_t additional_error{0};
 	
 	
 	while(nodes.size() > 0) {
+
+    // sort the nodes by non-decreasing ratio marginal/size of the subtree
 	  sort(nodes.begin(), nodes.end(),
 	       [&](const int x, const int y) { return marginal[x]*(2 * num_leaf[y] - 2) > marginal[y]*(2 * num_leaf[x] - 2); });
+
+
+    for(auto x : nodes) {
+      if(marginal[x] + additional_error > max_error)
+        cout << "keep " << x << endl;
+      else {
+        cout << marginal[x] << " + " << additional_error << " <= " << max_error << " -> " << x << " is removable\n";
+      }
+    }
+
+
 		
+    // do not prune nodes whose marginal would make the additional error exceed the upper bound
 		nodes.erase(std::remove_if(nodes.begin(), nodes.end(), [&](const int x) {return marginal[x] + additional_error > max_error;}), nodes.end());
 		
 		if(nodes.size() == 0)
 			break;
 		
+    // prune the worst node (and all its descendants)
     auto x{nodes.back()};
+
+    cout << "remove " << x << endl;
+
     nodes.pop_back();
     additional_error += marginal[x];
     auto p{parent[x]};
     auto self{child[1][p] == x};
     child[self][p] = mode[x];
-		marginal[p] -= marginal[x];
+		marginal[p] -= marginal[x]; // not sure we need to update the marginal!!!
 		num_leaf[p] -= (num_leaf[x]-1);
     freeNode(x);
 
