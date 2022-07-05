@@ -525,12 +525,16 @@ void Wood<E_t>::prune2(const int root, const E_t *total, const E_t max_error) {
     cout << "remove " << x << endl;
 
     nodes.pop_back();
-    additional_error += marginal[x];
-    auto p{parent[x]};
-    auto self{child[1][p] == x};
-    child[self][p] = mode[x];
-		marginal[p] -= marginal[x]; // not sure we need to update the marginal!!!
-		num_leaf[p] -= (num_leaf[x]-1);
+
+    if(x != root) {
+      additional_error += marginal[x];
+      auto p{parent[x]};
+      auto self{child[1][p] == x};
+      child[self][p] = mode[x];
+  		marginal[p] -= marginal[x]; // not sure we need to update the marginal!!!
+  		num_leaf[p] -= (num_leaf[x]-1);
+    }
+    
     freeNode(x);
 
 		nodes.erase(std::remove_if(nodes.begin(), nodes.end(), [&](const int x) {return available.contain(x);}), nodes.end());
