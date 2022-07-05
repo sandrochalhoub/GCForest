@@ -67,7 +67,7 @@ int run_algorithm(DTOptions &opt) {
         cout << endl;
         // cout << input.examples[y] << endl;
       }
-      // return 0;
+      return 0;
     }
 
     // cout << *training_set << endl;

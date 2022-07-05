@@ -449,18 +449,29 @@ void Wood<E_t>::prune(const int root, const E_t *total, const E_t max_error) {
 template <class E_t>
 void Wood<E_t>::prune2(const int root, const E_t *total, const E_t max_error) {
 
+
+  cout << "prune\n" ;
+  this->display(cout, root, 0);
+
+  cout << endl;
+
+
+  // number of leaves under every node
   vector<size_t> num_leaf;
   num_leaf.resize(size(), 1);
 
+  // error at every node
   vector<size_t> error;
   error.resize(size(), 0);
 
+  // ??
   vector<size_t> marginal;
   marginal.resize(size(), 0);
 
   vector<bool> mode;
   mode.resize(size(), false);
 
+  // get a list of all nodes from root
   vector<int> nodes;
 	get_descendants(root, nodes);
 
@@ -469,11 +480,14 @@ void Wood<E_t>::prune2(const int root, const E_t *total, const E_t max_error) {
   compute_error(root, error, marginal, mode, total, true);
 	
 	
-  // for (auto l : nodes) {
-  //   cout << "node_" << l << " f=" << getFeature(l) << " s=" << (2 * num_leaf[l] - 1) << " e=" << error[l]
-  //        << " m=" << marginal[l] << endl;
-  // }
-  //
+  for (auto l : nodes) {
+    cout << "node_" << l << " f=" << getFeature(l) << " s=" << (2 * num_leaf[l] - 1) << " e=" << error[l]
+         << " m=" << marginal[l] << endl;
+
+    assert(l>=0);
+    assert(l<size());
+  }
+  
 
   E_t additional_error{0};
 	
