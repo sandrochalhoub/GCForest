@@ -31,29 +31,29 @@ public:
   Tree(Wood<E_t> *w, const int i);
 
   Tree<E_t> prune(const E_t *total, const E_t max_error, const bool terminal=true);
+  Tree<E_t> prune(const E_t *total, const double max_loss);
 
   int getChild(const int node, const int branch) const;
 
   int getFeature(const int node) const;
-	
-	template<class sample>
-	bool predict(const sample &i) const;
+
+  template <class sample> bool predict(const sample &i) const;
   //
   // bool predict(const instance &i) const;
 
-        // template <class rIter, typename wf_type>
-        // E_t predict(rIter beg_neg, rIter end_neg, rIter beg_pos, rIter
-        // end_pos,
-        //             wf_type weight_function) const;
+  // template <class rIter, typename wf_type>
+  // E_t predict(rIter beg_neg, rIter end_neg, rIter beg_pos, rIter
+  // end_pos,
+  //             wf_type weight_function) const;
 
-        size_t size() const;
+  size_t size() const;
 
-        size_t depth() const;
+  size_t depth() const;
 
-        /*!@name Miscellaneous*/
-        //@{
-        std::ostream &display(std::ostream &os) const;
-        //@}
+  /*!@name Miscellaneous*/
+  //@{
+  std::ostream &display(std::ostream &os) const;
+  //@}
 };
 
 // M
@@ -88,10 +88,13 @@ public:
 
   size_t count() const;
 
-  // void cut(const int node);
-
-  Tree<E_t> prune(const int root, const E_t *total, const E_t max_error);
-	Tree<E_t> prune2(const int root, const E_t *total, const E_t max_error);
+  // prune from leaves until reaching a given maximum error
+  Tree<E_t> prune_leaf(const int root, const E_t *total, const E_t max_error);
+  // prune from anywhere until reaching a given maximum error
+  Tree<E_t> prune_all(const int root, const E_t *total, const E_t max_error);
+  // prune from anywhere until there is no node whose loss is above the given
+  // limit
+  Tree<E_t> prune_loss(const int root, const E_t *total, const double max_loss);
 
   // allocate memory for a new node and returns its index
   int grow();
@@ -146,9 +149,14 @@ Tree<E_t>::Tree(Wood<E_t> *w, const int node) : wood(w), idx(node) {}
 template <class E_t>
 Tree<E_t> Tree<E_t>::prune(const E_t *total, const E_t max_error, const bool leaf) {
 	if(leaf)
-		return wood->prune(idx, total, max_error);
-	else
-		return wood->prune2(idx, total, max_error);
+          return wood->prune_leaf(idx, total, max_error);
+        else
+          return wood->prune_all(idx, total, max_error);
+}
+
+template <class E_t>
+Tree<E_t> Tree<E_t>::prune(const E_t *total, const double max_loss) {
+  return wood->prune_loss(idx, total, max_loss);
 }
 
 template <class E_t>
@@ -356,7 +364,8 @@ void Wood<E_t>::get_descendants(const int node, vector<int> &bag, const bool ter
 // }
 
 template <class E_t>
-Tree<E_t> Wood<E_t>::prune(const int root, const E_t *total, const E_t max_error) {
+Tree<E_t> Wood<E_t>::prune_leaf(const int root, const E_t *total,
+                                const E_t max_error) {
 
   vector<size_t> num_leaf;
   num_leaf.resize(size(), 1);
@@ -449,8 +458,8 @@ Tree<E_t> Wood<E_t>::prune(const int root, const E_t *total, const E_t max_error
 }
 
 template <class E_t>
-Tree<E_t> Wood<E_t>::prune2(const int root, const E_t *total, const E_t max_error) {
-
+Tree<E_t> Wood<E_t>::prune_all(const int root, const E_t *total,
+                               const E_t max_error) {
 
   // cout << "prune\n" ;
   // this->display(cout, root, 0);
@@ -544,131 +553,121 @@ Tree<E_t> Wood<E_t>::prune2(const int root, const E_t *total, const E_t max_erro
 		nodes.erase(std::remove_if(nodes.begin(), nodes.end(), [&](const int x) {return available.contain(x);}), nodes.end());
 		
 	}
-	
-	
+
+        if (empty)
+          return (*this)[mode[root]];
+        return (*this)[root];
+}
+
+template <class E_t>
+Tree<E_t> Wood<E_t>::prune_loss(const int root, const E_t *total,
+                               const double max_loss) {
+
+  // cout << "prune\n";
+  // this->display(cout, root, 0);
+
+  /* all of the following vectors hold info indexed by nodes*/
+
+  // number of leaves under the node
+  vector<size_t> num_leaf;
+  num_leaf.resize(size(), 1);
+
+  // error at the node
+  vector<size_t> error;
+  error.resize(size(), 0);
+
+  // extra error if the node is removed
+  vector<size_t> marginal;
+  marginal.resize(size(), 0);
+
+  // the label used if the node is removed
+  vector<bool> mode;
+  mode.resize(size(), false);
+
+  // get a list of all nodes from root
+  vector<int> nodes;
+  get_descendants(root, nodes);
+
+  // compute all of the info
+  compute_size(root, num_leaf);
+  compute_error(root, error, marginal, mode, total, true);
+
+  for (auto l : nodes) {
+    // cout << "node_" << l << " f=" << getFeature(l)
+    //      << " s=" << (2 * num_leaf[l] - 1) << " e=" << error[l]
+    //      << " m=" << marginal[l] << " l="
+    //      << (static_cast<double>(marginal[l]) /
+    //          (static_cast<double>(total[0] + total[1]) * (num_leaf[l] - 1)))
+    //      << endl;
+
+    assert(num_leaf[l] >= 2);
+    assert(l >= 0);
+    assert(l < size());
+  }
+
+  // the extra error so far
+  double additional_loss{0};
+
+  bool empty{false};
+
+  while (nodes.size() > 0) {
+
+    // sort the nodes by non-decreasing ratio marginal/size of the subtree
+    sort(nodes.begin(), nodes.end(), [&](const int x, const int y) {
+      return marginal[x] * (num_leaf[y] - 1) > marginal[y] * (num_leaf[x] - 1);
+    });
+
+    if (nodes.size() == 0 or
+        additional_loss + static_cast<double>(marginal[nodes.back()]) /
+                (static_cast<double>(total[0] + total[1]) *
+                 static_cast<double>((num_leaf[nodes.back()] - 1))) >
+            max_loss) {
+
+      // if (nodes.size() > 0)
+      //   cout << "stop because loss[" << nodes.back() << "]="
+      //        << (static_cast<double>(marginal[nodes.back()]) /
+      //            (static_cast<double>(total[0] + total[1]) *
+      //             static_cast<double>(num_leaf[nodes.back()] - 1)))
+      //        << endl;
+      break;
+    }
+
+
+
+    // prune the worst node (and all its descendants)
+    auto x{nodes.back()};
+
+    additional_loss += (static_cast<double>(marginal[x]) /
+             (static_cast<double>(total[0] + total[1]) * static_cast<double>(num_leaf[x] - 1)));
+
+    // cout << "remove " << x << " (loss="
+    //      << additional_loss
+    //      << ")" << endl;
+
+    nodes.pop_back();
+
+    if (x != root) {
+      // additional_error += marginal[x];
+      auto p{parent[x]};
+      auto self{child[1][p] == x};
+      child[self][p] = mode[x];
+      marginal[p] -= marginal[x]; // not sure we need to update the marginal!!!
+      num_leaf[p] -= (num_leaf[x] - 1);
+    } else {
+      empty = true;
+    }
+
+    freeNode(x);
+
+    nodes.erase(
+        std::remove_if(nodes.begin(), nodes.end(),
+                       [&](const int x) { return available.contain(x); }),
+        nodes.end());
+  }
+
   if(empty)
     return (*this)[mode[root]];
   return (*this)[root];
-	
-	
-	
-	//   sort(nodes.begin(), nodes.end(),
-	//        [&](const int x, const int y) { return marginal[x]*(2 * num_leaf[y] - 2) > marginal[y]*(2 * num_leaf[x] - 2); });
-	//
-	//
-	//   cout << endl
-	//        << additional_error << " + " << marginal[nodes.back()] << " < "
-	//        << max_error << endl;
-	//   for (auto l : nodes) {
-	// 	double r = static_cast<double>(marginal[l]) / static_cast<double>(2 * num_leaf[l] - 2);
-	//     cout << "node_" << l << " f=" << getFeature(l) << " s=" << (2 * num_leaf[l] - 2) << " e=" << error[l]
-	//          << " m=" << marginal[l] << " r=" << r << endl;
-	//   }
-	//   // for (auto l : leafs) {
-	//   //   cout << "leaf_" << l << " " << getFeature(l) << " " << num_leaf[l] << " " << error[l]
-	//   //        << " " << marginal[l] << endl;
-	//   // }
-	//
-	// nodes.erase(std::remove_if(nodes.begin(), nodes.end(), [&](const int x) {return marginal[x] + additional_error > max_error;}), nodes.end());
-	//
-	//
-	//   while (nodes.size() > 0 and nodes.back() != root and
-	//          additional_error + marginal[nodes.back()] <= max_error) {
-	//
-	//     auto x{nodes.back()};
-	//     nodes.pop_back();
-	//
-	//   	cout << endl << "remove " << x << endl;
-	//   		// for(auto x : available)
-	//   		// cout << " " << x;
-	//   		// cout << endl;
-	//
-	// 	cout << endl;
-	//   for (auto l : nodes) {
-	// 		double r = static_cast<double>(marginal[l]) / static_cast<double>(2 * num_leaf[l] - 2);
-	//     cout << "node_" << l << " f=" << getFeature(l) << " s=" << (2 * num_leaf[l] - 2) << " e=" << error[l]
-	//          << " m=" << marginal[l] << " r=" << r << endl;
-	//   }
-	//
-	//     additional_error += marginal[x];
-	//
-	//     auto p{parent[x]};
-	//
-	//     // cout << "parent[" << l << "] = " << p << endl;
-	//
-	//     auto self{child[1][p] == x};
-	//
-	//     child[self][p] = mode[x];
-	//
-	//     // cout << child[self][p] << " <- " << mode[l] << endl;
-	//
-	// 	marginal[p] -= marginal[x];
-	// 	num_leaf[p] -= (num_leaf[x]-1);
-	//
-	//     freeNode(x);
-	//
-	//
-	//
-	//   		// assert(child[0][x] < 2 and child[1][x] < 2);
-	//
-	//
-	// 		// remove x's children
-	// 		// for(auto n{nodes.begin()}; n!=nodes.end())
-	//
-	//
-	//
-	//
-	//
-	//
-	//     // if (child[1 - self][p] <= 1) {
-	//     //
-	//     //   // cout << "add parent " << p << " (b/c it's a leaf)\n";
-	//     //
-	//     //   leafs.push_back(p);
-	//     //   auto rp{leafs.end()};
-	//     //   while (--rp != leafs.begin() and marginal[*rp] > marginal[*(rp - 1)])
-	//     //     swap(*rp, *(rp - 1));
-	//     // }
-	//     // else {
-	//     // 	cout << "parent " << p << " is not a leaf: " << child[1-self][p] <<
-	//     // "\n";
-	//     // }
-	//
-	//   		// for(auto x : available)
-	//   		// cout << " " << x;
-	//   		// cout << endl;
-	//   		//
-	//   		    cout << additional_error << " + " << marginal[nodes.back()] << " < "
-	//   		         << max_error << endl;
-	//   		//     for (auto l : leafs) {
-	//   		//       cout << "leaf_" << l << " " << getFeature(l) << " " << num_leaf[l] << " " << error[l]
-	//   		//            << " " << marginal[l] << endl;
-	//   		//     }
-	//   		//     display(cout, root, 0);
-	//   		//     cout << endl;
-	//
-	//   for (auto l : nodes) {
-	// 		double r = static_cast<double>(marginal[l]) / static_cast<double>(2 * num_leaf[l] - 2);
-	//     cout << "node_" << l << " f=" << getFeature(l) << " s=" << (2 * num_leaf[l] - 2) << " e=" << error[l]
-	//          << " m=" << marginal[l] << " r=" << r << endl;
-	//   }
-	//
-	// 	nodes.erase(std::remove_if(nodes.begin(), nodes.end(), [&](const int x) {return available.contain(x);}), nodes.end());
-	// 	// nodes.erase(nodes.resize()
-	//
-	// 	nodes.erase(std::remove_if(nodes.begin(), nodes.end(), [&](const int x) {return marginal[x] + additional_error > max_error;}), nodes.end());
-	//
-	//
-	//
-	//
-	// 	cout << endl;
-	//   for (auto l : nodes) {
-	// 		double r = static_cast<double>(marginal[l]) / static_cast<double>(2 * num_leaf[l] - 2);
-	//     cout << "node_" << l << " f=" << getFeature(l) << " s=" << (2 * num_leaf[l] - 2) << " e=" << error[l]
-	//          << " m=" << marginal[l] << " r=" << r << endl;
-	//   }
-	//
-	//   }
 }
 
 template <class E_t> int Wood<E_t>::grow() {
@@ -688,7 +687,6 @@ template <class E_t> int Wood<E_t>::grow() {
 
   return node;
 }
-
 
 template <class E_t> int Wood<E_t>::copyNode(const int node) {
   if (node > 1) {
