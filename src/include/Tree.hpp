@@ -30,7 +30,7 @@ public:
 
   Tree(Wood<E_t> *w, const int i);
 
-  void prune(const E_t *total, const E_t max_error, const bool terminal=true);
+  Tree<E_t> prune(const E_t *total, const E_t max_error, const bool terminal=true);
 
   int getChild(const int node, const int branch) const;
 
@@ -90,8 +90,8 @@ public:
 
   // void cut(const int node);
 
-  void prune(const int root, const E_t *total, const E_t max_error);
-	void prune2(const int root, const E_t *total, const E_t max_error);
+  Tree<E_t> prune(const int root, const E_t *total, const E_t max_error);
+	Tree<E_t> prune2(const int root, const E_t *total, const E_t max_error);
 
   // allocate memory for a new node and returns its index
   int grow();
@@ -144,11 +144,11 @@ template <class E_t>
 Tree<E_t>::Tree(Wood<E_t> *w, const int node) : wood(w), idx(node) {}
 
 template <class E_t>
-void Tree<E_t>::prune(const E_t *total, const E_t max_error, const bool leaf) {
+Tree<E_t> Tree<E_t>::prune(const E_t *total, const E_t max_error, const bool leaf) {
 	if(leaf)
-		wood->prune(idx, total, max_error);
+		return wood->prune(idx, total, max_error);
 	else
-		wood->prune2(idx, total, max_error);
+		return wood->prune2(idx, total, max_error);
 }
 
 template <class E_t>
@@ -292,22 +292,22 @@ void Wood<E_t>::compute_error(const int node, vector<E_t> &error,
     E_t rc[2] = {getCount(node, 0), getCount(node, 1)};
     E_t lc[2] = {total[0] - getCount(node, 0), total[1] - getCount(node, 1)};
 
-    // cout << node << " (" << total[0] << "/" << total[1] << ") " <<
-    // feature[node]
-    // 	<< ": " << child[0][node] << "=" << getCount(node,0) << "/" <<
-    // getCount(node,1) << " <> "
-    // 		<< child[0][node] << "=" << (total[0]-getCount(node,0)) << "/"
-    // <<
-    // (total[1]-getCount(node,1)) << endl;
-    //
+    // // cout << node << " (" << total[0] << "/" << total[1] << ") " <<
+    // // feature[node]
+    // // 	<< ": " << child[0][node] << "=" << getCount(node,0) << "/" <<
+    // // getCount(node,1) << " <> "
+    // // 		<< child[0][node] << "=" << (total[0]-getCount(node,0)) << "/"
+    // // <<
+    // // (total[1]-getCount(node,1)) << endl;
+    // //
     
-    cout << node << " (" << total[0] << "/" << total[1] << ")|("
-    	<< getCount(node,0) << "/" << getCount(node,1) << ") " << feature[node]
-    	<< ": " << child[0][node] << "=" << lc[0] << "/" << lc[1] << " <> "
-    		<< child[1][node] << "=" << rc[0] << "/" << rc[1] << endl;
+    // cout << node << " (" << total[0] << "/" << total[1] << ")|("
+    // 	<< getCount(node,0) << "/" << getCount(node,1) << ") " << feature[node]
+    // 	<< ": " << child[0][node] << "=" << lc[0] << "/" << lc[1] << " <> "
+    // 		<< child[1][node] << "=" << rc[0] << "/" << rc[1] << endl;
     
-    // assert(total[0] >= getCount(node,0));
-    // assert(total[1] >= getCount(node,1));
+    // // assert(total[0] >= getCount(node,0));
+    // // assert(total[1] >= getCount(node,1));
 
     if (child[0][node] >= 2) {
       compute_error(child[0][node], error, marginal, mode, lc, cumulative);
@@ -356,7 +356,7 @@ void Wood<E_t>::get_descendants(const int node, vector<int> &bag, const bool ter
 // }
 
 template <class E_t>
-void Wood<E_t>::prune(const int root, const E_t *total, const E_t max_error) {
+Tree<E_t> Wood<E_t>::prune(const int root, const E_t *total, const E_t max_error) {
 
   vector<size_t> num_leaf;
   num_leaf.resize(size(), 1);
@@ -444,17 +444,18 @@ void Wood<E_t>::prune(const int root, const E_t *total, const E_t max_error) {
 		//     display(cout, root, 0);
 		//     cout << endl;
   }
+
+  return (*this)[root];
 }
 
 template <class E_t>
-void Wood<E_t>::prune2(const int root, const E_t *total, const E_t max_error) {
+Tree<E_t> Wood<E_t>::prune2(const int root, const E_t *total, const E_t max_error) {
 
 
-  cout << "prune\n" ;
-  this->display(cout, root, 0);
+  // cout << "prune\n" ;
+  // this->display(cout, root, 0);
 
-  cout << endl;
-
+  // cout << endl;
 
   /* all of the following vectors hold info indexed by nodes*/
 
@@ -483,18 +484,19 @@ void Wood<E_t>::prune2(const int root, const E_t *total, const E_t max_error) {
   compute_error(root, error, marginal, mode, total, true);
 	
 	
-  for (auto l : nodes) {
-    cout << "node_" << l << " f=" << getFeature(l) << " s=" << (2 * num_leaf[l] - 1) << " e=" << error[l]
-         << " m=" << marginal[l] << endl;
+  // for (auto l : nodes) {
+  //   cout << "node_" << l << " f=" << getFeature(l) << " s=" << (2 * num_leaf[l] - 1) << " e=" << error[l]
+  //        << " m=" << marginal[l] << endl;
 
-    assert(l>=0);
-    assert(l<size());
-  }
+  //   assert(l>=0);
+  //   assert(l<size());
+  // }
   
 
   // the extra error so far
   E_t additional_error{0};
 	
+  bool empty{false};
 	
 	while(nodes.size() > 0) {
 
@@ -503,13 +505,13 @@ void Wood<E_t>::prune2(const int root, const E_t *total, const E_t max_error) {
 	       [&](const int x, const int y) { return marginal[x]*(2 * num_leaf[y] - 2) > marginal[y]*(2 * num_leaf[x] - 2); });
 
 
-    for(auto x : nodes) {
-      if(marginal[x] + additional_error > max_error)
-        cout << "keep " << x << endl;
-      else {
-        cout << marginal[x] << " + " << additional_error << " <= " << max_error << " -> " << x << " is removable\n";
-      }
-    }
+    // for(auto x : nodes) {
+    //   if(marginal[x] + additional_error > max_error)
+    //     cout << "keep " << x << endl;
+    //   // else {
+    //   //   cout << marginal[x] << " + " << additional_error << " <= " << max_error << " -> " << x << " is removable\n";
+    //   // }
+    // }
 
 
 		
@@ -522,15 +524,21 @@ void Wood<E_t>::prune2(const int root, const E_t *total, const E_t max_error) {
     // prune the worst node (and all its descendants)
     auto x{nodes.back()};
 
-    cout << "remove " << x << endl;
+    // cout << "remove " << x << endl;
 
     nodes.pop_back();
-    additional_error += marginal[x];
-    auto p{parent[x]};
-    auto self{child[1][p] == x};
-    child[self][p] = mode[x];
-		marginal[p] -= marginal[x]; // not sure we need to update the marginal!!!
-		num_leaf[p] -= (num_leaf[x]-1);
+
+    if(x != root) {
+      additional_error += marginal[x];
+      auto p{parent[x]};
+      auto self{child[1][p] == x};
+      child[self][p] = mode[x];
+  		marginal[p] -= marginal[x]; // not sure we need to update the marginal!!!
+  		num_leaf[p] -= (num_leaf[x]-1);
+    } else {
+      empty = true;
+    }
+    
     freeNode(x);
 
 		nodes.erase(std::remove_if(nodes.begin(), nodes.end(), [&](const int x) {return available.contain(x);}), nodes.end());
@@ -538,6 +546,9 @@ void Wood<E_t>::prune2(const int root, const E_t *total, const E_t max_error) {
 	}
 	
 	
+  if(empty)
+    return (*this)[mode[root]];
+  return (*this)[root];
 	
 	
 	
