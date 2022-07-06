@@ -19,11 +19,11 @@ using namespace std;
 using namespace blossom;
 
 IloInt nb_iter = 0;
-IloInt ITERMAX = 200;
+IloInt ITERMAX = 400;
 IloNum TARGET_ACCURACY = 0.99;
 IloNum EPS = 1e-6;
 
-// Column generation function with CPLEX (Work in Progress)
+// Column generation function with CPLEX
 template <template <typename> class ErrorPolicy = WeightedError, typename E_t = double>
 IloInt generateColumns(DTOptions &opt, WeightedDataset<E_t> *training_set, IloArray<IloIntArray> decisions) {
   IloEnv env;
@@ -42,6 +42,10 @@ IloInt generateColumns(DTOptions &opt, WeightedDataset<E_t> *training_set, IloAr
       // Variables of the forest
       IloNum guess = 0;
       IloNum accuracy = 0;
+      // All data points whose class is 0
+      auto classZero{(*training_set)[0]};
+      // All data points whose class is 1
+      auto classOne{(*training_set)[1]};
       // Constraints
       IloRangeArray ct_acc(env, data_size);
       IloRangeArray ct_z(env, data_size);
@@ -52,7 +56,6 @@ IloInt generateColumns(DTOptions &opt, WeightedDataset<E_t> *training_set, IloAr
 			// CSV
 			std::ofstream myfile;
       myfile.open ("example.csv", ios::app);
-
 
       //// CONSTRAINTS
       // Subject to the accuracy constraint
@@ -79,7 +82,7 @@ IloInt generateColumns(DTOptions &opt, WeightedDataset<E_t> *training_set, IloAr
       }
       primal.add(ct_w);
 
-      // Subject to the sum of weights
+      // Subject to the sum of weights constraint
       IloExpr sum(env);
       for (IloInt j = 0 ; j < forest_size ; j++) {
 	      sum += weights[j];
@@ -92,18 +95,16 @@ IloInt generateColumns(DTOptions &opt, WeightedDataset<E_t> *training_set, IloAr
       if (primalSolver.solve()) {
          primalSolver.out() << "Solution status: " << primalSolver.getStatus() << endl;
          for (IloInt j = 0; j < forest_size ; j++) {
-         	primalSolver.out() << "   weight tree " << j << ": " << primalSolver.getValue(weights[j]) << endl;
+         	primalSolver.out() << "   weight of tree " << j << "= " << primalSolver.getValue(weights[j]) << endl;
          }
-         primalSolver.out() << "zMin = " << primalSolver.getObjValue() << endl;
+         primalSolver.out() << "\n   zMin = " << primalSolver.getObjValue() << endl;
       }
       else {
 	      primalSolver.out()<< "No solution" << endl;
 	      env.end();
 	      return 0;
       }
-      primalSolver.printTime();
       
-		    
 		  // Computing the forest accuracy
 		  for (IloInt i = 0 ; i < data_size ; i++) {
 		    for (IloInt j = 0 ; j < forest_size ; j++) {
@@ -113,23 +114,11 @@ IloInt generateColumns(DTOptions &opt, WeightedDataset<E_t> *training_set, IloAr
 		    guess = 0;
 		  }
 		  accuracy /= data_size;
-		  cout << "\n" << nb_iter << " forest accuracy = " << accuracy << "\n\n" << endl;
+		  cout << "\n" << "Iteration " << nb_iter << ", forest accuracy= " << accuracy << "\n\n" << endl;
 		  
-		  /*
-      IloNum sumZ = 0;
-      for (IloInt i = 0 ; i < data_size ; i++) {
-      	if (primalSolver.getValue(z[i]) >= EPS)  sumZ++;
-      }
-      sumZ /= data_size;
-      cout << "\n\nACCURACY BY Z = " << sumZ << "\n\n" << endl;
-			*/
-		  
-		  // Stop if forest accuracy is good enough
+		  // Stop if forest is accurate enough
 		  if (accuracy >= TARGET_ACCURACY) {
-				myfile << accuracy;
-				myfile << ",";
-        myfile << nb_iter;
-				myfile << ",";
+				myfile << accuracy << "," << nb_iter << ",";
 				myfile.close();
 		    env.end();
   		  return 0;
@@ -141,48 +130,40 @@ IloInt generateColumns(DTOptions &opt, WeightedDataset<E_t> *training_set, IloAr
       IloNumArray beta(env, 1);
       primalSolver.getDuals(beta, ct_wSum);
 
-      // All data points whose class is 0
-      auto classZero{(*training_set)[0]};
-      // All data points whose class is 1
-      auto classOne{(*training_set)[1]};
-
-      // Initializing a new tree with weights = alpha
+      // New tree
       BacktrackingAlgorithm<ErrorPolicy, E_t> B(*training_set, opt);
       IloInt k=0;
       for (auto i : classZero) {
         B.setWeight(0, k, alpha[k]);
-        ++k;
+        k++;
       }
       k=0;
       for (auto i : classOne) {
 				B.setWeight(1, k, alpha[k + classZero.size()]);
-				++k;
+				k++;
       }
       B.minimize_error();
       Tree<double> sol = B.getSolution();
 
-      //// COLUMN-GENERATION (work in progress, stops after ITERMAX iterations)
+      //// COLUMN-GENERATION
 
       // Decision vector of the new tree
       IloIntArray decision(env, data_size);
+			// Decision vector of the new forest, if the new tree is added to the forest
       IloArray<IloIntArray> new_decisions(env, forest_size + 1);
       
       k=0;
       for(auto i : classZero) {
-        //printf("%lu | %d | %lu\n", data_size, i, classZero.size());
         bool prediction = sol.predict(classZero[i]);
         if (!prediction) decision[k] = 1;
         else decision[k] = -1;
-        //printf("i=%d, pred %d, decision %d\n", k, prediction, decision[k]);
         k++;
       }
       k = 0;
       for(auto i : classOne) {
         bool prediction = sol.predict(classOne[i]);
-        //printf("%lu | %d | %lu\n", data_size, i, classOne.size());
         if (prediction) decision[k + classZero.size()] = 1;
         else decision[k + classZero.size()] = -1;
-        //printf("i=%lu, pred %d, decision %d\n", k + classZero.size(), prediction, decision[k + classZero.size()]);
         k++;
 			}
 			
@@ -193,7 +174,6 @@ IloInt generateColumns(DTOptions &opt, WeightedDataset<E_t> *training_set, IloAr
 			}
 		  
 		  // If the new tree does not violate the dual constraint, it is added to the forest
-		  // IMPORTANT REMINDER : should be > but >= performs better
 		  if (dual_sum >= beta[0]) {
 		  	cout << "\nDual constraint respected, dual_sum = " << dual_sum << " > beta = " << beta[0] << "\n" << endl;
 		    // Adding the new tree to the forest
@@ -202,18 +182,19 @@ IloInt generateColumns(DTOptions &opt, WeightedDataset<E_t> *training_set, IloAr
 		      else new_decisions[j] = IloIntArray(decision);
 		    }
 
-		    // Repeat if ITERMAX not reached yet
-				if (ITERMAX > nb_iter++)
-        	generateColumns(opt, training_set, new_decisions);
-				else {
+		    // Repeat if ITERMAX not reached yet, otherwise stop
+				if (ITERMAX < nb_iter) {
 					myfile << accuracy;
 					myfile << ",";
 		      myfile << nb_iter;
 					myfile << ",";
 				}
+				else {
+					nb_iter++;
+					generateColumns(opt, training_set, new_decisions);
+				}
 		  }
   myfile.close();
-	// Stop if ITERMAX reached
   } catch (IloException& ex) {
       cerr << "Error: " << ex << endl;
   } catch (...) {
@@ -231,12 +212,11 @@ bool getPrediction(WeightedDataset<double>::List& X, std::vector<WeakClassifier>
   return sol->predict(X[i]);
 }
 
-// Forest initialization
+// Forest initialization with Adaboost
 template <template <typename> class ErrorPolicy = WeightedError, typename E_t = double>
 IloInt init_algorithm(DTOptions &opt) {
   std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
   IloEnv env;
-
   WeightedDataset<E_t> input;
 
   //// READING
@@ -282,13 +262,11 @@ IloInt init_algorithm(DTOptions &opt) {
     training_set->preprocess(opt.verbosity >= DTOptions::NORMAL);
   }
 
-  //// FIRST FOREST WITH ADABOOST
-  Adaboost A(*training_set, opt);
-
   if (opt.verbosity >= DTOptions::NORMAL)
     cout << "d inputtime=" << cpu_time() << endl;
 
-  //// SOLVING
+  //// TRAINING A FIRST FOREST WITH ADABOOST
+  Adaboost A(*training_set, opt);
   std::chrono::steady_clock::time_point ada_start = std::chrono::steady_clock::now();
   A.train();
   std::chrono::steady_clock::time_point ada_end = std::chrono::steady_clock::now();
@@ -299,14 +277,9 @@ IloInt init_algorithm(DTOptions &opt) {
   myfile << ",";
 	myfile << std::chrono::duration_cast<std::chrono::milliseconds>(ada_end - ada_start).count();
   myfile << ",";
-  // If the forest built by Adaboost is already good enough, column generation is unnecessary
+  // If the forest built by Adaboost is already accurate enough, stop
   if (A.get_accuracy() >= TARGET_ACCURACY) {
-		myfile << A.get_accuracy();
-		myfile << ",";
-		myfile << nb_iter;
-		myfile << ",";
-		myfile << std::chrono::duration_cast<std::chrono::milliseconds>(ada_end - ada_start).count();
-		myfile << "\n";
+		myfile << A.get_accuracy() << "," << nb_iter << "," << std::chrono::duration_cast<std::chrono::milliseconds>(ada_end - ada_start).count() << "\n";
 		env.end();
 		return 0;
 	}
@@ -321,16 +294,13 @@ IloInt init_algorithm(DTOptions &opt) {
   // The forest obtained from Adaboost
   std::vector<WeakClassifier> classifiers = A.getClassifier();
 
-  // Decisions vector == 1 if predictions[j][i] == classes[i], -1 otherwise
+  //// DECISIONS vector == 1 if predictions[j][i] == classes[i], -1 otherwise
   IloArray<IloIntArray> decisions(env, classifiers.size());
-
-  //// BUILDING DECISION VECTORS
   for (IloInt j = 0 ; j < classifiers.size() ; j++) {
     decisions[j] = IloIntArray(env, data_size);
     if (opt.verified) {
       IloInt k = 0;
       for(auto i : classZero) {
-        //printf("%lu | %d | %lu\n", data_size, i, classZero.size());
         bool prediction = getPrediction(classZero, classifiers, j, i);
         if (!prediction) decisions[j][k] = 1;
         else decisions[j][k] = -1;
@@ -338,7 +308,6 @@ IloInt init_algorithm(DTOptions &opt) {
       }
       k = 0;
       for(auto i : classOne) {
-        //printf("%lu | %d | %lu\n", data_size, i, classOne.size());
         bool prediction = getPrediction(classOne, classifiers, j, i);
         if (prediction) decisions[j][k + classZero.size()] = 1;
         else decisions[j][k + classZero.size()] = -1;
@@ -350,9 +319,7 @@ IloInt init_algorithm(DTOptions &opt) {
   generateColumns(opt, training_set, decisions);
 	std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
   myfile.open("example.csv", ios::app);
-  myfile << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
-  myfile << ",";
-	myfile << "\n";
+  myfile << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << "," << "\n";
 	myfile.close();
 	env.end();
   return 0;
@@ -385,7 +352,5 @@ int main(int argc, char *argv[]) {
   } else {
     return init_algorithm<>(opt);
   }
-
-
 }
 
