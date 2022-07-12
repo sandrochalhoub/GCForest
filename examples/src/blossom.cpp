@@ -139,27 +139,25 @@ int run_algorithm(DTOptions &opt) {
 
     size_t total[2] = {training_set->total(0), training_set->total(1)};
 
+    // E_t current_error{A.error() + training_set->numInconsistent()};
 
+    // cout << "cur: " << current_error << endl;
 
-    E_t current_error{A.error() + training_set->numInconsistent()};
+    // E_t target_error{static_cast<E_t>(static_cast<double>(total[0] +
+    // total[1]) * (1.0 - opt.pruning))};
 
-    cout << "cur: " << current_error << endl;
+    // cout << "target: " << target_error << endl;
 
-    E_t target_error{static_cast<E_t>(static_cast<double>(total[0] + total[1]) * (1.0 - opt.pruning))};
+    // E_t limit{target_error - current_error};
 
-    cout << "target: " << target_error << endl;
+    // // E_t limit{static_cast<E_t>(opt.pruning) - A.error() -
+    // //           training_set->numInconsistent()};
+    // if (target_error < current_error)
+    //   limit = 0;
 
-    E_t limit{target_error - current_error};
+    // cout << "limit: " << limit << endl;
 
-
-    // E_t limit{static_cast<E_t>(opt.pruning) - A.error() -
-    //           training_set->numInconsistent()};
-    if (target_error < current_error)
-      limit = 0;
-
-    cout << "limit: " << limit << endl;
-
-    sol = sol.prune(total, limit, false);
+    sol = sol.prune(total, opt.pruning);
 
     E_t tree_error = 0;
     for (auto y{0}; y < 2; ++y) {
