@@ -162,7 +162,17 @@ DTOptions blossom::parse_dt(int argc, char *argv[]) {
 
   cmd.add<SwitchArg>(opt.verified, "", "noverification",
                      "switch tree verification off", true);
-
+                     
+  //Reminder
+  cmd.add<ValueArg<int>>(opt.itermax, "", "itermax", "max number of iterations for gcforest",
+  			 false, numeric_limits<int>::max(), "int");
+  
+  cmd.add<ValueArg<int>>(opt.obj_check, "", "obj_check", "number of iterations after which the objective is checked",
+  			 false, 1, "int");
+  
+  cmd.add<ValueArg<double>>(opt.obj_eps, "", "obj_eps", "objective improvement under which gcforest stops",
+  			    false, 1e-6, "double");
+  
   cmd.add<SwitchArg>(opt.bounding, "", "bounding", "switch bound reasoning on",
                      false);
 
@@ -247,7 +257,7 @@ DTOptions blossom::parse_dt(int argc, char *argv[]) {
                          false, 2, "int");
 
   cmd.add<SwitchArg>(opt.preprocessing, "", "preprocessing",
-                     "switch test_sample preprocessing oon", false);
+                     "switch test_sample preprocessing on", false);
 
   cmd.add<SwitchArg>(opt.preprocessing, "", "nopreprocessing",
                      "switch test_sample preprocessing off", true);

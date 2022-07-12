@@ -80,6 +80,11 @@ public:
   int outtarget;
 
   double pruning;
+  
+  // Reminder
+  int itermax;
+  int obj_check;
+  double obj_eps;
 
   bool sample_only;
 
@@ -101,6 +106,7 @@ public:
         minsize(opt.minsize), preprocessing(opt.preprocessing),
         progress(opt.progress), delimiter(opt.delimiter),
         intarget(opt.intarget), outtarget(opt.outtarget), pruning(opt.pruning),
+				itermax(opt.itermax), obj_check(opt.obj_check), obj_eps(opt.obj_eps),
         sample_only(opt.sample_only) {}
 
   ostream &display(ostream &os);
