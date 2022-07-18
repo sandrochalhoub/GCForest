@@ -19,7 +19,6 @@ using namespace std;
 using namespace blossom;
 
 IloInt nb_iter = 0;
-IloNum TARGET_ACCURACY = 0.99;
 IloNum EPS = 1e-6;
 IloNum z_diff = 0;
 IloInt z_checker = 0;
@@ -61,7 +60,9 @@ IloInt generateColumns(DTOptions &opt, WeightedDataset<E_t> *training_set, Weigh
       primal.add(IloMinimize(env, zMin));
 			// CSV
 			std::ofstream myfile;
+      std::ofstream iterFile;
       myfile.open ("trial.csv", ios::app);
+      iterFile.open ("iter.csv", ios::app);
 
       //// CONSTRAINTS
       // Subject to the accuracy constraint
@@ -104,6 +105,10 @@ IloInt generateColumns(DTOptions &opt, WeightedDataset<E_t> *training_set, Weigh
          	primalSolver.out() << "   weight of tree " << j << "= " << primalSolver.getValue(weights[j]) << endl;
          }
          primalSolver.out() << "\n   zMin = " << primalSolver.getObjValue() << endl;
+
+         iterFile << primalSolver.getObjValue();
+         iterFile << ",";
+
       }
       else {
 	      primalSolver.out()<< "No solution" << endl;
@@ -125,14 +130,9 @@ IloInt generateColumns(DTOptions &opt, WeightedDataset<E_t> *training_set, Weigh
 		  }
 		  accuracy /= test_size;
 		  cout << "\n" << "Iteration " << nb_iter << ", forest accuracy= " << accuracy << "\n\n" << endl;
-		  
-		  // Stop if forest is accurate enough
-		  if (accuracy >= TARGET_ACCURACY) {
-				myfile << accuracy << "," << nb_iter << ",";
-				myfile.close();
-		    env.end();
-  		  return 0;
-		  }
+      iterFile << accuracy;
+      iterFile << ",";
+      iterFile.close();
 		  
 		  if (++z_checker == opt.obj_check) {
 				z_diff -= primalSolver.getObjValue();
@@ -372,7 +372,6 @@ IloInt init_algorithm(DTOptions &opt) {
 	}
 	ada_accuracy /= test_size;
 	cout << "\n" << "ADABOOST test accuracy= " << ada_accuracy << "\n\n" << endl;
-	//TARGET_ACCURACY = ada_accuracy * 1.125;
   // CSV
   std::ofstream myfile;
   myfile.open("trial.csv", ios::app);
