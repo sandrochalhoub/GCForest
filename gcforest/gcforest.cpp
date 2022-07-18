@@ -132,6 +132,7 @@ IloInt generateColumns(DTOptions &opt, WeightedDataset<E_t> *training_set, Weigh
 		  cout << "\n" << "Iteration " << nb_iter << ", forest accuracy= " << accuracy << "\n\n" << endl;
       iterFile << accuracy;
       iterFile << ",";
+      iterFile << "\n";
       iterFile.close();
 		  
 		  if (++z_checker == opt.obj_check) {
@@ -404,8 +405,12 @@ int main(int argc, char *argv[]) {
   else myfile << "N/A";
   myfile << ",";
 	myfile << opt.itermax;
+  myfile << ",";
+  myfile << opt.obj_check;
+  myfile << ",";
+  myfile << opt.obj_eps;
   myfile << ",";  
-	myfile.close();
+  myfile.close();
   if (opt.print_cmd)
     cout << opt.cmdline << endl;
 
