@@ -14,7 +14,7 @@
 ./gcforest file_path --max_depth 2 --ada_stop 200 --test_sample 0.2 --itermax 2 --obj_check 6 --obj_eps 1e-9
 ```
 
-- Description of the output CSV files
+## Description of the output CSV files
 
 Executing gcforest.cpp will produce two output CSV files: trial.csv and iter.csv.
 
