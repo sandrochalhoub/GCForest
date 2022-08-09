@@ -594,7 +594,7 @@ Tree<E_t> Wood<E_t>::prune_loss(const int root, const E_t *total,
 
   for (auto l : nodes) {
     // cout << "node_" << l << " f=" << getFeature(l)
-    //      << " s=" << (2 * num_leaf[l] - 1) << " e=" << error[l]
+    //      << " s=" << (num_leaf[l] - 1) << " e=" << error[l]
     //      << " m=" << marginal[l] << " l="
     //      << (static_cast<double>(marginal[l]) /
     //          (static_cast<double>(total[0] + total[1]) * (num_leaf[l] - 1)))
