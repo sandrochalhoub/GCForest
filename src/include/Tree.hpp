@@ -592,18 +592,21 @@ Tree<E_t> Wood<E_t>::prune_loss(const int root, const E_t *total,
   compute_size(root, num_leaf);
   compute_error(root, error, marginal, mode, total, true);
 
-  for (auto l : nodes) {
-    // cout << "node_" << l << " f=" << getFeature(l)
-    //      << " s=" << (num_leaf[l] - 1) << " e=" << error[l]
-    //      << " m=" << marginal[l] << " l="
-    //      << (static_cast<double>(marginal[l]) /
-    //          (static_cast<double>(total[0] + total[1]) * (num_leaf[l] - 1)))
-    //      << endl;
+  // for (auto l : nodes) {
+  //   // cout << "node_" << l << " f=" << getFeature(l)
+  //   //      << " s=" << (num_leaf[l] - 1) << " e=" << error[l]
+  //   //      << " m=" << marginal[l] << " l="
+  //   //      << (static_cast<double>(marginal[l]) /
+  //   //          (static_cast<double>(total[0] + total[1]) * (num_leaf[l] -
+  //   1)))
+  //   //      << endl;
 
-    assert(num_leaf[l] >= 2);
-    assert(l >= 0);
-    assert(l < size());
-  }
+  //   assert(num_leaf[l] >= 2);
+  //   assert(l >= 0);
+  //   assert(l < size());
+  // }
+
+  // cout << "size = " << size(root) << " / " << nodes.size() << endl;
 
   // the extra error so far
   double additional_loss{0};
@@ -617,32 +620,45 @@ Tree<E_t> Wood<E_t>::prune_loss(const int root, const E_t *total,
       return marginal[x] * (num_leaf[y] - 1) > marginal[y] * (num_leaf[x] - 1);
     });
 
+    // if (nodes.size() == 0 or
+    //     additional_loss + static_cast<double>(marginal[nodes.back()]) /
+    //             (static_cast<double>(total[0] + total[1]) *
+    //              static_cast<double>((num_leaf[nodes.back()] - 1))) >
+    //         max_loss) {
+
+    //   if (nodes.size() > 0)
+    //     cout << "stop because loss[" << nodes.back() << "]="
+    //          << (static_cast<double>(marginal[nodes.back()]) /
+    //              (static_cast<double>(total[0] + total[1]) *
+    //               static_cast<double>(num_leaf[nodes.back()] - 1)))
+    //          << endl;
+    //   break;
+    // }
+
     if (nodes.size() == 0 or
-        additional_loss + static_cast<double>(marginal[nodes.back()]) /
-                (static_cast<double>(total[0] + total[1]) *
-                 static_cast<double>((num_leaf[nodes.back()] - 1))) >
+        additional_loss + (static_cast<double>(marginal[nodes.back()]) /
+                           (static_cast<double>(total[0] + total[1]))) >
             max_loss) {
 
       // if (nodes.size() > 0)
       //   cout << "stop because loss[" << nodes.back() << "]="
       //        << (static_cast<double>(marginal[nodes.back()]) /
-      //            (static_cast<double>(total[0] + total[1]) *
-      //             static_cast<double>(num_leaf[nodes.back()] - 1)))
+      //            (static_cast<double>(total[0] + total[1])))
       //        << endl;
       break;
     }
 
-
-
     // prune the worst node (and all its descendants)
     auto x{nodes.back()};
 
-    additional_loss += (static_cast<double>(marginal[x]) /
-             (static_cast<double>(total[0] + total[1]) * static_cast<double>(num_leaf[x] - 1)));
+    additional_loss +=
+        (static_cast<double>(marginal[x]) /
+         (static_cast<double>(
+             total[0] +
+             total[1]))); // * static_cast<double>(num_leaf[x] - 1)));
 
-    // cout << "remove " << x << " (loss="
-    //      << additional_loss
-    //      << ")" << endl;
+    // cout << "remove " << x << " (loss=" << additional_loss
+    //      << ") num leaves=" << num_leaf[x] << endl;
 
     nodes.pop_back();
 
@@ -663,6 +679,8 @@ Tree<E_t> Wood<E_t>::prune_loss(const int root, const E_t *total,
         std::remove_if(nodes.begin(), nodes.end(),
                        [&](const int x) { return available.contain(x); }),
         nodes.end());
+
+    // cout << "size = " << size(root) << " / " << (2 * nodes.size() + 1) << endl;
   }
 
   if(empty)
