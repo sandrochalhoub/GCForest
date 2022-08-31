@@ -153,6 +153,8 @@ void BacktrackingAlgorithm<ErrorPolicy, E_t>::init() {
 
   search_limit = static_cast<size_t>(options.search);
 
+  iter_limit = static_cast<size_t>(options.itermax);
+
   time_limit = options.time;
 
 
@@ -240,6 +242,7 @@ bool BacktrackingAlgorithm<ErrorPolicy, E_t>::limit_out() {
       interrupted = true;
 	}
   interrupted = interrupted or (search_limit and search_size > search_limit);
+  interrupted = interrupted or (num_solutions >= iter_limit);
 	
   return interrupted;
 }

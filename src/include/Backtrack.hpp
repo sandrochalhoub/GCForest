@@ -246,6 +246,7 @@ private:
   size_t search_limit;
 
   size_t num_solutions;
+  size_t iter_limit;
 
   size_t num_backtracks;
 
