@@ -164,7 +164,7 @@ DTOptions blossom::parse_dt(int argc, char *argv[]) {
                      "switch tree verification off", true);
                      
   //Reminder
-  cmd.add<ValueArg<int>>(opt.itermax, "", "itermax", "max number of iterations for gcforest",
+  cmd.add<ValueArg<int>>(opt.itermax, "", "itermax", "max number of iterations for gcforest / solutions for blossom",
   			 false, numeric_limits<int>::max(), "int");
   
   cmd.add<ValueArg<int>>(opt.obj_check, "", "obj_check", "number of iterations after which the objective is checked",
