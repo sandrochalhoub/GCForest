@@ -77,6 +77,9 @@ void printToFile(WeightedDataset<E_t> &input, DTOptions &opt) {
   } else
     input.printDatasetToFile(cout, string(" "), string(""), relevant,
                              opt.outtarget != -1, false);
+
+  input.printHeader(cout, string(" "), string(""), string(""),
+                        relevant, opt.outtarget != -1);
 }
 
 int main(int argc, char *argv[]) {
@@ -93,14 +96,20 @@ int main(int argc, char *argv[]) {
   	read_non_binary(input, opt);
   // }
 
-  if (opt.sample < 1)
-    input.sample(opt.sample);
+  // if (opt.sample < 1)
+  //   input.sample(opt.sample);
+
 
   ////// PREPROCESING
+    if (opt.verbosity >= DTOptions::NORMAL)
+  cout << "preprocessing\n";
   if (opt.preprocessing)
     input.preprocess(opt.verbosity >= DTOptions::NORMAL);
 
   ////// PRINTING
+
+  if (opt.verbosity >= DTOptions::NORMAL)
+  cout << "printing\n";
   printToFile(input, opt);
 
   return 1;

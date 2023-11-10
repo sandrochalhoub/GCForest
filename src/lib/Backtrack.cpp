@@ -173,6 +173,9 @@ void BacktrackingAlgorithm<ErrorPolicy, E_t>::init() {
 template <template <typename> class ErrorPolicy, typename E_t>
 void BacktrackingAlgorithm<ErrorPolicy, E_t>::load(
     const WeightedDataset<E_t> &input) {
+  
+  wood.setFeatureLabels(input.getFeatureLabels());
+
   clearExamples();
 
   for (int y = 0; y < 2; ++y) {
@@ -1365,15 +1368,9 @@ bool BacktrackingAlgorithm<ErrorPolicy, E_t>::search() {
 
     DO_ASSERTS;
 		
-		
-
-
     if (blossom.empty()) {
       if (not notify_solution(sat))
         break;
-    // } else if (options.bounding and sat and fail()) {
-    //   if (not backtrack())
-    //     break;
     } else {
       expend();
     }

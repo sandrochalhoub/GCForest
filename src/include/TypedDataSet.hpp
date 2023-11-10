@@ -75,6 +75,9 @@ public:
     return this->getLabel(i, 1);
   }
 
+
+  virtual void display_choices() const = 0;
+
   //
   // const bool test()
 };
@@ -122,6 +125,10 @@ public:
 
   virtual const string getLabel(const int i) const { return ""; }
 
+  virtual void display_choices() const {
+    cout << value_set[0] << " or " << value_set[1] << endl;
+  }
+
   //
   // const bool test()
 };
@@ -151,6 +158,15 @@ public:
       return it->second;
     }
     return nothing;
+  }
+
+
+  virtual void display_choices() const {
+    cout << value_set[0] ;
+    for(auto i{1}; i<value_set.size(); ++i) {
+      cout << " or " << value_set[i];
+    }
+    cout << endl;
   }
 };
 
@@ -199,6 +215,11 @@ public:
     ss << "&2^" << i << (v ? "!=0" : "=0");
     return ss.str();
   }
+
+    virtual void display_choices() const {
+    cout << "binary direct ";
+    ClassicEncoding<T>::display_choices();
+  }
 };
 
 template <typename T> class BinaryScaled : public ClassicEncoding<T> {
@@ -233,6 +254,11 @@ public:
 
   // returns (in string format) the test x[i]
   const string getLabel(const int i, const int v) const { return "&=?"; }
+
+      virtual void display_choices() const {
+    cout << "binary scaled ";
+    ClassicEncoding<T>::display_choices();
+  }
 };
 
 template <typename T> class Order : public ClassicEncoding<T> {
@@ -240,6 +266,7 @@ template <typename T> class Order : public ClassicEncoding<T> {
 private:
   size_t num_examples;
   const string &feature_name;
+  vector<size_t> boundary;
 
 public:
   Order(const size_t n, const string &f)
@@ -298,7 +325,6 @@ public:
 
   void reduced_encoding(const size_t num_intervals) {
 
-    vector<size_t> boundary;
     size_t i_size{ClassicEncoding<T>::value_set.size() / num_intervals};
     size_t next_boundary{i_size};
     while (next_boundary < ClassicEncoding<T>::value_set.size()) {
@@ -327,9 +353,19 @@ public:
 
   // returns (in string format) the test x[i]
   const string getLabel(const int i, const int v) const {
+
+    auto x{i};
+    if(not boundary.empty())
+      x = boundary[i];
+
     std::stringstream ss;
-    ss << (v ? "<=" : ">") << ClassicEncoding<T>::value_set[i];
+    ss << (v ? "<=" : ">") << ClassicEncoding<T>::value_set[x];
     return ss.str();
+  }
+
+      virtual void display_choices() const {
+    cout << "order ";
+    ClassicEncoding<T>::display_choices();
   }
 };
 
@@ -409,6 +445,11 @@ public:
     ss << (v ? "<=" : ">") << ClassicEncoding<T>::value_set[i];
     return ss.str();
   }
+
+      virtual void display_choices() const {
+    cout << "interval ";
+    ClassicEncoding<T>::display_choices();
+  }
 };
 
 template <typename T> class Direct : public ClassicEncoding<T> {
@@ -448,6 +489,11 @@ public:
     std::stringstream ss;
     ss << (v ? "=" : "!=") << ClassicEncoding<T>::value_set[i];
     return ss.str();
+  }
+
+      virtual void display_choices() const {
+    cout << "direct ";
+    ClassicEncoding<T>::display_choices();
   }
 };
 
@@ -604,10 +650,10 @@ public:
 
   // void binarize(DataSet &bin) {
   template <class Dataset> void binarize(Dataset &bin) {
-    auto int_symbolic{0};
-    for (auto f{0}; f < numFeature(); ++f)
-      if (feature_type[f] == SYMBOL)
-        ++int_symbolic;
+    // auto int_symbolic{0};
+    // for (auto f{0}; f < numFeature(); ++f)
+    //   if (feature_type[f] == SYMBOL)
+    //     ++int_symbolic;
 
     for (auto f{0}; f < numFeature(); ++f) {
       if (feature_type[f] == INTEGER) {
@@ -712,12 +758,23 @@ public:
         if (feature_type[f] == INTEGER) {
           binex =
               concatenate(binex, int_encoder[r]->getEncoding(int_value[r][i]));
+
+          // if(i==0)
+          // int_encoder[r]->display_choices();
+
         } else if (feature_type[f] == FLOAT) {
           binex = concatenate(binex,
                               float_encoder[r]->getEncoding(float_value[r][i]));
+
+          // if(i==0)
+          // float_encoder[r]->display_choices();
+
         } else if (feature_type[f] == SYMBOL) {
           binex = concatenate(binex,
                               symb_encoder[r]->getEncoding(symb_value[r][i]));
+
+          // if(i==0)
+          // symb_encoder[r]->display_choices();
         }
         auto ref{bin_feature_count};
         while (bin_feature_count < binex.size()) {
@@ -730,7 +787,8 @@ public:
             binf += symb_encoder[r]->getLabel(bin_feature_count++ - ref);
           }
 
-          // bin.addFeature(binf);
+          // cout << binf << endl;
+          bin.addFeatureLabel(binf);
         }
       }
 

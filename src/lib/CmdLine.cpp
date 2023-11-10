@@ -215,7 +215,11 @@ DTOptions blossom::parse_dt(int argc, char *argv[]) {
 
   // Constraint<double> *range = new RangeConstraint<double>(0, 1);
   cmd.add<ValueArg<double>>(opt.test_sample, "", "test_sample",
-                            "sampling ratio", false, 0.0, "double");
+                            "sampling ratio (test)", false, 0.0, "double");
+
+  // Constraint<double> *range = new RangeConstraint<double>(0, 1);
+  cmd.add<ValueArg<double>>(opt.sample, "", "sample", "sampling ratio (train)",
+                            false, 1.0, "double");
 
   cmd.add<ValueArg<int>>(opt.width, "", "width",
                          "number of tied features for random selection", false,
