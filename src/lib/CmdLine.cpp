@@ -1,6 +1,7 @@
 
 #include <limits>
 #include <numeric>
+#include <memory>
 
 #include <CmdLine.hpp>
 
