@@ -3,16 +3,15 @@ include ../boost_home
 WRAPRDIR ?= .
 MAINDIR ?= ..
 
-CCC = g++
-
+CCC = g++ 
 SRC=$(WRAPRDIR)/wrapper/src
 OBJ=$(WRAPRDIR)/wrapper/obj
 INC=$(WRAPRDIR)/wrapper/include
 SWIG=$(WRAPRDIR)/wrapper/swig
 MAININC=$(MAINDIR)/src/include
 
-PYFLAGS = `python3-config --cflags`
-CFLAGS = -std=c++11 -fPIC -I$(INC) -I$(MAININC) -I$(BOOSTDIR) -I../tools $(PYFLAGS)
+PYFLAGS = `python3-config --cflags` 
+CFLAGS = -std=c++11 -fPIC -I$(INC) -I$(MAININC) -I$(BOOSTDIR) -I../tools $(PYFLAGS) -I/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Headers
 LFLAGS = -L$(OBJ) -flto 
 
 PWRAPSRC = $(wildcard $(SRC)/*.cpp)

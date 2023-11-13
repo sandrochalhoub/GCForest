@@ -28,10 +28,12 @@ namespace blossom {
 	  // the actual options
 	  string cmdline; // for reference
 	  string instance_file;
+	  string tree_file;
 	  string debug;
 	  string output;
 	  string format;
 
+	  enum verbosity { SILENT = 0, QUIET, NORMAL, YACKING, SOLVERINFO };
 	  int verbosity;
 
 	  int seed;
@@ -44,17 +46,16 @@ namespace blossom {
 
 	  bool verified;
 
-	  double sample;
+	  double test_sample;
 
 	  int width;
 	  double focus;
-	  // int max_size;
 	  int max_depth;
 
 	  int restart_base;
 	  double restart_factor;
 
-	  bool filter;
+	  bool filterfeature;
 
 	  double time;
 
@@ -62,15 +63,18 @@ namespace blossom {
 
 	  bool bounding;
 
-	  int node_strategy;
+	  enum node_strategy { FIRST = 0, RANDOM = 1, ERROR = 2, ERROR_REDUCTION = 3, ANTIERROR = 4 };
+  	int node_strategy;
 
-	  int feature_strategy;
+  	enum feature_strategy { MINERROR = 0, ENTROPY = 1, GINI = 2, HYBRID = 3 };
+  	int feature_strategy;
 
 /*	  bool binarize;*/
 	  double split;
 	  int ada_it;
 	  int ada_stop;
 
+	  bool filter;
 	  string reference_class;
 
 	  bool mindepth;
@@ -84,25 +88,29 @@ namespace blossom {
 	  int intarget;
 	  int outtarget;
 
+	  double pruning;
+
+  	bool sample_only;
+
 	  DTOptions(){};
 	  DTOptions(const DTOptions &opt);
 /*	      : cmdline(opt.cmdline), instance_file(opt.instance_file),
-	        debug(opt.debug), output(opt.output), format(opt.format),
-	        verbosity(opt.verbosity), seed(opt.seed), print_sol(opt.print_sol),
-	        print_par(opt.print_par), print_ins(opt.print_ins),
-	        print_sta(opt.print_sta), print_cmd(opt.print_cmd),
-	        verified(opt.verified), sample(opt.sample), width(opt.width),
-	        focus(opt.focus), max_depth(opt.max_depth),
-	        restart_base(opt.restart_base), restart_factor(opt.restart_factor),
-	        filter(opt.filter), time(opt.time), search(opt.search),
-	        bounding(opt.bounding), node_strategy(opt.node_strategy),
-	        feature_strategy(opt.feature_strategy), binarize(opt.binarize),
-	        split(opt.split), ada_it(opt.ada_it), ada_stop(opt.ada_stop),
-	        filter(opt.filter), reference_class(opt.reference_class),
-	        mindepth(opt.mindepth), minsize(opt.minsize),
-	        preprocessing(opt.preprocessing), progress(opt.progress),
-	        delimiter(opt.delimiter), intarget(opt.intarget),
-	        outtarget(opt.outtarget) {}*/
+        tree_file(opt.tree_file), debug(opt.debug), output(opt.output),
+        format(opt.format), verbosity(opt.verbosity), seed(opt.seed),
+        print_sol(opt.print_sol), print_par(opt.print_par),
+        print_ins(opt.print_ins), print_sta(opt.print_sta),
+        print_cmd(opt.print_cmd), verified(opt.verified),
+        test_sample(opt.test_sample), width(opt.width), focus(opt.focus),
+        max_depth(opt.max_depth), restart_base(opt.restart_base),
+        restart_factor(opt.restart_factor), time(opt.time), search(opt.search),
+        bounding(opt.bounding), node_strategy(opt.node_strategy),
+        feature_strategy(opt.feature_strategy), split(opt.split),
+        ada_it(opt.ada_it), ada_stop(opt.ada_stop), filter(opt.filter),
+        reference_class(opt.reference_class), mindepth(opt.mindepth),
+        minsize(opt.minsize), preprocessing(opt.preprocessing),
+        progress(opt.progress), delimiter(opt.delimiter),
+        intarget(opt.intarget), outtarget(opt.outtarget), pruning(opt.pruning),
+        sample_only(opt.sample_only) {} */
 
 	  ostream &display(ostream &os);
 	};
