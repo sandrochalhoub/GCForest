@@ -213,7 +213,7 @@ std::ostream &Wood<E_t>::display(std::ostream &os, const int node, const int p,
   if (node <= 1)
     os << "class-" << node << " (" << static_cast<double>(getCount(p, node))/static_cast<double>(getCount(p, 1-node) + getCount(p, node))<< ")"<< endl;
   else {
-   if(feature_label != NULL)
+    if(feature_label != NULL)
       os << (*feature_label)[feature[node]] << "?" << endl;
     else
       os << feature[node] << "?" << endl;

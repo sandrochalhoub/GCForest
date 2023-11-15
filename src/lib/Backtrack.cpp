@@ -231,13 +231,15 @@ bool BacktrackingAlgorithm<ErrorPolicy, E_t>::limit_out() {
 		
 		auto cpu_now{cpu_time()};
 		
-		// cout << (cpu_now - prev_cpu) << endl;
+	//	cout << (cpu_now - prev_cpu) << endl;
 		
 		if((cpu_now - prev_cpu) < .25)
 			checking_period *= 2;
 		else if((cpu_now - prev_cpu) > 1)
+		{
 			checking_period /= 2;
-		
+//			cout << (cpu_now - prev_cpu) << endl;
+		}
 		
 		prev_cpu = cpu_now;
 		
