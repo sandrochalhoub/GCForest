@@ -5,7 +5,7 @@ COMPILFLAGS= -std=c++1z -Wno-sign-compare -DBOOST_NO_CXX98_FUNCTION_BASE
 
 MAINDIR = .
 
-CCC = g++
+CCC = g++-9
 
 BIN=$(MAINDIR)/bin
 SRC=$(MAINDIR)/src/lib
