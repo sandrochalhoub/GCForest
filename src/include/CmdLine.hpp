@@ -87,6 +87,7 @@ public:
   double obj_eps;
 
   bool sample_only;
+  double sample;
 
   DTOptions(){};
   DTOptions(const DTOptions &opt)
@@ -106,8 +107,8 @@ public:
         minsize(opt.minsize), preprocessing(opt.preprocessing),
         progress(opt.progress), delimiter(opt.delimiter),
         intarget(opt.intarget), outtarget(opt.outtarget), pruning(opt.pruning),
-				itermax(opt.itermax), obj_check(opt.obj_check), obj_eps(opt.obj_eps),
-        sample_only(opt.sample_only) {}
+        itermax(opt.itermax), obj_check(opt.obj_check), obj_eps(opt.obj_eps),
+        sample_only(opt.sample_only), sample(opt.sample) {}
 
   ostream &display(ostream &os);
 };

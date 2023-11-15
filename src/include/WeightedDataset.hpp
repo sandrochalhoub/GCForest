@@ -25,6 +25,7 @@ public:
                   const E_t w = 1);
 
   void addExample(const vector<int> &x);
+  void addFeatureLabel(const string &l);
 
   void rmExample(const bool y, const int idx);
 
@@ -47,6 +48,8 @@ public:
   E_t total() const { return total_weight[0] + total_weight[1]; }
 
   size_t numFeature() const { return data[0].empty() ? 0 : data[0][0].size(); }
+
+  const vector<const string>* getFeatureLabels() const;
 
   template <class selector>
   void printDatasetToFile(ostream &outfile, const string &delimiter,
@@ -101,6 +104,7 @@ public:
 private:
   vector<instance> data[2];
   vector<E_t> weight[2];
+  vector<const string> feature_label;
 
 public:
   SparseSet examples[2];
@@ -130,6 +134,11 @@ void WeightedDataset<E_t>::addBitsetExample(instance &x, const bool y,
 template <typename E_t>
 inline void WeightedDataset<E_t>::addExample(const vector<int> &example) {
   return addExample(example.begin(), example.end(), -1, 1);
+}
+
+template <typename E_t>
+inline void WeightedDataset<E_t>::addFeatureLabel(const string &l) {
+  feature_label.push_back(l);
 }
 
 // template <typename E_t>
@@ -604,18 +613,32 @@ template <typename E_t> void WeightedDataset<E_t>::preprocess(const bool verbose
 // }
 
 template <typename E_t>
+const vector<const string>*
+ WeightedDataset<E_t>::getFeatureLabels() const {
+  return &feature_label;
+ }
+
+template <typename E_t>
 template <class selector>
 void WeightedDataset<E_t>::printHeader(
     ostream &outfile, const string &delimiter, const string &endline,
     const string &label, selector not_redundant, const bool first) const {
   if (first)
     outfile << label;
+
+
+  // cout << "PRINTHEADER " << feature_label.size() << " / " << data[0][0].size() << endl;
+
   for (auto x{0}; x < data[0][0].size(); ++x) {
     if (not_redundant(x)) {
+      // if (first)
+      //   outfile << delimiter << "f" << (x + 1);
+      // else
+      //   outfile << "f" << (x + 1) << delimiter;
       if (first)
-        outfile << delimiter << "f" << (x + 1);
+        outfile << delimiter << feature_label[x];
       else
-        outfile << "f" << (x + 1) << delimiter;
+        outfile << feature_label[x] << delimiter;
     }
   }
   if (not first)

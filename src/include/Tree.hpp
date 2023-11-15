@@ -66,6 +66,8 @@ private:
 
   vector<E_t> weight[2];
 
+  const vector<const string>* feature_label{NULL};
+
   void resize(const int k);
 
   void compute_size(const int node, vector<size_t> &num_leaf);
@@ -125,7 +127,10 @@ public:
 
   size_t depth(const int node) const;
 
+  void setFeatureLabels(const vector<const string>* fl);
+
   std::ostream &display(std::ostream &os, const int node,
+                        const int p,
                         const int depth = 0) const;
 
 #ifdef DEBUG
@@ -180,8 +185,7 @@ template <class E_t> size_t Tree<E_t>::depth() const {
 }
 
 template <class E_t> std::ostream &Tree<E_t>::display(std::ostream &os) const {
-
-  return wood->display(os, idx, 0);
+  return wood->display(os, idx, -1, 0);
 }
 
 template <class E_t>
@@ -204,15 +208,15 @@ bool Wood<E_t>::predict(const int node, const sample &x) const {
 // }
 
 template <class E_t>
-std::ostream &Wood<E_t>::display(std::ostream &os, const int node,
+std::ostream &Wood<E_t>::display(std::ostream &os, const int node, const int p,
                                  const int depth) const {
-
   if (node <= 1)
-    os << "class-" << node << endl;
+    os << "class-" << node << " (" << static_cast<double>(getCount(p, node))/static_cast<double>(getCount(p, 1-node) + getCount(p, node))<< ")"<< endl;
   else {
-    os << node << (isRoot(node) ? "*" : "") << ": "
-       // << " [" << getCount(node,0) << "/" << getCount(node,1) << "]:"
-       << feature[node] << endl;
+   if(feature_label != NULL)
+      os << (*feature_label)[feature[node]] << "?" << endl;
+    else
+      os << feature[node] << "?" << endl;
 
     assert(child[0][node] >= 0 and child[1][node] >= 0);
 
@@ -220,16 +224,20 @@ std::ostream &Wood<E_t>::display(std::ostream &os, const int node,
       os << "    ";
     os << " yes:";
 
-    display(os, child[true][node], depth + 1);
+    display(os, child[true][node], node, depth + 1);
 
     for (auto i{0}; i < depth; ++i)
       os << "    ";
     os << " no:";
 
-    display(os, child[false][node], depth + 1);
+    display(os, child[false][node], node, depth + 1);
   }
 
   return os;
+}
+
+ template <class E_t> void Wood<E_t>::setFeatureLabels(const vector<const string>* fl) {
+  feature_label = fl;
 }
 
 template <class E_t> Wood<E_t>::Wood() {
