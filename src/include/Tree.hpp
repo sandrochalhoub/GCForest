@@ -66,7 +66,7 @@ private:
 
   vector<E_t> weight[2];
 
-  const vector<const string>* feature_label{NULL};
+  const vector<string>* feature_label{NULL};
 
   void resize(const int k);
 
@@ -127,7 +127,7 @@ public:
 
   size_t depth(const int node) const;
 
-  void setFeatureLabels(const vector<const string>* fl);
+  void setFeatureLabels(const vector<string>* fl);
 
   std::ostream &display(std::ostream &os, const int node,
                         const int p,
@@ -236,7 +236,7 @@ std::ostream &Wood<E_t>::display(std::ostream &os, const int node, const int p,
   return os;
 }
 
- template <class E_t> void Wood<E_t>::setFeatureLabels(const vector<const string>* fl) {
+ template <class E_t> void Wood<E_t>::setFeatureLabels(const vector<string>* fl) {
   feature_label = fl;
 }
 

@@ -49,7 +49,7 @@ public:
 
   size_t numFeature() const { return data[0].empty() ? 0 : data[0][0].size(); }
 
-  const vector<const string>* getFeatureLabels() const;
+  const vector<string>* getFeatureLabels() const;
 
   template <class selector>
   void printDatasetToFile(ostream &outfile, const string &delimiter,
@@ -104,7 +104,7 @@ public:
 private:
   vector<instance> data[2];
   vector<E_t> weight[2];
-  vector<const string> feature_label;
+  vector<string> feature_label;
 
 public:
   SparseSet examples[2];
@@ -613,7 +613,7 @@ template <typename E_t> void WeightedDataset<E_t>::preprocess(const bool verbose
 // }
 
 template <typename E_t>
-const vector<const string>*
+const vector<string>*
  WeightedDataset<E_t>::getFeatureLabels() const {
   return &feature_label;
  }
