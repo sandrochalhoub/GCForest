@@ -210,14 +210,25 @@ bool Wood<E_t>::predict(const int node, const sample &x) const {
 template <class E_t>
 std::ostream &Wood<E_t>::display(std::ostream &os, const int node, const int p,
                                  const int depth) const {
+    
+//    os << "hello\n";
+    
   if (node <= 1)
     os << "class-" << node << " (" << static_cast<double>(getCount(p, node))/static_cast<double>(getCount(p, 1-node) + getCount(p, node))<< ")"<< endl;
   else {
-    if(feature_label != NULL)
-      os << (*feature_label)[feature[node]] << "?" << endl;
-    else
-      os << feature[node] << "?" << endl;
+      
+//      os << node << " / " << feature.size() << " / " << child[0].size() << " / " << child[1].size() << endl;
+      
+//      if(feature_label != NULL) {
+//          os << "hi\n";
+//          os << feature_label->size() << endl;
+//          os << feature[node] << endl;
+//          os << (*feature_label)[feature[node]] << "?" << endl;
+//      } else
+    os << feature[node] << "?" << endl;
 
+//      os << 11 << endl;
+      
     assert(child[0][node] >= 0 and child[1][node] >= 0);
 
     for (auto i{0}; i < depth; ++i)
@@ -245,6 +256,8 @@ template <class E_t> Wood<E_t>::Wood() {
 #ifdef DEBUG
   today = 0;
 #endif
+    
+//    assert(feature_label == NULL);
 
   for (auto i{0}; i < 2; ++i)
     grow();

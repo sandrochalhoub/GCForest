@@ -131,6 +131,9 @@ int run_algorithm(DTOptions &opt) {
     cout << std::setprecision(std::numeric_limits<long double>::digits10 + 1)
          << std::setw(0) << "p solution verified (" << tree_error << " / "
          << A.error() << ")" << endl;
+      
+      
+//      cout << sol << endl;
   }
 
   if (opt.pruning) {

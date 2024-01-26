@@ -1358,7 +1358,7 @@ template <template<typename> class ErrorPolicy, typename E_t>
 bool BacktrackingAlgorithm<ErrorPolicy, E_t>::search() {
   auto sat = false;
 
-  while ((not limit_out()) and (ub_error > 0 or size_matters)) {
+  while ((not sat or not limit_out()) and (ub_error > 0 or size_matters)) {
 
     if (num_backtracks > restart_limit)
       restart(false);

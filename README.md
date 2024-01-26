@@ -16,6 +16,11 @@ to learn a decision tree classifier:
 
 ```
 bin/blossom <datafile> [options]
+
+Option '--max_depth k' is the limit on the depth of the tree, it should be a low integer since the size of the tree can be 2^k
+
+Option '--test_sample f' (with f in [0,1)) is the size of the test sample
+
 ```
 
 to binarize a non-binary dataset:
